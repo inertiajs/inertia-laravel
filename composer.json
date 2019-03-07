@@ -1,0 +1,27 @@
+{
+    "name": "reinink/inertia-laravel",
+    "type": "library",
+    "description": "The Laravel adapter for Inertia.",
+    "keywords": ["laravel", "inertia"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jonathan Reinink",
+            "email": "jonathan@reinink.ca",
+            "homepage": "https://reinink.ca"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Inertia\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "require-dev": {
+        "orchestra/testbench": "~3.0"
+    }
+}
