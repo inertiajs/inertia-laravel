@@ -1,7 +1,7 @@
 {
-    "name": "reinink/inertia-laravel",
+    "name": "inertiajs/inertia-laravel",
     "type": "library",
-    "description": "The Laravel adapter for Inertia.js",
+    "description": "The Laravel adapter for Inertia.js.",
     "keywords": ["laravel", "inertia"],
     "license": "MIT",
     "authors": [
