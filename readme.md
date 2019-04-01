@@ -12,13 +12,9 @@ composer require inertiajs/inertia-laravel
 
 ## Getting started
 
-### Setup JavaScript adapter
-
-The first step to using Inertia.js is to setup a JavaScript adapter, such as [inertia-vue](https://github.com/inertiajs/inertia-vue). Be sure to follow the getting started instructions for the the adapter you choose.
-
 ### Setup root template
 
-Next, step a root template. We recommend using `app.blade.php`. This template must include your dependencies, as well as a single div with two data attributes, `component` and `props`. Here's a complete example:
+The first step to using Inertia is creating a root template. We recommend using `app.blade.php`. This template should include your assets, as well as a single `div` with two data attributes: `component` and `props`. Here's an example:
 
 ```php
 <!DOCTYPE html>
@@ -40,8 +36,12 @@ Next, step a root template. We recommend using `app.blade.php`. This template mu
 If you'd like to use a different root view, you can change it using `Inertia::setRootView()`:
 
 ```php
-Inertia\Inertia::setRootView('template-name');
+Inertia\Inertia::setRootView('name');
 ```
+
+### Setup JavaScript adapter
+
+Next, you'll need to setup an Inertia JavaScript adapter, such as [inertia-vue](https://github.com/inertiajs/inertia-vue). Be sure to follow the getting started instructions for the the adapter you choose.
 
 ### Making Inertia responses
 
