@@ -9,3 +9,74 @@ Install using Composer:
 ```sh
 composer require inertiajs/inertia-laravel
 ```
+
+## Getting started
+
+### Setup JavaScript adapter
+
+The first step to using Inertia.js is to setup a JavaScript adapter, such as [inertia-vue](https://github.com/inertiajs/inertia-vue). Be sure to follow the getting started instructions for the the adapter you choose.
+
+### Setup root template
+
+Next, step a root template. We recommend using `app.blade.php`. This template must include your dependencies, as well as a single div with two data attributes, `component` and `props`. Here's a complete example:
+
+```php
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link href="{{ mix('/css/app.css') }}" rel="stylesheet">
+    <script src="{{ mix('/js/app.js') }}" defer></script>
+</head>
+<body>
+
+<div id="app" data-component="{{ $component }}" data-props="{{ json_encode($props) }}" />
+
+</body>
+</html>
+```
+
+If you'd like to use a different root view, you can change it using `Inertia::setRootView()`:
+
+```php
+Inertia\Inertia::setRootView('template-name');
+```
+
+### Making Inertia responses
+
+To make an Inertia response, use `Inertia::render()`. This function takes who arguments, the component name, and the component data (props).
+
+```php
+use Inertia\Inertia;
+
+class EventsController extends Controller
+{
+    public function show(Event $event)
+    {
+        return Inertia::render('Event', [
+            'event' => $event->only('id', 'title', 'start_date', 'description'),
+        ]);
+    }
+}
+```
+
+### Sharing data
+
+To share data with all your components, use `Inertia::share($data)`. This can be done both synchronously and lazily:
+
+```php
+// Synchronously
+Inertia::share('app.name', Config::get('app.name'));
+
+// Lazily
+Inertia::share('auth.user', function () {
+    if (Auth::user()) {
+        return [
+            'id' => Auth::user()->id,
+            'first_name' => Auth::user()->first_name,
+            'last_name' => Auth::user()->last_name,
+        ];
+    }
+});
+```
