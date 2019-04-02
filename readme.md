@@ -45,7 +45,7 @@ Next, you'll need to setup an Inertia JavaScript adapter, such as [inertia-vue](
 
 ### Making Inertia responses
 
-To make an Inertia response, use `Inertia::render()`. This function takes who arguments, the component name, and the component data (props).
+To make an Inertia response, use `Inertia::render()`. This function takes two arguments, the component name, and the component data (props).
 
 ```php
 use Inertia\Inertia;
