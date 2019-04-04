@@ -27,7 +27,7 @@ The first step to using Inertia is creating a root template. We recommend using 
 </head>
 <body>
 
-<div id="app" data-component="{{ $component }}" data-props="{{ json_encode($props) }}"></div>
+<div id="app" data-component="{{ $component }}" data-props="{{ json_encode($props, JSON_FORCE_OBJECT) }}"></div>
 
 </body>
 </html>
