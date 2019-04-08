@@ -22,7 +22,7 @@ class Component
     {
         array_walk_recursive($this->sharedProps, function (&$item, $key) {
             if (is_callable($item)) {
-                $item = $item();
+                $item = app()->call($item);
             }
         });
 
