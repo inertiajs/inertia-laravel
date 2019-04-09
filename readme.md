@@ -10,9 +10,7 @@ Install using Composer:
 composer require inertiajs/inertia-laravel
 ~~~
 
-## Getting started
-
-### Setup root template
+## Setup root template
 
 The first step to using Inertia is creating a root template. We recommend using `app.blade.php`. This template should include your assets, as well as the `@inertia` directive.
 
@@ -45,11 +43,11 @@ If you'd like to use a different root view, you can change it using `Inertia::se
 Inertia\Inertia::setRootView('name');
 ~~~
 
-### Setup JavaScript adapter
+## Setup JavaScript adapter
 
 Next, you'll need to setup an Inertia JavaScript adapter, such as [inertia-vue](https://github.com/inertiajs/inertia-vue). Be sure to follow the getting started instructions for the the adapter you choose.
 
-### Making Inertia responses
+## Making Inertia responses
 
 To make an Inertia response, use `Inertia::render()`. This function takes two arguments, the component name, and the component data (props).
 
@@ -67,7 +65,7 @@ class EventsController extends Controller
 }
 ~~~
 
-### Sharing data
+## Sharing data
 
 To share data with all your components, use `Inertia::share($data)`. This can be done both synchronously and lazily:
 
