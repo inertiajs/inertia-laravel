@@ -6,17 +6,17 @@
 
 Install using Composer:
 
-```sh
+~~~sh
 composer require inertiajs/inertia-laravel
-```
+~~~
 
 ## Getting started
 
 ### Setup root template
 
-The first step to using Inertia is creating a root template. We recommend using `app.blade.php`. This template should include your assets, as well as a single `div` with two data attributes: `component` and `props`. Here's an example:
+The first step to using Inertia is creating a root template. We recommend using `app.blade.php`. This template should include your assets, as well as the `@inertia` directive.
 
-```php
+~~~blade
 <!DOCTYPE html>
 <html>
 <head>
@@ -27,17 +27,23 @@ The first step to using Inertia is creating a root template. We recommend using 
 </head>
 <body>
 
-<div id="app" data-component="{{ $component }}" data-props="{{ json_encode((object) $props) }}"></div>
+@inertia
 
 </body>
 </html>
-```
+~~~
+
+The `@inertia` directive is simply a helper for creating our base `div`. It includes two data attributes: `component` (the page component name) and `props` (the page data). Here's what it looks like:
+
+~~~blade
+<div id="app" data-component="{{ $component }}" data-props="{{ json_encode((object) $props) }}"></div>
+~~~
 
 If you'd like to use a different root view, you can change it using `Inertia::setRootView()`:
 
-```php
+~~~php
 Inertia\Inertia::setRootView('name');
-```
+~~~
 
 ### Setup JavaScript adapter
 
@@ -47,7 +53,7 @@ Next, you'll need to setup an Inertia JavaScript adapter, such as [inertia-vue](
 
 To make an Inertia response, use `Inertia::render()`. This function takes two arguments, the component name, and the component data (props).
 
-```php
+~~~php
 use Inertia\Inertia;
 
 class EventsController extends Controller
@@ -59,13 +65,13 @@ class EventsController extends Controller
         ]);
     }
 }
-```
+~~~
 
 ### Sharing data
 
 To share data with all your components, use `Inertia::share($data)`. This can be done both synchronously and lazily:
 
-```php
+~~~php
 // Synchronously
 Inertia::share('app.name', Config::get('app.name'));
 
@@ -79,4 +85,4 @@ Inertia::share('auth.user', function () {
         ];
     }
 });
-```
+~~~
