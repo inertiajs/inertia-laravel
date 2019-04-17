@@ -13,9 +13,26 @@ class Component
 
     protected $sharedProps = [];
 
+    protected $version = null;
+
     public function setRootView($name)
     {
         $this->rootView = $name;
+    }
+
+    public function share($key, $value)
+    {
+        return Arr::set($this->sharedProps, $key, $value);
+    }
+
+    public function version($version)
+    {
+        $this->version = $version;
+    }
+
+    public function getVersion()
+    {
+        return $this->version;
     }
 
     public function render($component, $props = [])
@@ -28,6 +45,7 @@ class Component
 
         if (Request::header('X-Inertia')) {
             return Response::json([
+                'version' => $this->version,
                 'component' => $component,
                 'props' => array_merge($this->sharedProps, $props),
                 'url' => Request::getRequestUri(),
@@ -38,13 +56,11 @@ class Component
         }
 
         return View::make($this->rootView, [
-            'component' => $component,
-            'props' => array_merge($this->sharedProps, $props),
+            'page' => [
+                'version' => $this->version,
+                'component' => $component,
+                'props' => array_merge($this->sharedProps, $props),
+            ],
         ]);
-    }
-
-    public function share($key, $value)
-    {
-        return Arr::set($this->sharedProps, $key, $value);
     }
 }
