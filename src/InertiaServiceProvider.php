@@ -15,7 +15,7 @@ class InertiaServiceProvider extends ServiceProvider
     public function boot()
     {
         Blade::directive('inertia', function () {
-            return "<div id=\"app\" data-component=\"{{ \$component }}\" data-props=\"{{ json_encode((object) \$props) }}\"></div>";
+            return "<div id=\"app\" data-page=\"{{ json_encode(\$page) }}\"></div>";
         });
     }
 

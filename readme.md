@@ -84,3 +84,26 @@ Inertia::share('auth.user', function () {
     }
 });
 ~~~
+
+## Asset versioning
+
+One common challenge with single-page apps is refreshing site assets when they've been changed. Inertia makes this easy by optionally tracking the current version of your site assets. In the event that an asset changes, Inertia will automatically make a hard page visit instead of a normal ajax visit on the next request.
+
+To enable automatic asset refreshing, first call the `Inertia::version($version)` method with your current asset version. We recommend putting this in a service provider. If you're using Laravel Mix, you can use the `mix-manifest.json` for this:
+
+~~~php
+Inertia::version(md5_file(public_path('mix-manifest.json')));
+~~~
+
+Next, add the `CheckInertiaVersion` middleware to your web middleware group, found in the `/app/Http/Kernel.php`:
+
+~~~php
+protected $middlewareGroups = [
+    'web' => [
+        \Inertia\CheckInertiaVersion::class,
+        // ...
+    ]
+];
+~~~
+
+Finally, make sure you have [versioning](https://laravel.com/docs/mix#versioning-and-cache-busting) setup in your `webpack.mix.js` to enable asset cache busting.
