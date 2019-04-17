@@ -28,12 +28,12 @@ class Component
 
     public function version($version)
     {
-        $this->version = is_callable($version) ? App::call($version) : $version;
+        $this->version = $version;
     }
 
     public function getVersion()
     {
-        return $this->version;
+        return is_callable($this->version) ? App::call($this->version) : $this->version;
     }
 
     public function render($component, $props = [])
@@ -46,7 +46,7 @@ class Component
 
         if (Request::header('X-Inertia')) {
             return Response::json([
-                'version' => $this->version,
+                'version' => $this->getVersion(),
                 'component' => $component,
                 'props' => array_merge($this->sharedProps, $props),
                 'url' => Request::getRequestUri(),
@@ -58,7 +58,7 @@ class Component
 
         return View::make($this->rootView, [
             'page' => [
-                'version' => $this->version,
+                'version' => $this->getVersion(),
                 'component' => $component,
                 'props' => array_merge($this->sharedProps, $props),
             ],
