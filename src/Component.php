@@ -3,6 +3,7 @@
 namespace Inertia;
 
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response;
@@ -27,7 +28,7 @@ class Component
 
     public function version($version)
     {
-        $this->version = $version;
+        $this->version = is_callable($version) ? App::call($version) : $version;
     }
 
     public function getVersion()
@@ -39,7 +40,7 @@ class Component
     {
         array_walk_recursive($this->sharedProps, function (&$item, $key) {
             if (is_callable($item)) {
-                $item = app()->call($item);
+                $item = App::call($item);
             }
         });
 
