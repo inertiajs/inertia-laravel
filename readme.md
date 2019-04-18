@@ -31,10 +31,10 @@ The first step to using Inertia is creating a root template. We recommend using 
 </html>
 ~~~
 
-The `@inertia` directive is simply a helper for creating our base `div`. It includes two data attributes: `component` (the page component name) and `props` (the page data). Here's what it looks like:
+The `@inertia` directive is simply a helper for creating our base `div`. It includes a `data-page` attribute which contains the inital page information. Here's what that looks like:
 
 ~~~blade
-<div id="app" data-component="{{ $component }}" data-props="{{ json_encode((object) $props) }}"></div>
+div id="app" data-page="{{ json_encode($page) }}"></div>
 ~~~
 
 If you'd like to use a different root view, you can change it using `Inertia::setRootView()`:
