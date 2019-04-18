@@ -26,6 +26,11 @@ class Component
         return Arr::set($this->sharedProps, $key, $value);
     }
 
+    public function get($key)
+    {
+        return Arr::get($this->sharedProps, $key);
+    }
+
     public function version($version)
     {
         $this->version = $version;
