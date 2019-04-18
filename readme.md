@@ -65,6 +65,33 @@ class EventsController extends Controller
 }
 ~~~
 
+## Following redirects
+
+When making a non-GET Inertia request, via `<inertia-link>` or manually, be sure to still respond with a proper Inertia response. For example, if you're creating a new user, have your "store" endpoint return a redirect back to a standard GET endpoint, such as your user index page. Inertia will automatically follow this redirect and update the page accordingly. Here's a simplified example:
+
+~~~php
+class UsersController extends Controller
+{
+    public function index()
+    {
+        return Inertia::render('Users/Index', ['users' => User::all()]);
+    }
+
+    public function store()
+    {
+        User::create(
+            Request::validate([
+                'first_name' => ['required', 'max:50'],
+                'last_name' => ['required', 'max:50'],
+                'email' => ['required', 'max:50', 'email'],
+            ])
+        );
+
+        return Redirect::route('users');
+    }
+}
+~~~
+
 ## Sharing data
 
 To share data with all your components, use `Inertia::share($data)`. This can be done both synchronously and lazily:
