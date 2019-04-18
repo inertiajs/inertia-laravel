@@ -92,6 +92,8 @@ class UsersController extends Controller
 }
 ~~~
 
+Note, when redirecting after a `PUT`, `PATCH` or `DELETE` request you must use a `303` response code, otherwise the subsequent request will not be treated as a `GET` request. A `303` redirect is the same as a `302` except that the follow-up request is explicitly changed to a `GET` request.
+
 ## Sharing data
 
 To share data with all your components, use `Inertia::share($data)`. This can be done both synchronously and lazily:
