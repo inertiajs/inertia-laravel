@@ -46,10 +46,10 @@ class Component
 
         if (Request::header('X-Inertia')) {
             return Response::json([
-                'version' => $this->getVersion(),
                 'component' => $component,
                 'props' => array_merge($this->sharedProps, $props),
                 'url' => Request::getRequestUri(),
+                'version' => $this->getVersion(),
             ], 200, [
                 'Vary' => 'Accept',
                 'X-Inertia' => true,
@@ -58,9 +58,10 @@ class Component
 
         return View::make($this->rootView, [
             'page' => [
-                'version' => $this->getVersion(),
                 'component' => $component,
                 'props' => array_merge($this->sharedProps, $props),
+                'url' => Request::getRequestUri(),
+                'version' => $this->getVersion(),
             ],
         ]);
     }
