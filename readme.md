@@ -114,6 +114,27 @@ Inertia::share('auth.user', function () {
 });
 ~~~
 
+## Accessing data in root template
+
+There are situations where you may want to access your prop data in your root Blade template. For example, you may want to add a meta description tag, Twitter card meta tags, or Facebook Open Graph meta tags. To do this, use the `Inertia::get()` helper.
+
+~~~blade
+<meta name="twitter:title" content="{{ Inertia::get('event.title') }}">
+~~~
+
+Sometimes you may even want to provide data that will not be sent to your JavaScript component. You can do this using the `with()` view helper, since `Inertia::render()` returns a `View` instance.
+
+~~~php
+return Inertia::render('Event', ['event' => $event])
+                ->with(['meta_description' => $event->meta_description]);
+~~~
+
+You can then access this variable like a regular Blade variable.
+
+~~~blade
+<meta name="description" content="{{ $meta_description }}">
+~~~
+
 ## Asset versioning
 
 One common challenge with single-page apps is refreshing site assets when they've been changed. Inertia makes this easy by optionally tracking the current version of your site assets. In the event that an asset changes, Inertia will automatically make a hard page visit instead of a normal ajax visit on the next request.
