@@ -34,7 +34,7 @@ The first step to using Inertia is creating a root template. We recommend using 
 The `@inertia` directive is simply a helper for creating our base `div`. It includes a `data-page` attribute which contains the inital page information. Here's what that looks like:
 
 ~~~blade
-div id="app" data-page="{{ json_encode($page) }}"></div>
+<div id="app" data-page="{{ json_encode($page) }}"></div>
 ~~~
 
 If you'd like to use a different root view, you can change it using `Inertia::setRootView()`:
