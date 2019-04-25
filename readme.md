@@ -1,6 +1,6 @@
 # Inertia.js Laravel Adapter
 
-> **Note:** This project is in the very early stages of development and IS NOT yet intended for public consumption. If you submit an issue, I do not guarantee a response. Please do not submit pull requests without first consulting me on Twitter ([@reinink](https://twitter.com/reinink)).
+To use Inertia.js you need both a server-side adapter (like this one) as well as a client-side adapter, such as [inertia-vue](https://github.com/inertiajs/inertia-vue). Be sure to also follow the installation instructions for the client-side adapter you choose. This documentation will only cover the Laravel adapter setup.
 
 ## Installation
 
@@ -31,21 +31,30 @@ The first step to using Inertia is creating a root template. We recommend using 
 </html>
 ~~~
 
-The `@inertia` directive is simply a helper for creating our base `div`. It includes a `data-page` attribute which contains the inital page information. Here's what that looks like:
+The `@inertia` directive is simply a helper for creating our base `div`. It includes a `data-page` attribute which contains the inital page information. Here's what that looks like.
 
 ~~~blade
 <div id="app" data-page="{{ json_encode($page) }}"></div>
 ~~~
 
-If you'd like to use a different root view, you can change it using `Inertia::setRootView()`:
+If you'd like to use a different root view, you can change it using `Inertia::setRootView()`.
 
 ~~~php
 Inertia\Inertia::setRootView('name');
 ~~~
 
-## Setup JavaScript adapter
+## Add Inertia middleware
 
-Next, you'll need to setup an Inertia JavaScript adapter, such as [inertia-vue](https://github.com/inertiajs/inertia-vue). Be sure to follow the getting started instructions for the the adapter you choose.
+Next, add the `Inertia\Middleware` middleware to your `web` middleware group, found in the `/app/Http/Kernel.php` file. This middleware monitors for asset changes, and also fixes an edge case with 302 redirects.
+
+~~~php
+protected $middlewareGroups = [
+    'web' => [
+        \Inertia\Middleware::class,
+        // ...
+    ]
+];
+~~~
 
 ## Making Inertia responses
 
@@ -67,7 +76,7 @@ class EventsController extends Controller
 
 ## Following redirects
 
-When making a non-GET Inertia request, via `<inertia-link>` or manually, be sure to still respond with a proper Inertia response. For example, if you're creating a new user, have your "store" endpoint return a redirect back to a standard GET endpoint, such as your user index page. Inertia will automatically follow this redirect and update the page accordingly. Here's a simplified example:
+When making a non-GET Inertia request, via `<inertia-link>` or manually, be sure to still respond with a proper Inertia response. For example, if you're creating a new user, have your "store" endpoint return a redirect back to a standard GET endpoint, such as your user index page. Inertia will automatically follow this redirect and update the page accordingly. Here's a simplified example.
 
 ~~~php
 class UsersController extends Controller
@@ -96,7 +105,7 @@ Note, when redirecting after a `PUT`, `PATCH` or `DELETE` request you must use a
 
 ## Sharing data
 
-To share data with all your components, use `Inertia::share($data)`. This can be done both synchronously and lazily:
+To share data with all your components, use `Inertia::share($data)`. This can be done both synchronously and lazily.
 
 ~~~php
 // Synchronously
@@ -151,17 +160,6 @@ If you're using Laravel Mix, you can use the `mix-manifest.json` for this. Here'
 Inertia::version(function () {
     return md5_file(public_path('mix-manifest.json'));
 });
-~~~
-
-Next, add the `CheckInertiaVersion` middleware to your web middleware group, found in the `/app/Http/Kernel.php`:
-
-~~~php
-protected $middlewareGroups = [
-    'web' => [
-        \Inertia\CheckInertiaVersion::class,
-        // ...
-    ]
-];
 ~~~
 
 Finally, make sure you have [versioning](https://laravel.com/docs/mix#versioning-and-cache-busting) setup in your `webpack.mix.js` to enable asset cache busting.
