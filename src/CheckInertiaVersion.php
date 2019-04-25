@@ -13,7 +13,7 @@ class CheckInertiaVersion
             && $request->header('X-Inertia')
             && $request->header('X-Inertia-Version') !== Inertia::getVersion()
         ) {
-            return Response::make('', 409, ['X-Inertia-Location' => $request->url()]);
+            return Response::make('', 409, ['X-Inertia-Location' => $request->fullUrl()]);
         }
 
         return $next($request);
