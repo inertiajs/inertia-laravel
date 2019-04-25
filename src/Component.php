@@ -53,7 +53,7 @@ class Component
             return Response::json([
                 'component' => $component,
                 'props' => array_merge($this->sharedProps, $props),
-                'url' => Request::getRequestUri(),
+                'url' => Request::fullUrl(),
                 'version' => $this->getVersion(),
             ], 200, [
                 'Vary' => 'Accept',
@@ -65,7 +65,7 @@ class Component
             'page' => [
                 'component' => $component,
                 'props' => array_merge($this->sharedProps, $props),
-                'url' => Request::getRequestUri(),
+                'url' => Request::fullUrl(),
                 'version' => $this->getVersion(),
             ],
         ]);
