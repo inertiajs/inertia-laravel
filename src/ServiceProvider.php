@@ -5,7 +5,7 @@ namespace Inertia;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
-class InertiaServiceProvider extends ServiceProvider
+class ServiceProvider extends ServiceProvider
 {
     /**
      * Perform post-registration booting of services.
