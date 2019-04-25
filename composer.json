@@ -2,7 +2,10 @@
     "name": "inertiajs/inertia-laravel",
     "type": "library",
     "description": "The Laravel adapter for Inertia.js.",
-    "keywords": ["laravel", "inertia"],
+    "keywords": [
+        "laravel",
+        "inertia"
+    ],
     "license": "MIT",
     "authors": [
         {
@@ -11,16 +14,6 @@
             "homepage": "https://reinink.ca"
         }
     ],
-    "autoload": {
-        "psr-4": {
-            "Inertia\\": "src"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Tests\\": "tests/"
-        }
-    },
     "require-dev": {
         "orchestra/testbench": "~3.0"
     },
@@ -29,6 +22,16 @@
             "providers": [
                 "Inertia\\ServiceProvider"
             ]
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Inertia\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
         }
     }
 }
