@@ -55,6 +55,7 @@ class Component
             'url' => Request::fullUrl(),
             'version' => $this->getVersion(),
         ];
+
         if (Request::header('X-Inertia')) {
             return Response::json($page, 200, [
                 'Vary' => 'Accept',
@@ -62,8 +63,6 @@ class Component
             ]);
         }
 
-        return View::make($this->rootView, [
-            'page' => $page,
-        ]);
+        return View::make($this->rootView, ['page' => $page]);
     }
 }
