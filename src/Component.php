@@ -49,25 +49,21 @@ class Component
             }
         });
 
+        $page = [
+            'component' => $component,
+            'props' => array_merge($this->sharedProps, $props),
+            'url' => Request::fullUrl(),
+            'version' => $this->getVersion(),
+        ];
         if (Request::header('X-Inertia')) {
-            return Response::json([
-                'component' => $component,
-                'props' => array_merge($this->sharedProps, $props),
-                'url' => Request::fullUrl(),
-                'version' => $this->getVersion(),
-            ], 200, [
+            return Response::json($page, 200, [
                 'Vary' => 'Accept',
                 'X-Inertia' => true,
             ]);
         }
 
         return View::make($this->rootView, [
-            'page' => [
-                'component' => $component,
-                'props' => array_merge($this->sharedProps, $props),
-                'url' => Request::fullUrl(),
-                'version' => $this->getVersion(),
-            ],
+            'page' => $page,
         ]);
     }
 }
