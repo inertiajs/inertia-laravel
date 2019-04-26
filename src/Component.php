@@ -21,14 +21,13 @@ class Component
         $this->rootView = $name;
     }
 
-    public function share($key, $value)
+    public function share($key, $value = null)
     {
-        return Arr::set($this->sharedProps, $key, $value);
-    }
+        if ($value === null) {
+            return Arr::get($this->sharedProps, $key);
+        }
 
-    public function get($key)
-    {
-        return Arr::get($this->sharedProps, $key);
+        return Arr::set($this->sharedProps, $key, $value);
     }
 
     public function version($version)
@@ -63,8 +62,6 @@ class Component
             ]);
         }
 
-        return View::make($this->rootView, array_merge(
-            ['page' => $page], array_merge($this->sharedProps, $props)
-        ));
+        return View::make($this->rootView, ['page' => $page]);
     }
 }
