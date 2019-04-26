@@ -63,6 +63,8 @@ class Component
             ]);
         }
 
-        return View::make($this->rootView, ['page' => $page]);
+        return View::make($this->rootView, array_merge(
+            ['page' => $page], array_merge($this->sharedProps, $props)
+        ));
     }
 }
