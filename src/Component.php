@@ -26,9 +26,13 @@ class Component
         return Arr::set($this->sharedProps, $key, $value);
     }
 
-    public function get($key)
+    public function getShared($key = null)
     {
-        return Arr::get($this->sharedProps, $key);
+        if ($key) {
+            return Arr::get($this->sharedProps, $key);
+        }
+
+        return $this->sharedProps;
     }
 
     public function version($version)

@@ -105,7 +105,7 @@ Note, when redirecting after a `PUT`, `PATCH` or `DELETE` request you must use a
 
 ## Sharing data
 
-To share data with all your components, use `Inertia::share($data)`. This can be done both synchronously and lazily.
+To share data with all your components, use `Inertia::share($key, $data)`. This can be done both synchronously and lazily.
 
 ~~~php
 // Synchronously
@@ -123,12 +123,14 @@ Inertia::share('auth.user', function () {
 });
 ~~~
 
+You can also get shared data using the same method `Inertia::share($key)`. If the key is not found, `null` is returned.
+
 ## Accessing data in root template
 
-There are situations where you may want to access your prop data in your root Blade template. For example, you may want to add a meta description tag, Twitter card meta tags, or Facebook Open Graph meta tags. To do this, use the `Inertia::get()` helper.
+There are situations where you may want to access your prop data in your root Blade template. For example, you may want to add a meta description tag, Twitter card meta tags, or Facebook Open Graph meta tags. These props are available via the `$page` variable.
 
 ~~~blade
-<meta name="twitter:title" content="{{ Inertia::get('event.title') }}">
+<meta name="twitter:title" content="{{ $page['props']['event']->title }}">
 ~~~
 
 Sometimes you may even want to provide data that will not be sent to your JavaScript component. You can do this using the `with()` view helper, since `Inertia::render()` returns a `View` instance.
