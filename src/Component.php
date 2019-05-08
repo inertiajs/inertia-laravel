@@ -67,6 +67,6 @@ class Component
             ]);
         }
 
-        return View::make($this->rootView, ['page' => $page]);
+        return View::make($this->rootView, compact('page'));
     }
 }
