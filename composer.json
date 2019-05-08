@@ -21,6 +21,10 @@
             "Tests\\": "tests/"
         }
     },
+    "require": {
+        "illuminate/contracts": "^5.8",
+        "illuminate/support": "^5.8"
+    },
     "require-dev": {
         "orchestra/testbench": "~3.0"
     },
