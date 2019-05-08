@@ -127,7 +127,7 @@ You can also get shared data using the same method `Inertia::share($key)`. If th
 
 ## Accessing data in root template
 
-There are situations where you may want to access your prop data in your root Blade template. For example, you may want to add a meta description tag, Twitter card meta tags, or Facebook Open Graph meta tags. To do this, all props are injected in the blade file, as regular Blade variable in `$page` variable.
+There are situations where you may want to access your prop data in your root Blade template. For example, you may want to add a meta description tag, Twitter card meta tags, or Facebook Open Graph meta tags. These props are available via the `$page` variable.
 
 ~~~blade
 <meta name="twitter:title" content="{{ $page['props']['event']->title }}">
