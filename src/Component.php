@@ -21,13 +21,18 @@ class Component
         $this->rootView = $name;
     }
 
-    public function share($key, $value = null)
+    public function share($key, $value)
     {
-        if ($value === null) {
+        return Arr::set($this->sharedProps, $key, $value);
+    }
+
+    public function getShared($key = null)
+    {
+        if ($key) {
             return Arr::get($this->sharedProps, $key);
         }
 
-        return Arr::set($this->sharedProps, $key, $value);
+        return $this->sharedProps;
     }
 
     public function version($version)
