@@ -17,6 +17,10 @@ class Middleware
         }
 
         if ($request->method() === 'GET' && $request->header('X-Inertia-Version') !== Inertia::getVersion()) {
+            if ($request->session()) {
+                $request->session()->reflash();
+            }
+
             return Response::make('', 409, ['X-Inertia-Location' => $request->fullUrl()]);
         }
 
