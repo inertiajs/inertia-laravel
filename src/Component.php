@@ -63,7 +63,7 @@ class Component
         if (Request::header('X-Inertia')) {
             return Response::json($page, 200, [
                 'Vary' => 'Accept',
-                'X-Inertia' => true,
+                'X-Inertia' => 'true',
             ]);
         }
 
