@@ -18,14 +18,4 @@ class ServiceProvider extends BaseServiceProvider
             return '<div id="app" data-page="{{ json_encode($page) }}"></div>';
         });
     }
-
-    /**
-     * Register bindings in the container.
-     *
-     * @return void
-     */
-    public function register()
-    {
-        //
-    }
 }
