@@ -56,7 +56,7 @@ class Component
         $page = [
             'component' => $component,
             'props' => array_merge($this->sharedProps, $props),
-            'url' => Request::fullUrl(),
+            'url' => Request::getRequestUri(),
             'version' => $this->getVersion(),
         ];
 
