@@ -4,16 +4,11 @@ namespace Inertia;
 
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\View;
-use Illuminate\Support\Facades\Request;
-use Illuminate\Support\Facades\Response;
 
-class Component
+class ResponseFactory
 {
     protected $rootView = 'app';
-
     protected $sharedProps = [];
-
     protected $version = null;
 
     public function setRootView($name)
@@ -23,7 +18,7 @@ class Component
 
     public function share($key, $value)
     {
-        return Arr::set($this->sharedProps, $key, $value);
+        Arr::set($this->sharedProps, $key, $value);
     }
 
     public function getShared($key = null)
@@ -53,20 +48,6 @@ class Component
             }
         });
 
-        $page = [
-            'component' => $component,
-            'props' => array_merge($this->sharedProps, $props),
-            'url' => Request::getRequestUri(),
-            'version' => $this->getVersion(),
-        ];
-
-        if (Request::header('X-Inertia')) {
-            return Response::json($page, 200, [
-                'Vary' => 'Accept',
-                'X-Inertia' => 'true',
-            ]);
-        }
-
-        return View::make($this->rootView, ['page' => $page]);
+        return new Response($component, $props, $this->rootView, $this->sharedProps, $this->getVersion());
     }
 }
