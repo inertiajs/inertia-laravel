@@ -24,6 +24,17 @@ class Response implements Responsable
         $this->version = $version;
     }
 
+    public function with($key, $value = null)
+    {
+        if (is_array($key)) {
+            $this->props = array_merge($this->props, $key);
+        } else {
+            $this->props[$key] = $value;
+        }
+
+        return $this;
+    }
+
     public function withViewData($key, $value)
     {
         $this->viewData[$key] = $value;
