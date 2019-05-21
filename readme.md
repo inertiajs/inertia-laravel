@@ -74,6 +74,21 @@ class EventsController extends Controller
 }
 ~~~
 
+Alternatively, you can use the `with()` method to include component data (props):
+
+~~~php
+use Inertia\Inertia;
+
+class EventsController extends Controller
+{
+    public function show(Event $event)
+    {
+        return Inertia::render('Event')
+            ->with('event', $event->only('id', 'title', 'start_date', 'description'));
+    }
+}
+~~~
+
 ## Following redirects
 
 When making a non-GET Inertia request, via `<inertia-link>` or manually, be sure to still respond with a proper Inertia response. For example, if you're creating a new user, have your "store" endpoint return a redirect back to a standard GET endpoint, such as your user index page. Inertia will automatically follow this redirect and update the page accordingly. Here's a simplified example.
@@ -133,17 +148,16 @@ There are situations where you may want to access your prop data in your root Bl
 <meta name="twitter:title" content="{{ $page['props']['event']->title }}">
 ~~~
 
-Sometimes you may even want to provide data that will not be sent to your JavaScript component. You can do this using the `with()` view helper, since `Inertia::render()` returns a `View` instance.
+Sometimes you may even want to provide data that will not be sent to your JavaScript component. You can do this using the `withViewData()` method.
 
 ~~~php
-return Inertia::render('Event', ['event' => $event])
-                ->with(['meta_description' => $event->meta_description]);
+return Inertia::render('Event', ['event' => $event])->withViewData(['meta' => $event->meta]);
 ~~~
 
 You can then access this variable like a regular Blade variable.
 
 ~~~blade
-<meta name="description" content="{{ $meta_description }}">
+<meta name="description" content="{{ $meta }}">
 ~~~
 
 ## Asset versioning
