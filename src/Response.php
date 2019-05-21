@@ -8,20 +8,20 @@ use Illuminate\Contracts\Support\Responsable;
 
 class Response implements Responsable
 {
+    protected $component;
+    protected $props;
     protected $rootView;
     protected $sharedProps;
     protected $version;
-    protected $component;
-    protected $props;
     protected $viewData = [];
 
-    public function __construct($rootView, $sharedProps = [], $version, $component, $props)
+    public function __construct($component, $props, $rootView = 'app', $sharedProps = [], $version = null)
     {
+        $this->component = $component;
+        $this->props = $props;
         $this->rootView = $rootView;
         $this->sharedProps = $sharedProps;
         $this->version = $version;
-        $this->component = $component;
-        $this->props = $props;
     }
 
     public function with($key, $value)

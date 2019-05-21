@@ -48,6 +48,6 @@ class ResponseFactory
             }
         });
 
-        return new Response($this->rootView, $this->sharedProps, $this->getVersion(), $component, $props);
+        return new Response($component, $props, $this->rootView, $this->sharedProps, $this->getVersion());
     }
 }
