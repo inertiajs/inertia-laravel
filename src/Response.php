@@ -24,7 +24,7 @@ class Response implements Responsable
         $this->version = $version;
     }
 
-    public function with($key, $value)
+    public function withViewData($key, $value)
     {
         $this->viewData[$key] = $value;
 
