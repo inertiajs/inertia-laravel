@@ -17,7 +17,6 @@ class ResponseTest extends TestCase
             'User/Edit',
             ['user' => ['name' => 'Jonathan']],
             'app',
-            ['foo' => 'bar'],
             '123'
         );
 
@@ -27,10 +26,9 @@ class ResponseTest extends TestCase
         $this->assertInstanceOf(View::class, $response);
         $this->assertSame('User/Edit', $page['component']);
         $this->assertSame('Jonathan', $page['props']['user']['name']);
-        $this->assertSame('bar', $page['props']['foo']);
         $this->assertSame('/user/123', $page['url']);
         $this->assertSame('123', $page['version']);
-        $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;foo&quot;:&quot;bar&quot;,&quot;user&quot;:{&quot;name&quot;:&quot;Jonathan&quot;}},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;}"></div>'."\n", $response->render());
+        $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;user&quot;:{&quot;name&quot;:&quot;Jonathan&quot;}},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;}"></div>'."\n", $response->render());
     }
 
     public function test_xhr_response()
@@ -42,7 +40,6 @@ class ResponseTest extends TestCase
             'User/Edit',
             ['user' => ['name' => 'Jonathan']],
             'app',
-            ['foo' => 'bar'],
             '123'
         );
 
@@ -52,7 +49,6 @@ class ResponseTest extends TestCase
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertSame('User/Edit', $page->component);
         $this->assertSame('Jonathan', $page->props->user->name);
-        $this->assertSame('bar', $page->props->foo);
         $this->assertSame('/user/123', $page->url);
         $this->assertSame('123', $page->version);
     }
