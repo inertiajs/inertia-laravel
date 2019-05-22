@@ -11,16 +11,14 @@ class Response implements Responsable
     protected $component;
     protected $props;
     protected $rootView;
-    protected $sharedProps;
     protected $version;
     protected $viewData = [];
 
-    public function __construct($component, $props, $rootView = 'app', $sharedProps = [], $version = null)
+    public function __construct($component, $props, $rootView = 'app', $version = null)
     {
         $this->component = $component;
         $this->props = $props;
         $this->rootView = $rootView;
-        $this->sharedProps = $sharedProps;
         $this->version = $version;
     }
 
@@ -46,7 +44,7 @@ class Response implements Responsable
     {
         $page = [
             'component' => $this->component,
-            'props' => array_merge($this->sharedProps, $this->props),
+            'props' => $this->props,
             'url' => $request->getRequestUri(),
             'version' => $this->version,
         ];

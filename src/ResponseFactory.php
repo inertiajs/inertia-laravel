@@ -2,6 +2,7 @@
 
 namespace Inertia;
 
+use Closure;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 
@@ -9,6 +10,7 @@ class ResponseFactory
 {
     protected $rootView = 'app';
     protected $sharedProps = [];
+    protected $sharedPropsCallbacks = [];
     protected $version = null;
 
     public function setRootView($name)
@@ -16,9 +18,13 @@ class ResponseFactory
         $this->rootView = $name;
     }
 
-    public function share($key, $value)
+    public function share($key, $value = null)
     {
-        Arr::set($this->sharedProps, $key, $value);
+        if ($key instanceof Closure) {
+            $this->sharedPropsCallbacks[] = $key;
+        } else {
+            Arr::set($this->sharedProps, $key, $value);
+        }
     }
 
     public function getShared($key = null)
@@ -42,12 +48,18 @@ class ResponseFactory
 
     public function render($component, $props = [])
     {
-        array_walk_recursive($this->sharedProps, function (&$item, $key) {
-            if (is_callable($item)) {
-                $item = App::call($item);
+        $props = array_merge($this->sharedProps, $props);
+
+        foreach ($this->sharedPropsCallbacks as $callback) {
+            $props = array_merge($props, App::call($callback));
+        }
+
+        array_walk_recursive($props, function (&$prop) {
+            if (is_callable($prop)) {
+                $prop = App::call($prop);
             }
         });
 
-        return new Response($component, $props, $this->rootView, $this->sharedProps, $this->getVersion());
+        return new Response($component, $props, $this->rootView, $this->getVersion());
     }
 }
