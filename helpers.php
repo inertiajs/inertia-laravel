@@ -1,8 +1,8 @@
 <?php
 
 if (! function_exists('inertia')) {
-    function inertia($component, $props, $rootView = 'app', $version = null)
+    function inertia($component, $props)
     {
-        return new \Inertia\Response($component, $props, $rootView, $version);
+        return \Inertia\Inertia::render($component, $props);
     }
 }

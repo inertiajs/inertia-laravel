@@ -53,21 +53,8 @@ class ResponseTest extends TestCase
         $this->assertSame('123', $page->version);
     }
 
-    public function test_server_response_with_helper_function()
+    public function test_the_helper_function_returns_a_response_instance()
     {
-        $request = Request::create('/user/123', 'GET');
-
-        $response = inertia('User/Edit', ['user' => ['name' => 'Jonathan']], 'app', '123');
-        $this->assertInstanceOf(Response::class, $response);
-
-        $response = $response->toResponse($request);
-        $page = $response->getData()['page'];
-
-        $this->assertInstanceOf(View::class, $response);
-        $this->assertSame('User/Edit', $page['component']);
-        $this->assertSame('Jonathan', $page['props']['user']['name']);
-        $this->assertSame('/user/123', $page['url']);
-        $this->assertSame('123', $page['version']);
-        $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;user&quot;:{&quot;name&quot;:&quot;Jonathan&quot;}},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;}"></div>'."\n", $response->render());
+        $this->assertInstanceOf(Response::class, inertia('User/Edit', ['user' => ['name' => 'Jonathan']]));
     }
 }
