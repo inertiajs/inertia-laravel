@@ -3,10 +3,12 @@
 if (! function_exists('inertia')) {
     function inertia($component = null, $props = [])
     {
+        $factory = new \Inertia\ResponseFactory();
+
         if ($component) {
-            return (new \Inertia\ResponseFactory())->render($component, $props);
+            return $factory->render($component, $props);
         }
 
-        return new \Inertia\ResponseFactory();
+        return $factory;
     }
 }
