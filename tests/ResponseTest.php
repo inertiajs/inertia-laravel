@@ -6,6 +6,7 @@ use Inertia\Response;
 use Illuminate\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Inertia\ResponseFactory;
 
 class ResponseTest extends TestCase
 {
@@ -56,5 +57,10 @@ class ResponseTest extends TestCase
     public function test_the_helper_function_returns_a_response_instance()
     {
         $this->assertInstanceOf(Response::class, inertia('User/Edit', ['user' => ['name' => 'Jonathan']]));
+    }
+
+    public function test_if_no_parameters_are_passed_to_the_helper_function_it_returns_the_response_factory()
+    {
+        $this->assertInstanceOf(ResponseFactory::class, inertia());
     }
 }
