@@ -14,7 +14,10 @@
     "autoload": {
         "psr-4": {
             "Inertia\\": "src"
-        }
+        },
+        "files": [
+            "./helpers.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
