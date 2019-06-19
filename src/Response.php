@@ -36,9 +36,7 @@ class Response implements Responsable
     public function withViewData($key, $value = null)
     {
         if (is_array($key)) {
-            foreach ($key as $k => $value) {
-                $this->viewData[$k] = $value;
-            }
+            $this->viewData = array_merge($this->viewData, $key);
         } else {
             $this->viewData[$key] = $value;
         }
