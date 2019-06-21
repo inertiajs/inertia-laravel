@@ -43,7 +43,7 @@ class ResponseFactory
 
     public function getVersion()
     {
-        return is_callable($this->version) ? App::call($this->version) : $this->version;
+        return $this->version instanceof Closure ? App::call($this->version) : $this->version;
     }
 
     public function render($component, $props = [])
@@ -55,7 +55,7 @@ class ResponseFactory
         }
 
         array_walk_recursive($props, function (&$prop) {
-            if (is_callable($prop)) {
+            if ($prop instanceof Closure) {
                 $prop = App::call($prop);
             }
         });
