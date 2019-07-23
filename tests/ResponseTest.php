@@ -3,9 +3,9 @@
 namespace Tests;
 
 use Inertia\Response;
-use Illuminate\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response as BaseResponse;
 
 class ResponseTest extends TestCase
 {
@@ -21,14 +21,9 @@ class ResponseTest extends TestCase
         );
 
         $response = $response->toResponse($request);
-        $page = $response->getData()['page'];
 
-        $this->assertInstanceOf(View::class, $response);
-        $this->assertSame('User/Edit', $page['component']);
-        $this->assertSame('Jonathan', $page['props']['user']['name']);
-        $this->assertSame('/user/123', $page['url']);
-        $this->assertSame('123', $page['version']);
-        $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;user&quot;:{&quot;name&quot;:&quot;Jonathan&quot;}},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;}"></div>'."\n", $response->render());
+        $this->assertInstanceOf(BaseResponse::class, $response);
+        $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;user&quot;:{&quot;name&quot;:&quot;Jonathan&quot;}},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;}"></div>'."\n", $response->content());
     }
 
     public function test_xhr_response()
