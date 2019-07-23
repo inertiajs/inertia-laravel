@@ -3,7 +3,7 @@
 namespace Inertia;
 
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Contracts\Support\Responsable;
 
 class Response implements Responsable
@@ -56,6 +56,6 @@ class Response implements Responsable
             ]);
         }
 
-        return View::make($this->rootView, $this->viewData + ['page' => $page]);
+        return Response::view($this->rootView, $this->viewData + ['page' => $page]);
     }
 }
