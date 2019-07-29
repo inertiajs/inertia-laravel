@@ -17,7 +17,7 @@ class Middleware
         }
 
         if ($request->method() === 'GET' && $request->header('X-Inertia-Version') !== Inertia::getVersion()) {
-            if ($request->session()) {
+            if ($request->hasSession()) {
                 $request->session()->reflash();
             }
 
