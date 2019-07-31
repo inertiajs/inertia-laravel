@@ -33,9 +33,13 @@ class Response implements Responsable
         return $this;
     }
 
-    public function withViewData($key, $value)
+    public function withViewData($key, $value = null)
     {
-        $this->viewData[$key] = $value;
+        if (is_array($key)) {
+            $this->viewData = array_merge($this->viewData, $key);
+        } else {
+            $this->viewData[$key] = $value;
+        }
 
         return $this;
     }
