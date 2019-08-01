@@ -40,7 +40,7 @@ class Response implements Responsable
         } else {
             $this->viewData[$key] = $value;
         }
-        
+      
         return $this;
     }
 
