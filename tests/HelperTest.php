@@ -3,8 +3,8 @@
 namespace Tests;
 
 use Inertia\Inertia;
-use Inertia\ResponseFactory;
 use Inertia\Response;
+use Inertia\ResponseFactory;
 
 class HelperTest extends TestCase
 {

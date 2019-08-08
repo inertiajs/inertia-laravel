@@ -1,14 +1,16 @@
 <?php
 
-if (! function_exists('inertia')) {
+if (!function_exists('inertia')) {
     /**
      * Inertia helper.
      *
      * @param null|string $component
-     * @param array $props
+     * @param array       $props
+     *
      * @return \Inertia\ResponseFactory|\Inertia\Response
      */
-    function inertia($component = null, $props = []) {
+    function inertia($component = null, $props = [])
+    {
         $instance = \Inertia\Inertia::getFacadeRoot();
 
         if ($component) {
