@@ -21,7 +21,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\": "tests/"
+            "Inertia\\Tests\\": "tests/"
         }
     },
     "require-dev": {
