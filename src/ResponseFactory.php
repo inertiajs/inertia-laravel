@@ -10,7 +10,6 @@ class ResponseFactory
 {
     protected $rootView = 'app';
     protected $sharedProps = [];
-    protected $sharedPropsCallbacks = [];
     protected $version = null;
 
     public function setRootView($name)
@@ -20,8 +19,8 @@ class ResponseFactory
 
     public function share($key, $value = null)
     {
-        if ($key instanceof Closure) {
-            $this->sharedPropsCallbacks[] = $key;
+        if (is_array($key)) {
+            $this->sharedProps = array_merge($this->sharedProps, $key);
         } else {
             Arr::set($this->sharedProps, $key, $value);
         }
@@ -48,18 +47,11 @@ class ResponseFactory
 
     public function render($component, $props = [])
     {
-        $props = array_merge($this->sharedProps, $props);
-
-        foreach ($this->sharedPropsCallbacks as $callback) {
-            $props = array_merge($props, App::call($callback));
-        }
-
-        array_walk_recursive($props, function (&$prop) {
-            if ($prop instanceof Closure) {
-                $prop = App::call($prop);
-            }
-        });
-
-        return new Response($component, $props, $this->rootView, $this->getVersion());
+        return new Response(
+            $component,
+            array_merge($this->sharedProps, $props),
+            $this->rootView,
+            $this->getVersion()
+        );
     }
 }
