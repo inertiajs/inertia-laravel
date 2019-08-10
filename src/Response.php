@@ -54,9 +54,11 @@ class Response implements Responsable
             ? array_only($this->props, $only)
             : $this->props;
 
-        $props = array_map(function ($prop) {
-            return $prop instanceof Closure ? App::call($prop) : $prop;
-        }, $props);
+        array_walk_recursive($props, function (&$prop) {
+            if ($prop instanceof Closure) {
+                $prop = App::call($prop);
+            }
+        });
 
         $page = [
             'component' => $this->component,
