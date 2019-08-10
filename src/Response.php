@@ -48,11 +48,15 @@ class Response implements Responsable
 
     public function toResponse($request)
     {
-        $only = array_filter(explode(',', $request->header('X-Inertia-Only')));
+        $only = array_filter(explode(',', $request->header('X-Inertia-Partial-Data')));
+
+        $props = ($only && $request->header('X-Inertia-Partial-Component') === $this->component)
+            ? array_only($this->props, $only)
+            : $this->props;
 
         $props = array_map(function ($prop) {
             return $prop instanceof Closure ? App::call($prop) : $prop;
-        }, $only ? array_only($this->props, $only) : $this->props);
+        }, $props);
 
         $page = [
             'component' => $this->component,
