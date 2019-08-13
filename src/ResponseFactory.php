@@ -5,6 +5,7 @@ namespace Inertia;
 use Closure;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
+use Illuminate\Contracts\Support\Arrayable;
 
 class ResponseFactory
 {
@@ -47,6 +48,10 @@ class ResponseFactory
 
     public function render($component, $props = [])
     {
+        if ($props instanceof Arrayable) {
+            $props = $props->toArray();
+        }
+
         return new Response(
             $component,
             array_merge($this->sharedProps, $props),
