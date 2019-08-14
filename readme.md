@@ -136,6 +136,24 @@ Inertia::share('auth.user', function () {
         ];
     }
 });
+
+// Multiple values
+Inertia::share([
+    // Synchronously
+    'app' => [
+        'name' => Config::get('app.name')
+    ],
+    // Lazily
+    'auth' => function () {
+        return [
+            'user' => Auth::user() ? [
+                'id' => Auth::user()->id,
+                'first_name' => Auth::user()->first_name,
+                'last_name' => Auth::user()->last_name,
+            ] : null;
+        ];
+    }
+]);
 ~~~
 
 You can also get shared data using the same method `Inertia::share($key)`. If the key is not found, `null` is returned.

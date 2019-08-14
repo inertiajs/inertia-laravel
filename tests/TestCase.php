@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests;
+namespace Inertia\Tests;
 
 use Illuminate\Support\Facades\View;
 use Orchestra\Testbench\TestCase as Orchestra;

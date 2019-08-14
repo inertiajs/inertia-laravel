@@ -2,7 +2,9 @@
 
 namespace Inertia;
 
+use Closure;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\App;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Support\Facades\Response as ResponseFacade;
 
@@ -33,18 +35,34 @@ class Response implements Responsable
         return $this;
     }
 
-    public function withViewData($key, $value)
+    public function withViewData($key, $value = null)
     {
-        $this->viewData[$key] = $value;
+        if (is_array($key)) {
+            $this->viewData = array_merge($this->viewData, $key);
+        } else {
+            $this->viewData[$key] = $value;
+        }
 
         return $this;
     }
 
     public function toResponse($request)
     {
+        $only = array_filter(explode(',', $request->header('X-Inertia-Partial-Data')));
+
+        $props = ($only && $request->header('X-Inertia-Partial-Component') === $this->component)
+            ? array_only($this->props, $only)
+            : $this->props;
+
+        array_walk_recursive($props, function (&$prop) {
+            if ($prop instanceof Closure) {
+                $prop = App::call($prop);
+            }
+        });
+
         $page = [
             'component' => $this->component,
-            'props' => $this->props,
+            'props' => $props,
             'url' => $request->getRequestUri(),
             'version' => $this->version,
         ];
