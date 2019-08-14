@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests;
+namespace Inertia\Tests;
 
 use Inertia\Response;
 use Illuminate\Http\Request;
