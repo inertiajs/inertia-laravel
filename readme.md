@@ -150,7 +150,7 @@ Inertia::share([
                 'id' => Auth::user()->id,
                 'first_name' => Auth::user()->first_name,
                 'last_name' => Auth::user()->last_name,
-            ] : null;
+            ] : null
         ];
     }
 ]);
