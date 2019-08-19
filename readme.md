@@ -1,6 +1,6 @@
 # Inertia.js Laravel Adapter
 
-To use Inertia.js you need both a server-side adapter (like this one) as well as a client-side adapter, such as [inertia-vue](https://github.com/inertiajs/inertia-vue). Be sure to also follow the installation instructions for the client-side adapter you choose. This documentation will only cover the Laravel adapter setup.
+To use [Inertia.js](https://github.com/inertiajs/inertia) you need both a server-side adapter (like this one) as well as a client-side adapter, such as [inertia-vue](https://github.com/inertiajs/inertia-vue). Be sure to also follow the installation instructions for the client-side adapter you choose. This documentation will only cover the Laravel adapter setup.
 
 ## Installation
 
@@ -150,7 +150,7 @@ Inertia::share([
                 'id' => Auth::user()->id,
                 'first_name' => Auth::user()->first_name,
                 'last_name' => Auth::user()->last_name,
-            ] : null;
+            ] : null
         ];
     }
 ]);
