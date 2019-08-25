@@ -33,13 +33,21 @@ class TestResponseTest extends TestCase
         $response->assertPropCount('prop', 3);
     }
 
-    private function makeMockResponse($content)
+    public function test_assert_component()
+    {
+        $response = $this->makeMockResponse();
+
+        $response->assertComponent('mock');
+    }
+
+    private function makeMockResponse($content = [])
     {
     	$baseResponse = tap(new Response, function ($response) use ($content) {
             $response->setContent([
             	'page' => [
-            		'props' => $content
-            	]
+            		'props' => $content,
+                    'component' => 'mock'
+            	],
             ]);
         });
 

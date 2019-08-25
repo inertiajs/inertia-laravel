@@ -37,6 +37,13 @@ class TestResponse extends BaseResponse
 		return $this;
 	}
 
+	public function assertComponent($component)
+	{
+		PHPUnit::assertEquals($component, $this->original['page']['component']);
+
+		return $this;
+	}
+
 	protected function props($key = null)
 	{
 		$props = json_decode(json_encode($this->original['page']['props']), JSON_OBJECT_AS_ARRAY);
