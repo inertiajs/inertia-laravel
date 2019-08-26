@@ -2,31 +2,24 @@
 
 namespace Inertia\Tests;
 
-use Illuminate\Http\Request;
+use Inertia\Response;
 use Inertia\Controller;
+use Illuminate\Http\Request;
 
 class ControllerTest extends TestCase
 {
-    public function test_it_returns_an_inertia_response()
+    public function test_controller_returns_an_inertia_response()
     {
-        $request = new Request();
-        $request->headers->set('X-Inertia-Partial-Component', 'Component');
-        $controller = new Controller();
+        $response = (new Controller())('User/Edit', ['user' => ['name' => 'Jonathan']]);
 
-        $response = $controller('Component', ['prop1' => true, 'prop2' => false])->toResponse($request);
-
-
-        $this->assertEquals('app', $response->name());
+        $this->assertInstanceOf(Response::class, $response);
         $this->assertEquals([
             'page' => [
-                'component' => 'Component',
-                'props' => [
-                    'prop1' => true,
-                    'prop2' => false,
-                ],
+                'component' => 'User/Edit',
+                'props' => ['user' => ['name' => 'Jonathan']],
                 'url' => '',
                 'version' => null,
-            ]
-        ], $response->getData());
+            ],
+        ], $response->toResponse(new Request())->getData());
     }
 }
