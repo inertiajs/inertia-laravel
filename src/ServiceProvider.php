@@ -34,7 +34,6 @@ class ServiceProvider extends BaseServiceProvider
 
     protected function registerMiddleware()
     {
-        $kernel = $this->app[Kernel::class];
-        $kernel->pushMiddleware(Middleware::class);
+        $this->app['router']->pushMiddlewareToGroup('web', Middleware::class);
     }
 }
