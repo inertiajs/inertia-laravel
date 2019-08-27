@@ -2,18 +2,28 @@
 
 namespace Inertia;
 
-use Illuminate\Routing\Router;
 use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
 class ServiceProvider extends BaseServiceProvider
 {
+    private static $configPath = __DIR__ . '/../config/config.php';
+
     public function boot()
     {
-        $this->registerBladeDirective();
-        $this->registerRouterMacro();
-        $this->registerMiddleware();
+        $this->publishes([self::$configPath => config_path('inertia.php')], 'config');
+
+        if (config('inertia.use_blade_directive', true)) {
+            $this->registerBladeDirective();
+        }
+        if (config('inertia.use_router_macro', true)) {
+            $this->registerRouterMacro();
+        }
+        if (config('inertia.use_middleware', true)) {
+            $this->registerMiddleware();
+        }
     }
 
     protected function registerBladeDirective()
@@ -35,5 +45,11 @@ class ServiceProvider extends BaseServiceProvider
     protected function registerMiddleware()
     {
         $this->app[Kernel::class]->pushMiddleware(Middleware::class);
+    }
+
+    public function register()
+    {
+        parent::register();
+        $this->mergeConfigFrom(self::$configPath, 'inertia');
     }
 }
