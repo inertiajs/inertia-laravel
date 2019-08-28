@@ -3,9 +3,8 @@
 namespace Inertia;
 
 use Closure;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\View;
 use Illuminate\Contracts\Support\Responsable;
 
 class Response implements Responsable
@@ -15,6 +14,7 @@ class Response implements Responsable
     protected $rootView;
     protected $version;
     protected $viewData = [];
+    protected $statusCode = 200;
 
     public function __construct($component, $props, $rootView = 'app', $version = null)
     {
@@ -22,6 +22,13 @@ class Response implements Responsable
         $this->props = $props;
         $this->rootView = $rootView;
         $this->version = $version;
+    }
+
+    public function withStatusCode($statusCode)
+    {
+        $this->statusCode = $statusCode;
+
+        return $this;
     }
 
     public function with($key, $value = null)
@@ -51,7 +58,7 @@ class Response implements Responsable
         $only = array_filter(explode(',', $request->header('X-Inertia-Partial-Data')));
 
         $props = ($only && $request->header('X-Inertia-Partial-Component') === $this->component)
-            ? array_only($this->props, $only)
+            ? Arr::only($this->props, $only)
             : $this->props;
 
         array_walk_recursive($props, function (&$prop) {
@@ -68,12 +75,21 @@ class Response implements Responsable
         ];
 
         if ($request->header('X-Inertia')) {
-            return new JsonResponse($page, 200, [
-                'Vary' => 'Accept',
-                'X-Inertia' => 'true',
-            ]);
+            return response()
+                ->json(
+                    $page,
+                    $this->statusCode, [
+                        'Vary' => 'Accept',
+                        'X-Inertia' => 'true',
+                    ]
+                );
         }
 
-        return View::make($this->rootView, $this->viewData + ['page' => $page]);
+        return response()
+            ->view(
+                $this->rootView,
+                $this->viewData + ['page' => $page],
+                $this->statusCode
+            );
     }
 }
