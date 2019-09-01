@@ -43,19 +43,6 @@ If you'd like to use a different root view, you can change it using `Inertia::se
 Inertia\Inertia::setRootView('name');
 ~~~
 
-## Add Inertia middleware
-
-Next, add the `Inertia\Middleware` middleware to your `web` middleware group, found in the `/app/Http/Kernel.php` file. This middleware monitors for asset changes, and also fixes an edge case with 302 redirects. Be sure to include this middleware *after* any session related middleware.
-
-~~~php
-protected $middlewareGroups = [
-    'web' => [
-        // ...
-        \Inertia\Middleware::class,
-    ]
-];
-~~~
-
 ## Making Inertia responses
 
 To make an Inertia response, use `Inertia::render()`. This function takes two arguments, the component name, and the component data (props).
