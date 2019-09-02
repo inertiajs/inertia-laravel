@@ -15,7 +15,7 @@ class HelperTest extends TestCase
 
     public function test_the_helper_function_returns_a_response_instance()
     {
-        $this->assertInstanceOf(Response::class, inertia('User/Edit', ['user' => ['name' => 'George']]));
+        $this->assertInstanceOf(Response::class, inertia('User/Edit', ['user' => ['name' => 'Jonathan']]));
     }
 
     public function test_the_instance_is_the_same_as_the_facade_instance()
