@@ -20,6 +20,6 @@ class ControllerTest extends TestCase
                 'url' => '',
                 'version' => null,
             ],
-        ], $response->toResponse(new Request())->getData());
+        ], $response->toResponse(new Request())->getOriginalContent()->getData());
     }
 }
