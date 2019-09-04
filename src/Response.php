@@ -3,11 +3,12 @@
 namespace Inertia;
 
 use Closure;
+use Illuminate\Support\Arr;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\App;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Responsable;
-use Illuminate\Support\Facades\Response as ResponseFacade;
+use Illuminate\Support\Facades\Response as ResponseFactory;
 
 class Response implements Responsable
 {
@@ -52,7 +53,7 @@ class Response implements Responsable
         $only = array_filter(explode(',', $request->header('X-Inertia-Partial-Data')));
 
         $props = ($only && $request->header('X-Inertia-Partial-Component') === $this->component)
-            ? array_only($this->props, $only)
+            ? Arr::only($this->props, $only)
             : $this->props;
 
         array_walk_recursive($props, function (&$prop) {
@@ -75,6 +76,6 @@ class Response implements Responsable
             ]);
         }
 
-        return ResponseFacade::view($this->rootView, $this->viewData + ['page' => $page]);
+        return ResponseFactory::view($this->rootView, $this->viewData + ['page' => $page]);
     }
 }
