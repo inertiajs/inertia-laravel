@@ -24,7 +24,7 @@ class Response implements Responsable
         $this->version = $version;
     }
 
-    public function withStatusCode($statusCode)
+    public function setStatusCode($statusCode)
     {
         $this->statusCode = $statusCode;
 
