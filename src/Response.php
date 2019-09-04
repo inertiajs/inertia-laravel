@@ -3,6 +3,7 @@
 namespace Inertia;
 
 use Closure;
+use Illuminate\Support\Arr;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\View;
@@ -52,7 +53,7 @@ class Response implements Responsable
         $only = array_filter(explode(',', $request->header('X-Inertia-Partial-Data')));
 
         $props = ($only && $request->header('X-Inertia-Partial-Component') === $this->component)
-            ? array_only($this->props, $only)
+            ? Arr::only($this->props, $only)
             : $this->props;
 
         array_walk_recursive($props, function (&$prop) {
