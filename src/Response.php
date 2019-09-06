@@ -6,9 +6,9 @@ use Closure;
 use Illuminate\Support\Arr;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\View;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Responsable;
+use Illuminate\Support\Facades\Response as ResponseFactory;
 
 class Response implements Responsable
 {
@@ -76,6 +76,6 @@ class Response implements Responsable
             ]);
         }
 
-        return View::make($this->rootView, $this->viewData + ['page' => $page]);
+        return ResponseFactory::view($this->rootView, $this->viewData + ['page' => $page]);
     }
 }
