@@ -3,6 +3,7 @@
 namespace Inertia;
 
 use Closure;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Contracts\Support\Arrayable;
@@ -48,6 +49,10 @@ class ResponseFactory
 
     public function render($component, $props = [])
     {
+        if ($props instanceof JsonResource) {
+            $props = $props->response()->getData(true);
+        }
+
         if ($props instanceof Arrayable) {
             $props = $props->toArray();
         }
