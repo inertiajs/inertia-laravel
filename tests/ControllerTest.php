@@ -2,10 +2,10 @@
 
 namespace Inertia\Tests;
 
-use Illuminate\Routing\Route;
 use Inertia\Response;
 use Inertia\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Route;
 
 class ControllerTest extends TestCase
 {
@@ -16,8 +16,9 @@ class ControllerTest extends TestCase
             $route = new Route(['GET'], '/', ['\Inertia\Controller', '__invoke']);
             $route->defaults('component', 'User/Edit');
             $route->defaults('props', [
-                    'user' => ['name' => 'Jonathan']
+                'user' => ['name' => 'Jonathan'],
             ]);
+
             return $route;
         });
 
