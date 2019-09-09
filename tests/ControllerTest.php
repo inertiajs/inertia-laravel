@@ -2,6 +2,7 @@
 
 namespace Inertia\Tests;
 
+use Illuminate\Routing\Route;
 use Inertia\Response;
 use Inertia\Controller;
 use Illuminate\Http\Request;
@@ -10,7 +11,17 @@ class ControllerTest extends TestCase
 {
     public function test_controller_returns_an_inertia_response()
     {
-        $response = (new Controller())('User/Edit', ['user' => ['name' => 'Jonathan']]);
+        $request = new Request();
+        $request->setRouteResolver(static function () {
+            $route = new Route(['GET'], '/', ['\Inertia\Controller', '__invoke']);
+            $route->defaults('component', 'User/Edit');
+            $route->defaults('props', [
+                    'user' => ['name' => 'Jonathan']
+            ]);
+            return $route;
+        });
+
+        $response = (new Controller())($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertEquals([
