@@ -37,10 +37,14 @@ The `@inertia` directive is simply a helper for creating our base `div`. It incl
 <div id="app" data-page="{{ json_encode($page) }}"></div>
 ~~~
 
-If you'd like to use a different root view, you can change it using `Inertia::setRootView()`.
+If you'd like to use a different root view, you can change it using `Inertia::setRootView()` or by publishing the config file and overwriting the preset value.
 
 ~~~php
 Inertia\Inertia::setRootView('name');
+~~~
+
+~~~sh
+php artisan vendor:publish --provider="Inertia\ServiceProvider"
 ~~~
 
 ## Making Inertia responses
