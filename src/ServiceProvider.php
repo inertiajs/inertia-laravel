@@ -14,6 +14,9 @@ class ServiceProvider extends BaseServiceProvider
         $this->registerBladeDirective();
         $this->registerRouterMacro();
         $this->registerMiddleware();
+        $this->publishes([
+            __DIR__.'/config/inertia.php' => config_path('inertia.php'),
+        ]);
     }
 
     protected function registerBladeDirective()

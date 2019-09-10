@@ -9,9 +9,14 @@ use Illuminate\Contracts\Support\Arrayable;
 
 class ResponseFactory
 {
-    protected $rootView = 'app';
+    protected $rootView;
     protected $sharedProps = [];
     protected $version = null;
+
+    public function __construct()
+    {
+        $this->rootView = config('inertia.root_template');
+    }
 
     public function setRootView($name)
     {
