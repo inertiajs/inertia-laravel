@@ -14,9 +14,7 @@ class ServiceProvider extends BaseServiceProvider
         $this->registerBladeDirective();
         $this->registerRouterMacro();
         $this->registerMiddleware();
-        $this->publishes([
-            __DIR__.'/config/inertia.php' => config_path('inertia.php'),
-        ]);
+        $this->registerConfig();
     }
 
     protected function registerBladeDirective()
@@ -38,5 +36,13 @@ class ServiceProvider extends BaseServiceProvider
     protected function registerMiddleware()
     {
         $this->app[Kernel::class]->pushMiddleware(Middleware::class);
+    }
+
+    protected function registerConfig()
+    {
+        $source = __DIR__ . '/../config/inertia.php';
+
+        $this->publishes([$source => config_path('inertia.php')]);
+        $this->mergeConfigFrom($source, 'inertia');
     }
 }
