@@ -4,8 +4,11 @@ namespace Inertia;
 
 use Closure;
 use Illuminate\Support\Arr;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\App;
+use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Responsable;
+use Illuminate\Support\Facades\Response as ResponseFactory;
 
 class Response implements Responsable
 {
@@ -19,12 +22,12 @@ class Response implements Responsable
     public function __construct($component, $props, $rootView = 'app', $version = null)
     {
         $this->component = $component;
-        $this->props = $props;
+        $this->props = $props instanceof Arrayable ? $props->toArray() : $props;
         $this->rootView = $rootView;
         $this->version = $version;
     }
 
-    public function withStatusCode($statusCode)
+    public function setStatusCode($statusCode)
     {
         $this->statusCode = $statusCode;
 
