@@ -20,7 +20,7 @@ class ResponseTest extends TestCase
             '123'
         );
 
-        $inertiaResponse->withStatusCode(418);
+        $inertiaResponse->setStatusCode(418);
 
         $httpResponse = $inertiaResponse->toResponse($request);
 
@@ -41,7 +41,7 @@ class ResponseTest extends TestCase
             '123'
         );
 
-        $inertiaResponse->withStatusCode(418);
+        $inertiaResponse->setStatusCode(418);
 
         $jsonResponse = $inertiaResponse->toResponse($request);
 

@@ -4,7 +4,6 @@ namespace Inertia;
 
 use Closure;
 use Illuminate\Support\Arr;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\App;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Responsable;
@@ -78,21 +77,19 @@ class Response implements Responsable
         ];
 
         if ($request->header('X-Inertia')) {
-            return response()
-                ->json(
-                    $page,
-                    $this->statusCode, [
-                        'Vary' => 'Accept',
-                        'X-Inertia' => 'true',
-                    ]
-                );
+            return ResponseFactory::json(
+                $page,
+                $this->statusCode, [
+                    'Vary' => 'Accept',
+                    'X-Inertia' => 'true',
+                ]
+            );
         }
 
-        return response()
-            ->view(
-                $this->rootView,
-                $this->viewData + ['page' => $page],
-                $this->statusCode
-            );
+        return ResponseFactory::view(
+            $this->rootView,
+            $this->viewData + ['page' => $page],
+            $this->statusCode
+        );
     }
 }
