@@ -16,6 +16,11 @@ class ServiceProvider extends BaseServiceProvider
         $this->registerMiddleware();
     }
 
+    public function register()
+    {
+        $this->app->singleton(ResponseFactory::class);
+    }
+
     protected function registerBladeDirective()
     {
         Blade::directive('inertia', function () {
