@@ -5,6 +5,7 @@ namespace Inertia;
 use Illuminate\Support\Facades\Facade;
 
 /**
+ * @method static bool isInertiaRequest($request)
  * @method static void setRootView($name)
  * @method static void share($key, $value = null)
  * @method static array getShared($key = null)

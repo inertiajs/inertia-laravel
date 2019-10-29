@@ -13,6 +13,11 @@ class ResponseFactory
     protected $sharedProps = [];
     protected $version = null;
 
+    public function isInertiaRequest($request)
+    {
+        return boolval($request->header('X-Inertia'));
+    }
+
     public function setRootView($name)
     {
         $this->rootView = $name;
