@@ -12,7 +12,7 @@ class Middleware
     {
         $response = $next($request);
 
-        if (!$request->header('X-Inertia')) {
+        if (!Inertia::isInertiaRequest($request)) {
             return $response;
         }
 
