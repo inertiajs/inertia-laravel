@@ -52,14 +52,16 @@ class Response implements Responsable
     {
         $only = array_filter(explode(',', $request->header('X-Inertia-Partial-Data')));
 
-        $props = ($only && $request->header('X-Inertia-Partial-Component') === $this->component)
-            ? Arr::only($this->props, $only)
-            : $this->props;
+        $props = collect(
+            ($only && $request->header('X-Inertia-Partial-Component') === $this->component)
+                ? Arr::only($this->props, $only)
+                : $this->props
+        )->map(function ($prop, $key) use ($request) {
+            if ($prop instanceof Closure) $prop = App::call($prop);
 
-        array_walk_recursive($props, function (&$prop) {
-            if ($prop instanceof Closure) {
-                $prop = App::call($prop);
-            }
+            return ($prop instanceof \Illuminate\Http\Resources\Json\ResourceCollection)
+                ? $props[$key] = $prop->toResponse($request)->getData()
+                : $props[$key] = $prop;
         });
 
         $page = [
