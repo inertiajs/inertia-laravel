@@ -5,10 +5,13 @@ namespace Inertia;
 use Closure;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Traits\Macroable;
 use Illuminate\Contracts\Support\Arrayable;
 
 class ResponseFactory
 {
+    use Macroable;
+
     protected $rootView = 'app';
     protected $sharedProps = [];
     protected $version = null;
