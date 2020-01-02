@@ -7,6 +7,7 @@ use Illuminate\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response as BaseResponse;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class ResponseTest extends TestCase
 {
@@ -47,6 +48,33 @@ class ResponseTest extends TestCase
             '123'
         );
 
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertSame('User/Edit', $page->component);
+        $this->assertSame('Jonathan', $page->props->user->name);
+        $this->assertSame('/user/123', $page->url);
+        $this->assertSame('123', $page->version);
+    }
+
+    public function test_resource_response()
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $user = (object) ['name' => 'Jonathan'];
+
+        $resource = new class($user) extends JsonResource {
+            public static $wrap = null;
+
+            public function toArray($request)
+            {
+                return ['name' => $this->name];
+            }
+        };
+
+        $response = new Response('User/Edit', ['user' => $resource], 'app', '123');
         $response = $response->toResponse($request);
         $page = $response->getData();
 
