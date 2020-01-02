@@ -2,6 +2,7 @@
 
 namespace Inertia;
 
+use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\Facades\Blade;
@@ -12,6 +13,7 @@ class ServiceProvider extends BaseServiceProvider
     public function boot()
     {
         $this->registerBladeDirective();
+        $this->registerRequestMacro();
         $this->registerRouterMacro();
         $this->registerMiddleware();
     }
@@ -20,6 +22,13 @@ class ServiceProvider extends BaseServiceProvider
     {
         Blade::directive('inertia', function () {
             return '<div id="app" data-page="{{ json_encode($page) }}"></div>';
+        });
+    }
+
+    protected function registerRequestMacro()
+    {
+        Request::macro('inertia', function () {
+            return boolval($this->header('X-Inertia'));
         });
     }
 
