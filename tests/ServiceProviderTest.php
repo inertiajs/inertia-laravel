@@ -3,6 +3,7 @@
 namespace Inertia\Tests;
 
 use Inertia\Middleware;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\Facades\Blade;
@@ -16,6 +17,17 @@ class ServiceProviderTest extends TestCase
 
         $this->assertArrayHasKey('inertia', $directives);
         $this->assertEquals('<div id="app" data-page="{{ json_encode($page) }}"></div>', $directives['inertia']());
+    }
+
+    public function test_request_macro_is_registered()
+    {
+        $request = Request::create('/user/123', 'GET');
+
+        $this->assertFalse($request->inertia());
+
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $this->assertTrue($request->inertia());
     }
 
     public function test_route_macro_is_registered()
