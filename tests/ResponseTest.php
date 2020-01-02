@@ -15,13 +15,8 @@ class ResponseTest extends TestCase
     {
         $request = Request::create('/user/123', 'GET');
 
-        $response = new Response(
-            'User/Edit',
-            ['user' => ['name' => 'Jonathan']],
-            'app',
-            '123'
-        );
-
+        $user = ['name' => 'Jonathan'];
+        $response = new Response('User/Edit', ['user' => $user], 'app', '123');
         $response = $response->toResponse($request);
         $view = $response->getOriginalContent();
         $page = $view->getData()['page'];
@@ -41,13 +36,8 @@ class ResponseTest extends TestCase
         $request = Request::create('/user/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
 
-        $response = new Response(
-            'User/Edit',
-            ['user' => ['name' => 'Jonathan']],
-            'app',
-            '123'
-        );
-
+        $user = (object) ['name' => 'Jonathan'];
+        $response = new Response('User/Edit', ['user' => $user], 'app', '123');
         $response = $response->toResponse($request);
         $page = $response->getData();
 
