@@ -79,7 +79,7 @@ class ResponseTest extends TestCase
         $this->assertSame('123', $page->version);
     }
 
-    public function test_callable_resource_response()
+    public function test_lazy_resource_response()
     {
         $request = Request::create('/users', 'GET', ['page' => 1]);
         $request->headers->add(['X-Inertia' => 'true']);
@@ -93,7 +93,8 @@ class ResponseTest extends TestCase
         $callable = function () use ($users) {
             $page = new LengthAwarePaginator($users->take(2), $users->count(), 2);
 
-            return new class($page, JsonResource::class) extends ResourceCollection {};
+            return new class($page, JsonResource::class) extends ResourceCollection {
+            };
         };
 
         $response = new Response('User/Index', ['users' => $callable], 'app', '123');
@@ -109,19 +110,19 @@ class ResponseTest extends TestCase
                 'next' => '/?page=2',
             ],
             'meta' => [
-                'current_page'=> 1,
-                'from'=> 1,
-                'last_page'=> 2,
-                'path'=> '/',
-                'per_page'=> 2,
-                'to'=> 2,
-                'total'=> 3,
+                'current_page' => 1,
+                'from' => 1,
+                'last_page' => 2,
+                'path' => '/',
+                'per_page' => 2,
+                'to' => 2,
+                'total' => 3,
             ],
         ];
 
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertSame('User/Index', $page->component);
-        $this->assertSame(\json_encode($expected), \json_encode($page->props->users));
+        $this->assertSame(json_encode($expected), json_encode($page->props->users));
         $this->assertSame('/users?page=1', $page->url);
         $this->assertSame('123', $page->version);
     }
