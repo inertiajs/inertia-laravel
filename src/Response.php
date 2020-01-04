@@ -59,7 +59,9 @@ class Response implements Responsable
         array_walk_recursive($props, function (&$prop) use ($request) {
             if ($prop instanceof Closure) {
                 $prop = App::call($prop);
-            } else if ($prop instanceof Responsable) {
+            }
+
+            if ($prop instanceof Responsable) {
                 $prop = $prop->toResponse($request)->getData();
             }
         });
