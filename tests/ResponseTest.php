@@ -5,9 +5,13 @@ namespace Inertia\Tests;
 use Inertia\Response;
 use Illuminate\View\View;
 use Illuminate\Http\Request;
+use Illuminate\Support\Fluent;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Collection;
 use Illuminate\Http\Response as BaseResponse;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Resources\Json\ResourceCollection;
 
 class ResponseTest extends TestCase
 {
@@ -72,6 +76,53 @@ class ResponseTest extends TestCase
         $this->assertSame('User/Edit', $page->component);
         $this->assertSame('Jonathan', $page->props->user->name);
         $this->assertSame('/user/123', $page->url);
+        $this->assertSame('123', $page->version);
+    }
+
+    public function test_callable_resource_response()
+    {
+        $request = Request::create('/users', 'GET', ['page' => 1]);
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $users = Collection::make([
+            new Fluent(['name' => 'Jonathan']),
+            new Fluent(['name' => 'Taylor']),
+            new Fluent(['name' => 'Jeffrey']),
+        ]);
+
+        $callable = function () use ($users) {
+            $page = new LengthAwarePaginator($users->take(2), $users->count(), 2);
+
+            return new class($page, JsonResource::class) extends ResourceCollection {};
+        };
+
+        $response = new Response('User/Index', ['users' => $callable], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $expected = [
+            'data' => $users->take(2),
+            'links' => [
+                'first' => '/?page=1',
+                'last' => '/?page=2',
+                'prev' => null,
+                'next' => '/?page=2',
+            ],
+            'meta' => [
+                'current_page'=> 1,
+                'from'=> 1,
+                'last_page'=> 2,
+                'path'=> '/',
+                'per_page'=> 2,
+                'to'=> 2,
+                'total'=> 3,
+            ],
+        ];
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertSame('User/Index', $page->component);
+        $this->assertSame(\json_encode($expected), \json_encode($page->props->users));
+        $this->assertSame('/users?page=1', $page->url);
         $this->assertSame('123', $page->version);
     }
 }
