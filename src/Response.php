@@ -64,6 +64,10 @@ class Response implements Responsable
             if ($prop instanceof Responsable) {
                 $prop = $prop->toResponse($request)->getData();
             }
+
+            if ($prop instanceof Arrayable) {
+                $prop = $prop->toArray();
+            }
         });
 
         $page = [
