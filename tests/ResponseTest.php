@@ -2,6 +2,7 @@
 
 namespace Inertia\Tests;
 
+use Illuminate\Contracts\Support\Arrayable;
 use Inertia\Response;
 use Illuminate\View\View;
 use Illuminate\Http\Request;
@@ -124,6 +125,39 @@ class ResponseTest extends TestCase
         $this->assertSame('User/Index', $page->component);
         $this->assertSame(json_encode($expected), json_encode($page->props->users));
         $this->assertSame('/users?page=1', $page->url);
+        $this->assertSame('123', $page->version);
+    }
+
+    public function test_arrayable_prop_response()
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $user = (object) ['name' => 'Jonathan'];
+
+        $resource = new class($user) implements Arrayable {
+
+            public $user;
+
+            public function __construct($user)
+            {
+                $this->user = $user;
+            }
+
+            public function toArray()
+            {
+                return ['name' => $this->user->name];
+            }
+        };
+
+        $response = new Response('User/Edit', ['user' => $resource], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertSame('User/Edit', $page->component);
+        $this->assertSame('Jonathan', $page->props->user->name);
+        $this->assertSame('/user/123', $page->url);
         $this->assertSame('123', $page->version);
     }
 }
