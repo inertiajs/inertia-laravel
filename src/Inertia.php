@@ -20,4 +20,10 @@ class Inertia extends Facade
     {
         return ResponseFactory::class;
     }
+
+    public static function fake()
+    {
+        static::swap(new FakeResponseFactory());
+    }
+
 }
