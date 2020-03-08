@@ -4,14 +4,18 @@
 namespace Inertia;
 
 
+use Closure;
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Contracts\Support\Responsable;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use PHPUnit\Framework\Assert;
 
 class FakeResponseFactory extends ResponseFactory
 {
 
-    private $component;
-    private $props;
+    private $component = '';
+    private $props     = [];
 
     public function render($component, $props = [])
     {
@@ -19,8 +23,11 @@ class FakeResponseFactory extends ResponseFactory
             $props = $props->toArray();
         }
 
-        $this->component = $component;
+        $props = $this->transformProps(array_merge($this->sharedProps, $props));
+
         $this->props     = $props;
+        $this->component = $component;
+
 
         return new Response(
             $component,
@@ -30,14 +37,36 @@ class FakeResponseFactory extends ResponseFactory
         );
     }
 
-    public function assertHasProps($props = [])
+    private function transformProps($props)
     {
-        $allProps = array_keys($this->getAllProps());
+        array_walk_recursive($props, [$this, 'transformProp']);
 
-        foreach($props as $prop) {
+        return $props;
+    }
+
+    private function transformProp(&$prop)
+    {
+        if($prop instanceof Closure) {
+            $prop = App::call($prop);
+        }
+
+        if($prop instanceof Responsable) {
+            $prop = $prop->toResponse(new Request)->getData();
+        }
+
+        if($prop instanceof Arrayable) {
+            $prop = $prop->toArray();
+        }
+    }
+
+    public function assertHasProps($propKeys = [])
+    {
+        $allPropKeys = array_keys($this->getAllProps());
+
+        foreach($propKeys as $key) {
             Assert::assertTrue(
-                in_array($prop, $allProps),
-                "Failed asserting that prop $prop exists"
+                in_array($key, $allPropKeys),
+                "Failed asserting that prop $key exists"
             );
         }
     }
@@ -49,6 +78,7 @@ class FakeResponseFactory extends ResponseFactory
 
     public function assertPropsEqual($expected)
     {
+        $expected = $this->transformProps($expected);
         $allProps = $this->getAllProps();
 
         Assert::assertEquals($expected, $allProps);
@@ -57,6 +87,8 @@ class FakeResponseFactory extends ResponseFactory
     public function assertPropEquals($key, $value)
     {
         $this->assertHasProp($key);
+
+        $this->transformProp($value);
 
         $prop = $this->getProp($key);
 
@@ -74,7 +106,7 @@ class FakeResponseFactory extends ResponseFactory
 
     public function getAllProps()
     {
-        return array_merge($this->sharedProps, $this->props);
+        return $this->props;
     }
 
     public function getProp($key)

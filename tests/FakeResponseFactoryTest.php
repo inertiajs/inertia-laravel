@@ -11,7 +11,7 @@ use PHPUnit\Framework\ExpectationFailedException;
 class FakeResponseFactoryTest extends TestCase
 {
 
-    /** @var FakeResponseFactory  */
+    /** @var FakeResponseFactory */
     private $fake;
 
     public function setUp() : void
@@ -47,8 +47,7 @@ class FakeResponseFactoryTest extends TestCase
         try {
             $this->fake->assertComponentIs('ShmeowDongle');
             $this->fail();
-        }
-        catch (ExpectationFailedException $exception) {
+        } catch(ExpectationFailedException $exception) {
             $this->assertThat($exception, new ExceptionMessage('Failed asserting that ShmeowDongle was rendered. When ComponentName was rendered.'));
         }
 
@@ -61,8 +60,7 @@ class FakeResponseFactoryTest extends TestCase
         try {
             $this->fake->assertHasProps(['dongle', 'inertia']);
             $this->fail();
-        }
-        catch (ExpectationFailedException $exception) {
+        } catch(ExpectationFailedException $exception) {
             $this->assertThat($exception, new ExceptionMessage('Failed asserting that prop dongle exists'));
         }
 
@@ -75,8 +73,7 @@ class FakeResponseFactoryTest extends TestCase
         try {
             $this->fake->assertHasProp('dongle');
             $this->fail();
-        }
-        catch (ExpectationFailedException $exception) {
+        } catch(ExpectationFailedException $exception) {
             $this->assertThat($exception, new ExceptionMessage('Failed asserting that prop dongle exists'));
         }
 
@@ -89,8 +86,7 @@ class FakeResponseFactoryTest extends TestCase
         try {
             $this->fake->assertPropsEqual(['inertia' => 'Rocks']);
             $this->fail();
-        }
-        catch (ExpectationFailedException $exception) {
+        } catch(ExpectationFailedException $exception) {
             $this->assertThat($exception, new ExceptionMessage('Failed asserting that two arrays are equal.'));
         }
 
@@ -104,8 +100,7 @@ class FakeResponseFactoryTest extends TestCase
         try {
             $this->fake->assertPropEquals('inertia', 'Rocks');
             $this->fail();
-        }
-        catch (ExpectationFailedException $exception) {
+        } catch(ExpectationFailedException $exception) {
             $this->assertThat($exception, new ExceptionMessage('Failed asserting that prop inertia exists'));
         }
 
@@ -113,12 +108,39 @@ class FakeResponseFactoryTest extends TestCase
         try {
             $this->fake->assertPropEquals('foo', 'socks');
             $this->fail();
-        }
-        catch (ExpectationFailedException $exception) {
+        } catch(ExpectationFailedException $exception) {
             $this->assertThat($exception, new ExceptionMessage('Failed asserting that two strings are equal.'));
         }
 
         $this->fake->assertPropEquals('foo', 'bar');
+    }
+
+    /** @test */
+    public function propsAreTransformed()
+    {
+        $this->fake->render('Component', [
+            'func' => function() {
+                return 'something';
+            }
+        ]);
+
+        $this->assertEquals('something', $this->fake->getProp('func'));
+    }
+
+    /** @test */
+    public function expectedValuesAreTransformed()
+    {
+        $this->fake = new FakeResponseFactory();
+
+        $func = function() {
+            return 'something';
+        };
+
+        $this->fake->render('Component', ['func' => $func]);
+
+        $this->fake->assertPropsEqual(['func' => $func]);
+
+        $this->fake->assertPropEquals('func', $func);
     }
 
 }
