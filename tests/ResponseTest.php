@@ -3,16 +3,16 @@
 namespace Inertia\Tests;
 
 use Illuminate\Contracts\Support\Arrayable;
-use Inertia\Response;
-use Illuminate\View\View;
-use Illuminate\Http\Request;
-use Illuminate\Support\Fluent;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Collection;
-use Illuminate\Http\Response as BaseResponse;
-use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
+use Illuminate\Http\Response as BaseResponse;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Fluent;
+use Illuminate\View\View;
+use Inertia\Response;
 
 class ResponseTest extends TestCase
 {
@@ -151,6 +151,39 @@ class ResponseTest extends TestCase
         };
 
         $response = new Response('User/Edit', ['user' => $resource], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertSame('User/Edit', $page->component);
+        $this->assertSame('Jonathan', $page->props->user->name);
+        $this->assertSame('/user/123', $page->url);
+        $this->assertSame('123', $page->version);
+    }
+
+    public function test_callable_prop_response()
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $user = (object) ['name' => 'Jonathan'];
+
+        $callableClass = new class($user) {
+
+            public $user;
+
+            public function __construct($user)
+            {
+                $this->user = $user;
+            }
+
+            public function __invoke()
+            {
+                return ['name' => $this->user->name];
+            }
+        };
+
+        $response = new Response('User/Edit', ['user' => $callableClass], 'app', '123');
         $response = $response->toResponse($request);
         $page = $response->getData();
 
