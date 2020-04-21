@@ -3,6 +3,8 @@
 namespace Inertia\Tests;
 
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Contracts\Support\Renderable;
+use Illuminate\Support\Arr;
 use Inertia\Response;
 use Illuminate\View\View;
 use Illuminate\Http\Request;
@@ -13,6 +15,7 @@ use Illuminate\Http\Response as BaseResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
+use Inertia\ShouldShareWithView;
 
 class ResponseTest extends TestCase
 {
@@ -159,5 +162,43 @@ class ResponseTest extends TestCase
         $this->assertSame('Jonathan', $page->props->user->name);
         $this->assertSame('/user/123', $page->url);
         $this->assertSame('123', $page->version);
+    }
+
+    public function test_sharable_prop_response()
+    {
+        $request = Request::create('/user/123', 'GET');
+
+        $user = (object) ['name' => 'Jonathan'];
+
+        $resource = new class($user) implements Arrayable, Renderable, ShouldShareWithView {
+
+            public $user;
+
+            public function __construct($user)
+            {
+                $this->user = $user;
+            }
+
+            public function toArray()
+            {
+                return ['name' => $this->user->name];
+            }
+
+            public function render()
+            {
+                return "<h1>{$this->user->name}</h1>";
+            }
+        };
+
+        $response = new Response('User/Edit', ['user' => $resource], 'app', '123');
+        $view = $response->toResponse($request)->getOriginalContent();
+        $data = $view->getData();
+
+        $this->assertSame('User/Edit', Arr::get($data, 'page.component'));
+        $this->assertSame('Jonathan', Arr::get($data, 'page.props.user.name'));
+        $this->assertSame('/user/123', Arr::get($data, 'page.url'));
+        $this->assertSame('123', Arr::get($data, 'page.version'));
+        $this->assertSame($user, $data['user']->user);
+        $this->assertSame('<h1>Jonathan</h1>', $data['user']->render());
     }
 }

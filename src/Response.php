@@ -56,9 +56,13 @@ class Response implements Responsable
             ? Arr::only($this->props, $only)
             : $this->props;
 
-        array_walk_recursive($props, function (&$prop) use ($request) {
+        array_walk_recursive($props, function (&$prop, $key) use ($request) {
             if ($prop instanceof Closure) {
                 $prop = App::call($prop);
+            }
+
+            if ($prop instanceof ShouldShareWithView) {
+                $this->withViewData($key, $prop);
             }
 
             if ($prop instanceof Responsable) {
