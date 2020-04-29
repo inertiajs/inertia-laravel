@@ -5,7 +5,7 @@ if (!function_exists('inertia')) {
      * Inertia helper.
      *
      * @param null|string $component
-     * @param array       $props
+     * @param array|\Illuminate\Contracts\Support\Arrayable $props
      *
      * @return \Inertia\ResponseFactory|\Inertia\Response
      */
