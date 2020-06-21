@@ -37,6 +37,13 @@ class Response implements Responsable
         return $this;
     }
 
+    public function withRootView($rootView)
+    {
+        $this->rootView = $rootView;
+
+        return $this;
+    }
+
     public function withViewData($key, $value = null)
     {
         if (is_array($key)) {
