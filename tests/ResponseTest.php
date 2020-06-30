@@ -160,4 +160,27 @@ class ResponseTest extends TestCase
         $this->assertSame('/user/123', $page->url);
         $this->assertSame('123', $page->version);
     }
+
+    public function test_xhr_partial_response()
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'User/Edit']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'partial']);
+
+        $user = (object) ['name' => 'Jonathan'];
+        $response = new Response('User/Edit', ['user' => $user, 'partial' => 'partial-data'], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $props = get_object_vars($page->props);
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertSame('User/Edit', $page->component);
+        $this->assertFalse(isset($props['name']));
+        $this->assertCount(1, $props);
+        $this->assertSame('partial-data', $page->props->partial);
+        $this->assertSame('/user/123', $page->url);
+        $this->assertSame('123', $page->version);
+    }
 }
