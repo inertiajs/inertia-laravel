@@ -177,7 +177,7 @@ class ResponseTest extends TestCase
 
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertSame('User/Edit', $page->component);
-        $this->assertFalse(isset($props['name']));
+        $this->assertFalse(isset($props['user']));
         $this->assertCount(1, $props);
         $this->assertSame('partial-data', $page->props->partial);
         $this->assertSame('/user/123', $page->url);
