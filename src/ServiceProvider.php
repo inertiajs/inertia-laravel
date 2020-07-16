@@ -2,11 +2,15 @@
 
 namespace Inertia;
 
+use LogicException;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
+use Illuminate\Support\Facades\App;
+use Illuminate\Testing\TestResponse;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
+use Illuminate\Foundation\Testing\TestResponse as LegacyTestResponse;
 
 class ServiceProvider extends BaseServiceProvider
 {
@@ -21,6 +25,10 @@ class ServiceProvider extends BaseServiceProvider
         $this->registerRequestMacro();
         $this->registerRouterMacro();
         $this->registerMiddleware();
+
+        if (App::runningUnitTests()) {
+            $this->registerTestingMacros();
+        }
     }
 
     protected function registerBladeDirective()
@@ -49,5 +57,24 @@ class ServiceProvider extends BaseServiceProvider
     protected function registerMiddleware()
     {
         $this->app[Kernel::class]->pushMiddleware(Middleware::class);
+    }
+
+    protected function registerTestingMacros()
+    {
+        // Laravel >= 7.0
+        if (class_exists(TestResponse::class)) {
+            TestResponse::mixin(new Assertions());
+
+            return;
+        }
+
+        // Laravel <= 6.0
+        if (class_exists(LegacyTestResponse::class)) {
+            LegacyTestResponse::mixin(new Assertions());
+
+            return;
+        }
+
+        throw new LogicException('Could not detect TestResponse class.');
     }
 }
