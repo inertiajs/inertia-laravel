@@ -53,7 +53,7 @@ class Assertions
             }
 
             if (is_null($value)) {
-                PHPUnit::assertArrayHasKey($key, $this->inertiaProps());
+                PHPUnit::assertTrue(Arr::has($this->inertiaProps(), $key));
             } elseif ($value instanceof Closure) {
                 PHPUnit::assertTrue($value(Arr::get($this->inertiaProps(), $key)));
             } elseif ($value instanceof Model) {
@@ -66,7 +66,6 @@ class Assertions
         };
     }
 
-    // TODO: Test.
     public function assertInertiaHasAll()
     {
         return function (array $bindings) {
@@ -82,13 +81,12 @@ class Assertions
         };
     }
 
-    // TODO: Test.
     public function assertInertiaMissing()
     {
         return function ($key) {
             $this->assertInertia();
 
-            PHPUnit::assertArrayNotHasKey($key, $this->inertiaProps());
+            PHPUnit::assertFalse(Arr::has($this->inertiaProps(), $key));
 
             return $this;
         };
