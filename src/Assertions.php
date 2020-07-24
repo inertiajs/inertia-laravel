@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Support\Arr;
 use PHPUnit\Framework\Assert as PHPUnit;
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Contracts\Support\Responsable;
 
 class Assertions
 {
@@ -58,6 +59,8 @@ class Assertions
                 PHPUnit::assertTrue($value(Arr::get($this->inertiaProps(), $key)));
             } elseif ($value instanceof Arrayable) {
                 PHPUnit::assertEquals($value->toArray(), Arr::get($this->inertiaProps(), $key));
+            } elseif ($value instanceof Responsable) {
+                PHPUnit::assertEquals($value->toResponse($this)->getData(), Arr::get($this->inertiaProps(), $key));
             } else {
                 PHPUnit::assertEquals($value, Arr::get($this->inertiaProps(), $key));
             }

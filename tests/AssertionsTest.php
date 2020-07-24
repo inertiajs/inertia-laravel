@@ -6,6 +6,7 @@ use Inertia\Inertia;
 use Illuminate\Foundation\Auth\User;
 use Illuminate\Database\Eloquent\Model;
 use PHPUnit\Framework\AssertionFailedError;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class AssertionsTest extends TestCase
 {
@@ -276,6 +277,73 @@ class AssertionsTest extends TestCase
         $this->expectException(AssertionFailedError::class);
 
         $response->assertInertiaHas('example.nested', $userB);
+    }
+
+    public function test_the_inertia_page_has_a_prop_with_a_value_using_a_responsable()
+    {
+        Model::unguard();
+        $user = User::make(['name' => 'Example']);
+        $resource = JsonResource::collection([$user, $user]);
+
+        $response = $this->makeMockResponse(
+            Inertia::render('test-component', [
+                'example' => $resource,
+            ])
+        );
+
+        $response->assertInertiaHas('example', $resource);
+    }
+
+    public function test_the_inertia_page_does_not_have_a_prop_with_a_value_using_a_responsable()
+    {
+        Model::unguard();
+        $resourceA = JsonResource::make(User::make(['name' => 'Another']));
+        $resourceB = JsonResource::make(User::make(['name' => 'Example']));
+
+        $response = $this->makeMockResponse(
+            Inertia::render('test-component', [
+                'example' => $resourceA,
+            ])
+        );
+
+        $this->expectException(AssertionFailedError::class);
+
+        $response->assertInertiaHas('example', $resourceB);
+    }
+
+    public function test_the_inertia_page_has_a_nested_prop_with_a_value_using_a_responsable()
+    {
+        Model::unguard();
+        $resource = JsonResource::make(User::make(['name' => 'Another']));
+
+        $response = $this->makeMockResponse(
+            Inertia::render('test-component', [
+                'example' => [
+                    'nested' => $resource,
+                ],
+            ])
+        );
+
+        $response->assertInertiaHas('example.nested', $resource);
+    }
+
+    public function test_the_inertia_page_does_not_have_a_nested_prop_with_a_value_using_a_responsable()
+    {
+        Model::unguard();
+        $resourceA = JsonResource::make(User::make(['name' => 'Another']));
+        $resourceB = JsonResource::make(User::make(['name' => 'Example']));
+
+        $response = $this->makeMockResponse(
+            Inertia::render('test-component', [
+                'example' => [
+                    'nested' => $resourceA,
+                ],
+            ])
+        );
+
+        $this->expectException(AssertionFailedError::class);
+
+        $response->assertInertiaHas('example.nested', $resourceB);
     }
 
     public function test_the_inertia_page_has_all_the_given_props()
