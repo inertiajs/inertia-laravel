@@ -212,7 +212,7 @@ class AssertionsTest extends TestCase
         });
     }
 
-    public function test_the_inertia_page_has_a_prop_with_a_value_using_a_model()
+    public function test_the_inertia_page_has_a_prop_with_a_value_using_an_arrayable()
     {
         Model::unguard();
         $user = User::make(['name' => 'Example']);
@@ -226,7 +226,7 @@ class AssertionsTest extends TestCase
         $response->assertInertiaHas('example-prop', $user);
     }
 
-    public function test_the_inertia_page_does_not_have_a_prop_with_a_value_using_a_model()
+    public function test_the_inertia_page_does_not_have_a_prop_with_a_value_using_an_arrayable()
     {
         Model::unguard();
         $userA = User::make(['name' => 'Example']);
@@ -243,7 +243,7 @@ class AssertionsTest extends TestCase
         $response->assertInertiaHas('example-prop', $userB);
     }
 
-    public function test_the_inertia_page_has_a_nested_prop_with_a_value_using_a_model()
+    public function test_the_inertia_page_has_a_nested_prop_with_a_value_using_an_arrayable()
     {
         Model::unguard();
         $user = User::make(['name' => 'Example']);
@@ -259,7 +259,7 @@ class AssertionsTest extends TestCase
         $response->assertInertiaHas('example.nested', $user);
     }
 
-    public function test_the_inertia_page_does_not_have_a_nested_prop_with_a_value_using_a_model()
+    public function test_the_inertia_page_does_not_have_a_nested_prop_with_a_value_using_an_arrayable()
     {
         Model::unguard();
         $userA = User::make(['name' => 'Example']);

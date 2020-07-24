@@ -4,8 +4,8 @@ namespace Inertia;
 
 use Closure;
 use Illuminate\Support\Arr;
-use Illuminate\Database\Eloquent\Model;
 use PHPUnit\Framework\Assert as PHPUnit;
+use Illuminate\Contracts\Support\Arrayable;
 
 class Assertions
 {
@@ -56,7 +56,7 @@ class Assertions
                 PHPUnit::assertTrue(Arr::has($this->inertiaProps(), $key));
             } elseif ($value instanceof Closure) {
                 PHPUnit::assertTrue($value(Arr::get($this->inertiaProps(), $key)));
-            } elseif ($value instanceof Model) {
+            } elseif ($value instanceof Arrayable) {
                 PHPUnit::assertEquals($value->toArray(), Arr::get($this->inertiaProps(), $key));
             } else {
                 PHPUnit::assertEquals($value, Arr::get($this->inertiaProps(), $key));
