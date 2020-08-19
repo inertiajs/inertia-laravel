@@ -46,7 +46,11 @@ class ResponseFactory
 
     public function getVersion()
     {
-        return $this->version instanceof Closure ? App::call($this->version) : $this->version;
+        $version = $this->version instanceof Closure
+            ? App::call($this->version)
+            : $this->version;
+
+        return (string) $version;
     }
 
     public function render($component, $props = [])
