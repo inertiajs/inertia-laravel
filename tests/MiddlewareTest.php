@@ -41,6 +41,24 @@ class MiddlewareTest extends TestCase
         ]);
     }
 
+    public function test_the_version_can_be_a_closure()
+    {
+        Inertia::version(function () {
+            return md5('Inertia');
+        });
+
+        $request = Request::create('/user/edit', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Version' => 'b19a24ee5c287f42ee1d465dab77ab37']);
+
+        $response = $this->makeMockResponse($request);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Edit',
+        ]);
+    }
+
     public function test_it_will_instruct_inertia_to_reload_on_a_version_mismatch()
     {
         Inertia::version(1234);
