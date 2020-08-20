@@ -15,14 +15,12 @@ class MiddlewareTest extends TestCase
 
         $request = Request::create('/user/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
-        $request->headers->add(['X-Inertia-Version' => 1597347897973]);
+        $request->headers->add(['X-Inertia-Version' => '1597347897973']);
 
         $response = $this->makeMockResponse($request);
 
         $response->assertSuccessful();
-        $response->assertJson([
-            'component' => 'User/Edit',
-        ]);
+        $response->assertJson(['component' => 'User/Edit']);
     }
 
     public function test_the_version_can_be_a_string()
@@ -36,9 +34,7 @@ class MiddlewareTest extends TestCase
         $response = $this->makeMockResponse($request);
 
         $response->assertSuccessful();
-        $response->assertJson([
-            'component' => 'User/Edit',
-        ]);
+        $response->assertJson(['component' => 'User/Edit']);
     }
 
     public function test_the_version_can_be_a_closure()
@@ -54,9 +50,7 @@ class MiddlewareTest extends TestCase
         $response = $this->makeMockResponse($request);
 
         $response->assertSuccessful();
-        $response->assertJson([
-            'component' => 'User/Edit',
-        ]);
+        $response->assertJson(['component' => 'User/Edit']);
     }
 
     public function test_it_will_instruct_inertia_to_reload_on_a_version_mismatch()
