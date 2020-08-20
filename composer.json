@@ -24,6 +24,9 @@
             "Inertia\\Tests\\": "tests/"
         }
     },
+    "require": {
+        "laravel/framework": "^5.4|^6.0|^7.0"
+    },
     "require-dev": {
         "orchestra/testbench": "~3.0"
     },
