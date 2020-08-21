@@ -9,6 +9,17 @@ use Inertia\Middleware;
 
 class MiddlewareTest extends TestCase
 {
+    public function test_the_version_is_optional()
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $response = $this->makeMockResponse($request);
+
+        $response->assertSuccessful();
+        $response->assertJson(['component' => 'User/Edit']);
+    }
+
     public function test_the_version_can_be_a_number()
     {
         Inertia::version(1597347897973);
