@@ -117,22 +117,9 @@ class ServiceProviderTest extends TestCase
         $this->assertSame('The email must be a valid email address.', $errors->email);
     }
 
-    public function multipleErrorBagsValidationErrorsProvider()
+    public function test_validation_exceptions_can_have_multiple_error_bags()
     {
-        $array = [
-            'default' => [
-                'name' => [
-                    'The name field is required.',
-                ],
-                'email' => 'The email must be a valid email address.',
-            ],
-            'example' => [
-                'name' => 'The name field is required.',
-                'email' => 'The email must be a valid email address.',
-            ],
-        ];
-
-        $viewErrorBag = tap(new ViewErrorBag(), function ($errorBag) {
+        Session::put('errors', tap(new ViewErrorBag(), function ($errorBag) {
             $errorBag->put('default', new MessageBag([
                 'name' => 'The name field is required.',
                 'email' => 'The email must be a valid email address.',
@@ -143,18 +130,7 @@ class ServiceProviderTest extends TestCase
                     'The email must be a valid email address.',
                 ],
             ]));
-        });
-
-        return [
-            [$array],
-            [$viewErrorBag],
-        ];
-    }
-
-    /** @dataProvider multipleErrorBagsValidationErrorsProvider */
-    public function test_validation_exceptions_can_have_multiple_error_bags($errors)
-    {
-        Session::put('errors', $errors);
+        }));
 
         $errors = Inertia::getShared('errors')();
 
