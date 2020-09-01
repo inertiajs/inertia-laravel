@@ -2,12 +2,16 @@
 
 namespace Inertia\Tests;
 
+use Closure;
+use Inertia\Inertia;
 use Inertia\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Support\MessageBag;
 use Illuminate\Support\Facades\App;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Session;
 
 class ServiceProviderTest extends TestCase
 {
@@ -48,5 +52,31 @@ class ServiceProviderTest extends TestCase
         $kernel = App::make(Kernel::class);
 
         $this->assertTrue($kernel->hasMiddleware(Middleware::class));
+    }
+
+    public function test_validation_errors_are_registered()
+    {
+        $this->assertTrue(Inertia::getShared('errors') instanceof Closure);
+    }
+
+    public function test_validation_errors_are_not_registered_when_already_registered()
+    {
+        Inertia::share('errors', 'This is a validation error');
+
+        $this->assertSame('This is a validation error', Inertia::getShared('errors'));
+    }
+
+    public function test_validation_errors_are_returned_in_the_correct_format()
+    {
+        Session::put('errors', new MessageBag([
+            'name' => 'The name field is required.',
+            'email' => 'Not a valid email address',
+        ]));
+
+        $errors = Inertia::getShared('errors')();
+
+        $this->assertIsObject($errors);
+        $this->assertSame('The name field is required.', $errors->name);
+        $this->assertSame('Not a valid email address', $errors->email);
     }
 }
