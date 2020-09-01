@@ -4,6 +4,8 @@ namespace Inertia;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
+use Illuminate\Support\MessageBag;
+use Illuminate\Support\ViewErrorBag;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Session;
@@ -60,9 +62,27 @@ class ServiceProvider extends BaseServiceProvider
         }
 
         Inertia::share('errors', function () {
-            return (object) array_map(function ($error) {
-                return $error[0];
-            }, Session::has('errors') ? Session::get('errors')->messages() : []);
+            $errors = Session::get('errors', new ViewErrorBag());
+
+            if (is_array($errors) && count($errors) > 0) {
+                $errors = (new ViewErrorBag())->put('default', new MessageBag($errors));
+            } elseif ($errors instanceof MessageBag && $errors->any()) {
+                $errors = (new ViewErrorBag())->put('default', $errors);
+            } elseif (! $errors instanceof ViewErrorBag) {
+                return (object) [];
+            }
+
+            $formatted = collect($errors->getBags())->map(function (MessageBag $bag) {
+                return collect($bag->messages())->map(function ($errors) {
+                    return $errors[0];
+                });
+            });
+
+            if ($formatted->count() === 1 && $formatted->has('default')) {
+                return (object) $formatted->toArray()['default'];
+            }
+
+            return (object) $formatted->toArray();
         });
     }
 }
