@@ -64,13 +64,7 @@ class ServiceProvider extends BaseServiceProvider
         Inertia::share('errors', function () {
             $errors = Session::get('errors', new ViewErrorBag());
 
-            if (is_array($errors) && count($errors) > 0 && is_array($errors[array_keys($errors)[0]])) {
-                $errors = tap(new ViewErrorBag(), function ($bag) use ($errors) {
-                    foreach ($errors as $key => $messages) {
-                        $bag->put($key, new MessageBag($messages));
-                    }
-                });
-            } elseif (is_array($errors) && count($errors) > 0) {
+            if (is_array($errors) && count($errors) > 0) {
                 $errors = (new ViewErrorBag())->put('default', new MessageBag($errors));
             } elseif ($errors instanceof MessageBag && $errors->any()) {
                 $errors = (new ViewErrorBag())->put('default', $errors);
