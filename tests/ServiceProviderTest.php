@@ -75,27 +75,41 @@ class ServiceProviderTest extends TestCase
         $this->assertSame('This is a validation error', Inertia::getShared('errors'));
     }
 
-    public function test_validation_errors_can_be_an_array()
+    public function basicValidationErrorsProvider()
     {
-        Session::put('errors', [
+        $array = [
+            'name' => 'The name field is required.',
+            'email' => [
+                'The email must be a valid email address.',
+            ],
+        ];
+
+        $messageBag = new MessageBag([
             'name' => 'The name field is required.',
             'email' => 'The email must be a valid email address.',
         ]);
 
-        $errors = Inertia::getShared('errors')();
-
-        $this->assertIsObject($errors);
-        $this->assertSame('The name field is required.', $errors->name);
-        $this->assertSame('The email must be a valid email address.', $errors->email);
-    }
-
-    public function test_validation_exceptions_can_be_a_message_bag()
-    {
-        Session::put('errors', new MessageBag([
-            'name' => 'The name field is required.',
+        $viewErrorBag = (new ViewErrorBag())->put('default', new MessageBag([
+            'name' => [
+                'The name field is required.',
+            ],
             'email' => 'The email must be a valid email address.',
         ]));
 
+        return [
+            [$array],
+            [$messageBag],
+            [$viewErrorBag],
+        ];
+    }
+
+    /**
+     * @dataProvider basicValidationErrorsProvider
+     */
+    public function test_validation_errors_are_returned_in_the_correct_format($errors)
+    {
+        Session::put('errors', $errors);
+
         $errors = Inertia::getShared('errors')();
 
         $this->assertIsObject($errors);
@@ -103,26 +117,44 @@ class ServiceProviderTest extends TestCase
         $this->assertSame('The email must be a valid email address.', $errors->email);
     }
 
-    public function test_validation_exceptions_can_be_an_error_bag()
+    public function multipleErrorBagsValidationErrorsProvider()
     {
-        Session::put('errors', (new ViewErrorBag())->put('default', new MessageBag([
-            'name' => 'The name field is required.',
-            'email' => 'The email must be a valid email address.',
-        ])));
+        $array = [
+            'default' => [
+                'name' => [
+                    'The name field is required.',
+                ],
+                'email' => 'The email must be a valid email address.',
+            ],
+            'example' => [
+                'name' => 'The name field is required.',
+                'email' => 'The email must be a valid email address.',
+            ],
+        ];
 
-        $errors = Inertia::getShared('errors')();
+        $viewErrorBag = tap(new ViewErrorBag(), function ($errorBag) {
+            $errorBag->put('default', new MessageBag([
+                'name' => 'The name field is required.',
+                'email' => 'The email must be a valid email address.',
+            ]));
+            $errorBag->put('example', new MessageBag([
+                'name' => 'The name field is required.',
+                'email' => [
+                    'The email must be a valid email address.',
+                ],
+            ]));
+        });
 
-        $this->assertIsObject($errors);
-        $this->assertSame('The name field is required.', $errors->name);
-        $this->assertSame('The email must be a valid email address.', $errors->email);
+        return [
+            [$array],
+            [$viewErrorBag],
+        ];
     }
 
-    public function test_validation_exceptions_can_be_multiple_error_bags()
+    /** @dataProvider multipleErrorBagsValidationErrorsProvider */
+    public function test_validation_exceptions_can_have_multiple_error_bags($errors)
     {
-        Session::put('errors', tap(new ViewErrorBag(), function ($errorBags) {
-            $errorBags->put('default', new MessageBag(['name' => 'The name field is required.']));
-            $errorBags->put('example', new MessageBag(['email' => 'The email must be a valid email address.']));
-        }));
+        Session::put('errors', $errors);
 
         $errors = Inertia::getShared('errors')();
 
