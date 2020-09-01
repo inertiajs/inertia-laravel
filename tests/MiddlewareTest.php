@@ -2,10 +2,11 @@
 
 namespace Inertia\Tests;
 
-use Illuminate\Foundation\Testing\TestResponse;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Middleware;
+use Illuminate\Http\Request;
+use Illuminate\Testing\TestResponse;
+use Illuminate\Foundation\Testing\TestResponse as LegacyTestResponse;
 
 class MiddlewareTest extends TestCase
 {
@@ -84,6 +85,11 @@ class MiddlewareTest extends TestCase
         $response = (new Middleware())->handle($request, function ($request) {
             return Inertia::render('User/Edit', ['user' => ['name' => 'Jonathan']])->toResponse($request);
         });
+
+        if (class_exists(LegacyTestResponse::class)) {
+            // Laravel <= 6.0
+            return LegacyTestResponse::fromBaseResponse($response);
+        }
 
         return TestResponse::fromBaseResponse($response);
     }
