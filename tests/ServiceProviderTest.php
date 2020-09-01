@@ -117,7 +117,7 @@ class ServiceProviderTest extends TestCase
         $this->assertSame('The email must be a valid email address.', $errors->email);
     }
 
-    public function test_validation_exceptions_can_have_multiple_error_bags()
+    public function test_validation_errors_can_have_multiple_error_bags()
     {
         Session::put('errors', tap(new ViewErrorBag(), function ($errorBag) {
             $errorBag->put('default', new MessageBag([
@@ -139,7 +139,7 @@ class ServiceProviderTest extends TestCase
         $this->assertSame('The email must be a valid email address.', $errors->example['email']);
     }
 
-    public function test_validation_exceptions_will_be_empty_when_an_invalid_value_was_set_to_the_session()
+    public function test_validation_errors_will_be_empty_when_an_invalid_value_was_set_to_the_session()
     {
         Session::put('errors', new Request());
         $errors = Inertia::getShared('errors')();
