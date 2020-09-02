@@ -2,11 +2,11 @@
 
 namespace Inertia\Tests;
 
-use Inertia\Inertia;
-use Illuminate\Foundation\Auth\User;
 use Illuminate\Database\Eloquent\Model;
-use PHPUnit\Framework\AssertionFailedError;
+use Illuminate\Foundation\Auth\User;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Inertia\Inertia;
+use PHPUnit\Framework\AssertionFailedError;
 
 class AssertionsTest extends TestCase
 {
@@ -35,7 +35,7 @@ class AssertionsTest extends TestCase
             Inertia::render('test-component')
         );
 
-        $response->assertInertiaComponent('test-component');
+        $response->assertInertia('test-component');
     }
 
     public function test_the_inertia_component_does_not_match()
@@ -46,7 +46,33 @@ class AssertionsTest extends TestCase
 
         $this->expectException(AssertionFailedError::class);
 
-        $response->assertInertiaComponent('another-component');
+        $response->assertInertia('another-component');
+    }
+
+    public function test_the_inertia_component_and_props_match()
+    {
+        $response = $this->makeMockResponse(
+            Inertia::render('test-component', $props = [
+                'foo' => 'bar',
+            ])
+        );
+
+        $response->assertInertia('test-component', $props);
+    }
+
+    public function test_the_inertia_component_and_props_do_not_match()
+    {
+        $response = $this->makeMockResponse(
+            Inertia::render('test-component', $props = [
+                'foo' => 'bar',
+            ])
+        );
+
+        $this->expectException(AssertionFailedError::class);
+
+        $response->assertInertia('test-component', [
+            'foo' => 'baz',
+        ]);
     }
 
     public function test_the_inertia_page_has_a_prop()

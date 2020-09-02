@@ -9,8 +9,7 @@ namespace Illuminate\Testing {
     /**
      * @see \Inertia\Assertions
      *
-     * @method self assertInertia()
-     * @method self assertInertiaComponent($name)
+     * @method self assertInertia($component = null, $props = [])
      * @method self assertInertiaHas($key, $value = null)
      * @method self assertInertiaHasAll(array $bindings)
      * @method self assertInertiaMissing($key)
@@ -27,8 +26,7 @@ namespace Illuminate\Foundation\Testing {
     /**
      * @see \Inertia\Assertions
      *
-     * @method self assertInertia()
-     * @method self assertInertiaComponent($name)
+     * @method self assertInertia($component = null, $props = [])
      * @method self assertInertiaHas($key, $value = null)
      * @method self assertInertiaHasAll(array $bindings)
      * @method self assertInertiaMissing($key)

@@ -3,16 +3,16 @@
 namespace Inertia;
 
 use Closure;
-use Illuminate\Support\Arr;
-use PHPUnit\Framework\Assert as PHPUnit;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Responsable;
+use Illuminate\Support\Arr;
+use PHPUnit\Framework\Assert as PHPUnit;
 
 class Assertions
 {
     public function assertInertia()
     {
-        return function () {
+        return function ($component = null, $props = []) {
             $this->assertViewHas('page');
 
             tap($this->viewData('page'), function ($view) {
@@ -21,6 +21,12 @@ class Assertions
                 PHPUnit::assertArrayHasKey('url', $view);
                 PHPUnit::assertArrayHasKey('version', $view);
             });
+
+            if (! is_null($component)) {
+                PHPUnit::assertEquals($component, $this->viewData('page')['component']);
+            }
+
+            $this->assertInertiaHasAll($props);
 
             return $this;
         };
@@ -32,17 +38,6 @@ class Assertions
             $this->assertInertia();
 
             return $this->viewData('page')['props'];
-        };
-    }
-
-    public function assertInertiaComponent()
-    {
-        return function ($name) {
-            $this->assertInertia();
-
-            PHPUnit::assertEquals($name, $this->viewData('page')['component']);
-
-            return $this;
         };
     }
 
