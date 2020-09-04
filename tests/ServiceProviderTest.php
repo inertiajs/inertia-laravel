@@ -70,13 +70,13 @@ class ServiceProviderTest extends TestCase
     {
         Session::put('errors', new MessageBag([
             'name' => 'The name field is required.',
-            'email' => 'Not a valid email address',
+            'email' => 'Not a valid email address.',
         ]));
 
         $errors = Inertia::getShared('errors')();
 
         $this->assertIsObject($errors);
         $this->assertSame('The name field is required.', $errors->name);
-        $this->assertSame('Not a valid email address', $errors->email);
+        $this->assertSame('Not a valid email address.', $errors->email);
     }
 }
