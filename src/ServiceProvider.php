@@ -4,6 +4,7 @@ namespace Inertia;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
+use Illuminate\Support\Collection;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Session;
@@ -64,13 +65,13 @@ class ServiceProvider extends BaseServiceProvider
                 return (object) [];
             }
 
-            return (object) collect(Session::get('errors')->getBags())->map(function ($bag) {
-                return collect($bag->messages())->map(function ($errors) {
+            return (object) Collection::make(Session::get('errors')->getBags())->map(function ($bag) {
+                return (object) Collection::make($bag->messages())->map(function ($errors) {
                     return $errors[0];
-                });
+                })->toArray();
             })->pipe(function ($bags) {
-                return $bags->has('default') ? $bags->get('default') : $bags;
-            })->toArray();
+                return $bags->has('default') ? $bags->get('default') : $bags->toArray();
+            });
         });
     }
 }
