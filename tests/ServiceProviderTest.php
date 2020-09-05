@@ -8,6 +8,7 @@ use Inertia\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\ViewErrorBag;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
@@ -56,7 +57,15 @@ class ServiceProviderTest extends TestCase
 
     public function test_validation_errors_are_registered()
     {
-        $this->assertTrue(Inertia::getShared('errors') instanceof Closure);
+        $this->assertInstanceOf(Closure::class, Inertia::getShared('errors'));
+    }
+
+    public function test_validation_errors_can_be_empty()
+    {
+        $errors = Inertia::getShared('errors')();
+
+        $this->assertIsObject($errors);
+        $this->assertEmpty(get_object_vars($errors));
     }
 
     public function test_validation_errors_are_not_registered_when_already_registered()
@@ -68,15 +77,29 @@ class ServiceProviderTest extends TestCase
 
     public function test_validation_errors_are_returned_in_the_correct_format()
     {
-        Session::put('errors', new MessageBag([
+        Session::put('errors', (new ViewErrorBag())->put('default', new MessageBag([
             'name' => 'The name field is required.',
             'email' => 'Not a valid email address.',
-        ]));
+        ])));
 
         $errors = Inertia::getShared('errors')();
 
         $this->assertIsObject($errors);
         $this->assertSame('The name field is required.', $errors->name);
         $this->assertSame('Not a valid email address.', $errors->email);
+    }
+
+    public function test_validation_errors_with_named_error_bags_are_scoped()
+    {
+        Session::put('errors', (new ViewErrorBag())->put('example', new MessageBag([
+            'name' => 'The name field is required.',
+            'email' => 'Not a valid email address.',
+        ])));
+
+        $errors = Inertia::getShared('errors')();
+
+        $this->assertIsObject($errors);
+        $this->assertSame('The name field is required.', $errors->example->name);
+        $this->assertSame('Not a valid email address.', $errors->example->email);
     }
 }
