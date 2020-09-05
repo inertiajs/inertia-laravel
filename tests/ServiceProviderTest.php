@@ -75,76 +75,31 @@ class ServiceProviderTest extends TestCase
         $this->assertSame('This is a validation error', Inertia::getShared('errors'));
     }
 
-    public function basicValidationErrorsProvider()
+    public function test_validation_errors_are_returned_in_the_correct_format()
     {
-        $array = [
+        Session::put('errors', (new ViewErrorBag())->put('default', new MessageBag([
             'name' => 'The name field is required.',
-            'email' => [
-                'The email must be a valid email address.',
-            ],
-        ];
-
-        $messageBag = new MessageBag([
-            'name' => 'The name field is required.',
-            'email' => 'The email must be a valid email address.',
-        ]);
-
-        $viewErrorBag = (new ViewErrorBag())->put('default', new MessageBag([
-            'name' => [
-                'The name field is required.',
-            ],
-            'email' => 'The email must be a valid email address.',
-        ]));
-
-        return [
-            [$array],
-            [$messageBag],
-            [$viewErrorBag],
-        ];
-    }
-
-    /**
-     * @dataProvider basicValidationErrorsProvider
-     */
-    public function test_validation_errors_are_returned_in_the_correct_format($errors)
-    {
-        Session::put('errors', $errors);
+            'email' => 'Not a valid email address.',
+        ])));
 
         $errors = Inertia::getShared('errors')();
 
         $this->assertIsObject($errors);
         $this->assertSame('The name field is required.', $errors->name);
-        $this->assertSame('The email must be a valid email address.', $errors->email);
+        $this->assertSame('Not a valid email address.', $errors->email);
     }
 
-    public function test_validation_errors_can_have_multiple_error_bags()
+    public function test_validation_errors_with_named_error_bags_are_scoped()
     {
-        Session::put('errors', tap(new ViewErrorBag(), function ($errorBag) {
-            $errorBag->put('default', new MessageBag([
-                'name' => 'The name field is required.',
-                'email' => 'The email must be a valid email address.',
-            ]));
-            $errorBag->put('example', new MessageBag([
-                'name' => 'The name field is required.',
-                'email' => [
-                    'The email must be a valid email address.',
-                ],
-            ]));
-        }));
+        Session::put('errors', (new ViewErrorBag())->put('example', new MessageBag([
+            'name' => 'The name field is required.',
+            'email' => 'Not a valid email address.',
+        ])));
 
         $errors = Inertia::getShared('errors')();
 
         $this->assertIsObject($errors);
-        $this->assertSame('The name field is required.', $errors->default['name']);
-        $this->assertSame('The email must be a valid email address.', $errors->example['email']);
-    }
-
-    public function test_validation_errors_will_be_empty_when_an_invalid_value_was_set_to_the_session()
-    {
-        Session::put('errors', new Request());
-        $errors = Inertia::getShared('errors')();
-
-        $this->assertIsObject($errors);
-        $this->assertEmpty(get_object_vars($errors));
+        $this->assertSame('The name field is required.', $errors->example->name);
+        $this->assertSame('Not a valid email address.', $errors->example->email);
     }
 }
