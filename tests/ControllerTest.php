@@ -28,7 +28,10 @@ class ControllerTest extends TestCase
         $this->assertEquals([
             'page' => [
                 'component' => 'User/Edit',
-                'props' => ['user' => ['name' => 'Jonathan']],
+                'props' => [
+                    'user' => ['name' => 'Jonathan'],
+                    'errors' => (object) [],
+                ],
                 'url' => '',
                 'version' => null,
             ],
