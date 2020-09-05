@@ -4,6 +4,7 @@ namespace Inertia;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
+use Illuminate\Support\Collection;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Session;
@@ -60,9 +61,17 @@ class ServiceProvider extends BaseServiceProvider
         }
 
         Inertia::share('errors', function () {
-            return (object) array_map(function ($error) {
-                return $error[0];
-            }, Session::has('errors') ? Session::get('errors')->messages() : []);
+            if (! Session::has('errors')) {
+                return (object) [];
+            }
+
+            return (object) Collection::make(Session::get('errors')->getBags())->map(function ($bag) {
+                return (object) Collection::make($bag->messages())->map(function ($errors) {
+                    return $errors[0];
+                })->toArray();
+            })->pipe(function ($bags) {
+                return $bags->has('default') ? $bags->get('default') : $bags->toArray();
+            });
         });
     }
 }
