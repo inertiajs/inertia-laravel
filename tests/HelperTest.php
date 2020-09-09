@@ -6,6 +6,13 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Inertia\ResponseFactory;
 
+/**
+ * @covers ::inertia
+ * @uses \Inertia\Inertia
+ * @uses \Inertia\Response
+ * @uses \Inertia\ResponseFactory
+ * @uses \Inertia\ServiceProvider
+ */
 class HelperTest extends TestCase
 {
     public function test_the_helper_function_returns_an_instance_of_the_response_factory()

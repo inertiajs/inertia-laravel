@@ -7,6 +7,13 @@ use Inertia\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
 
+/**
+ * @covers \Inertia\Controller
+ * @uses \Inertia\Inertia
+ * @uses \Inertia\Response
+ * @uses \Inertia\ResponseFactory
+ * @uses \Inertia\ServiceProvider
+ */
 class ControllerTest extends TestCase
 {
     public function test_controller_returns_an_inertia_response()

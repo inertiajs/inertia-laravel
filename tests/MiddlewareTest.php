@@ -7,6 +7,13 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Middleware;
 
+/**
+ * @covers \Inertia\Middleware
+ * @uses \Inertia\Inertia
+ * @uses \Inertia\Response
+ * @uses \Inertia\ResponseFactory
+ * @uses \Inertia\ServiceProvider
+ */
 class MiddlewareTest extends TestCase
 {
     public function test_the_version_is_optional()

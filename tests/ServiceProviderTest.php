@@ -14,6 +14,12 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 
+/**
+ * @covers \Inertia\ServiceProvider
+ * @uses \Inertia\Inertia::getFacadeAccessor
+ * @uses \Inertia\ResponseFactory::getShared
+ * @uses \Inertia\ResponseFactory::share
+ */
 class ServiceProviderTest extends TestCase
 {
     public function test_blade_directive_is_registered()

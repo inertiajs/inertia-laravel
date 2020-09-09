@@ -14,6 +14,12 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
+/**
+ * @covers \Inertia\Response
+ * @uses \Inertia\Inertia
+ * @uses \Inertia\ServiceProvider
+ * @uses \Inertia\ResponseFactory
+ */
 class ResponseTest extends TestCase
 {
     public function test_server_response()
