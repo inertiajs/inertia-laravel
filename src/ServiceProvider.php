@@ -80,7 +80,7 @@ class ServiceProvider extends BaseServiceProvider
 
         throw new LogicException('Could not detect TestResponse class.');
     }
-    
+
     protected function shareValidationErrors()
     {
         if (Inertia::getShared('errors')) {
