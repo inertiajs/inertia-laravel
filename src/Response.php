@@ -84,6 +84,10 @@ class Response implements Responsable
             ]);
         }
 
+        if ($request->isXmlHttpRequest()) {
+            return new JsonResponse($props);
+        }
+
         return ResponseFactory::view($this->rootView, $this->viewData + ['page' => $page]);
     }
 }

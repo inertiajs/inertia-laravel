@@ -53,6 +53,20 @@ class ResponseTest extends TestCase
         $this->assertSame('123', $page->version);
     }
 
+    public function test_xhr_non_inertia_response()
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Requested-With' => 'XMLHttpRequest']);
+
+        $user = (object) ['name' => 'Jonathan'];
+        $response = new Response('User/Edit', ['user' => $user], 'app', '123');
+        $response = $response->toResponse($request);
+        $data = $response->getData();
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertSame('Jonathan', $data->user->name);
+    }
+
     public function test_resource_response()
     {
         $request = Request::create('/user/123', 'GET');
