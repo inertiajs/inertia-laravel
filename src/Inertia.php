@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static void version($version)
  * @method static int|string getVersion()
  * @method static \Inertia\Response render($component, $props = [])
+ * @method static \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse forceRedirect($to, $status = 302, $headers = [], $secure = null)
  *
  * @see \Inertia\ResponseFactory
  */

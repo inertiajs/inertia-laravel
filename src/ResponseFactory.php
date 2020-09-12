@@ -7,6 +7,9 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Traits\Macroable;
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Response;
 
 class ResponseFactory
 {
@@ -65,5 +68,14 @@ class ResponseFactory
             $this->rootView,
             $this->getVersion()
         );
+    }
+
+    public function forceRedirect($path, $status = 302, $headers = [], $secure = null)
+    {
+        if (Request::hasHeader('X-Inertia')) {
+            return Response::make('', 409, $headers)->header('X-Inertia-Location', $path);
+        } else {
+            return Redirect::to($path, $status, $headers, $secure);
+        }
     }
 }
