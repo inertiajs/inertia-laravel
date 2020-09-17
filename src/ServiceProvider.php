@@ -7,6 +7,7 @@ use Illuminate\Routing\Router;
 use Illuminate\Support\Collection;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
@@ -51,7 +52,10 @@ class ServiceProvider extends BaseServiceProvider
 
     protected function registerMiddleware()
     {
-        $this->app[Kernel::class]->appendMiddlewareToGroup('web', Middleware::class);
+        $this->app[Kernel::class]->appendMiddlewareToGroup(
+            Config::get('inertia.middleware_group', 'web'),
+            Middleware::class
+        );
     }
 
     protected function shareValidationErrors()
