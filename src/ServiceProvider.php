@@ -51,7 +51,7 @@ class ServiceProvider extends BaseServiceProvider
 
     protected function registerMiddleware()
     {
-        $this->app[Kernel::class]->pushMiddleware(Middleware::class);
+        $this->app[Kernel::class]->appendMiddlewareToGroup('web', Middleware::class);
     }
 
     protected function shareValidationErrors()
