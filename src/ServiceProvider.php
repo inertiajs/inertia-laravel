@@ -9,13 +9,19 @@ use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Session\TokenMismatchException;
+use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 class ServiceProvider extends BaseServiceProvider
 {
     public function register()
     {
         $this->app->singleton(ResponseFactory::class);
+
+        $this->registerExceptionHandlers();
     }
 
     public function boot()
@@ -76,6 +82,26 @@ class ServiceProvider extends BaseServiceProvider
             })->pipe(function ($bags) {
                 return $bags->has('default') ? $bags->get('default') : $bags->toArray();
             });
+        });
+    }
+
+    protected function registerExceptionHandlers()
+    {
+        $handler = app(ExceptionHandler::class);
+
+        // The 'renderable' method is only available as of Laravel 8+
+        // In earlier version of Laravel, you'll have to register
+        // these yourself in your app's exception handler.
+        if (! method_exists($handler, 'renderable')) {
+            return;
+        }
+
+        $handler->renderable(function (HttpExceptionInterface $exception) {
+            if ($exception->getStatusCode() === 419 && $exception->getPrevious() instanceof TokenMismatchException) {
+                return Redirect::back()->with([
+                    'error' => Config::get('inertia.csrf_error', 'The page expired, please try again.'),
+                ]);
+            }
         });
     }
 }
