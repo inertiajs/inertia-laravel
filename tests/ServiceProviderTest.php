@@ -50,9 +50,9 @@ class ServiceProviderTest extends TestCase
 
     public function test_middleware_is_registered()
     {
-        $kernel = App::make(Kernel::class);
+        $middleware = App::make(Kernel::class)->getMiddlewareGroups();
 
-        $this->assertTrue($kernel->hasMiddleware(Middleware::class));
+        $this->assertContains(Middleware::class, $middleware['web']);
     }
 
     public function test_validation_errors_are_registered()
