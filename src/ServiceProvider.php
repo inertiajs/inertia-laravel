@@ -4,8 +4,11 @@ namespace Inertia;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
+use Illuminate\Support\Collection;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
 class ServiceProvider extends BaseServiceProvider
@@ -21,6 +24,7 @@ class ServiceProvider extends BaseServiceProvider
         $this->registerRequestMacro();
         $this->registerRouterMacro();
         $this->registerMiddleware();
+        $this->shareValidationErrors();
     }
 
     protected function registerBladeDirective()
@@ -48,6 +52,34 @@ class ServiceProvider extends BaseServiceProvider
 
     protected function registerMiddleware()
     {
-        $this->app[Kernel::class]->pushMiddleware(Middleware::class);
+        $kernel = $this->app[Kernel::class];
+
+        if (method_exists($kernel, 'appendMiddlewareToGroup')) {
+            $kernel->appendMiddlewareToGroup(
+                Config::get('inertia.middleware_group', 'web'),
+                Middleware::class
+            );
+        }
+    }
+
+    protected function shareValidationErrors()
+    {
+        if (Inertia::getShared('errors')) {
+            return;
+        }
+
+        Inertia::share('errors', function () {
+            if (! Session::has('errors')) {
+                return (object) [];
+            }
+
+            return (object) Collection::make(Session::get('errors')->getBags())->map(function ($bag) {
+                return (object) Collection::make($bag->messages())->map(function ($errors) {
+                    return $errors[0];
+                })->toArray();
+            })->pipe(function ($bags) {
+                return $bags->has('default') ? $bags->get('default') : $bags->toArray();
+            });
+        });
     }
 }
