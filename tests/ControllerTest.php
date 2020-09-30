@@ -2,10 +2,10 @@
 
 namespace Inertia\Tests;
 
-use Inertia\Response;
-use Inertia\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
+use Inertia\Controller;
+use Inertia\Response;
 
 class ControllerTest extends TestCase
 {

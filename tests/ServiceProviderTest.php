@@ -3,17 +3,16 @@
 namespace Inertia\Tests;
 
 use Closure;
-use Inertia\Inertia;
-use Inertia\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
-use Illuminate\Support\MessageBag;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\ViewErrorBag;
-use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\MessageBag;
+use Illuminate\Support\ViewErrorBag;
+use Inertia\Inertia;
+use Inertia\Middleware;
 
 class ServiceProviderTest extends TestCase
 {
