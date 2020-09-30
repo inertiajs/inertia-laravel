@@ -2,11 +2,11 @@
 
 namespace Inertia\Tests;
 
-use Inertia\Inertia;
-use Inertia\Middleware;
+use Illuminate\Foundation\Testing\TestResponse as LegacyTestResponse;
 use Illuminate\Http\Request;
 use Illuminate\Testing\TestResponse;
-use Illuminate\Foundation\Testing\TestResponse as LegacyTestResponse;
+use Inertia\Inertia;
+use Inertia\Middleware;
 
 class MiddlewareTest extends TestCase
 {
