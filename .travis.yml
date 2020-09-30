@@ -1,5 +1,5 @@
-sudo: required
-
+os: linux
+dist: xenial
 language: php
 
 php:
@@ -9,7 +9,7 @@ php:
   - 8.0
 
 env:
-  matrix:
+  jobs:
     - COMPOSER_FLAGS="--prefer-lowest"
     - COMPOSER_FLAGS=""
 
