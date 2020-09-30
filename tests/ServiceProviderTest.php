@@ -51,10 +51,14 @@ class ServiceProviderTest extends TestCase
 
     public function test_middleware_is_registered_to_the_web_group()
     {
-        $route = Route::middleware('web')->get('/');
-        $middleware = App::make(Router::class)->gatherRouteMiddleware($route);
+        $webRoute = Route::middleware('web')->get('/');
+        $apiRoute = Route::middleware('api')->get('/');
 
-        $this->assertContains(Middleware::class, $middleware);
+        $webMiddleware = App::make(Router::class)->gatherRouteMiddleware($webRoute);
+        $apiMiddleware = App::make(Router::class)->gatherRouteMiddleware($apiRoute);
+
+        $this->assertContains(Middleware::class, $webMiddleware);
+        $this->assertNotContains(Middleware::class, $apiMiddleware);
     }
 
     public function test_validation_errors_are_registered()
