@@ -28,6 +28,7 @@
         "laravel/framework": "^6.12|^7.0|^8.0"
     },
     "require-dev": {
+        "ext-json": "*",
         "orchestra/testbench": "^4.0|^5.0|^6.0"
     },
     "extra": {

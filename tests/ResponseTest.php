@@ -2,6 +2,7 @@
 
 namespace Inertia\Tests;
 
+use Arr;
 use Illuminate\Contracts\Support\Arrayable;
 use Inertia\Response;
 use Illuminate\View\View;
@@ -103,7 +104,7 @@ class ResponseTest extends TestCase
         $page = $response->getData();
 
         $expected = [
-            'data' => $users->take(2),
+            'data' => $users->take(2)->toArray(),
             'links' => [
                 'first' => '/?page=1',
                 'last' => '/?page=2',
@@ -123,9 +124,20 @@ class ResponseTest extends TestCase
 
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertSame('User/Index', $page->component);
-        $this->assertSame(json_encode($expected), json_encode($page->props->users));
         $this->assertSame('/users?page=1', $page->url);
         $this->assertSame('123', $page->version);
+
+        tap(json_decode(json_encode($page->props->users), true), function ($actual) use ($expected) {
+            // On Laravel 8+, new 'links' were added to the 'meta' section for convenience.
+            // We'll just inject these to our expected array to prevent testing issues
+            // on earlier version of Laravel.
+            if (Arr::has($actual, 'meta.links')) {
+                $expected['meta']['links'] = $actual['meta']['links'];
+                ksort($expected['meta']);
+            }
+
+            $this->assertSame($expected, $actual);
+        });
     }
 
     public function test_arrayable_prop_response()
