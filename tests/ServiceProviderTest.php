@@ -6,6 +6,7 @@ use Closure;
 use Inertia\Inertia;
 use Inertia\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Router;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\ViewErrorBag;
@@ -48,11 +49,12 @@ class ServiceProviderTest extends TestCase
         $this->assertEquals(['component' => 'User/Edit', 'props' => ['user' => ['name' => 'Jonathan']]], $route->defaults);
     }
 
-    public function test_middleware_is_registered()
+    public function test_middleware_is_registered_to_the_web_group()
     {
-        $kernel = App::make(Kernel::class);
+        $route = Route::middleware('web')->get('/');
+        $middleware = App::make(Router::class)->gatherRouteMiddleware($route);
 
-        $this->assertTrue($kernel->hasMiddleware(Middleware::class));
+        $this->assertContains(Middleware::class, $middleware);
     }
 
     public function test_validation_errors_are_registered()
