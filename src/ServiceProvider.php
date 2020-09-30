@@ -52,10 +52,14 @@ class ServiceProvider extends BaseServiceProvider
 
     protected function registerMiddleware()
     {
-        $this->app[Kernel::class]->appendMiddlewareToGroup(
-            Config::get('inertia.middleware_group', 'web'),
-            Middleware::class
-        );
+        $kernel = $this->app[Kernel::class];
+
+        if (method_exists($kernel, 'appendMiddlewareToGroup')) {
+            $kernel->appendMiddlewareToGroup(
+                Config::get('inertia.middleware_group', 'web'),
+                Middleware::class
+            );
+        }
     }
 
     protected function shareValidationErrors()
