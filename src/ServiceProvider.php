@@ -59,11 +59,8 @@ class ServiceProvider extends BaseServiceProvider
         if (method_exists($kernel, 'appendMiddlewareToGroup')) {
             $kernel->appendMiddlewareToGroup($group, Middleware::class);
 
-            return;
-        }
-
         // Laravel >= 5.4.4 && < 6.9.0
-        if ($this->app[Router::class]->hasMiddlewareGroup($group)) {
+        } elseif ($this->app[Router::class]->hasMiddlewareGroup($group)) {
             $this->app[Router::class]->pushMiddlewareToGroup($group, Middleware::class);
         }
     }
