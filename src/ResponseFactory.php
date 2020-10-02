@@ -5,6 +5,7 @@ namespace Inertia;
 use Closure;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Response as BaseResponse;
 use Illuminate\Support\Traits\Macroable;
 use Illuminate\Contracts\Support\Arrayable;
 
@@ -65,5 +66,10 @@ class ResponseFactory
             $this->rootView,
             $this->getVersion()
         );
+    }
+
+    public function location($url)
+    {
+        return BaseResponse::make('', 409, ['X-Inertia-Location' => $url]);
     }
 }
