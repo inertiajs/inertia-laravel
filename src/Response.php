@@ -70,10 +70,12 @@ class Response implements Responsable
             }
         });
 
+        $hash = $request->header('X-Inertia-Hash', '');
+
         $page = [
             'component' => $this->component,
             'props' => $props,
-            'url' => $request->getRequestUri(),
+            'url' => $request->getRequestUri() . $hash,
             'version' => $this->version,
         ];
 
