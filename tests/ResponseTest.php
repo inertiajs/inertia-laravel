@@ -183,4 +183,18 @@ class ResponseTest extends TestCase
         $this->assertSame('/user/123', $page->url);
         $this->assertSame('123', $page->version);
     }
+
+    public function test_xhr_with_hash_in_url()
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Hash' => '#some-hash']);
+
+        $response = new Response('Some/Component', [], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertSame('/user/123#some-hash', $page->url);
+    }
 }
