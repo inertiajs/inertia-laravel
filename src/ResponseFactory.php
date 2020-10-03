@@ -13,15 +13,33 @@ class ResponseFactory
 {
     use Macroable;
 
+    /**
+     * @var string
+     */
     protected $rootView = 'app';
+
+    /**
+     * @var mixed[]
+     */
     protected $sharedProps = [];
+
+    /**
+     * @var mixed|null
+     */
     protected $version = null;
 
+    /**
+     * @param string $name
+     */
     public function setRootView($name)
     {
         $this->rootView = $name;
     }
 
+    /**
+     * @param string|mixed[] $key
+     * @param mixed|null     $value
+     */
     public function share($key, $value = null)
     {
         if (is_array($key)) {
@@ -31,6 +49,11 @@ class ResponseFactory
         }
     }
 
+    /**
+     * @param string|null $key
+     *
+     * @return mixed|mixed[]
+     */
     public function getShared($key = null)
     {
         if ($key) {
@@ -40,11 +63,17 @@ class ResponseFactory
         return $this->sharedProps;
     }
 
+    /**
+     * @param mixed|null $version
+     */
     public function version($version)
     {
         $this->version = $version;
     }
 
+    /**
+     * @return string
+     */
     public function getVersion()
     {
         $version = $this->version instanceof Closure
@@ -54,6 +83,12 @@ class ResponseFactory
         return (string) $version;
     }
 
+    /**
+     * @param string           $component
+     * @param array|Arrayable  $props
+     *
+     * @return Response
+     */
     public function render($component, $props = [])
     {
         if ($props instanceof Arrayable) {
@@ -68,6 +103,11 @@ class ResponseFactory
         );
     }
 
+    /**
+     * @param string $url
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function location($url)
     {
         return BaseResponse::make('', 409, ['X-Inertia-Location' => $url]);
