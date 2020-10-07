@@ -5,12 +5,12 @@ namespace Inertia\Tests;
 use Closure;
 use Inertia\Inertia;
 use Inertia\Middleware;
+use Inertia\ServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\ViewErrorBag;
-use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
@@ -49,7 +49,7 @@ class ServiceProviderTest extends TestCase
         $this->assertEquals(['component' => 'User/Edit', 'props' => ['user' => ['name' => 'Jonathan']]], $route->defaults);
     }
 
-    public function test_middleware_is_registered_to_the_web_group()
+    public function test_middleware_is_registered_to_the_web_group_by_default()
     {
         $webRoute = Route::middleware('web')->get('/');
         $apiRoute = Route::middleware('api')->get('/');
@@ -59,6 +59,22 @@ class ServiceProviderTest extends TestCase
 
         $this->assertContains(Middleware::class, $webMiddleware);
         $this->assertNotContains(Middleware::class, $apiMiddleware);
+    }
+
+    public function test_middleware_can_be_assigned_to_multiple_groups()
+    {
+        $serviceProvider = new ServiceProvider($this->app);
+        config()->set(['inertia.middleware_group' => ['web', 'api']]);
+        $serviceProvider->boot();
+
+        $webRoute = Route::middleware('web')->get('/');
+        $apiRoute = Route::middleware('api')->get('/');
+
+        $webMiddleware = App::make(Router::class)->gatherRouteMiddleware($webRoute);
+        $apiMiddleware = App::make(Router::class)->gatherRouteMiddleware($apiRoute);
+
+        $this->assertContains(Middleware::class, $webMiddleware);
+        $this->assertContains(Middleware::class, $apiMiddleware);
     }
 
     public function test_validation_errors_are_registered()

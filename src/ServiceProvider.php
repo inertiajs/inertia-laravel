@@ -2,6 +2,7 @@
 
 namespace Inertia;
 
+use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Collection;
@@ -53,15 +54,17 @@ class ServiceProvider extends BaseServiceProvider
     protected function registerMiddleware()
     {
         $kernel = $this->app[Kernel::class];
-        $group = Config::get('inertia.middleware_group', 'web');
+        $groups = Config::get('inertia.middleware_group', ['web']);
 
-        // Laravel >= 6.9.0
-        if (method_exists($kernel, 'appendMiddlewareToGroup')) {
-            $kernel->appendMiddlewareToGroup($group, Middleware::class);
+        foreach (Arr::wrap($groups) as $group) {
+            // Laravel >= 6.9.0
+            if (method_exists($kernel, 'appendMiddlewareToGroup')) {
+                $kernel->appendMiddlewareToGroup($group, Middleware::class);
 
-        // Laravel >= 5.4.4 && < 6.9.0
-        } elseif ($this->app[Router::class]->hasMiddlewareGroup($group)) {
-            $this->app[Router::class]->pushMiddlewareToGroup($group, Middleware::class);
+                // Laravel >= 5.4.4 && < 6.9.0
+            } elseif ($this->app[Router::class]->hasMiddlewareGroup($group)) {
+                $this->app[Router::class]->pushMiddlewareToGroup($group, Middleware::class);
+            }
         }
     }
 
