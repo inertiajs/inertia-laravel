@@ -4,13 +4,13 @@ namespace Inertia\Tests;
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Controller;
-use Inertia\Tests\middleware\DefaultMiddleware;
+use Inertia\Tests\middleware\ExampleMiddleware;
 
 class ControllerTest extends TestCase
 {
     public function test_controller_returns_an_inertia_response()
     {
-        Route::middleware(DefaultMiddleware::class)
+        Route::middleware(ExampleMiddleware::class)
             ->get('/', Controller::class)
             ->defaults('component', 'User/Edit')
             ->defaults('props', [

@@ -2,10 +2,32 @@
 
 namespace Inertia\Tests\middleware;
 
+use Inertia\Concerns\InertiaDefaults;
 use Inertia\Middleware;
 
-class DefaultMiddleware extends Middleware
+class ExampleMiddleware extends Middleware
 {
+    use InertiaDefaults {
+        share as defaultShare;
+        version as defaultVersion;
+    }
+
+    /**
+     * @var mixed|null
+     */
+    protected $version;
+
+    /**
+     * @var array|mixed
+     */
+    protected $shared;
+
+    public function __construct($version = null, $shared = [])
+    {
+        $this->version = $version;
+        $this->shared = $shared;
+    }
+
     /**
      * Determine the current Inertia asset version hash
      * used for automatic asset cache busting.
@@ -17,7 +39,7 @@ class DefaultMiddleware extends Middleware
      */
     public function version($request)
     {
-        //
+        return $this->version;
     }
 
     /**
@@ -31,11 +53,6 @@ class DefaultMiddleware extends Middleware
      */
     public function share($request)
     {
-        // Enable Inertia's built-in sharing defaults.
-        $defaults = parent::share($request);
-
-        return array_merge($defaults, [
-            //
-        ]);
+        return array_merge($this->defaultShare($request), $this->shared);
     }
 }

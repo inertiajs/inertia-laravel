@@ -4,9 +4,12 @@ namespace Inertia\Tests;
 
 use Illuminate\Foundation\Testing\TestResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\MessageBag;
+use Illuminate\Support\ViewErrorBag;
 use Inertia\Inertia;
-use Inertia\Middleware;
-use Inertia\Tests\middleware\DefaultMiddleware;
+use Inertia\Tests\middleware\ExampleMiddleware;
 
 class MiddlewareTest extends TestCase
 {
@@ -23,13 +26,11 @@ class MiddlewareTest extends TestCase
 
     public function test_the_version_can_be_a_number()
     {
-        Inertia::version(1597347897973);
-
         $request = Request::create('/user/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
         $request->headers->add(['X-Inertia-Version' => '1597347897973']);
 
-        $response = $this->makeMockResponse($request);
+        $response = $this->makeMockResponse($request, 1597347897973);
 
         $response->assertSuccessful();
         $response->assertJson(['component' => 'User/Edit']);
@@ -37,29 +38,11 @@ class MiddlewareTest extends TestCase
 
     public function test_the_version_can_be_a_string()
     {
-        Inertia::version('foo-version');
-
         $request = Request::create('/user/edit', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
         $request->headers->add(['X-Inertia-Version' => 'foo-version']);
 
-        $response = $this->makeMockResponse($request);
-
-        $response->assertSuccessful();
-        $response->assertJson(['component' => 'User/Edit']);
-    }
-
-    public function test_the_version_can_be_a_closure()
-    {
-        Inertia::version(function () {
-            return md5('Inertia');
-        });
-
-        $request = Request::create('/user/edit', 'GET');
-        $request->headers->add(['X-Inertia' => 'true']);
-        $request->headers->add(['X-Inertia-Version' => 'b19a24ee5c287f42ee1d465dab77ab37']);
-
-        $response = $this->makeMockResponse($request);
+        $response = $this->makeMockResponse($request, 'foo-version');
 
         $response->assertSuccessful();
         $response->assertJson(['component' => 'User/Edit']);
@@ -80,9 +63,85 @@ class MiddlewareTest extends TestCase
         self::assertEmpty($response->content());
     }
 
-    private function makeMockResponse($request)
+    public function test_validation_errors_are_registered_as_of_default()
     {
-        $response = (new DefaultMiddleware())->handle($request, function ($request) {
+        Route::middleware(ExampleMiddleware::class)->get('/', function () {
+            $this->assertInstanceOf(\Closure::class, Inertia::getShared('errors'));
+        });
+
+        $this->withoutExceptionHandling()->get('/');
+    }
+
+    public function test_validation_errors_can_be_empty()
+    {
+        Route::middleware(ExampleMiddleware::class)->get('/', function () {
+            $errors = Inertia::getShared('errors')();
+
+            $this->assertIsObject($errors);
+            $this->assertEmpty(get_object_vars($errors));
+        });
+
+        $this->withoutExceptionHandling()->get('/');
+    }
+
+    public function test_validation_errors_are_returned_in_the_correct_format()
+    {
+        Session::put('errors', (new ViewErrorBag())->put('default', new MessageBag([
+            'name' => 'The name field is required.',
+            'email' => 'Not a valid email address.',
+        ])));
+
+        Route::middleware(ExampleMiddleware::class)->get('/', function () {
+            $errors = Inertia::getShared('errors')();
+
+            $this->assertIsObject($errors);
+            $this->assertSame('The name field is required.', $errors->name);
+            $this->assertSame('Not a valid email address.', $errors->email);
+        });
+
+        $this->withoutExceptionHandling()->get('/');
+    }
+
+    public function test_validation_errors_with_named_error_bags_are_scoped()
+    {
+        Session::put('errors', (new ViewErrorBag())->put('example', new MessageBag([
+            'name' => 'The name field is required.',
+            'email' => 'Not a valid email address.',
+        ])));
+
+        Route::middleware(ExampleMiddleware::class)->get('/', function () {
+            $errors = Inertia::getShared('errors')();
+
+            $this->assertIsObject($errors);
+            $this->assertSame('The name field is required.', $errors->example->name);
+            $this->assertSame('Not a valid email address.', $errors->example->email);
+        });
+
+        $this->withoutExceptionHandling()->get('/');
+    }
+
+    public function test_default_validation_errors_can_be_overwritten()
+    {
+        Session::put('errors', (new ViewErrorBag())->put('example', new MessageBag([
+            'name' => 'The name field is required.',
+            'email' => 'Not a valid email address.',
+        ])));
+
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $response = $this->makeMockResponse($request, null, ['errors' => 'foo']);
+
+        $response->assertJson([
+            'props' => [
+                'errors' => 'foo',
+            ],
+        ]);
+    }
+
+    private function makeMockResponse($request, $version = null, $shared = [])
+    {
+        $response = (new ExampleMiddleware($version, $shared))->handle($request, function ($request) {
             return Inertia::render('User/Edit', ['user' => ['name' => 'Jonathan']])->toResponse($request);
         });
 

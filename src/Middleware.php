@@ -2,9 +2,7 @@
 
 namespace Inertia;
 
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Response;
-use Illuminate\Support\Facades\Session;
 use Symfony\Component\HttpFoundation\RedirectResponse as Redirect;
 
 abstract class Middleware
@@ -27,24 +25,7 @@ abstract class Middleware
      * @param  \Illuminate\Http\Request  $request
      * @return array
      */
-    public function shared($request)
-    {
-        return [
-            'errors' => function () {
-                if (! Session::has('errors')) {
-                    return (object) [];
-                }
-
-                return (object) Collection::make(Session::get('errors')->getBags())->map(function ($bag) {
-                    return (object) Collection::make($bag->messages())->map(function ($errors) {
-                        return $errors[0];
-                    })->toArray();
-                })->pipe(function ($bags) {
-                    return $bags->has('default') ? $bags->get('default') : $bags->toArray();
-                });
-            },
-        ];
-    }
+    abstract public function share($request);
 
     /**
      * Handle the incoming request.
@@ -55,7 +36,7 @@ abstract class Middleware
      */
     public function handle($request, $next)
     {
-        Inertia::share($this->shared($request));
+        Inertia::share($this->share($request));
 
         Inertia::version(function () use ($request) {
             return $this->version($request);
