@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use Inertia\Concerns\MiddlewareDefaults;
+use Inertia\Concerns\InertiaDefaults;
 use Inertia\Middleware;
 
 class {{ $name }} extends Middleware
