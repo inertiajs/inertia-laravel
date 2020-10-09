@@ -6,6 +6,7 @@ use Illuminate\Foundation\Testing\TestResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Middleware;
+use Inertia\Tests\middleware\DefaultMiddleware;
 
 class MiddlewareTest extends TestCase
 {
@@ -81,7 +82,7 @@ class MiddlewareTest extends TestCase
 
     private function makeMockResponse($request)
     {
-        $response = (new Middleware())->handle($request, function ($request) {
+        $response = (new DefaultMiddleware())->handle($request, function ($request) {
             return Inertia::render('User/Edit', ['user' => ['name' => 'Jonathan']])->toResponse($request);
         });
 
