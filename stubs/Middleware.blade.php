@@ -2,10 +2,16 @@
 
 namespace App\Http\Middleware;
 
+use Inertia\Concerns\MiddlewareDefaults;
 use Inertia\Middleware;
 
 class {{ $name }} extends Middleware
 {
+    use InertiaDefaults {
+        share as defaultShare;
+        version as defaultVersion;
+    }
+
     /**
      * Determine the current Inertia asset version hash
      * used for automatic asset cache busting.
@@ -31,7 +37,7 @@ class {{ $name }} extends Middleware
      */
     public function share($request)
     {
-        return array_merge(parent::share($request), [
+        return array_merge($this->defaultShare($request), [
             //
         ]);
     }
