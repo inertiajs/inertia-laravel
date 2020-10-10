@@ -2,11 +2,9 @@
 
 namespace Inertia\Console;
 
-use Illuminate\Console\Command;
-use Throwable;
-use View;
+use Illuminate\Console\GeneratorCommand;
 
-class CreateMiddleware extends Command
+class CreateMiddleware extends GeneratorCommand
 {
     /**
      * The name and signature of the console command.
@@ -23,30 +21,30 @@ class CreateMiddleware extends Command
     protected $description = 'Creates a new Inertia middleware';
 
     /**
-     * Create a new command instance.
+     * The type of class being generated.
      *
-     * @return void
+     * @var string
      */
-    public function __construct()
-    {
-        parent::__construct();
+    protected $type = 'Middleware';
 
-        View::addNamespace('inertia', __DIR__.'/../../stubs');
+    /**
+     * Get the stub file for the generator.
+     *
+     * @return string
+     */
+    protected function getStub()
+    {
+        return __DIR__.'/../../stubs/middleware.stub';
     }
 
     /**
-     * Execute the console command.
+     * Get the default namespace for the class.
      *
-     * @return void
-     * @throws Throwable
+     * @param  string  $rootNamespace
+     * @return string
      */
-    public function handle()
+    protected function getDefaultNamespace($rootNamespace)
     {
-        file_put_contents(
-            app_path('Http/Middleware/'.$this->argument('name').'.php'),
-            view('inertia::Middleware', ['name' => $this->argument('name')])->render()
-        );
-
-        $this->info('Inertia middleware ['.$this->argument('name').'] created successfully.');
+        return $rootNamespace.'\Http\Middleware';
     }
 }
