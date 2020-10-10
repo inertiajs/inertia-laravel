@@ -4,8 +4,6 @@ namespace Inertia;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 class Middleware
@@ -61,7 +59,7 @@ class Middleware
         Inertia::version(function () use ($request) {
             return $this->version($request);
         });
-        
+
         Inertia::share($this->share($request));
 
         $response = $next($request);
