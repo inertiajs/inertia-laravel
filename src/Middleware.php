@@ -67,8 +67,8 @@ class Middleware
     }
 
     /**
-     * In the event that the asset version changes, Inertia will automatically reload
-     * the page in order to ensure the application keeps working for the end user.
+     * In the event that the assets change, initiate a
+     * client-side location visit to force an update.
      *
      * @param  Request  $request
      * @param  Response  $response
