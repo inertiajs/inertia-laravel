@@ -58,11 +58,11 @@ class Middleware
      */
     public function handle(Request $request, Closure $next)
     {
-        Inertia::share($this->share($request));
-
         Inertia::version(function () use ($request) {
             return $this->version($request);
         });
+        
+        Inertia::share($this->share($request));
 
         $response = $next($request);
         $response = $this->checkVersion($request, $response);
