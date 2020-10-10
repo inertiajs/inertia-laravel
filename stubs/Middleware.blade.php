@@ -2,42 +2,33 @@
 
 namespace App\Http\Middleware;
 
-use Inertia\Concerns\InertiaDefaults;
+use Illuminate\Http\Request;
 use Inertia\Middleware;
 
 class {{ $name }} extends Middleware
 {
-    use InertiaDefaults {
-        share as defaultShare;
-        version as defaultVersion;
-    }
-
     /**
-     * Determine the current Inertia asset version hash
-     * used for automatic asset cache busting.
+     * Determines the current Inertia asset version hash.
      *
      * {{ '@' }}see https://inertiajs.com/asset-versioning
-     *
      * {{ '@' }}param  \Illuminate\Http\Request  $request
      * {{ '@' }}return string|null
      */
-    public function version($request)
+    public function version(Request $request)
     {
         //
     }
 
     /**
-     * Defines the Inertia properties that automatically
-     * shared as of default. Can be overwritten.
+     * Defines the Inertia props that are shared by default.
      *
      * {{ '@' }}see https://inertiajs.com/shared-data
-     *
      * {{ '@' }}param  \Illuminate\Http\Request  $request
      * {{ '@' }}return array
      */
-    public function share($request)
+    public function share(Request $request)
     {
-        return array_merge($this->defaultShare($request), [
+        return array_merge(parent::share($request), [
             //
         ]);
     }

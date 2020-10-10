@@ -2,8 +2,8 @@
 
 namespace Inertia\Tests;
 
-use Illuminate\Foundation\Testing\TestResponse;
 use Illuminate\Http\Request;
+use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\MessageBag;
@@ -15,10 +15,11 @@ class MiddlewareTest extends TestCase
 {
     public function test_the_version_is_optional()
     {
-        $request = Request::create('/user/123', 'GET');
-        $request->headers->add(['X-Inertia' => 'true']);
+        $this->prepareMockEndpoint();
 
-        $response = $this->makeMockResponse($request);
+        $response = $this->get('/', [
+            'X-Inertia' => 'true',
+        ]);
 
         $response->assertSuccessful();
         $response->assertJson(['component' => 'User/Edit']);
@@ -26,11 +27,12 @@ class MiddlewareTest extends TestCase
 
     public function test_the_version_can_be_a_number()
     {
-        $request = Request::create('/user/123', 'GET');
-        $request->headers->add(['X-Inertia' => 'true']);
-        $request->headers->add(['X-Inertia-Version' => '1597347897973']);
+        $this->prepareMockEndpoint($version = 1597347897973);
 
-        $response = $this->makeMockResponse($request, 1597347897973);
+        $response = $this->get('/', [
+            'X-Inertia' => 'true',
+            'X-Inertia-Version' => $version,
+        ]);
 
         $response->assertSuccessful();
         $response->assertJson(['component' => 'User/Edit']);
@@ -38,11 +40,12 @@ class MiddlewareTest extends TestCase
 
     public function test_the_version_can_be_a_string()
     {
-        $request = Request::create('/user/edit', 'GET');
-        $request->headers->add(['X-Inertia' => 'true']);
-        $request->headers->add(['X-Inertia-Version' => 'foo-version']);
+        $this->prepareMockEndpoint($version = 'foo-version');
 
-        $response = $this->makeMockResponse($request, 'foo-version');
+        $response = $this->get('/', [
+            'X-Inertia' => 'true',
+            'X-Inertia-Version' => $version,
+        ]);
 
         $response->assertSuccessful();
         $response->assertJson(['component' => 'User/Edit']);
@@ -50,22 +53,21 @@ class MiddlewareTest extends TestCase
 
     public function test_it_will_instruct_inertia_to_reload_on_a_version_mismatch()
     {
-        Inertia::version(1234);
+        $this->prepareMockEndpoint('1234');
 
-        $request = Request::create('/user/123', 'GET');
-        $request->headers->add(['X-Inertia' => 'true']);
-        $request->headers->add(['X-Inertia-Version' => 4321]);
-
-        $response = $this->makeMockResponse($request);
+        $response = $this->get('/', [
+            'X-Inertia' => 'true',
+            'X-Inertia-Version' => '4321',
+        ]);
 
         $response->assertStatus(409);
-        $response->assertHeader('X-Inertia-Location', $request->fullUrl());
-        self::assertEmpty($response->content());
+        $response->assertHeader('X-Inertia-Location', $this->baseUrl);
+        self::assertEmpty($response->getContent());
     }
 
     public function test_validation_errors_are_registered_as_of_default()
     {
-        Route::middleware(ExampleMiddleware::class)->get('/', function () {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
             $this->assertInstanceOf(\Closure::class, Inertia::getShared('errors'));
         });
 
@@ -74,7 +76,7 @@ class MiddlewareTest extends TestCase
 
     public function test_validation_errors_can_be_empty()
     {
-        Route::middleware(ExampleMiddleware::class)->get('/', function () {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
             $errors = Inertia::getShared('errors')();
 
             $this->assertIsObject($errors);
@@ -91,7 +93,7 @@ class MiddlewareTest extends TestCase
             'email' => 'Not a valid email address.',
         ])));
 
-        Route::middleware(ExampleMiddleware::class)->get('/', function () {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
             $errors = Inertia::getShared('errors')();
 
             $this->assertIsObject($errors);
@@ -109,7 +111,7 @@ class MiddlewareTest extends TestCase
             'email' => 'Not a valid email address.',
         ])));
 
-        Route::middleware(ExampleMiddleware::class)->get('/', function () {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
             $errors = Inertia::getShared('errors')();
 
             $this->assertIsObject($errors);
@@ -127,10 +129,8 @@ class MiddlewareTest extends TestCase
             'email' => 'Not a valid email address.',
         ])));
 
-        $request = Request::create('/user/123', 'GET');
-        $request->headers->add(['X-Inertia' => 'true']);
-
-        $response = $this->makeMockResponse($request, null, ['errors' => 'foo']);
+        $this->prepareMockEndpoint(null, ['errors' => 'foo']);
+        $response = $this->get('/', ['X-Inertia' => 'true']);
 
         $response->assertJson([
             'props' => [
@@ -139,12 +139,12 @@ class MiddlewareTest extends TestCase
         ]);
     }
 
-    private function makeMockResponse($request, $version = null, $shared = [])
+    private function prepareMockEndpoint($version = null, $shared = [])
     {
-        $response = (new ExampleMiddleware($version, $shared))->handle($request, function ($request) {
-            return Inertia::render('User/Edit', ['user' => ['name' => 'Jonathan']])->toResponse($request);
+        return Route::middleware(StartSession::class)->get('/', function (Request $request) use ($version, $shared) {
+            return (new ExampleMiddleware($version, $shared))->handle($request, function ($request) {
+                return Inertia::render('User/Edit', ['user' => ['name' => 'Jonathan']])->toResponse($request);
+            });
         });
-
-        return TestResponse::fromBaseResponse($response);
     }
 }
