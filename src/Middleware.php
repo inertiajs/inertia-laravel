@@ -105,8 +105,7 @@ class Middleware
      */
     public function changeRedirectCode(Request $request, Response $response)
     {
-        if ($response instanceof RedirectResponse &&
-            $request->header('X-Inertia') &&
+        if ($request->header('X-Inertia') &&
             $response->getStatusCode() === 302 &&
             in_array($request->method(), ['PUT', 'PATCH', 'DELETE'])
         ) {
