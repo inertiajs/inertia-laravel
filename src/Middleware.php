@@ -96,8 +96,8 @@ class Middleware
     }
 
     /**
-     * Changes the status code during an Inertia redirect, so that the browser
-     * makes the request as GET instead, avoiding unsupported method calls.
+     * Changes the status code during redirects, ensuring they are made as
+     * GET requests, preventing "MethodNotAllowedHttpException" errors.
      *
      * @param  Request  $request
      * @param  Response  $response
