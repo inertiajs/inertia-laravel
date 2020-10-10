@@ -89,7 +89,7 @@ class Middleware
                 $request->session()->reflash();
             }
 
-            return new Response('', 409, ['X-Inertia-Location' => $request->fullUrl()]);
+            return Inertia::location($request->fullUrl());
         }
 
         return $response;
