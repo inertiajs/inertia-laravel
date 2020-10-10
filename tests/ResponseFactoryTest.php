@@ -3,6 +3,7 @@
 namespace Inertia\Tests;
 
 use Illuminate\Http\Response;
+use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\ResponseFactory;
@@ -31,7 +32,7 @@ class ResponseFactoryTest extends TestCase
 
     public function test_the_version_can_be_a_closure()
     {
-        Route::middleware(ExampleMiddleware::class)->get('/', function () {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
             $this->assertSame('', Inertia::getVersion());
 
             Inertia::version(function () {
@@ -52,7 +53,7 @@ class ResponseFactoryTest extends TestCase
 
     public function test_shared_data_can_be_shared_from_anywhere()
     {
-        Route::middleware(ExampleMiddleware::class)->get('/', function () {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
             Inertia::share('foo', 'bar');
 
             return Inertia::render('User/Edit');
