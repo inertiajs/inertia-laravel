@@ -114,8 +114,8 @@ class Middleware
     }
 
     /**
-     * Resolves and prepares validation errors in such a way
-     * that they are easier to use in the Inertia client.
+     * Resolves and prepares validation errors in such
+     * a way that they are easier to use client-side.
      *
      * @param  Request  $request
      * @return object
