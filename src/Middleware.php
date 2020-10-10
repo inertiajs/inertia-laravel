@@ -128,8 +128,8 @@ class Middleware
             return (object) [];
         }
 
-        return (object) Collection::make($request->session()->get('errors')->getBags())->map(function ($bag) {
-            return (object) Collection::make($bag->messages())->map(function ($errors) {
+        return (object) collect($request->session()->get('errors')->getBags())->map(function ($bag) {
+            return (object) collect($bag->messages())->map(function ($errors) {
                 return $errors[0];
             })->toArray();
         })->pipe(function ($bags) {
