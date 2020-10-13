@@ -5,7 +5,7 @@ namespace Inertia\Tests;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
 use Inertia\Controller;
-use Inertia\Tests\middleware\ExampleMiddleware;
+use Inertia\Tests\Stubs\ExampleMiddleware;
 
 class ControllerTest extends TestCase
 {

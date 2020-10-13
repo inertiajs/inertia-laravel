@@ -1,6 +1,6 @@
 <?php
 
-namespace Inertia\Tests\middleware;
+namespace Inertia\Tests\Stubs;
 
 use Inertia\Middleware;
 

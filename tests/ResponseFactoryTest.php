@@ -7,7 +7,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\ResponseFactory;
-use Inertia\Tests\middleware\ExampleMiddleware;
+use Inertia\Tests\Stubs\ExampleMiddleware;
 
 class ResponseFactoryTest extends TestCase
 {
