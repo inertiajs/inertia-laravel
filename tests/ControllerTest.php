@@ -2,39 +2,33 @@
 
 namespace Inertia\Tests;
 
-use Inertia\Response;
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Route;
 use Inertia\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Routing\Route;
+use Inertia\Tests\Stubs\ExampleMiddleware;
 
 class ControllerTest extends TestCase
 {
     public function test_controller_returns_an_inertia_response()
     {
-        $request = new Request();
-        $request->setRouteResolver(static function () {
-            $route = new Route(['GET'], '/', ['\Inertia\Controller', '__invoke']);
-            $route->defaults('component', 'User/Edit');
-            $route->defaults('props', [
+        Route::middleware([StartSession::class, ExampleMiddleware::class])
+            ->get('/', Controller::class)
+            ->defaults('component', 'User/Edit')
+            ->defaults('props', [
                 'user' => ['name' => 'Jonathan'],
             ]);
 
-            return $route;
-        });
+        $response = $this->get('/');
 
-        $response = (new Controller())($request);
-
-        $this->assertInstanceOf(Response::class, $response);
-        $this->assertEquals([
-            'page' => [
-                'component' => 'User/Edit',
-                'props' => [
-                    'user' => ['name' => 'Jonathan'],
-                    'errors' => (object) [],
-                ],
-                'url' => '',
-                'version' => null,
+        $page = $response->viewData('page');
+        $this->assertEquals($page, [
+            'component' => 'User/Edit',
+            'props' => [
+                'user' => ['name' => 'Jonathan'],
+                'errors' => (object) [],
             ],
-        ], $response->toResponse(new Request())->getOriginalContent()->getData());
+            'url' => '/',
+            'version' => '',
+        ]);
     }
 }
