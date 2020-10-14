@@ -18,7 +18,7 @@ class CreateMiddleware extends GeneratorCommand
      *
      * @var string
      */
-    protected $description = 'Creates a new Inertia middleware';
+    protected $description = 'Create a new Inertia middleware';
 
     /**
      * The type of class being generated.
