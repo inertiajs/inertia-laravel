@@ -3,11 +3,11 @@
 namespace Inertia;
 
 use Closure;
+use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Response as BaseResponse;
 use Illuminate\Support\Traits\Macroable;
-use Illuminate\Contracts\Support\Arrayable;
 
 class ResponseFactory
 {
