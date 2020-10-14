@@ -11,7 +11,7 @@ class CreateMiddleware extends GeneratorCommand
      *
      * @var string
      */
-    protected $signature = 'inertia:middleware {name=Inertia : Name of the Middleware that should be created}';
+    protected $signature = 'inertia:middleware {name=HandleInertiaRequests : Name of the Middleware that should be created}';
 
     /**
      * The console command description.
