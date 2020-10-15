@@ -8,6 +8,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 class Middleware
 {
+    protected $rootView = 'app';
+
     /**
      * Determines the current asset version.
      *
@@ -56,6 +58,8 @@ class Middleware
         });
 
         Inertia::share($this->share($request));
+
+        Inertia::setRootView($this->rootView($request) ?? $this->rootView);
 
         $response = $next($request);
         $response = $this->checkVersion($request, $response);
@@ -128,5 +132,16 @@ class Middleware
         })->pipe(function ($bags) {
             return $bags->has('default') ? $bags->get('default') : $bags->toArray();
         });
+    }
+
+    /**
+     * Ability to set the current root view.
+     *
+     * @param Request $request
+     * @return string
+     */
+    public function rootView(Request $request)
+    {
+        return 'app';
     }
 }
