@@ -1,6 +1,6 @@
 <?php
 
-if (!function_exists('inertia')) {
+if (! function_exists('inertia')) {
     /**
      * Inertia helper.
      *
