@@ -1,4 +1,1 @@
-php:
-  preset: laravel
-js: true
-css: true
+preset: laravel
