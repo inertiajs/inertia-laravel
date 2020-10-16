@@ -3,16 +3,16 @@
 namespace Inertia\Tests;
 
 use Illuminate\Contracts\Support\Arrayable;
-use Inertia\Response;
-use Illuminate\View\View;
-use Illuminate\Http\Request;
-use Illuminate\Support\Fluent;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Collection;
-use Illuminate\Http\Response as BaseResponse;
-use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
+use Illuminate\Http\Response as BaseResponse;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Fluent;
+use Illuminate\View\View;
+use Inertia\Response;
 
 class ResponseTest extends TestCase
 {
@@ -136,7 +136,6 @@ class ResponseTest extends TestCase
         $user = (object) ['name' => 'Jonathan'];
 
         $resource = new class($user) implements Arrayable {
-
             public $user;
 
             public function __construct($user)
