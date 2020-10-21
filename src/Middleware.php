@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 class Middleware
 {
     /**
-     * The root template that will be loaded on the first page visit.
+     * The root template that's loaded on the first page visit.
      *
      * @see https://inertiajs.com/server-side-setup#root-template
      * @var string
@@ -51,7 +51,7 @@ class Middleware
     }
 
     /**
-     * Sets the root template that will be loaded on the first page visit.
+     * Sets the root template that's loaded on the first page visit.
      *
      * @see https://inertiajs.com/server-side-setup#root-template
      * @param Request $request
