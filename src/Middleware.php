@@ -9,6 +9,14 @@ use Symfony\Component\HttpFoundation\Response;
 class Middleware
 {
     /**
+     * The root template that's loaded on the first page visit.
+     *
+     * @see https://inertiajs.com/server-side-setup#root-template
+     * @var string
+     */
+    protected $rootView = 'app';
+
+    /**
      * Determines the current asset version.
      *
      * @see https://inertiajs.com/asset-versioning
@@ -43,6 +51,18 @@ class Middleware
     }
 
     /**
+     * Sets the root template that's loaded on the first page visit.
+     *
+     * @see https://inertiajs.com/server-side-setup#root-template
+     * @param Request $request
+     * @return string
+     */
+    public function rootView(Request $request)
+    {
+        return $this->rootView;
+    }
+
+    /**
      * Handle the incoming request.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -56,6 +76,8 @@ class Middleware
         });
 
         Inertia::share($this->share($request));
+
+        Inertia::setRootView($this->rootView($request));
 
         $response = $next($request);
         $response = $this->checkVersion($request, $response);
