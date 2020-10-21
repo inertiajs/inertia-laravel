@@ -32,15 +32,4 @@ class {{ class }} extends Middleware
             //
         ]);
     }
-
-    /**
-     * Ability to set the current root view.
-     *
-     * @param Request $request
-     * @return string
-     */
-    public function rootView(Request $request)
-    {
-        // return 'custom';
-    }
 }

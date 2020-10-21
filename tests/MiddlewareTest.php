@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\ViewErrorBag;
 use Inertia\Inertia;
+use Inertia\Middleware;
 use Inertia\Tests\Stubs\ExampleMiddleware;
 
 class MiddlewareTest extends TestCase
@@ -139,10 +140,39 @@ class MiddlewareTest extends TestCase
         ]);
     }
 
-    private function prepareMockEndpoint($version = null, $shared = [])
+    public function test_middleware_can_change_the_root_view_via_a_property()
     {
-        return Route::middleware(StartSession::class)->get('/', function (Request $request) use ($version, $shared) {
-            return (new ExampleMiddleware($version, $shared))->handle($request, function ($request) {
+        $this->prepareMockEndpoint(null, [], new class extends Middleware {
+            protected $rootView = 'welcome';
+        });
+
+        $response = $this->get('/');
+        $response->assertOk();
+        $response->assertViewIs('welcome');
+    }
+
+    public function test_middleware_can_change_the_root_view_by_overriding_the_rootview_method()
+    {
+        $this->prepareMockEndpoint(null, [], new class extends Middleware {
+            public function rootView(Request $request)
+            {
+                return 'welcome';
+            }
+        });
+
+        $response = $this->get('/');
+        $response->assertOk();
+        $response->assertViewIs('welcome');
+    }
+
+    private function prepareMockEndpoint($version = null, $shared = [], $middleware = null)
+    {
+        if (is_null($middleware)) {
+            $middleware = new ExampleMiddleware($version, $shared);
+        }
+
+        return Route::middleware(StartSession::class)->get('/', function (Request $request) use ($middleware) {
+            return $middleware->handle($request, function ($request) {
                 return Inertia::render('User/Edit', ['user' => ['name' => 'Jonathan']])->toResponse($request);
             });
         });
