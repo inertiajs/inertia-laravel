@@ -50,6 +50,18 @@ class Middleware
     }
 
     /**
+     * Sets the root template that will be loaded on the first page visit.
+     *
+     * @see https://inertiajs.com/server-side-setup#root-template
+     * @param Request $request
+     * @return string
+     */
+    public function rootView(Request $request)
+    {
+        return $this->rootView;
+    }
+
+    /**
      * Handle the incoming request.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -137,17 +149,5 @@ class Middleware
         })->pipe(function ($bags) {
             return $bags->has('default') ? $bags->get('default') : $bags->toArray();
         });
-    }
-
-    /**
-     * Sets the root template that will be loaded on the first page visit.
-     *
-     * @see https://inertiajs.com/server-side-setup#root-template
-     * @param Request $request
-     * @return string
-     */
-    public function rootView(Request $request)
-    {
-        return $this->rootView;
     }
 }

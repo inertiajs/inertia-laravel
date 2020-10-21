@@ -8,6 +8,13 @@ use Inertia\Middleware;
 class {{ class }} extends Middleware
 {
     /**
+     * The root template that will be loaded on the first page visit.
+     *
+     * @var string
+     */
+    protected $rootView = 'app';
+
+    /**
      * Determines the current asset version.
      *
      * @see https://inertiajs.com/asset-versioning
