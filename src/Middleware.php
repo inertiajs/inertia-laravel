@@ -15,6 +15,12 @@ class Middleware
      * @var string
      */
     protected $rootView = 'app';
+    
+    /**
+     * The path to the manifest file relative to the public directory.
+     * Used to determine the current asset version
+     */
+    protected $manifestPath = 'mix-manifest.json';
 
     /**
      * Determines the current asset version.
@@ -29,7 +35,7 @@ class Middleware
             return md5(config('app.asset_url'));
         }
 
-        if (file_exists($manifest = public_path('mix-manifest.json'))) {
+        if (file_exists($manifest = public_path($this->manifestPath))) {
             return md5_file($manifest);
         }
     }
