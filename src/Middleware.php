@@ -15,10 +15,13 @@ class Middleware
      * @var string
      */
     protected $rootView = 'app';
-    
+
     /**
-     * The path to the manifest file relative to the public directory.
-     * Used to determine the current asset version
+     * The path to the manifest file relative to the public directory
+     * used to determine the current asset version.
+     *
+     * @see version
+     * @var string
      */
     protected $manifestPath = 'mix-manifest.json';
 
