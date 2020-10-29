@@ -54,6 +54,11 @@ class ResponseFactory
         return (string) $version;
     }
 
+    public function lazy(callable $callback)
+    {
+        return new LazyProp($callback);
+    }
+
     public function render($component, $props = [])
     {
         if ($props instanceof Arrayable) {
