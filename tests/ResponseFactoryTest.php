@@ -6,6 +6,7 @@ use Illuminate\Http\Response;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Inertia\LazyProp;
 use Inertia\ResponseFactory;
 use Inertia\Tests\Stubs\ExampleMiddleware;
 
@@ -68,5 +69,15 @@ class ResponseFactoryTest extends TestCase
                 'foo' => 'bar',
             ],
         ]);
+    }
+
+    public function test_can_create_lazy_prop()
+    {
+        $factory = new ResponseFactory();
+        $lazyProp = $factory->lazy(function () {
+            return 'A lazy value';
+        });
+
+        $this->assertInstanceOf(LazyProp::class, $lazyProp);
     }
 }

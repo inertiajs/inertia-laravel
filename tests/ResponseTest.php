@@ -12,6 +12,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Fluent;
 use Illuminate\View\View;
+use Inertia\LazyProp;
 use Inertia\Response;
 
 class ResponseTest extends TestCase
@@ -181,5 +182,41 @@ class ResponseTest extends TestCase
         $this->assertSame('partial-data', $page->props->partial);
         $this->assertSame('/user/123', $page->url);
         $this->assertSame('123', $page->version);
+    }
+
+    public function test_lazy_props_are_not_included_by_default()
+    {
+        $request = Request::create('/users', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $lazyProp = new LazyProp(function () {
+            return 'A lazy value';
+        });
+
+        $response = new Response('Users', ['users' => [], 'lazy' => $lazyProp], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertSame([], $page->props->users);
+        $this->assertObjectNotHasAttribute('lazy', $page->props);
+    }
+
+    public function test_lazy_props_are_included_in_partial_reload()
+    {
+        $request = Request::create('/users', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'Users']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'lazy']);
+
+        $lazyProp = new LazyProp(function () {
+            return 'A lazy value';
+        });
+
+        $response = new Response('Users', ['users' => [], 'lazy' => $lazyProp], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertObjectNotHasAttribute('users', $page->props);
+        $this->assertSame('A lazy value', $page->props->lazy);
     }
 }
