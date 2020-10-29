@@ -16,6 +16,14 @@ class ServiceProviderTest extends TestCase
         $this->assertEquals('<div id="app" data-page="{{ json_encode($page) }}"></div>', $directives['inertia']());
     }
 
+    public function test_blade_directive_can_take_div_id_as_argument()
+    {
+        $directives = Blade::getCustomDirectives();
+
+        $this->assertArrayHasKey('inertia', $directives);
+        $this->assertEquals('<div id="application" data-page="{{ json_encode($page) }}"></div>', $directives['inertia']('application'));
+    }
+
     public function test_request_macro_is_registered()
     {
         $request = Request::create('/user/123', 'GET');
