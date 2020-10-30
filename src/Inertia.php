@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static int|string getVersion()
  * @method static \Inertia\Response render($component, $props = [])
  * @method static \Illuminate\Http\Response location($url)
+ * @method static \Inertia\LazyProp lazy(callable $callback)
  *
  * @see \Inertia\ResponseFactory
  */
