@@ -22,6 +22,8 @@ class ServiceProviderTest extends TestCase
 
         $this->assertArrayHasKey('inertia', $directives);
         $this->assertEquals('<div id="application" data-page="{{ json_encode($page) }}"></div>', $directives['inertia']('application'));
+        $this->assertEquals('<div id="application" data-page="{{ json_encode($page) }}"></div>', $directives['inertia']("'application'"));
+        $this->assertEquals('<div id="application" data-page="{{ json_encode($page) }}"></div>', $directives['inertia']('"application"'));
     }
 
     public function test_request_macro_is_registered()

@@ -25,6 +25,8 @@ class ServiceProvider extends BaseServiceProvider
     protected function registerBladeDirective()
     {
         Blade::directive('inertia', function ($id = '') {
+            $id = trim($id, '\'"');
+
             return sprintf('<div id="%s" data-page="{{ json_encode($page) }}"></div>', $id ?: 'app');
         });
     }
