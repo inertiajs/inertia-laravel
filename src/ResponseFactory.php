@@ -59,6 +59,11 @@ class ResponseFactory
         return new LazyProp($callback);
     }
 
+    public function inline(string $component, callable $default, array $props = [])
+    {
+        return $this->render($component, $props)->withBase($default);
+    }
+
     public function render($component, $props = [])
     {
         if ($props instanceof Arrayable) {
