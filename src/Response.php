@@ -17,6 +17,8 @@ class Response implements Responsable
     protected $rootView;
     protected $version;
     protected $viewData = [];
+    protected $base;
+    protected $inline;
 
     public function __construct($component, $props, $rootView = 'app', $version = null)
     {
@@ -24,6 +26,20 @@ class Response implements Responsable
         $this->props = $props instanceof Arrayable ? $props->toArray() : $props;
         $this->rootView = $rootView;
         $this->version = $version;
+    }
+
+    public function withBase(callable $base)
+    {
+        $this->base = $base;
+
+        return $this;
+    }
+
+    public function inline($inline)
+    {
+        $this->inline = $inline;
+
+        return $this;
     }
 
     public function with($key, $value = null)
@@ -50,6 +66,12 @@ class Response implements Responsable
 
     public function toResponse($request)
     {
+        if (!$request->inertia() && $this->base) {
+            return ($this->base)()
+                ->inline($this->component)
+                ->toResponse($request);
+        }
+
         $only = array_filter(explode(',', $request->header('X-Inertia-Partial-Data')));
 
         $props = ($only && $request->header('X-Inertia-Partial-Component') === $this->component)
@@ -81,6 +103,11 @@ class Response implements Responsable
             'props' => $props,
             'url' => $request->getRequestUri(),
             'version' => $this->version,
+            'inline' => $this->inline ? [
+                'component' => $this->inline,
+                'props' => $props,
+                'url' => $request->getRequestUri(),
+            ] : null,
         ];
 
         if ($request->header('X-Inertia')) {
