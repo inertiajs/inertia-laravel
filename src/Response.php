@@ -66,7 +66,7 @@ class Response implements Responsable
 
     public function toResponse($request)
     {
-        if (!$request->header('X-Inertia-Inline') && $this->base) {
+        if (! $request->header('X-Inertia-Inline') && $this->base) {
             return ($this->base)()
                 ->inline($this->component)
                 ->toResponse($request);
@@ -102,12 +102,12 @@ class Response implements Responsable
             'component' => $this->component,
             'props' => $props,
             'url' => $request->getRequestUri(),
-            'version' => $this->version,
             'inline' => $this->inline ? [
                 'component' => $this->inline,
                 'props' => $props,
                 'url' => $request->getRequestUri(),
             ] : null,
+            'version' => $this->version,
         ];
 
         if ($request->header('X-Inertia')) {
