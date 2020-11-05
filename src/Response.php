@@ -17,6 +17,7 @@ class Response implements Responsable
     protected $rootView;
     protected $version;
     protected $viewData = [];
+    protected $inlineable;
     protected $inlineBase;
     protected $inlineComponent;
     protected $inlineProps;
@@ -40,6 +41,13 @@ class Response implements Responsable
     {
         $this->inlineComponent = $component;
         $this->inlineProps = $props;
+
+        return $this;
+    }
+
+    public function inlineable($inlineable)
+    {
+        $this->inlineable = $inlineable;
 
         return $this;
     }
@@ -110,6 +118,7 @@ class Response implements Responsable
                 'url' => $request->getRequestUri(),
             ] : null,
             'version' => $this->version,
+            'inlineable' => $this->inlineable,
         ];
 
         if ($request->header('X-Inertia')) {
