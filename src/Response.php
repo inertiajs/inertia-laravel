@@ -17,8 +17,9 @@ class Response implements Responsable
     protected $rootView;
     protected $version;
     protected $viewData = [];
-    protected $base;
-    protected $inline;
+    protected $inlineBase;
+    protected $inlineComponent;
+    protected $inlineProps;
 
     public function __construct($component, $props, $rootView = 'app', $version = null)
     {
@@ -28,16 +29,17 @@ class Response implements Responsable
         $this->version = $version;
     }
 
-    public function withBase(callable $base)
+    public function inlineBase(callable $inlineBase)
     {
-        $this->base = $base;
+        $this->inlineBase = $inlineBase;
 
         return $this;
     }
 
-    public function inline($inline)
+    public function inline($component, $props = [])
     {
-        $this->inline = $inline;
+        $this->inlineComponent = $component;
+        $this->inlineProps = $props;
 
         return $this;
     }
@@ -66,9 +68,9 @@ class Response implements Responsable
 
     public function toResponse($request)
     {
-        if (! $request->header('X-Inertia-Inline') && $this->base) {
-            return ($this->base)()
-                ->inline($this->component)
+        if (! $request->header('X-Inertia-Inline') && $this->inlineBase) {
+            return App::call($this->inlineBase)
+                ->inline($this->component, $this->props)
                 ->toResponse($request);
         }
 
@@ -102,9 +104,9 @@ class Response implements Responsable
             'component' => $this->component,
             'props' => $props,
             'url' => $request->getRequestUri(),
-            'inline' => $this->inline ? [
-                'component' => $this->inline,
-                'props' => $props,
+            'inline' => $this->inlineComponent ? [
+                'component' => $this->inlineComponent,
+                'props' => $this->inlineProps,
                 'url' => $request->getRequestUri(),
             ] : null,
             'version' => $this->version,

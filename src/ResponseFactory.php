@@ -61,7 +61,7 @@ class ResponseFactory
 
     public function inline(string $component, callable $default, array $props = [])
     {
-        return $this->render($component, $props)->withBase($default);
+        return $this->render($component, $props)->inlineBase($default);
     }
 
     public function render($component, $props = [])
