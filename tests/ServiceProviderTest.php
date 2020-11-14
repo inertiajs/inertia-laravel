@@ -13,7 +13,9 @@ class ServiceProviderTest extends TestCase
         $directives = Blade::getCustomDirectives();
 
         $this->assertArrayHasKey('inertia', $directives);
-        $this->assertEquals('<div id="app" data-page="{{ json_encode($page) }}"></div>', $directives['inertia']());
+        
+        $this->assertEquals('<?php echo app(\Inertia\BladeDirective::class)->render()->withPage($page); ?>', $directives['inertia']());
+        $this->assertEquals('<?php echo app(\Inertia\BladeDirective::class)->render("foo")->withPage($page); ?>', $directives['inertia']('"foo"'));
     }
 
     public function test_request_macro_is_registered()

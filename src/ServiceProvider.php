@@ -12,6 +12,7 @@ class ServiceProvider extends BaseServiceProvider
     public function register()
     {
         $this->app->singleton(ResponseFactory::class);
+        $this->app->singleton(BladeDirective::class);
     }
 
     public function boot()
@@ -24,8 +25,8 @@ class ServiceProvider extends BaseServiceProvider
 
     protected function registerBladeDirective()
     {
-        Blade::directive('inertia', function () {
-            return '<div id="app" data-page="{{ json_encode($page) }}"></div>';
+        Blade::directive('inertia', function ($expression = '') {
+            return '<?php echo app(\Inertia\BladeDirective::class)->render('.$expression.')->withPage($page); ?>';
         });
     }
 
