@@ -44,4 +44,12 @@ class BladeDirectiveTest extends TestCase
             $this->compileBlade("@inertia('foo')")
         );
     }
+
+    public function test_directive_is_rendered_with_a_custom_div_id_with_shorthand_if_expression()
+    {
+        $this->assertSame(
+            '<div id="foo" data-page="{&quot;foo&quot;:&quot;bar&quot;}"></div>',
+            $this->compileBlade("@inertia(true ? 'foo' : 'bar')")
+        );
+    }
 }
