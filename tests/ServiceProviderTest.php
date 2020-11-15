@@ -13,7 +13,7 @@ class ServiceProviderTest extends TestCase
         $directives = Blade::getCustomDirectives();
 
         $this->assertArrayHasKey('inertia', $directives);
-        
+
         $this->assertEquals('<?php echo app(\Inertia\BladeDirective::class)->render()->withPage($page); ?>', $directives['inertia']());
         $this->assertEquals('<?php echo app(\Inertia\BladeDirective::class)->render("foo")->withPage($page); ?>', $directives['inertia']('"foo"'));
     }

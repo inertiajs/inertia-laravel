@@ -2,10 +2,10 @@
 
 namespace Inertia\Tests;
 
-use Mockery as m;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Compilers\BladeCompiler;
+use Mockery as m;
 
 class BladeDirectiveTest extends TestCase
 {
