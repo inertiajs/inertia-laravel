@@ -228,7 +228,7 @@ class ResponseTest extends TestCase
             'auth' => [
                 'user' => [
                     'name' => 'Jonathan Reinink',
-                ]
+                ],
             ],
             'auth.user.can.deleteProducts' => true,
             'product' => ['name' => 'My example product'],
