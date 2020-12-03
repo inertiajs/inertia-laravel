@@ -219,4 +219,26 @@ class ResponseTest extends TestCase
         $this->assertObjectNotHasAttribute('users', $page->props);
         $this->assertSame('A lazy value', $page->props->lazy);
     }
+
+    public function test_can_nest_props_using_dot_notation()
+    {
+        $request = Request::create('/products/123', 'GET');
+
+        $props = [
+            'auth' => [
+                'user' => [
+                    'name' => 'Jonathan Reinink',
+                ]
+            ],
+            'auth.user.can.deleteProducts' => true,
+            'product' => ['name' => 'My example product'],
+        ];
+        $response = new Response('Products/Edit', $props, 'app', '123');
+        $response = $response->toResponse($request);
+        $view = $response->getOriginalContent();
+        $user = $view->getData()['page']['props']['auth']['user'];
+
+        $this->assertSame('Jonathan Reinink', $user['name']);
+        $this->assertTrue($user['can']['deleteProducts']);
+    }
 }
