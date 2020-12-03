@@ -76,6 +76,13 @@ class Response implements Responsable
             }
         });
 
+        foreach ($props as $key => $value) {
+            if (str_contains($key, '.')) {
+                Arr::set($props, $key, $value);
+                unset($props[$key]);
+            }
+        }
+
         $page = [
             'component' => $this->component,
             'props' => $props,
