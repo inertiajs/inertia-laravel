@@ -147,8 +147,14 @@ class Middleware
             return (object) collect($bag->messages())->map(function ($errors) {
                 return $errors[0];
             })->toArray();
-        })->pipe(function ($bags) {
-            return $bags->has('default') ? $bags->get('default') : $bags->toArray();
+        })->pipe(function ($bags) use ($request) {
+            if ($bags->has('default') && $request->header('x-inertia-error-bag')) {
+                return [$request->header('x-inertia-error-bag') => $bags->get('default')];
+            } else if ($bags->has('default')) {
+                return $bags->get('default');
+            } else {
+                return $bags->toArray();
+            }
         });
     }
 }
