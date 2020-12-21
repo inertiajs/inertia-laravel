@@ -150,7 +150,7 @@ class Middleware
         })->pipe(function ($bags) use ($request) {
             if ($bags->has('default') && $request->header('x-inertia-error-bag')) {
                 return [$request->header('x-inertia-error-bag') => $bags->get('default')];
-            } else if ($bags->has('default')) {
+            } elseif ($bags->has('default')) {
                 return $bags->get('default');
             } else {
                 return $bags->toArray();
