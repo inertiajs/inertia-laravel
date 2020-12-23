@@ -140,6 +140,24 @@ class MiddlewareTest extends TestCase
         ]);
     }
 
+    public function test_validation_errors_are_scoped_to_error_bag_header()
+    {
+        Session::put('errors', (new ViewErrorBag())->put('default', new MessageBag([
+            'name' => 'The name field is required.',
+            'email' => 'Not a valid email address.',
+        ])));
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            $errors = Inertia::getShared('errors')();
+
+            $this->assertIsObject($errors);
+            $this->assertSame('The name field is required.', $errors->example->name);
+            $this->assertSame('Not a valid email address.', $errors->example->email);
+        });
+
+        $this->withoutExceptionHandling()->get('/', ['X-Inertia-Error-Bag' => 'example']);
+    }
+
     public function test_middleware_can_change_the_root_view_via_a_property()
     {
         $this->prepareMockEndpoint(null, [], new class extends Middleware {
