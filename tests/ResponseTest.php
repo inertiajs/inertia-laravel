@@ -17,6 +17,16 @@ use Inertia\Response;
 
 class ResponseTest extends TestCase
 {
+    public function test_can_macro()
+    {
+        $response = new Response('User/Edit', []);
+        $response->macro('foo', function () {
+            return 'bar';
+        });
+
+        $this->assertEquals('bar', $response->foo());
+    }
+
     public function test_server_response()
     {
         $request = Request::create('/user/123', 'GET');
