@@ -20,6 +20,7 @@ class Response implements Responsable
     protected $rootView;
     protected $version;
     protected $viewData = [];
+    protected $renderUrl;
 
     public function __construct($component, $props, $rootView = 'app', $version = null)
     {
@@ -47,6 +48,13 @@ class Response implements Responsable
         } else {
             $this->viewData[$key] = $value;
         }
+
+        return $this;
+    }
+
+    public function renderUrl($renderUrl)
+    {
+        $this->renderUrl = $renderUrl;
 
         return $this;
     }
@@ -89,7 +97,7 @@ class Response implements Responsable
         $page = [
             'component' => $this->component,
             'props' => $props,
-            'url' => $request->getRequestUri(),
+            'url' => $this->renderUrl ?? $request->getRequestUri(),
             'version' => $this->version,
         ];
 
