@@ -251,4 +251,22 @@ class ResponseTest extends TestCase
         $this->assertSame('Jonathan Reinink', $user['name']);
         $this->assertTrue($user['can']['deleteProducts']);
     }
+
+    public function test_can_set_render_url()
+    {
+        $request = Request::create('/products/123', 'PATCH');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $product = (object) ['name' => 'My example product'];
+        $response = new Response('Products', ['product' => $product], 'app', '123');
+        $response = $response->renderUrl('/products');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertSame('Products', $page->component);
+        $this->assertSame('My example product', $page->props->product->name);
+        $this->assertSame('/products', $page->url);
+        $this->assertSame('123', $page->version);
+    }
 }
