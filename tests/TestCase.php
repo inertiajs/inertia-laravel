@@ -23,7 +23,7 @@ abstract class TestCase extends Orchestra
     {
         parent::setUp();
 
-        View::addLocation(__DIR__.'/stubs');
+        View::addLocation(__DIR__.'/Stubs');
 
         Inertia::setRootView('welcome');
         config()->set('inertia.page.should_exist', false);
