@@ -51,8 +51,10 @@ return [
          */
         'extensions' => [
 
-            'vue',
+            'js',
             'svelte',
+            'ts',
+            'vue',
 
         ],
 
