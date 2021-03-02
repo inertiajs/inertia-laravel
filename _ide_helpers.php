@@ -7,7 +7,7 @@
 namespace Illuminate\Testing {
 
     /**
-     * @see \ClaudioDekker\Inertia\TestResponseMacros
+     * @see \Inertia\Testing\TestResponseMacros
      *
      * @method self assertInertia(\Closure $assert = null)
      */
@@ -20,7 +20,7 @@ namespace Illuminate\Testing {
 namespace Illuminate\Foundation\Testing {
 
     /**
-     * @see \ClaudioDekker\Inertia\TestResponseMacros
+     * @see \Inertia\Testing\TestResponseMacros
      *
      * @method self assertInertia(\Closure $assert = null)
      */
