@@ -134,9 +134,13 @@ class ResponseTest extends TestCase
 
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertSame('User/Index', $page->component);
-        $this->assertSame(json_encode($expected), json_encode($page->props->users));
         $this->assertSame('/users?page=1', $page->url);
         $this->assertSame('123', $page->version);
+        tap($page->props->users, function ($users) use ($expected) {
+            $this->assertSame(json_encode($expected['data']), json_encode($users->data));
+            $this->assertSame(json_encode($expected['links']), json_encode($users->links));
+            $this->assertSame('/', $users->meta->path);
+        });
     }
 
     public function test_arrayable_prop_response()
