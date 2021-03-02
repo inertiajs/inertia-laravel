@@ -419,8 +419,8 @@ class AssertTest extends TestCase
     {
         $this->makeMockRequest(
             Inertia::render('foo', [
-                    'baz' => 'foo',
-                ])
+                'baz' => 'foo',
+            ])
         )->assertInertia(function (Assert $inertia) {
             $inertia->has('baz')->missingAll('foo', 'bar');
         });
