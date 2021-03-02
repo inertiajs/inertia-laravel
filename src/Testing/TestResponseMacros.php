@@ -17,10 +17,6 @@ class TestResponseMacros
 
             $callback($assert);
 
-            if (config('inertia.force_top_level_property_interaction', true)) {
-                $assert->interacted();
-            }
-
             return $this;
         };
     }

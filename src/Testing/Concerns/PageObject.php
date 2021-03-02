@@ -12,9 +12,9 @@ trait PageObject
     {
         PHPUnit::assertSame($value, $this->component, 'Unexpected Inertia page component.');
 
-        if ($shouldExist || (is_null($shouldExist) && config('inertia.page.should_exist', true))) {
+        if ($shouldExist || (is_null($shouldExist) && config('inertia.testing.ensure_pages_exist', true))) {
             try {
-                app('inertia.view.finder')->find($value);
+                app('inertia.testing.view-finder')->find($value);
             } catch (InvalidArgumentException $exception) {
                 PHPUnit::fail(sprintf('Inertia page component file [%s] does not exist.', $value));
             }

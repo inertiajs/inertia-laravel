@@ -71,7 +71,7 @@ class AssertTest extends TestCase
             Inertia::render('Stubs/ExamplePage')
         );
 
-        config()->set('inertia.page.should_exist', true);
+        config()->set('inertia.testing.ensure_pages_exist', true);
         $response->assertInertia(function (Assert $inertia) {
             $inertia->component('Stubs/ExamplePage');
         });
@@ -84,7 +84,7 @@ class AssertTest extends TestCase
             Inertia::render('foo')
         );
 
-        config()->set('inertia.page.should_exist', true);
+        config()->set('inertia.testing.ensure_pages_exist', true);
         $this->expectException(AssertionFailedError::class);
         $this->expectExceptionMessage('Inertia page component file [foo] does not exist.');
 
@@ -100,7 +100,7 @@ class AssertTest extends TestCase
             Inertia::render('foo')
         );
 
-        config()->set('inertia.page.should_exist', false);
+        config()->set('inertia.testing.ensure_pages_exist', false);
         $this->expectException(AssertionFailedError::class);
         $this->expectExceptionMessage('Inertia page component file [foo] does not exist.');
 
@@ -116,7 +116,7 @@ class AssertTest extends TestCase
             Inertia::render('foo')
         );
 
-        config()->set('inertia.page.should_exist', true);
+        config()->set('inertia.testing.ensure_pages_exist', true);
 
         $response->assertInertia(function (Assert $inertia) {
             $inertia->component('foo', false);
@@ -130,8 +130,8 @@ class AssertTest extends TestCase
             Inertia::render('fixtures/ExamplePage')
         );
 
-        config()->set('inertia.page.should_exist', true);
-        config()->set('inertia.page.paths', [realpath(__DIR__)]);
+        config()->set('inertia.testing.ensure_pages_exist', true);
+        config()->set('inertia.testing.page_paths', [realpath(__DIR__)]);
         $this->expectException(AssertionFailedError::class);
         $this->expectExceptionMessage('Inertia page component file [fixtures/ExamplePage] does not exist.');
 
@@ -147,8 +147,8 @@ class AssertTest extends TestCase
             Inertia::render('fixtures/ExamplePage')
         );
 
-        config()->set('inertia.page.should_exist', true);
-        config()->set('inertia.page.extensions', ['bin', 'exe', 'svg']);
+        config()->set('inertia.testing.ensure_pages_exist', true);
+        config()->set('inertia.testing.page_extensions', ['bin', 'exe', 'svg']);
         $this->expectException(AssertionFailedError::class);
         $this->expectExceptionMessage('Inertia page component file [fixtures/ExamplePage] does not exist.');
 
@@ -943,41 +943,6 @@ class AssertTest extends TestCase
     }
 
     /** @test */
-    public function it_does_not_fail_when_not_interacting_with_every_top_level_prop_by_default(): void
-    {
-        $response = $this->makeMockRequest(
-            Inertia::render('foo', [
-                'foo' => 'bar',
-                'bar' => 'baz',
-            ])
-        );
-
-        $response->assertInertia(function (Assert $inertia) {
-            $inertia->has('foo');
-        });
-    }
-
-    /** @test */
-    public function it_fails_when_not_interacting_with_every_top_level_prop_while_the_force_setting_is_enabled(): void
-    {
-        $response = $this->makeMockRequest(
-            Inertia::render('foo', [
-                'foo' => 'bar',
-                'bar' => 'baz',
-            ])
-        );
-
-        config()->set('inertia.force_top_level_property_interaction', true);
-
-        $this->expectException(AssertionFailedError::class);
-        $this->expectExceptionMessage('Unexpected Inertia properties were found on the root level.');
-
-        $response->assertInertia(function (Assert $inertia) {
-            $inertia->has('foo');
-        });
-    }
-
-    /** @test */
     public function it_can_disable_the_interaction_check_for_the_current_scope(): void
     {
         $response = $this->makeMockRequest(
@@ -1013,6 +978,41 @@ class AssertTest extends TestCase
                 ->has('baz', function (Assert $inertia) {
                     $inertia->where('foo', 'bar');
                 });
+        });
+    }
+
+    /** @test */
+    public function it_does_not_fail_when_not_interacting_with_every_top_level_prop(): void
+    {
+        $response = $this->makeMockRequest(
+            Inertia::render('foo', [
+                'foo' => 'bar',
+                'bar' => 'baz',
+            ])
+        );
+
+        $response->assertInertia(function (Assert $inertia) {
+            $inertia->has('foo');
+        });
+    }
+
+    /** @test */
+    public function it_fails_when_not_interacting_with_every_top_level_prop_while_the_interacted_flag_is_set(): void
+    {
+        $response = $this->makeMockRequest(
+            Inertia::render('foo', [
+                'foo' => 'bar',
+                'bar' => 'baz',
+            ])
+        );
+
+        $this->expectException(AssertionFailedError::class);
+        $this->expectExceptionMessage('Unexpected Inertia properties were found on the root level.');
+
+        $response->assertInertia(function (Assert $inertia) {
+            $inertia
+                ->has('foo')
+                ->interacted();
         });
     }
 
