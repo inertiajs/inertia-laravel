@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\Facade;
  * @method static array getShared($key = null)
  * @method static void version($version)
  * @method static int|string getVersion()
- * @method static \Inertia\Response render($component, $props = [])
+ * @method static Response render($component, $props = [])
  * @method static \Illuminate\Http\Response location($url)
- * @method static \Inertia\LazyProp lazy(callable $callback)
+ * @method static LazyProp lazy(callable $callback)
  *
  * @see \Inertia\ResponseFactory
  */
