@@ -162,7 +162,7 @@ class AssertTest extends TestCase
     public function the_component_name_resolver_can_be_customized(): void
     {
         InertiaTesting::setComponentNameResolver(function ($name) {
-            return $name . "Page";
+            return $name.'Page';
         });
 
         $response = $this->makeMockRequest(

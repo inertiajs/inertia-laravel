@@ -15,7 +15,7 @@ abstract class TestCase extends Orchestra
     {
         return [
             \Inertia\ServiceProvider::class,
-            \Inertia\Testing\ServiceProvider::class
+            \Inertia\Testing\ServiceProvider::class,
         ];
     }
 
