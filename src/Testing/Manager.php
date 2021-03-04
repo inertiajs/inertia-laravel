@@ -81,7 +81,7 @@ class Manager
         try {
             return $viewFinder->find($componentName);
         } catch (InvalidArgumentException $exception) {
-            PHPUnit::fail(sprintf('Inertia page component file [%s] does not exist.', $value));
+            PHPUnit::fail(sprintf('Inertia page component file [%s] does not exist.', $componentName));
         }
     }
 }
