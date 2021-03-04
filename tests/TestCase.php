@@ -6,7 +6,6 @@ use Illuminate\Foundation\Testing\TestResponse as LegacyTestResponse;
 use Illuminate\Support\Facades\View;
 use Illuminate\Testing\TestResponse;
 use Inertia\Inertia;
-use Inertia\ServiceProvider;
 use LogicException;
 use Orchestra\Testbench\TestCase as Orchestra;
 
@@ -15,7 +14,8 @@ abstract class TestCase extends Orchestra
     protected function getPackageProviders($app)
     {
         return [
-            ServiceProvider::class,
+            \Inertia\ServiceProvider::class,
+            \Inertia\Testing\ServiceProvider::class
         ];
     }
 

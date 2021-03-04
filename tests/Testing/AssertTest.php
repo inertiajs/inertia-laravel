@@ -9,6 +9,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use Inertia\Testing\Assert;
+use Inertia\Testing\Facades\InertiaTesting;
 use Inertia\Tests\TestCase;
 use PHPUnit\Framework\AssertionFailedError;
 use TypeError;
@@ -154,6 +155,22 @@ class AssertTest extends TestCase
 
         $response->assertInertia(function (Assert $inertia) {
             $inertia->component('fixtures/ExamplePage');
+        });
+    }
+
+    /** @test */
+    public function the_component_name_resolver_can_be_customized(): void
+    {
+        InertiaTesting::setComponentNameResolver(function ($name) {
+            return $name . "Page";
+        });
+
+        $response = $this->makeMockRequest(
+            Inertia::render('fixtures/ExamplePage')
+        );
+
+        $response->assertInertia(function (Assert $inertia) {
+            $inertia->component('fixtures/Example');
         });
     }
 
