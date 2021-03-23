@@ -54,12 +54,13 @@ class Response implements Responsable
     public function toResponse($request)
     {
         $only = array_filter(explode(',', $request->header('X-Inertia-Partial-Data')));
+        $include = array_filter(explode(',', $request->header('X-Inertia-Include-Data')));
 
         $props = ($only && $request->header('X-Inertia-Partial-Component') === $this->component)
             ? Arr::only($this->props, $only)
-            : array_filter($this->props, function ($prop) {
-                return ! ($prop instanceof LazyProp);
-            });
+            : array_filter($this->props, function ($prop, $key) {
+                return ! ($prop instanceof LazyProp) || Arr::has($include, $key);
+            }, ARRAY_FILTER_USE_BOTH);
 
         array_walk_recursive($props, function (&$prop) use ($request) {
             if ($prop instanceof LazyProp) {
