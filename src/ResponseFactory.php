@@ -73,6 +73,11 @@ class ResponseFactory
         );
     }
 
+    public function stackable($component, $props = [])
+    {
+        return $this->render($component, $props = [])->stackable();
+    }
+
     public function location($url)
     {
         return BaseResponse::make('', 409, ['X-Inertia-Location' => $url]);

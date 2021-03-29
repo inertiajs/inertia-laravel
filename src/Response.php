@@ -3,12 +3,16 @@
 namespace Inertia;
 
 use Closure;
+use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Facades\Response as ResponseFactory;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Traits\Macroable;
 
 class Response implements Responsable
@@ -20,6 +24,8 @@ class Response implements Responsable
     protected $rootView;
     protected $version;
     protected $viewData = [];
+    protected $stackable;
+    protected $basePageUrl;
 
     public function __construct($component, $props, $rootView = 'app', $version = null)
     {
@@ -27,6 +33,27 @@ class Response implements Responsable
         $this->props = $props instanceof Arrayable ? $props->toArray() : $props;
         $this->rootView = $rootView;
         $this->version = $version;
+    }
+
+    public function stackable()
+    {
+        $this->stackable = true;
+
+        return $this;
+    }
+
+    public function basePageRoute($name)
+    {
+        $this->basePageUrl = URL::route($name);
+
+        return $this;
+    }
+
+    public function basePageUrl($url)
+    {
+        $this->basePageUrl = $url;
+
+        return $this;
     }
 
     public function with($key, $value = null)
@@ -86,12 +113,40 @@ class Response implements Responsable
             }
         }
 
-        $page = [
-            'component' => $this->component,
-            'props' => $props,
-            'url' => $request->getRequestUri(),
-            'version' => $this->version,
-        ];
+        if (! $request->header('X-Inertia-Stack') && $this->basePageUrl) {
+            $kernel = App::make(Kernel::class);
+            $url = $this->basePageUrl;
+
+            do {
+                $response = $kernel->handle(
+                    $this->createBaseRequest($request, $url)
+                );
+
+                if (! $response->headers->get('X-Inertia') && ! $response->isRedirect()) {
+                    return $response;
+                }
+
+                $url = $response->isRedirect() ? $response->getTargetUrl() : null;
+            } while ($url);
+
+            App::instance('request', $request);
+            Facade::clearResolvedInstance('request');
+
+            $page = $response->getData(true);
+            $page['stacked'] = [
+                'component' => $this->component,
+                'props' => $props,
+                'url' => $request->getRequestUri(),
+            ];
+        } else {
+            $page = [
+                'component' => $this->component,
+                'props' => $props,
+                'url' => $request->getRequestUri(),
+                'version' => $this->version,
+                'stackable' => $this->stackable,
+            ];
+        }
 
         if ($request->header('X-Inertia')) {
             return new JsonResponse($page, 200, [
@@ -101,5 +156,19 @@ class Response implements Responsable
         }
 
         return ResponseFactory::view($this->rootView, $this->viewData + ['page' => $page]);
+    }
+
+    public function createBaseRequest(Request $request, $url)
+    {
+        $headers = Arr::except($request->headers->all(), 'X-Inertia-Stack');
+        $headers['Accept'] = 'text/html, application/xhtml+xml';
+        $headers['X-Requested-With'] = 'XMLHttpRequest';
+        $headers['X-Inertia'] = true;
+        $headers['X-Inertia-Version'] = $this->version;
+
+        $baseRequest = Request::create($url, 'GET');
+        $baseRequest->headers->replace($headers);
+
+        return $baseRequest;
     }
 }
