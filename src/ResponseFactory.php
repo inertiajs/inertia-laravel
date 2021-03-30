@@ -31,10 +31,10 @@ class ResponseFactory
         }
     }
 
-    public function getShared($key = null)
+    public function getShared($key = null, $default = null)
     {
         if ($key) {
-            return Arr::get($this->sharedProps, $key);
+            return Arr::get($this->sharedProps, $key, $default);
         }
 
         return $this->sharedProps;
