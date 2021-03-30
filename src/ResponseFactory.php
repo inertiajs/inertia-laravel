@@ -75,7 +75,7 @@ class ResponseFactory
 
     public function stackable($component, $props = [])
     {
-        return $this->render($component, $props = [])->stackable();
+        return $this->render($component, $props)->stackable();
     }
 
     public function location($url)

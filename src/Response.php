@@ -42,9 +42,9 @@ class Response implements Responsable
         return $this;
     }
 
-    public function basePageRoute($name)
+    public function basePageRoute(...$args)
     {
-        $this->basePageUrl = URL::route($name);
+        $this->basePageUrl = URL::route(...$args);
 
         return $this;
     }
@@ -133,10 +133,12 @@ class Response implements Responsable
             Facade::clearResolvedInstance('request');
 
             $page = $response->getData(true);
-            $page['stacked'] = [
-                'component' => $this->component,
-                'props' => $props,
-                'url' => $request->getRequestUri(),
+            $page['stacks'] = [
+                [
+                    'component' => $this->component,
+                    'props' => $props,
+                    'url' => $request->getRequestUri(),
+                ]
             ];
         } else {
             $page = [
@@ -145,6 +147,7 @@ class Response implements Responsable
                 'url' => $request->getRequestUri(),
                 'version' => $this->version,
                 'stackable' => $this->stackable,
+                'stacks' => [],
             ];
         }
 
