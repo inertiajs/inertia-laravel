@@ -71,6 +71,14 @@ class ResponseFactoryTest extends TestCase
         ]);
     }
 
+    public function test_can_flush_shared_data()
+    {
+        Inertia::share('foo', 'bar');
+        $this->assertSame(['foo' => 'bar'], Inertia::getShared());
+        Inertia::flushShared();
+        $this->assertSame([], Inertia::getShared());
+    }
+
     public function test_can_create_lazy_prop()
     {
         $factory = new ResponseFactory();
