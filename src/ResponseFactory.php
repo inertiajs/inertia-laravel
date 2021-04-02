@@ -40,6 +40,11 @@ class ResponseFactory
         return $this->sharedProps;
     }
 
+    public function flushShared()
+    {
+        $this->sharedProps = [];
+    }
+
     public function version($version)
     {
         $this->version = $version;
