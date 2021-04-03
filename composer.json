@@ -37,7 +37,8 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Inertia\\ServiceProvider"
+                "Inertia\\ServiceProvider",
+                "Inertia\\Testing\\ServiceProvider"
             ]
         }
     }

@@ -3,21 +3,21 @@
 namespace Inertia\Testing\Concerns;
 
 use Illuminate\Support\Arr;
-use InvalidArgumentException;
+use Inertia\Testing\Facades\InertiaTesting;
 use PHPUnit\Framework\Assert as PHPUnit;
 
 trait PageObject
 {
     public function component(string $value = null, $shouldExist = null): self
     {
-        PHPUnit::assertSame($value, $this->component, 'Unexpected Inertia page component.');
+        PHPUnit::assertSame(
+            InertiaTesting::resolveComponentName($value),
+            $this->component,
+            'Unexpected Inertia page component.'
+        );
 
         if ($shouldExist || (is_null($shouldExist) && config('inertia.testing.ensure_pages_exist', true))) {
-            try {
-                app('inertia.testing.view-finder')->find($value);
-            } catch (InvalidArgumentException $exception) {
-                PHPUnit::fail(sprintf('Inertia page component file [%s] does not exist.', $value));
-            }
+            InertiaTesting::findComponent($value);
         }
 
         return $this;
