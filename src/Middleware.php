@@ -158,7 +158,7 @@ class Middleware
             }
         });
     }
-    
+
     /**
      * Resolves and prepares the request methods, if they are being redirected.
      *
@@ -167,8 +167,10 @@ class Middleware
      */
     public function resolveRequestMethod(Request $request)
     {
-        if (! is_null($request->server('REDIRECT_REDIRECT_REQUEST_METHOD')))
+        if (! is_null($request->server('REDIRECT_REDIRECT_REQUEST_METHOD'))) {
             $request->setMethod($request->server('REDIRECT_REDIRECT_REQUEST_METHOD'));
+        }
+
         return $request;
     }
 }
