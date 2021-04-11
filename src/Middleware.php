@@ -160,12 +160,14 @@ class Middleware
     }
     
     /**
-     * @param Request $request
+     * Resolves and prepares the request methods, if they are being redirected.
+     *
+     * @param  Request  $request
      * @return Request
      */
     public function resolveRequestMethod(Request $request)
     {
-        if ($request->server('REDIRECT_REDIRECT_REQUEST_METHOD', false) !== false)
+        if (! is_null($request->server('REDIRECT_REDIRECT_REQUEST_METHOD')))
             $request->setMethod($request->server('REDIRECT_REDIRECT_REQUEST_METHOD'));
         return $request;
     }
