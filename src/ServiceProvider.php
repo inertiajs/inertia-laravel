@@ -22,7 +22,7 @@ class ServiceProvider extends BaseServiceProvider
             __DIR__.'/../config/inertia.php',
             'inertia'
         );
-        
+
         $this->registerRequestMacro();
         $this->registerRouterMacro();
         $this->registerTestingMacros();
