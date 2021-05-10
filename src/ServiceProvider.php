@@ -23,6 +23,10 @@ class ServiceProvider extends BaseServiceProvider
             'inertia'
         );
 
+        $this->registerRequestMacro();
+        $this->registerRouterMacro();
+        $this->registerTestingMacros();
+
         $this->app->bind('inertia.testing.view-finder', function ($app) {
             return new FileViewFinder(
                 $app['files'],
@@ -36,9 +40,6 @@ class ServiceProvider extends BaseServiceProvider
     {
         $this->registerBladeDirective();
         $this->registerConsoleCommands();
-        $this->registerRequestMacro();
-        $this->registerRouterMacro();
-        $this->registerTestingMacros();
 
         $this->publishes([
             __DIR__.'/../config/inertia.php' => config_path('inertia.php'),
