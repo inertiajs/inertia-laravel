@@ -265,7 +265,8 @@ class ResponseTest extends TestCase
         $request = Request::create('/user/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
 
-        $resource = new class implements Responsable {
+        $resource = new class implements Responsable
+        {
             public function toResponse($request)
             {
                 return JsonResponse::fromJsonString('{"\u0000*\u0000_invalid_key": "for object"}');
