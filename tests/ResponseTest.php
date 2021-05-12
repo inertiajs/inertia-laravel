@@ -3,6 +3,7 @@
 namespace Inertia\Tests;
 
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -257,5 +258,27 @@ class ResponseTest extends TestCase
 
         $this->assertSame('Jonathan Reinink', $user['name']);
         $this->assertTrue($user['can']['deleteProducts']);
+    }
+
+    public function test_responsable_with_invalid_key()
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $resource = new class implements Responsable {
+            public function toResponse($request)
+            {
+                return JsonResponse::fromJsonString('{"\u0000*\u0000_invalid_key": "for object"}');
+            }
+        };
+
+        $response = new Response('User/Edit', ['resource' => $resource], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData(true);
+
+        $this->assertSame(
+            json_decode('{"\u0000*\u0000_invalid_key": "for object"}', true),
+            $page['props']['resource']
+        );
     }
 }
