@@ -269,7 +269,7 @@ class ResponseTest extends TestCase
         {
             public function toResponse($request)
             {
-                return new JsonResponse(["\x00*\x00_invalid_key" => "for object"]);
+                return new JsonResponse(["\x00*\x00_invalid_key" => 'for object']);
             }
         };
 
@@ -278,7 +278,7 @@ class ResponseTest extends TestCase
         $page = $response->getData(true);
 
         $this->assertSame(
-            ["\x00*\x00_invalid_key" => "for object"],
+            ["\x00*\x00_invalid_key" => 'for object'],
             $page['props']['resource']
         );
     }
