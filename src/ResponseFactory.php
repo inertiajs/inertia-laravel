@@ -26,7 +26,7 @@ class ResponseFactory
     {
         if (is_array($key)) {
             $this->sharedProps = array_merge($this->sharedProps, $key);
-        } elseif($key instanceof Arrayable) {
+        } elseif ($key instanceof Arrayable) {
             $this->sharedProps = array_merge($this->sharedProps, $key->toArray());
         } else {
             Arr::set($this->sharedProps, $key, $value);
