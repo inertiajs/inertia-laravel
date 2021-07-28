@@ -27,6 +27,7 @@ return [
         'page_extensions' => [
 
             'js',
+            'jsx',
             'svelte',
             'ts',
             'vue',
