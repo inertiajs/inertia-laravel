@@ -51,6 +51,13 @@ class Response implements Responsable
         return $this;
     }
 
+    public function rootView($rootView)
+    {
+        $this->rootView = $rootView;
+
+        return $this;
+    }
+
     public function toResponse($request)
     {
         $only = array_filter(explode(',', $request->header('X-Inertia-Partial-Data')));
