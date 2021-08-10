@@ -145,7 +145,7 @@ class Middleware
 
         return (object) collect($request->session()->get('errors')->getBags())->map(function ($bag) {
             return (object) collect($bag->messages())->map(function ($errors) {
-                return $errors[0];
+                return array_key_exists(0, $errors) ? $errors[0] : false;
             })->toArray();
         })->pipe(function ($bags) use ($request) {
             if ($bags->has('default') && $request->header('x-inertia-error-bag')) {
