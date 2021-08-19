@@ -8,6 +8,7 @@ use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Response as ResponseFactory;
 use Illuminate\Support\Traits\Macroable;
 
@@ -99,6 +100,8 @@ class Response implements Responsable
             'url' => $request->getRequestUri(),
             'version' => $this->version,
         ];
+
+        Event::dispatch('inertia.collected', [$page]);
 
         if ($request->header('X-Inertia')) {
             return new JsonResponse($page, 200, [
