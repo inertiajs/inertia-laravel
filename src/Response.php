@@ -101,7 +101,9 @@ class Response implements Responsable
             'version' => $this->version,
         ];
 
-        Event::dispatch('inertia.collected', [$page]);
+        if (env('APP_DEBUG', false)) {
+            Event::dispatch('inertia.debug', [$page]);
+        }
 
         if ($request->header('X-Inertia')) {
             return new JsonResponse($page, 200, [
