@@ -12,6 +12,7 @@ class Middleware
      * The root template that's loaded on the first page visit.
      *
      * @see https://inertiajs.com/server-side-setup#root-template
+     *
      * @var string
      */
     protected $rootView = 'app';
@@ -20,6 +21,7 @@ class Middleware
      * Determines the current asset version.
      *
      * @see https://inertiajs.com/asset-versioning
+     *
      * @param  \Illuminate\Http\Request  $request
      * @return string|null
      */
@@ -40,6 +42,7 @@ class Middleware
      * Defines the props that are shared by default.
      *
      * @see https://inertiajs.com/shared-data
+     *
      * @param  \Illuminate\Http\Request  $request
      * @return array
      */
@@ -56,7 +59,8 @@ class Middleware
      * Sets the root template that's loaded on the first page visit.
      *
      * @see https://inertiajs.com/server-side-setup#root-template
-     * @param Request $request
+     *
+     * @param  Request $request
      * @return string
      */
     public function rootView(Request $request): string
@@ -150,13 +154,11 @@ class Middleware
                 return $errors[0];
             })->toArray();
         })->pipe(function ($bags) use ($request) {
-            if ($bags->has('default') && $request->header('x-inertia-error-bag'))
-            {
+            if ($bags->has('default') && $request->header('x-inertia-error-bag')) {
                 return [$request->header('x-inertia-error-bag') => $bags->get('default')];
             }
 
-            if ($bags->has('default'))
-            {
+            if ($bags->has('default')) {
                 return $bags->get('default');
             }
 
