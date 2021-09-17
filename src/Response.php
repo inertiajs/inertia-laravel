@@ -65,11 +65,11 @@ class Response implements Responsable
 
         $props = ($only && $request->header('X-Inertia-Partial-Component') === $this->component)
             ? Arr::only($this->props, $only)
-            : array_filter($this->props, static function ( $prop) {
+            : array_filter($this->props, static function ($prop) {
                 return ! ($prop instanceof LazyProp);
             });
 
-        array_walk_recursive($props, static function ( &$prop) use ($request) {
+        array_walk_recursive($props, static function (&$prop) use ($request) {
             if ($prop instanceof LazyProp) {
                 $prop = App::call($prop);
             }
