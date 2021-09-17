@@ -25,16 +25,15 @@ class Middleware
      */
     public function version(Request $request): ?string
     {
-        $version = null;
         if (config('app.asset_url')) {
-            $version = md5(config('app.asset_url'));
+            return md5(config('app.asset_url'));
         }
 
         if (file_exists($manifest = public_path('mix-manifest.json'))) {
-            $version = md5_file($manifest);
+            return md5_file($manifest);
         }
 
-        return $version;
+        return null;
     }
 
     /**
