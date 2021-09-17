@@ -60,7 +60,7 @@ class Middleware
      *
      * @see https://inertiajs.com/server-side-setup#root-template
      *
-     * @param  Request $request
+     * @param  Request  $request
      * @return string
      */
     public function rootView(Request $request): string
