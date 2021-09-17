@@ -2,6 +2,7 @@
 
 namespace Inertia\Tests\Stubs;
 
+use Illuminate\Http\Request;
 use Inertia\Middleware;
 
 class ExampleMiddleware extends Middleware
@@ -29,7 +30,7 @@ class ExampleMiddleware extends Middleware
      * @param  \Illuminate\Http\Request  $request
      * @return string|null
      */
-    public function version($request)
+    public function version(Request $request): ?string
     {
         return $this->version;
     }
@@ -41,7 +42,7 @@ class ExampleMiddleware extends Middleware
      * @param  \Illuminate\Http\Request  $request
      * @return array
      */
-    public function share($request)
+    public function share(Request $request): array
     {
         return array_merge(parent::share($request), $this->shared);
     }

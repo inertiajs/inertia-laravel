@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Response as ResponseFactory;
@@ -29,7 +30,7 @@ class Response implements Responsable
         $this->version = $version;
     }
 
-    public function with($key, $value = null)
+    public function with($key, $value = null): self
     {
         if (is_array($key)) {
             $this->props = array_merge($this->props, $key);
@@ -40,7 +41,7 @@ class Response implements Responsable
         return $this;
     }
 
-    public function withViewData($key, $value = null)
+    public function withViewData($key, $value = null): self
     {
         if (is_array($key)) {
             $this->viewData = array_merge($this->viewData, $key);
@@ -51,7 +52,7 @@ class Response implements Responsable
         return $this;
     }
 
-    public function rootView($rootView)
+    public function rootView($rootView): self
     {
         $this->rootView = $rootView;
 
@@ -64,11 +65,11 @@ class Response implements Responsable
 
         $props = ($only && $request->header('X-Inertia-Partial-Component') === $this->component)
             ? Arr::only($this->props, $only)
-            : array_filter($this->props, function ($prop) {
+            : array_filter($this->props, static function ( $prop) {
                 return ! ($prop instanceof LazyProp);
             });
 
-        array_walk_recursive($props, function (&$prop) use ($request) {
+        array_walk_recursive($props, static function ( &$prop) use ($request) {
             if ($prop instanceof LazyProp) {
                 $prop = App::call($prop);
             }

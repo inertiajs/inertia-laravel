@@ -12,7 +12,7 @@ use Orchestra\Testbench\TestCase as Orchestra;
 
 abstract class TestCase extends Orchestra
 {
-    protected function getPackageProviders($app)
+    protected function getPackageProviders($app): array
     {
         return [
             ServiceProvider::class,
@@ -49,7 +49,7 @@ abstract class TestCase extends Orchestra
         throw new LogicException('Could not detect TestResponse class.');
     }
 
-    protected function makeMockRequest($view)
+    protected function makeMockRequest($view): TestResponse
     {
         app('router')->get('/example-url', function () use ($view) {
             return $view;

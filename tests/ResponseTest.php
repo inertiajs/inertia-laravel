@@ -17,7 +17,7 @@ use Inertia\Response;
 
 class ResponseTest extends TestCase
 {
-    public function test_can_macro()
+    public function test_can_macro(): void
     {
         $response = new Response('User/Edit', []);
         $response->macro('foo', function () {
@@ -27,7 +27,7 @@ class ResponseTest extends TestCase
         $this->assertEquals('bar', $response->foo());
     }
 
-    public function test_server_response()
+    public function test_server_response(): void
     {
         $request = Request::create('/user/123', 'GET');
 
@@ -44,10 +44,10 @@ class ResponseTest extends TestCase
         $this->assertSame('Jonathan', $page['props']['user']['name']);
         $this->assertSame('/user/123', $page['url']);
         $this->assertSame('123', $page['version']);
-        $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;user&quot;:{&quot;name&quot;:&quot;Jonathan&quot;}},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;}"></div>'."\n", $view->render());
+        $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;user&quot;:{&quot;name&quot;:&quot;Jonathan&quot;}},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;}"></div>'."\r\n", $view->render());
     }
 
-    public function test_xhr_response()
+    public function test_xhr_response(): void
     {
         $request = Request::create('/user/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
@@ -64,7 +64,7 @@ class ResponseTest extends TestCase
         $this->assertSame('123', $page->version);
     }
 
-    public function test_resource_response()
+    public function test_resource_response(): void
     {
         $request = Request::create('/user/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
@@ -75,7 +75,7 @@ class ResponseTest extends TestCase
         {
             public static $wrap = null;
 
-            public function toArray($request)
+            public function toArray($request): array
             {
                 return ['name' => $this->name];
             }
@@ -92,7 +92,7 @@ class ResponseTest extends TestCase
         $this->assertSame('123', $page->version);
     }
 
-    public function test_lazy_resource_response()
+    public function test_lazy_resource_response(): void
     {
         $request = Request::create('/users', 'GET', ['page' => 1]);
         $request->headers->add(['X-Inertia' => 'true']);
@@ -103,7 +103,7 @@ class ResponseTest extends TestCase
             new Fluent(['name' => 'Jeffrey']),
         ]);
 
-        $callable = function () use ($users) {
+        $callable = static function () use ($users) {
             $page = new LengthAwarePaginator($users->take(2), $users->count(), 2);
 
             return new class($page, JsonResource::class) extends ResourceCollection
@@ -145,7 +145,7 @@ class ResponseTest extends TestCase
         });
     }
 
-    public function test_arrayable_prop_response()
+    public function test_arrayable_prop_response(): void
     {
         $request = Request::create('/user/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
@@ -161,7 +161,7 @@ class ResponseTest extends TestCase
                 $this->user = $user;
             }
 
-            public function toArray()
+            public function toArray(): array
             {
                 return ['name' => $this->user->name];
             }
@@ -178,7 +178,7 @@ class ResponseTest extends TestCase
         $this->assertSame('123', $page->version);
     }
 
-    public function test_xhr_partial_response()
+    public function test_xhr_partial_response(): void
     {
         $request = Request::create('/user/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
@@ -201,7 +201,7 @@ class ResponseTest extends TestCase
         $this->assertSame('123', $page->version);
     }
 
-    public function test_lazy_props_are_not_included_by_default()
+    public function test_lazy_props_are_not_included_by_default(): void
     {
         $request = Request::create('/users', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
@@ -218,7 +218,7 @@ class ResponseTest extends TestCase
         $this->assertObjectNotHasAttribute('lazy', $page->props);
     }
 
-    public function test_lazy_props_are_included_in_partial_reload()
+    public function test_lazy_props_are_included_in_partial_reload(): void
     {
         $request = Request::create('/users', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
@@ -237,7 +237,7 @@ class ResponseTest extends TestCase
         $this->assertSame('A lazy value', $page->props->lazy);
     }
 
-    public function test_can_nest_props_using_dot_notation()
+    public function test_can_nest_props_using_dot_notation(): void
     {
         $request = Request::create('/products/123', 'GET');
 

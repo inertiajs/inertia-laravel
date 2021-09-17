@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 
 class ServiceProviderTest extends TestCase
 {
-    public function test_blade_directive_is_registered()
+    public function test_blade_directive_is_registered(): void
     {
         $directives = Blade::getCustomDirectives();
 
@@ -16,7 +16,7 @@ class ServiceProviderTest extends TestCase
         $this->assertEquals('<div id="app" data-page="{{ json_encode($page) }}"></div>', $directives['inertia']());
     }
 
-    public function test_request_macro_is_registered()
+    public function test_request_macro_is_registered(): void
     {
         $request = Request::create('/user/123', 'GET');
 
@@ -27,7 +27,7 @@ class ServiceProviderTest extends TestCase
         $this->assertTrue($request->inertia());
     }
 
-    public function test_route_macro_is_registered()
+    public function test_route_macro_is_registered(): void
     {
         $route = Route::inertia('/', 'User/Edit', ['user' => ['name' => 'Jonathan']]);
         $routes = Route::getRoutes();

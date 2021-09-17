@@ -17,12 +17,12 @@ class ResponseFactory
     protected $sharedProps = [];
     protected $version = null;
 
-    public function setRootView($name)
+    public function setRootView(string $name): void
     {
         $this->rootView = $name;
     }
 
-    public function share($key, $value = null)
+    public function share($key, $value = null): void
     {
         if (is_array($key)) {
             $this->sharedProps = array_merge($this->sharedProps, $key);
@@ -42,17 +42,17 @@ class ResponseFactory
         return $this->sharedProps;
     }
 
-    public function flushShared()
+    public function flushShared(): void
     {
         $this->sharedProps = [];
     }
 
-    public function version($version)
+    public function version($version): void
     {
         $this->version = $version;
     }
 
-    public function getVersion()
+    public function getVersion(): string
     {
         $version = $this->version instanceof Closure
             ? App::call($this->version)
@@ -61,12 +61,12 @@ class ResponseFactory
         return (string) $version;
     }
 
-    public function lazy(callable $callback)
+    public function lazy(callable $callback): LazyProp
     {
         return new LazyProp($callback);
     }
 
-    public function render($component, $props = [])
+    public function render($component, array $props = []): Response
     {
         if ($props instanceof Arrayable) {
             $props = $props->toArray();
@@ -80,7 +80,7 @@ class ResponseFactory
         );
     }
 
-    public function location($url)
+    public function location(string $url): \Illuminate\Http\Response
     {
         return BaseResponse::make('', 409, ['X-Inertia-Location' => $url]);
     }
