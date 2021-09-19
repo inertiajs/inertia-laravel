@@ -9,6 +9,7 @@ use Inertia\Inertia;
 use Inertia\LazyProp;
 use Inertia\ResponseFactory;
 use Inertia\Tests\Stubs\ExampleMiddleware;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class ResponseFactoryTest extends TestCase
 {
@@ -25,6 +26,16 @@ class ResponseFactoryTest extends TestCase
     public function test_location_response()
     {
         $response = (new ResponseFactory())->location('https://inertiajs.com');
+
+        $this->assertInstanceOf(Response::class, $response);
+        $this->assertEquals(409, $response->getStatusCode());
+        $this->assertEquals('https://inertiajs.com', $response->headers->get('X-Inertia-Location'));
+    }
+
+    public function test_location_response_from_redirect()
+    {
+        $redirect = new RedirectResponse('https://inertiajs.com');
+        $response = (new ResponseFactory())->location($redirect);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertEquals(409, $response->getStatusCode());

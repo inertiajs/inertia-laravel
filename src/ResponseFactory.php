@@ -8,6 +8,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Response as BaseResponse;
 use Illuminate\Support\Traits\Macroable;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class ResponseFactory
 {
@@ -82,6 +83,10 @@ class ResponseFactory
 
     public function location($url)
     {
+        if ($url instanceof RedirectResponse) {
+            $url = $url->getTargetUrl();
+        }
+
         return BaseResponse::make('', 409, ['X-Inertia-Location' => $url]);
     }
 }
