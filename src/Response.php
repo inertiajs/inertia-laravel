@@ -101,7 +101,7 @@ class Response implements Responsable
             'version' => $this->version,
         ];
 
-        if (env('APP_DEBUG', false)) {
+        if (config('app.debug')) {
             Event::dispatch('inertia.debug', [$page]);
         }
 
