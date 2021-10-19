@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Response as ResponseFactory;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Traits\Macroable;
 
 class Response implements Responsable
@@ -29,7 +30,19 @@ class Response implements Responsable
         $this->version = $version;
     }
 
-    public function with($key, $value = null)
+    /**
+     * Flashes data to the session.
+     *
+     * @param string $key
+     */
+    public function with($key, $value = true)
+    {
+        Session::flash($key, $value);
+        
+        return $this;
+    }
+
+    public function withProperty($key, $value = null)
     {
         if (is_array($key)) {
             $this->props = array_merge($this->props, $key);

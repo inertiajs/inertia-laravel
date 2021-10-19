@@ -10,6 +10,7 @@ use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Http\Response as BaseResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Fluent;
 use Illuminate\View\View;
 use Inertia\LazyProp;
@@ -71,8 +72,7 @@ class ResponseTest extends TestCase
 
         $user = (object) ['name' => 'Jonathan'];
 
-        $resource = new class($user) extends JsonResource
-        {
+        $resource = new class($user) extends JsonResource {
             public static $wrap = null;
 
             public function toArray($request)
@@ -106,8 +106,7 @@ class ResponseTest extends TestCase
         $callable = function () use ($users) {
             $page = new LengthAwarePaginator($users->take(2), $users->count(), 2);
 
-            return new class($page, JsonResource::class) extends ResourceCollection
-            {
+            return new class($page, JsonResource::class) extends ResourceCollection {
             };
         };
 
@@ -152,8 +151,7 @@ class ResponseTest extends TestCase
 
         $user = (object) ['name' => 'Jonathan'];
 
-        $resource = new class($user) implements Arrayable
-        {
+        $resource = new class($user) implements Arrayable {
             public $user;
 
             public function __construct($user)
@@ -258,4 +256,31 @@ class ResponseTest extends TestCase
         $this->assertSame('Jonathan Reinink', $user['name']);
         $this->assertTrue($user['can']['deleteProducts']);
     }
+
+    public function test_with_props()
+    {
+        $request = Request::create('/dashboard', 'GET');
+        $view = (new Response('Dashboard', []))
+            ->withProperty('name', 'Makise Kurisu')
+            ->toResponse($request)
+            ->getOriginalContent();
+
+        $name = $view->getData()['page']['props']['name'];
+        
+        $this->assertEquals('Makise Kurisu', $name);
+    }
+
+    public function test_with_flash_data()
+    {
+        $request = Request::create('/dashboard', 'GET');
+        $view = (new Response('Dashboard', []))
+            ->with('success', 'This functionality works')
+            ->toResponse($request)
+            ->getOriginalContent();
+
+
+        $this->assertEmpty($view->getData()['page']['props']);
+        $this->assertEquals('This functionality works', Session::get('success'));
+    }
 }
+;
