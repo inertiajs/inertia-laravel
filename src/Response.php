@@ -33,12 +33,12 @@ class Response implements Responsable
     /**
      * Flashes data to the session.
      *
-     * @param string $key
+     * @param  string  $key
      */
     public function with($key, $value = true)
     {
         Session::flash($key, $value);
-        
+
         return $this;
     }
 

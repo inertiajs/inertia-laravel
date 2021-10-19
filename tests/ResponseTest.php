@@ -72,7 +72,8 @@ class ResponseTest extends TestCase
 
         $user = (object) ['name' => 'Jonathan'];
 
-        $resource = new class($user) extends JsonResource {
+        $resource = new class($user) extends JsonResource
+        {
             public static $wrap = null;
 
             public function toArray($request)
@@ -106,7 +107,8 @@ class ResponseTest extends TestCase
         $callable = function () use ($users) {
             $page = new LengthAwarePaginator($users->take(2), $users->count(), 2);
 
-            return new class($page, JsonResource::class) extends ResourceCollection {
+            return new class($page, JsonResource::class) extends ResourceCollection
+            {
             };
         };
 
@@ -151,7 +153,8 @@ class ResponseTest extends TestCase
 
         $user = (object) ['name' => 'Jonathan'];
 
-        $resource = new class($user) implements Arrayable {
+        $resource = new class($user) implements Arrayable
+        {
             public $user;
 
             public function __construct($user)
@@ -266,7 +269,7 @@ class ResponseTest extends TestCase
             ->getOriginalContent();
 
         $name = $view->getData()['page']['props']['name'];
-        
+
         $this->assertEquals('Makise Kurisu', $name);
     }
 
@@ -278,9 +281,7 @@ class ResponseTest extends TestCase
             ->toResponse($request)
             ->getOriginalContent();
 
-
         $this->assertEmpty($view->getData()['page']['props']);
         $this->assertEquals('This functionality works', Session::get('success'));
     }
 }
-;
