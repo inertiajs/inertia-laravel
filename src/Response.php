@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Response as ResponseFactory;
 use Illuminate\Support\Traits\Macroable;
 use GuzzleHttp\Promise\PromiseInterface;
+
 class Response implements Responsable
 {
     use Macroable;
