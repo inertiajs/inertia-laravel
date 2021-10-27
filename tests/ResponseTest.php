@@ -2,6 +2,7 @@
 
 namespace Inertia\Tests;
 
+use GuzzleHttp\Promise\FulFilledPromise;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -12,7 +13,6 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Fluent;
 use Illuminate\View\View;
-use GuzzleHttp\Promise\FulFilledPromise;
 use Inertia\LazyProp;
 use Inertia\Response;
 

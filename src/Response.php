@@ -3,6 +3,7 @@
 namespace Inertia;
 
 use Closure;
+use GuzzleHttp\Promise\PromiseInterface;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\JsonResponse;
@@ -10,7 +11,6 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Response as ResponseFactory;
 use Illuminate\Support\Traits\Macroable;
-use GuzzleHttp\Promise\PromiseInterface;
 
 class Response implements Responsable
 {
@@ -68,7 +68,6 @@ class Response implements Responsable
             : array_filter($this->props, function ($prop) {
                 return ! ($prop instanceof LazyProp);
             });
-            
         array_walk_recursive($props, function (&$prop) use ($request) {
             if ($prop instanceof LazyProp) {
                 $prop = App::call($prop);
