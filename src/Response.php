@@ -68,6 +68,7 @@ class Response implements Responsable
             : array_filter($this->props, function ($prop) {
                 return ! ($prop instanceof LazyProp);
             });
+
         array_walk_recursive($props, function (&$prop) use ($request) {
             if ($prop instanceof LazyProp) {
                 $prop = App::call($prop);
