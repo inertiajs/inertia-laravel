@@ -27,7 +27,8 @@
     "require": {
         "php": "^7.2|^8.0",
         "ext-json": "*",
-        "laravel/framework": "^5.4|^6.0|^7.0|^8.0"
+        "laravel/framework": "^5.4|^6.0|^7.0|^8.0",
+        "guzzlehttp/promises": "^1.5"
     },
     "require-dev": {
         "roave/security-advisories": "dev-master",

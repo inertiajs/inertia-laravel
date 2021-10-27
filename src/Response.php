@@ -10,7 +10,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Response as ResponseFactory;
 use Illuminate\Support\Traits\Macroable;
-
+use GuzzleHttp\Promise\PromiseInterface;
 class Response implements Responsable
 {
     use Macroable;
@@ -67,7 +67,7 @@ class Response implements Responsable
             : array_filter($this->props, function ($prop) {
                 return ! ($prop instanceof LazyProp);
             });
-
+            
         array_walk_recursive($props, function (&$prop) use ($request) {
             if ($prop instanceof LazyProp) {
                 $prop = App::call($prop);
@@ -83,6 +83,10 @@ class Response implements Responsable
 
             if ($prop instanceof Arrayable) {
                 $prop = $prop->toArray();
+            }
+
+            if ($prop instanceof PromiseInterface) {
+                $prop = $prop->wait();
             }
         });
 
