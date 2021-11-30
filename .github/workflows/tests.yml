@@ -13,11 +13,11 @@ jobs:
       fail-fast: true
       matrix:
         php: [ 7.2, 7.3, 7.4, 8.0, 8.1 ]
-        laravel: [ ^6.0, ^7.0, ^8.0 ]
+        laravel: [ ^6.0, ^7.0, ^8.74 ]
         composerFlags: ['--prefer-lowest', '']
         exclude:
           - php: 7.2
-            laravel: ^8.0
+            laravel: ^8.74
           - php: 8.1
             laravel: ^6.0
           - php: 8.1
