@@ -32,7 +32,7 @@
     "require-dev": {
         "roave/security-advisories": "dev-master",
         "orchestra/testbench": "^4.0|^5.0|^6.0",
-        "phpunit/phpunit": "^8.0|^9.3"
+        "phpunit/phpunit": "^8.0|^9.5.8"
     },
     "extra": {
         "laravel": {
