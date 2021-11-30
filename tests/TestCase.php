@@ -32,6 +32,7 @@ abstract class TestCase extends Orchestra
 
     /**
      * @return string
+     *
      * @throws LogicException
      */
     protected function getTestResponseClass(): string
