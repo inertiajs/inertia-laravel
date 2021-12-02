@@ -11,7 +11,6 @@ use Inertia\Inertia;
 use Inertia\LazyProp;
 use Inertia\ResponseFactory;
 use Inertia\Tests\Stubs\ExampleMiddleware;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class ResponseFactoryTest extends TestCase
 {
@@ -37,7 +36,7 @@ class ResponseFactoryTest extends TestCase
         $this->assertEquals(Response::HTTP_CONFLICT, $response->getStatusCode());
         $this->assertEquals('https://inertiajs.com', $response->headers->get('X-Inertia-Location'));
     }
-  
+
     public function test_location_response_for_non_inertia_requests()
     {
         Request::macro('inertia', function () {
@@ -51,14 +50,28 @@ class ResponseFactoryTest extends TestCase
         $this->assertEquals('https://inertiajs.com', $response->headers->get('location'));
     }
 
-    public function test_location_response_from_redirect_response()
+    public function test_location_response_for_inertia_requests_using_redirect_response()
     {
+        Request::macro('inertia', function () {
+            return true;
+        });
+
         $redirect = new RedirectResponse('https://inertiajs.com');
         $response = (new ResponseFactory())->location($redirect);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertEquals(409, $response->getStatusCode());
         $this->assertEquals('https://inertiajs.com', $response->headers->get('X-Inertia-Location'));
+    }
+
+    public function test_location_response_for_non_inertia_requests_using_redirect_response()
+    {
+        $redirect = new RedirectResponse('https://inertiajs.com');
+        $response = (new ResponseFactory())->location($redirect);
+
+        $this->assertInstanceOf(RedirectResponse::class, $response);
+        $this->assertEquals(Response::HTTP_FOUND, $response->getStatusCode());
+        $this->assertEquals('https://inertiajs.com', $response->headers->get('location'));
     }
 
     public function test_the_version_can_be_a_closure()
