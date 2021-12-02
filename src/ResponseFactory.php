@@ -4,8 +4,10 @@ namespace Inertia;
 
 use Closure;
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response as BaseResponse;
 use Illuminate\Support\Traits\Macroable;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -82,11 +84,15 @@ class ResponseFactory
     }
 
     public function location($url)
-    {
+    { 
         if ($url instanceof RedirectResponse) {
             $url = $url->getTargetUrl();
         }
-
-        return BaseResponse::make('', 409, ['X-Inertia-Location' => $url]);
+      
+        if (Request::inertia()) {
+            return BaseResponse::make('', 409, ['X-Inertia-Location' => $url]);
+        }
+      
+        return new RedirectResponse($url);
     }
 }
