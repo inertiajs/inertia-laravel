@@ -2,8 +2,10 @@
 
 namespace Inertia\Tests;
 
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\LazyProp;
@@ -22,13 +24,30 @@ class ResponseFactoryTest extends TestCase
         $this->assertEquals('bar', $factory->foo());
     }
 
-    public function test_location_response()
+    public function test_location_response_for_inertia_requests()
     {
+        Request::macro('inertia', function () {
+            return true;
+        });
+
         $response = (new ResponseFactory())->location('https://inertiajs.com');
 
         $this->assertInstanceOf(Response::class, $response);
-        $this->assertEquals(409, $response->getStatusCode());
+        $this->assertEquals(Response::HTTP_CONFLICT, $response->getStatusCode());
         $this->assertEquals('https://inertiajs.com', $response->headers->get('X-Inertia-Location'));
+    }
+
+    public function test_location_response_for_non_inertia_requests()
+    {
+        Request::macro('inertia', function () {
+            return false;
+        });
+
+        $response = (new ResponseFactory())->location('https://inertiajs.com');
+
+        $this->assertInstanceOf(RedirectResponse::class, $response);
+        $this->assertEquals(Response::HTTP_FOUND, $response->getStatusCode());
+        $this->assertEquals('https://inertiajs.com', $response->headers->get('location'));
     }
 
     public function test_the_version_can_be_a_closure()
