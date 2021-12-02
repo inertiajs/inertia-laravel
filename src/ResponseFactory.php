@@ -84,6 +84,10 @@ class ResponseFactory
 
     public function location($url)
     {
+        if ($url instanceof RedirectResponse) {
+            $url = $url->getTargetUrl();
+        }
+
         if (Request::inertia()) {
             return BaseResponse::make('', 409, ['X-Inertia-Location' => $url]);
         }
