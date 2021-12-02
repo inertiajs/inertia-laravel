@@ -78,7 +78,7 @@ class Response implements Responsable
             }
 
             if ($prop instanceof Responsable) {
-                $prop = $prop->toResponse($request)->getData();
+                $prop = $prop->toResponse($request)->getData(true);
             }
 
             if ($prop instanceof Arrayable) {
