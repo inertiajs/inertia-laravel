@@ -85,7 +85,9 @@ class Response implements Responsable
             if ($prop instanceof Arrayable) {
                 $prop = $prop->toArray();
             }
+        });
 
+        array_walk_recursive($props, function (&$prop) {
             if ($prop instanceof PromiseInterface) {
                 $prop = $prop->wait();
             }
