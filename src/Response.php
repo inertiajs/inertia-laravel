@@ -60,7 +60,7 @@ class Response implements Responsable
 
     public function toResponse($request)
     {
-        $only = array_filter(explode(',', $request->header('X-Inertia-Partial-Data')));
+        $only = array_filter(explode(',', $request->header('X-Inertia-Partial-Data', '')));
 
         $props = ($only && $request->header('X-Inertia-Partial-Component') === $this->component)
             ? Arr::only($this->props, $only)
@@ -78,7 +78,7 @@ class Response implements Responsable
             }
 
             if ($prop instanceof Responsable) {
-                $prop = $prop->toResponse($request)->getData();
+                $prop = $prop->toResponse($request)->getData(true);
             }
 
             if ($prop instanceof Arrayable) {
