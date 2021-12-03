@@ -2,7 +2,6 @@
 
 namespace Inertia\Tests;
 
-use GuzzleHttp\Promise\FulFilledPromise;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -15,6 +14,7 @@ use Illuminate\Support\Fluent;
 use Illuminate\View\View;
 use Inertia\LazyProp;
 use Inertia\Response;
+use Mockery;
 
 class ResponseTest extends TestCase
 {
@@ -186,7 +186,10 @@ class ResponseTest extends TestCase
 
         $user = (object) ['name' => 'Jonathan'];
 
-        $promise = new FulFilledPromise($user);
+        $promise = Mockery::mock('GuzzleHttp\Promise\PromiseInterface')
+            ->shouldReceive('wait')
+            ->andReturn($user)
+            ->mock();
 
         $response = new Response('User/Edit', ['user' => $promise], 'app', '123');
         $response = $response->toResponse($request);
