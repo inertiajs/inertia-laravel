@@ -7,7 +7,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 class FakeResource extends JsonResource
 {
     /**
-     * @var array $data
+     * @var array
      */
     private $data;
 
