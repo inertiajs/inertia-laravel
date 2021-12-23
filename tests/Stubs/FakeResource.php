@@ -24,6 +24,6 @@ class FakeResource extends JsonResource
      */
     public function toArray($request)
     {
-       return $this->data;
+        return $this->data;
     }
 }
