@@ -6,7 +6,10 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class FakeResource extends JsonResource
 {
-    private array $data;
+    /**
+     * @var array $data
+     */
+    private $data;
 
     public static $wrap = null;
 
