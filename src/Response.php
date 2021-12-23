@@ -6,6 +6,8 @@ use Closure;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Resources\Json\ResourceResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Response as ResponseFactory;
@@ -77,7 +79,7 @@ class Response implements Responsable
                 $prop = App::call($prop);
             }
 
-            if ($prop instanceof Responsable) {
+            if ($prop instanceof ResourceResponse || $prop instanceof JsonResource) {
                 $prop = $prop->toResponse($request)->getData(true);
             }
 
