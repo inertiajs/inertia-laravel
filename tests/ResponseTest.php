@@ -2,8 +2,6 @@
 
 namespace Inertia\Tests;
 
-use Illuminate\Contracts\Support\Arrayable;
-use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -16,7 +14,6 @@ use Illuminate\View\View;
 use Inertia\LazyProp;
 use Inertia\Response;
 use Inertia\Tests\Stubs\FakeResource;
-use Inertia\Tests\Stubs\UserResource;
 
 class ResponseTest extends TestCase
 {
