@@ -14,7 +14,7 @@ use Inertia\Tests\Stubs\ExampleMiddleware;
 
 class ResponseFactoryTest extends TestCase
 {
-    public function test_can_macro()
+    public function test_can_macro(): void
     {
         $factory = new ResponseFactory();
         $factory->macro('foo', function () {
@@ -24,7 +24,7 @@ class ResponseFactoryTest extends TestCase
         $this->assertEquals('bar', $factory->foo());
     }
 
-    public function test_location_response_for_inertia_requests()
+    public function test_location_response_for_inertia_requests(): void
     {
         Request::macro('inertia', function () {
             return true;
@@ -37,7 +37,7 @@ class ResponseFactoryTest extends TestCase
         $this->assertEquals('https://inertiajs.com', $response->headers->get('X-Inertia-Location'));
     }
 
-    public function test_location_response_for_non_inertia_requests()
+    public function test_location_response_for_non_inertia_requests(): void
     {
         Request::macro('inertia', function () {
             return false;
@@ -50,7 +50,7 @@ class ResponseFactoryTest extends TestCase
         $this->assertEquals('https://inertiajs.com', $response->headers->get('location'));
     }
 
-    public function test_location_response_for_inertia_requests_using_redirect_response()
+    public function test_location_response_for_inertia_requests_using_redirect_response(): void
     {
         Request::macro('inertia', function () {
             return true;
@@ -64,7 +64,7 @@ class ResponseFactoryTest extends TestCase
         $this->assertEquals('https://inertiajs.com', $response->headers->get('X-Inertia-Location'));
     }
 
-    public function test_location_response_for_non_inertia_requests_using_redirect_response()
+    public function test_location_response_for_non_inertia_requests_using_redirect_response(): void
     {
         $redirect = new RedirectResponse('https://inertiajs.com');
         $response = (new ResponseFactory())->location($redirect);
@@ -74,7 +74,7 @@ class ResponseFactoryTest extends TestCase
         $this->assertEquals('https://inertiajs.com', $response->headers->get('location'));
     }
 
-    public function test_the_version_can_be_a_closure()
+    public function test_the_version_can_be_a_closure(): void
     {
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
             $this->assertSame('', Inertia::getVersion());
@@ -95,7 +95,7 @@ class ResponseFactoryTest extends TestCase
         $response->assertJson(['component' => 'User/Edit']);
     }
 
-    public function test_shared_data_can_be_shared_from_anywhere()
+    public function test_shared_data_can_be_shared_from_anywhere(): void
     {
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
             Inertia::share('foo', 'bar');
@@ -114,7 +114,7 @@ class ResponseFactoryTest extends TestCase
         ]);
     }
 
-    public function test_can_flush_shared_data()
+    public function test_can_flush_shared_data(): void
     {
         Inertia::share('foo', 'bar');
         $this->assertSame(['foo' => 'bar'], Inertia::getShared());
@@ -122,7 +122,7 @@ class ResponseFactoryTest extends TestCase
         $this->assertSame([], Inertia::getShared());
     }
 
-    public function test_can_create_lazy_prop()
+    public function test_can_create_lazy_prop(): void
     {
         $factory = new ResponseFactory();
         $lazyProp = $factory->lazy(function () {
