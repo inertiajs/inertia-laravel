@@ -2,8 +2,6 @@
 
 namespace Inertia\Tests;
 
-use Illuminate\Contracts\Support\Arrayable;
-use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -15,6 +13,7 @@ use Illuminate\Support\Fluent;
 use Illuminate\View\View;
 use Inertia\LazyProp;
 use Inertia\Response;
+use Inertia\Tests\Stubs\FakeResource;
 
 class ResponseTest extends TestCase
 {
@@ -70,17 +69,7 @@ class ResponseTest extends TestCase
         $request = Request::create('/user/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
 
-        $user = (object) ['name' => 'Jonathan'];
-
-        $resource = new class($user) extends JsonResource
-        {
-            public static $wrap = null;
-
-            public function toArray($request): array
-            {
-                return ['name' => $this->name];
-            }
-        };
+        $resource = new FakeResource(['name' => 'Jonathan']);
 
         $response = new Response('User/Edit', ['user' => $resource], 'app', '123');
         $response = $response->toResponse($request);
@@ -151,22 +140,7 @@ class ResponseTest extends TestCase
         $request = Request::create('/user/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
 
-        $user = (object) ['name' => 'Jonathan'];
-
-        $resource = new class($user) implements Arrayable
-        {
-            public $user;
-
-            public function __construct($user)
-            {
-                $this->user = $user;
-            }
-
-            public function toArray(): array
-            {
-                return ['name' => $this->user->name];
-            }
-        };
+        $resource = FakeResource::make(['name' => 'Jonathan']);
 
         $response = new Response('User/Edit', ['user' => $resource], 'app', '123');
         $response = $response->toResponse($request);
@@ -265,13 +239,7 @@ class ResponseTest extends TestCase
         $request = Request::create('/user/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
 
-        $resource = new class implements Responsable
-        {
-            public function toResponse($request): JsonResponse
-            {
-                return new JsonResponse(["\x00*\x00_invalid_key" => 'for object']);
-            }
-        };
+        $resource = new FakeResource(["\x00*\x00_invalid_key" => 'for object']);
 
         $response = new Response('User/Edit', ['resource' => $resource], 'app', '123');
         $response = $response->toResponse($request);
