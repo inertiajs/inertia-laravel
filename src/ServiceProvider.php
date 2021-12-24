@@ -10,7 +10,6 @@ use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use Illuminate\Testing\TestResponse;
 use Illuminate\View\FileViewFinder;
 use Inertia\Testing\TestResponseMacros;
-use Inertia\Controller;
 use LogicException;
 use ReflectionException;
 

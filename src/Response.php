@@ -24,10 +24,10 @@ class Response implements Responsable
     protected $viewData = [];
 
     /**
-     * @param string $component
-     * @param array|Arrayable $props
-     * @param string $rootView
-     * @param string $version
+     * @param  string  $component
+     * @param  array|Arrayable  $props
+     * @param  string  $rootView
+     * @param  string  $version
      */
     public function __construct(string $component, $props, string $rootView = 'app', string $version = '')
     {
@@ -38,8 +38,8 @@ class Response implements Responsable
     }
 
     /**
-     * @param string|array $key
-     * @param mixed|null $value
+     * @param  string|array  $key
+     * @param  mixed|null  $value
      * @return $this
      */
     public function with($key, $value = null): self
@@ -54,8 +54,8 @@ class Response implements Responsable
     }
 
     /**
-     * @param string|array $key
-     * @param mixed|null $value
+     * @param  string|array  $key
+     * @param  mixed|null  $value
      * @return $this
      */
     public function withViewData($key, $value = null): self
