@@ -50,7 +50,8 @@ abstract class TestCase extends Orchestra
         throw new LogicException('Could not detect TestResponse class.');
     }
 
-    protected function makeMockRequest($view): TestResponse
+    /** @returns TestResponse|LegacyTestResponse */
+    protected function makeMockRequest($view)
     {
         app('router')->get('/example-url', function () use ($view) {
             return $view;
