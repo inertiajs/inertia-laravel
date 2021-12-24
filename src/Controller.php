@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 
 class Controller
 {
-    public function __invoke(Request $request)
+    public function __invoke(Request $request): Response
     {
         return Inertia::render(
             $request->route()->defaults['component'],

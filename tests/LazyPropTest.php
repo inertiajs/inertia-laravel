@@ -7,7 +7,7 @@ use Inertia\LazyProp;
 
 class LazyPropTest extends TestCase
 {
-    public function test_can_invoke()
+    public function test_can_invoke(): void
     {
         $lazyProp = new LazyProp(function () {
             return 'A lazy value';
@@ -16,7 +16,7 @@ class LazyPropTest extends TestCase
         $this->assertSame('A lazy value', $lazyProp());
     }
 
-    public function test_can_resolve_bindings_when_invoked()
+    public function test_can_resolve_bindings_when_invoked(): void
     {
         $lazyProp = new LazyProp(function (Request $request) {
             return $request;

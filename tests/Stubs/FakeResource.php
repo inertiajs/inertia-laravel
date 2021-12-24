@@ -6,8 +6,18 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class FakeResource extends JsonResource
 {
-    private array $data;
+    /**
+     * The data that will be used.
+     *
+     * @var array
+     */
+    private $data;
 
+    /**
+     * The "data" wrapper that should be applied.
+     *
+     * @var string|null
+     */
     public static $wrap = null;
 
     public function __construct(array $resource)
@@ -22,7 +32,7 @@ class FakeResource extends JsonResource
      * @param  \Illuminate\Http\Request  $request
      * @return array
      */
-    public function toArray($request)
+    public function toArray($request): array
     {
         return $this->data;
     }

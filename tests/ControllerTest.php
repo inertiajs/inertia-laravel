@@ -9,7 +9,7 @@ use Inertia\Tests\Stubs\ExampleMiddleware;
 
 class ControllerTest extends TestCase
 {
-    public function test_controller_returns_an_inertia_response()
+    public function test_controller_returns_an_inertia_response(): void
     {
         Route::middleware([StartSession::class, ExampleMiddleware::class])
             ->get('/', Controller::class)

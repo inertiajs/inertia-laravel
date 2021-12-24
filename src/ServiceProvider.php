@@ -11,10 +11,11 @@ use Illuminate\Testing\TestResponse;
 use Illuminate\View\FileViewFinder;
 use Inertia\Testing\TestResponseMacros;
 use LogicException;
+use ReflectionException;
 
 class ServiceProvider extends BaseServiceProvider
 {
-    public function register()
+    public function register(): void
     {
         $this->app->singleton(ResponseFactory::class);
 
@@ -36,7 +37,7 @@ class ServiceProvider extends BaseServiceProvider
         });
     }
 
-    public function boot()
+    public function boot(): void
     {
         $this->registerBladeDirective();
         $this->registerConsoleCommands();
@@ -46,14 +47,14 @@ class ServiceProvider extends BaseServiceProvider
         ]);
     }
 
-    protected function registerBladeDirective()
+    protected function registerBladeDirective(): void
     {
         Blade::directive('inertia', function () {
             return '<div id="app" data-page="{{ json_encode($page) }}"></div>';
         });
     }
 
-    protected function registerConsoleCommands()
+    protected function registerConsoleCommands(): void
     {
         if (! $this->app->runningInConsole()) {
             return;
@@ -64,23 +65,26 @@ class ServiceProvider extends BaseServiceProvider
         ]);
     }
 
-    protected function registerRequestMacro()
+    protected function registerRequestMacro(): void
     {
         Request::macro('inertia', function () {
-            return boolval($this->header('X-Inertia'));
+            return (bool) $this->header('X-Inertia');
         });
     }
 
-    protected function registerRouterMacro()
+    protected function registerRouterMacro(): void
     {
         Router::macro('inertia', function ($uri, $component, $props = []) {
-            return $this->match(['GET', 'HEAD'], $uri, '\Inertia\Controller')
+            return $this->match(['GET', 'HEAD'], $uri, Controller::class)
                 ->defaults('component', $component)
                 ->defaults('props', $props);
         });
     }
 
-    protected function registerTestingMacros()
+    /**
+     * @throws ReflectionException|LogicException
+     */
+    protected function registerTestingMacros(): void
     {
         if (class_exists(TestResponse::class)) {
             TestResponse::mixin(new TestResponseMacros());

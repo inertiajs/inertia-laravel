@@ -26,13 +26,13 @@ class Assert implements Arrayable
     /** @var string */
     private $url;
 
-    /** @var mixed|null */
+    /** @var string|null */
     private $version;
 
     /** @var string */
     private $path;
 
-    protected function __construct(string $component, array $props, string $url, $version = null, string $path = null)
+    protected function __construct(string $component, array $props, string $url, string $version = null, string $path = null)
     {
         $this->path = $path;
 
@@ -42,7 +42,7 @@ class Assert implements Arrayable
         $this->version = $version;
     }
 
-    protected function dotPath($key): string
+    protected function dotPath(string $key): string
     {
         if (is_null($this->path)) {
             return $key;
@@ -51,7 +51,7 @@ class Assert implements Arrayable
         return implode('.', [$this->path, $key]);
     }
 
-    protected function scope($key, Closure $callback): self
+    protected function scope(string $key, Closure $callback): self
     {
         $props = $this->prop($key);
         $path = $this->dotPath($key);

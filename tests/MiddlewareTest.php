@@ -14,7 +14,7 @@ use Inertia\Tests\Stubs\ExampleMiddleware;
 
 class MiddlewareTest extends TestCase
 {
-    public function test_the_version_is_optional()
+    public function test_the_version_is_optional(): void
     {
         $this->prepareMockEndpoint();
 
@@ -26,7 +26,7 @@ class MiddlewareTest extends TestCase
         $response->assertJson(['component' => 'User/Edit']);
     }
 
-    public function test_the_version_can_be_a_number()
+    public function test_the_version_can_be_a_number(): void
     {
         $this->prepareMockEndpoint($version = 1597347897973);
 
@@ -39,7 +39,7 @@ class MiddlewareTest extends TestCase
         $response->assertJson(['component' => 'User/Edit']);
     }
 
-    public function test_the_version_can_be_a_string()
+    public function test_the_version_can_be_a_string(): void
     {
         $this->prepareMockEndpoint($version = 'foo-version');
 
@@ -52,7 +52,7 @@ class MiddlewareTest extends TestCase
         $response->assertJson(['component' => 'User/Edit']);
     }
 
-    public function test_it_will_instruct_inertia_to_reload_on_a_version_mismatch()
+    public function test_it_will_instruct_inertia_to_reload_on_a_version_mismatch(): void
     {
         $this->prepareMockEndpoint('1234');
 
@@ -66,7 +66,7 @@ class MiddlewareTest extends TestCase
         self::assertEmpty($response->getContent());
     }
 
-    public function test_validation_errors_are_registered_as_of_default()
+    public function test_validation_errors_are_registered_as_of_default(): void
     {
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
             $this->assertInstanceOf(\Closure::class, Inertia::getShared('errors'));
@@ -75,7 +75,7 @@ class MiddlewareTest extends TestCase
         $this->withoutExceptionHandling()->get('/');
     }
 
-    public function test_validation_errors_can_be_empty()
+    public function test_validation_errors_can_be_empty(): void
     {
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
             $errors = Inertia::getShared('errors')();
@@ -87,7 +87,7 @@ class MiddlewareTest extends TestCase
         $this->withoutExceptionHandling()->get('/');
     }
 
-    public function test_validation_errors_are_returned_in_the_correct_format()
+    public function test_validation_errors_are_returned_in_the_correct_format(): void
     {
         Session::put('errors', (new ViewErrorBag())->put('default', new MessageBag([
             'name' => 'The name field is required.',
@@ -105,7 +105,7 @@ class MiddlewareTest extends TestCase
         $this->withoutExceptionHandling()->get('/');
     }
 
-    public function test_validation_errors_with_named_error_bags_are_scoped()
+    public function test_validation_errors_with_named_error_bags_are_scoped(): void
     {
         Session::put('errors', (new ViewErrorBag())->put('example', new MessageBag([
             'name' => 'The name field is required.',
@@ -123,7 +123,7 @@ class MiddlewareTest extends TestCase
         $this->withoutExceptionHandling()->get('/');
     }
 
-    public function test_default_validation_errors_can_be_overwritten()
+    public function test_default_validation_errors_can_be_overwritten(): void
     {
         Session::put('errors', (new ViewErrorBag())->put('example', new MessageBag([
             'name' => 'The name field is required.',
@@ -140,7 +140,7 @@ class MiddlewareTest extends TestCase
         ]);
     }
 
-    public function test_validation_errors_are_scoped_to_error_bag_header()
+    public function test_validation_errors_are_scoped_to_error_bag_header(): void
     {
         Session::put('errors', (new ViewErrorBag())->put('default', new MessageBag([
             'name' => 'The name field is required.',
@@ -158,7 +158,7 @@ class MiddlewareTest extends TestCase
         $this->withoutExceptionHandling()->get('/', ['X-Inertia-Error-Bag' => 'example']);
     }
 
-    public function test_middleware_can_change_the_root_view_via_a_property()
+    public function test_middleware_can_change_the_root_view_via_a_property(): void
     {
         $this->prepareMockEndpoint(null, [], new class extends Middleware
         {
@@ -170,11 +170,11 @@ class MiddlewareTest extends TestCase
         $response->assertViewIs('welcome');
     }
 
-    public function test_middleware_can_change_the_root_view_by_overriding_the_rootview_method()
+    public function test_middleware_can_change_the_root_view_by_overriding_the_rootview_method(): void
     {
         $this->prepareMockEndpoint(null, [], new class extends Middleware
         {
-            public function rootView(Request $request)
+            public function rootView(Request $request): string
             {
                 return 'welcome';
             }
@@ -185,7 +185,7 @@ class MiddlewareTest extends TestCase
         $response->assertViewIs('welcome');
     }
 
-    private function prepareMockEndpoint($version = null, $shared = [], $middleware = null)
+    private function prepareMockEndpoint($version = null, $shared = [], $middleware = null): \Illuminate\Routing\Route
     {
         if (is_null($middleware)) {
             $middleware = new ExampleMiddleware($version, $shared);
