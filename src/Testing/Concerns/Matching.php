@@ -4,7 +4,6 @@ namespace Inertia\Testing\Concerns;
 
 use Closure;
 use Illuminate\Contracts\Support\Arrayable;
-use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceResponse;
 use Illuminate\Support\Collection;
