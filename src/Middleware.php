@@ -87,9 +87,8 @@ class Middleware
 
         $response = $next($request);
         $response = $this->checkVersion($request, $response);
-        $response = $this->changeRedirectCode($request, $response);
 
-        return $response;
+        return $this->changeRedirectCode($request, $response);
     }
 
     /**

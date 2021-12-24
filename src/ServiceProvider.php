@@ -10,7 +10,9 @@ use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use Illuminate\Testing\TestResponse;
 use Illuminate\View\FileViewFinder;
 use Inertia\Testing\TestResponseMacros;
+use Inertia\Controller;
 use LogicException;
+use ReflectionException;
 
 class ServiceProvider extends BaseServiceProvider
 {
@@ -67,19 +69,22 @@ class ServiceProvider extends BaseServiceProvider
     protected function registerRequestMacro(): void
     {
         Request::macro('inertia', function () {
-            return boolval($this->header('X-Inertia'));
+            return (bool) $this->header('X-Inertia');
         });
     }
 
     protected function registerRouterMacro(): void
     {
         Router::macro('inertia', function ($uri, $component, $props = []) {
-            return $this->match(['GET', 'HEAD'], $uri, '\Inertia\Controller')
+            return $this->match(['GET', 'HEAD'], $uri, Controller::class)
                 ->defaults('component', $component)
                 ->defaults('props', $props);
         });
     }
 
+    /**
+     * @throws ReflectionException|LogicException
+     */
     protected function registerTestingMacros(): void
     {
         if (class_exists(TestResponse::class)) {

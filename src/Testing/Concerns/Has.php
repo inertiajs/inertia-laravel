@@ -9,7 +9,7 @@ use PHPUnit\Framework\Assert as PHPUnit;
 
 trait Has
 {
-    protected function count(string $key, $length): self
+    protected function count(string $key, int $length): self
     {
         PHPUnit::assertCount(
             $length,
@@ -35,6 +35,12 @@ trait Has
         return $this;
     }
 
+    /**
+     * @param string $key
+     * @param mixed|null $value
+     * @param Closure|null $scope
+     * @return $this
+     */
     public function has(string $key, $value = null, Closure $scope = null): self
     {
         PHPUnit::assertTrue(
@@ -105,9 +111,9 @@ trait Has
 
     abstract protected function prop(string $key = null);
 
-    abstract protected function dotPath($key): string;
+    abstract protected function dotPath(string $key): string;
 
     abstract protected function interactsWith(string $key): void;
 
-    abstract protected function scope($key, Closure $callback);
+    abstract protected function scope(string $key, Closure $callback);
 }

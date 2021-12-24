@@ -15,15 +15,24 @@ class ResponseFactory
 {
     use Macroable;
 
+    /** @var string */
     protected $rootView = 'app';
+
+    /** @var array */
     protected $sharedProps = [];
-    protected $version = null;
+
+    /** @var Closure|string|null */
+    protected $version;
 
     public function setRootView(string $name): void
     {
         $this->rootView = $name;
     }
 
+    /**
+     * @param string|array|Arrayable $key
+     * @param mixed|null $value
+     */
     public function share($key, $value = null): void
     {
         if (is_array($key)) {
@@ -35,7 +44,12 @@ class ResponseFactory
         }
     }
 
-    public function getShared($key = null, $default = null)
+    /**
+     * @param string|null $key
+     * @param null|mixed $default
+     * @return mixed
+     */
+    public function getShared(string $key = null, $default = null)
     {
         if ($key) {
             return Arr::get($this->sharedProps, $key, $default);
@@ -49,6 +63,9 @@ class ResponseFactory
         $this->sharedProps = [];
     }
 
+    /**
+     * @param Closure|string|null $version
+     */
     public function version($version): void
     {
         $this->version = $version;
@@ -82,7 +99,10 @@ class ResponseFactory
         );
     }
 
-    public function location(string $url): \Illuminate\Http\Response
+    /**
+     * @param string|RedirectResponse $url
+     */
+    public function location($url): \Symfony\Component\HttpFoundation\Response
     {
         if ($url instanceof RedirectResponse) {
             $url = $url->getTargetUrl();
