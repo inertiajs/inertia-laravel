@@ -36,9 +36,9 @@ trait Has
     }
 
     /**
-     * @param string $key
-     * @param mixed|null $value
-     * @param Closure|null $scope
+     * @param  string  $key
+     * @param  mixed|null  $value
+     * @param  Closure|null  $scope
      * @return $this
      */
     public function has(string $key, $value = null, Closure $scope = null): self

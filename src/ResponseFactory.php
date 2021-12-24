@@ -30,8 +30,8 @@ class ResponseFactory
     }
 
     /**
-     * @param string|array|Arrayable $key
-     * @param mixed|null $value
+     * @param  string|array|Arrayable  $key
+     * @param  mixed|null  $value
      */
     public function share($key, $value = null): void
     {
@@ -45,8 +45,8 @@ class ResponseFactory
     }
 
     /**
-     * @param string|null $key
-     * @param null|mixed $default
+     * @param  string|null  $key
+     * @param  null|mixed  $default
      * @return mixed
      */
     public function getShared(string $key = null, $default = null)
@@ -64,7 +64,7 @@ class ResponseFactory
     }
 
     /**
-     * @param Closure|string|null $version
+     * @param  Closure|string|null  $version
      */
     public function version($version): void
     {
@@ -100,7 +100,7 @@ class ResponseFactory
     }
 
     /**
-     * @param string|RedirectResponse $url
+     * @param  string|RedirectResponse  $url
      */
     public function location($url): \Symfony\Component\HttpFoundation\Response
     {
