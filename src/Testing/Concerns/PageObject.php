@@ -35,7 +35,7 @@ trait PageObject
         return $this;
     }
 
-    public function version($value): self
+    public function version(string $value): self
     {
         PHPUnit::assertSame($value, $this->version, 'Unexpected Inertia asset version.');
 

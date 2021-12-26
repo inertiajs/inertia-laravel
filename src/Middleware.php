@@ -12,6 +12,7 @@ class Middleware
      * The root template that's loaded on the first page visit.
      *
      * @see https://inertiajs.com/server-side-setup#root-template
+     *
      * @var string
      */
     protected $rootView = 'app';
@@ -20,10 +21,11 @@ class Middleware
      * Determines the current asset version.
      *
      * @see https://inertiajs.com/asset-versioning
+     *
      * @param  \Illuminate\Http\Request  $request
      * @return string|null
      */
-    public function version(Request $request)
+    public function version(Request $request): ?string
     {
         if (config('app.asset_url')) {
             return md5(config('app.asset_url'));
@@ -32,16 +34,19 @@ class Middleware
         if (file_exists($manifest = public_path('mix-manifest.json'))) {
             return md5_file($manifest);
         }
+
+        return null;
     }
 
     /**
      * Defines the props that are shared by default.
      *
      * @see https://inertiajs.com/shared-data
+     *
      * @param  \Illuminate\Http\Request  $request
      * @return array
      */
-    public function share(Request $request)
+    public function share(Request $request): array
     {
         return [
             'errors' => function () use ($request) {
@@ -54,10 +59,11 @@ class Middleware
      * Sets the root template that's loaded on the first page visit.
      *
      * @see https://inertiajs.com/server-side-setup#root-template
-     * @param Request $request
+     *
+     * @param  Request  $request
      * @return string
      */
-    public function rootView(Request $request)
+    public function rootView(Request $request): string
     {
         return $this->rootView;
     }
@@ -69,7 +75,7 @@ class Middleware
      * @param  Closure  $next
      * @return Response
      */
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): Response
     {
         Inertia::version(function () use ($request) {
             return $this->version($request);
@@ -81,9 +87,8 @@ class Middleware
 
         $response = $next($request);
         $response = $this->checkVersion($request, $response);
-        $response = $this->changeRedirectCode($request, $response);
 
-        return $response;
+        return $this->changeRedirectCode($request, $response);
     }
 
     /**
@@ -94,7 +99,7 @@ class Middleware
      * @param  Response  $response
      * @return Response
      */
-    public function checkVersion(Request $request, Response $response)
+    public function checkVersion(Request $request, Response $response): Response
     {
         if ($request->header('X-Inertia') &&
             $request->method() === 'GET' &&
@@ -118,7 +123,7 @@ class Middleware
      * @param  Response  $response
      * @return Response
      */
-    public function changeRedirectCode(Request $request, Response $response)
+    public function changeRedirectCode(Request $request, Response $response): Response
     {
         if ($request->header('X-Inertia') &&
             $response->getStatusCode() === 302 &&
@@ -137,7 +142,7 @@ class Middleware
      * @param  Request  $request
      * @return object
      */
-    public function resolveValidationErrors(Request $request)
+    public function resolveValidationErrors(Request $request): object
     {
         if (! $request->session()->has('errors')) {
             return (object) [];
@@ -150,11 +155,13 @@ class Middleware
         })->pipe(function ($bags) use ($request) {
             if ($bags->has('default') && $request->header('x-inertia-error-bag')) {
                 return [$request->header('x-inertia-error-bag') => $bags->get('default')];
-            } elseif ($bags->has('default')) {
-                return $bags->get('default');
-            } else {
-                return $bags->toArray();
             }
+
+            if ($bags->has('default')) {
+                return $bags->get('default');
+            }
+
+            return $bags->toArray();
         });
     }
 }
