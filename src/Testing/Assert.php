@@ -38,7 +38,7 @@ class Assert implements Arrayable
         echo "\033[0;31m - If you are seeing this error while using \$response->assertInertia(...), please upgrade to Laravel 8.32.0 or higher.\033[0m\n";
         echo "\033[0;31m - If you are using the 'Assert' class directly, please adapt your tests to use the 'AssertableInertia' class instead.\033[0m\n";
         echo "\033[0;31mFor more information and questions, please see https://github.com/inertiajs/inertia-laravel/pull/338 \033[0m\n\n";
-        @trigger_error("Inertia's built-in 'Assert' library will be removed in a future version of inertia-laravel", \E_USER_DEPRECATED);
+        @trigger_error("Inertia's built-in 'Assert' library will be removed in a future version of inertia-laravel: https://github.com/inertiajs/inertia-laravel/pull/338", \E_USER_DEPRECATED);
 
         $this->path = $path;
 
