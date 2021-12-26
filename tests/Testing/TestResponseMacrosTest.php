@@ -2,6 +2,7 @@
 
 namespace Inertia\Tests\Testing;
 
+use Illuminate\Testing\Fluent\AssertableJson;
 use Inertia\Inertia;
 use Inertia\Testing\Assert;
 use Inertia\Tests\TestCase;
@@ -17,7 +18,12 @@ class TestResponseMacrosTest extends TestCase
 
         $success = false;
         $response->assertInertia(function ($page) use (&$success) {
-            $this->assertInstanceOf(Assert::class, $page);
+            if (class_exists(AssertableJson::class)) {
+                $this->assertInstanceOf(AssertableJson::class, $page);
+            } else {
+                // TODO: Remove once built-in Assert library is removed.
+                $this->assertInstanceOf(Assert::class, $page);
+            }
             $success = true;
         });
 
