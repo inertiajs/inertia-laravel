@@ -101,7 +101,7 @@ class Response implements Responsable
             if ($prop instanceof Closure) {
                 $prop = App::call($prop);
             }
-            
+
             if ($prop instanceof PromiseInterface) {
                 $prop = $prop->wait();
             }
