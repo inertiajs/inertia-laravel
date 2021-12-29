@@ -2,6 +2,7 @@
 
 namespace Inertia\Tests\Stubs;
 
+use Illuminate\Support\Facades\Config;
 use Inertia\Ssr\Gateway;
 use Inertia\Ssr\Response;
 
@@ -24,7 +25,7 @@ class FakeGateway implements Gateway
     {
         $this->times++;
 
-        if ($page['component'] !== 'Ssr/Enabled') {
+        if (! Config::get('inertia.ssr.enabled', false)) {
             return null;
         }
 
