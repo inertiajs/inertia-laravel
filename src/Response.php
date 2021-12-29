@@ -3,6 +3,7 @@
 namespace Inertia;
 
 use Closure;
+use GuzzleHttp\Promise\PromiseInterface;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\JsonResponse;
@@ -99,6 +100,10 @@ class Response implements Responsable
 
             if ($prop instanceof Closure) {
                 $prop = App::call($prop);
+            }
+
+            if ($prop instanceof PromiseInterface) {
+                $prop = $prop->wait();
             }
 
             if ($prop instanceof ResourceResponse || $prop instanceof JsonResource) {

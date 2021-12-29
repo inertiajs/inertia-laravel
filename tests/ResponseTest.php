@@ -14,6 +14,7 @@ use Illuminate\View\View;
 use Inertia\LazyProp;
 use Inertia\Response;
 use Inertia\Tests\Stubs\FakeResource;
+use Mockery;
 
 class ResponseTest extends TestCase
 {
@@ -143,6 +144,29 @@ class ResponseTest extends TestCase
         $resource = FakeResource::make(['name' => 'Jonathan']);
 
         $response = new Response('User/Edit', ['user' => $resource], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertSame('User/Edit', $page->component);
+        $this->assertSame('Jonathan', $page->props->user->name);
+        $this->assertSame('/user/123', $page->url);
+        $this->assertSame('123', $page->version);
+    }
+
+    public function test_promise_props_are_resolved(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $user = (object) ['name' => 'Jonathan'];
+
+        $promise = Mockery::mock('GuzzleHttp\Promise\PromiseInterface')
+            ->shouldReceive('wait')
+            ->andReturn($user)
+            ->mock();
+
+        $response = new Response('User/Edit', ['user' => $promise], 'app', '123');
         $response = $response->toResponse($request);
         $page = $response->getData();
 
