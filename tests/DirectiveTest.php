@@ -25,9 +25,10 @@ class DirectiveTest extends TestCase
     protected $compiler;
 
     /**
-     * Example Page Object.
+     * Example Page Objects.
      */
     protected const EXAMPLE_PAGE_OBJECT = ['component' => 'Foo/Bar', 'props' => ['foo' => 'bar'], 'url' => '/test', 'version' => ''];
+    protected const EXAMPLE_PAGE_OBJECT_SSR = ['component' => 'Ssr/Enabled', 'props' => ['foo' => 'bar'], 'url' => '/test', 'version' => ''];
 
     public function setUp(): void
     {
@@ -82,43 +83,58 @@ class DirectiveTest extends TestCase
         return $output;
     }
 
-    public function test_it_renders_the_root_element_by_default(): void
+    public function test_inertia_directive_renders_the_root_element(): void
     {
-        $defaultElement = '<div id="app" data-page="{&quot;component&quot;:&quot;Foo\/Bar&quot;,&quot;props&quot;:{&quot;foo&quot;:&quot;bar&quot;},&quot;url&quot;:&quot;\/test&quot;,&quot;version&quot;:&quot;&quot;}"></div>';
-        $fooElement = '<div id="foo" data-page="{&quot;component&quot;:&quot;Foo\/Bar&quot;,&quot;props&quot;:{&quot;foo&quot;:&quot;bar&quot;},&quot;url&quot;:&quot;\/test&quot;,&quot;version&quot;:&quot;&quot;}"></div>';
+        $html = '<div id="app" data-page="{&quot;component&quot;:&quot;Foo\/Bar&quot;,&quot;props&quot;:{&quot;foo&quot;:&quot;bar&quot;},&quot;url&quot;:&quot;\/test&quot;,&quot;version&quot;:&quot;&quot;}"></div>';
 
-        $this->assertSame($defaultElement, $this->renderView('@inertia', ['page' => self::EXAMPLE_PAGE_OBJECT]));
-        $this->assertSame($defaultElement, $this->renderView('@inertia()', ['page' => self::EXAMPLE_PAGE_OBJECT]));
-        $this->assertSame($defaultElement, $this->renderView('@inertia("")', ['page' => self::EXAMPLE_PAGE_OBJECT]));
-        $this->assertSame($defaultElement, $this->renderView("@inertia('')", ['page' => self::EXAMPLE_PAGE_OBJECT]));
-        $this->assertSame($fooElement, $this->renderView('@inertia(foo)', ['page' => self::EXAMPLE_PAGE_OBJECT]));
-        $this->assertSame($fooElement, $this->renderView("@inertia('foo')", ['page' => self::EXAMPLE_PAGE_OBJECT]));
-        $this->assertSame($fooElement, $this->renderView('@inertia("foo")', ['page' => self::EXAMPLE_PAGE_OBJECT]));
+        $this->assertSame($html, $this->renderView('@inertia', ['page' => self::EXAMPLE_PAGE_OBJECT]));
+        $this->assertSame($html, $this->renderView('@inertia()', ['page' => self::EXAMPLE_PAGE_OBJECT]));
+        $this->assertSame($html, $this->renderView('@inertia("")', ['page' => self::EXAMPLE_PAGE_OBJECT]));
+        $this->assertSame($html, $this->renderView("@inertia('')", ['page' => self::EXAMPLE_PAGE_OBJECT]));
     }
 
-    public function test_blade_directive_can_indicate_ssr_head_placement(): void
+    public function test_inertia_directive_renders_server_side_rendered_content_when_enabled(): void
     {
-        $this->assertSame("foo\nbar\n", $this->renderView('@inertiaHead', ['page' => self::EXAMPLE_PAGE_OBJECT]));
+        $this->assertSame(
+            "<p>This is some example SSR content</p>",
+            $this->renderView("@inertia", ['page' => self::EXAMPLE_PAGE_OBJECT_SSR])
+        );
     }
 
-    public function test_renders_ssr_content_instead_of_the_default_root_element(): void
+    public function test_inertia_directive_can_use_a_different_root_element_id(): void
     {
+        $html = '<div id="foo" data-page="{&quot;component&quot;:&quot;Foo\/Bar&quot;,&quot;props&quot;:{&quot;foo&quot;:&quot;bar&quot;},&quot;url&quot;:&quot;\/test&quot;,&quot;version&quot;:&quot;&quot;}"></div>';
+
+        $this->assertSame($html, $this->renderView('@inertia(foo)', ['page' => self::EXAMPLE_PAGE_OBJECT]));
+        $this->assertSame($html, $this->renderView("@inertia('foo')", ['page' => self::EXAMPLE_PAGE_OBJECT]));
+        $this->assertSame($html, $this->renderView('@inertia("foo")', ['page' => self::EXAMPLE_PAGE_OBJECT]));
+    }
+
+    public function test_inertia_head_directive_renders_nothing(): void
+    {
+        $this->assertEmpty($this->renderView('@inertiaHead', ['page' => self::EXAMPLE_PAGE_OBJECT]));
+    }
+
+    public function test_inertia_head_directive_renders_server_side_rendered_head_elements_when_enabled(): void
+    {
+        $this->assertSame(
+            "<meta charset=\"UTF-8\" />\n<title inertia>Example SSR Title</title>\n",
+            $this->renderView('@inertiaHead', ['page' => self::EXAMPLE_PAGE_OBJECT_SSR])
+        );
+    }
+
+    public function test_the_server_side_rendering_request_is_dispatched_only_once_per_request(): void
+    {
+        $this->app->instance(Gateway::class, $gateway = new FakeGateway());
+
         $view = "<!DOCTYPE html>\n<html>\n<head>\n@inertiaHead\n</head>\n<body>\n@inertia\n</body>\n</html>";
-        $expected = "<!DOCTYPE html>\n<html>\n<head>\nfoo\nbar\n</head>\n<body>\nbaz</body>\n</html>";
+        $expected = "<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\" />\n<title inertia>Example SSR Title</title>\n</head>\n<body>\n<p>This is some example SSR content</p></body>\n</html>";
 
-        $this->assertSame($expected, $this->renderView($view, ['page' => self::EXAMPLE_PAGE_OBJECT]));
-    }
+        $this->assertSame(
+            $expected,
+            $this->renderView($view, ['page' => self::EXAMPLE_PAGE_OBJECT_SSR])
+        );
 
-    /** @test */
-    public function falls_back_to_client_side_rendering_when_server_side_rendering_fails(): void
-    {
-        $view = "<!DOCTYPE html>\n<html>\n<head>\n@inertiaHead\n</head>\n<body>\n@inertia\n</body>\n</html>";
-        $expected = "<!DOCTYPE html>\n<html>\n<head>\n</head>\n<body>\n<div id=\"app\" data-page=\"{&quot;component&quot;:&quot;Ssr\\/Fail&quot;,&quot;props&quot;:{&quot;foo&quot;:&quot;bar&quot;},&quot;url&quot;:&quot;\\/test&quot;,&quot;version&quot;:&quot;&quot;}\"></div></body>\n</html>";
-
-        $page = array_merge(self::EXAMPLE_PAGE_OBJECT, [
-            'component' => 'Ssr/Fail', // Special flag to emulate SSR failure. See \Inertia\Tests\Stubs\FakeGateway.
-        ]);
-
-        $this->assertSame($expected, $this->renderView($view, ['page' => $page]));
+        $this->assertSame(1, $gateway->times);
     }
 }

@@ -16,7 +16,7 @@ class HttpGateway implements Gateway
      */
     public function dispatch(array $page): ?Response
     {
-        $endpoint = Config::get('inertia.ssr_url', 'http://localhost:8080/render');
+        $endpoint = Config::get('inertia.ssr_url', 'http://127.0.0.1:8080/render');
 
         try {
             [$head, $body] = Http::post($endpoint, $page)->throw()->json();
@@ -24,6 +24,9 @@ class HttpGateway implements Gateway
             return null;
         }
 
-        return new Response($head, $body);
+        return new Response(
+            implode("\n", $head),
+            $body
+        );
     }
 }

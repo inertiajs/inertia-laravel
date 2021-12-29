@@ -4,25 +4,49 @@ namespace Inertia;
 
 class Directive
 {
+    /**
+     * Compiles the "@inertia" directive.
+     *
+     * @param string $expression
+     * @return string
+     */
     public static function compile($expression = ''): string
     {
         $id = trim(trim($expression), "\'\"") ?: 'app';
 
-        return '<?php if (isset($inertiaSsr) && $inertiaSsr instanceof \Inertia\Ssr\Response) { '
-            .'echo $inertiaSsr->body; '
-            .'} else { ?>'
-            .'<div id="'.$id.'" data-page="{{ json_encode($page) }}"></div>'
-            .'<?php } ?>';
+        $template = '<?php
+            if (!isset($__inertiaSsr)) {
+                $__inertiaSsr = app(\Inertia\Ssr\Gateway::class)->dispatch($page);
+            }
+
+            if ($__inertiaSsr instanceof \Inertia\Ssr\Response) {
+                echo $__inertiaSsr->body;
+            } else {
+                ?><div id="'.$id.'" data-page="{{ json_encode($page) }}"></div><?php
+            }
+        ?>';
+
+        return implode(' ', array_map('trim', explode("\n", $template)));
     }
 
+    /**
+     * Compiles the "@inertiaHead" directive.
+     *
+     * @param string $expression
+     * @return string
+     */
     public static function compileHead($expression = ''): string
     {
-        return '<?php $inertiaSsr = app(\Inertia\Ssr\Gateway::class)->dispatch($page); '
-            .'if ($inertiaSsr instanceof \Inertia\Ssr\Response) { '
-            .'  foreach($inertiaSsr->head as $element) { '
-            .'    echo $element . "\n"; '
-            .'  } '
-            .'} '
-            .'?>';
+        $template = '<?php
+            if (!isset($__inertiaSsr)) {
+                $__inertiaSsr = app(\Inertia\Ssr\Gateway::class)->dispatch($page);
+            }
+
+            if ($__inertiaSsr instanceof \Inertia\Ssr\Response) {
+                echo $__inertiaSsr->head;
+            }
+        ?>';
+
+        return implode(' ', array_map('trim', explode("\n", $template)));
     }
 }

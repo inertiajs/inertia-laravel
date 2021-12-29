@@ -8,6 +8,13 @@ use Inertia\Ssr\Response;
 class FakeGateway implements Gateway
 {
     /**
+     * Tracks the number of times the 'dispatch' method was called.
+     *
+     * @var int
+     */
+    public $times = 0;
+
+    /**
      * Dispatch the Inertia page to the Server Side Rendering engine.
      *
      * @param  array  $page
@@ -15,13 +22,15 @@ class FakeGateway implements Gateway
      */
     public function dispatch(array $page): ?Response
     {
-        if ($page['component'] === 'Ssr/Fail') {
+        $this->times++;
+
+        if ($page['component'] !== 'Ssr/Enabled') {
             return null;
         }
 
         return new Response(
-            ['foo', 'bar'],
-            'baz'
+            "<meta charset=\"UTF-8\" />\n<title inertia>Example SSR Title</title>\n",
+            '<p>This is some example SSR content</p>'
         );
     }
 }

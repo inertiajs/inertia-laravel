@@ -5,7 +5,7 @@ namespace Inertia\Ssr;
 class Response
 {
     /**
-     * @var array
+     * @var string
      */
     public $head;
 
@@ -14,7 +14,13 @@ class Response
      */
     public $body;
 
-    public function __construct(array $head, string $body)
+    /**
+     * Prepare the Inertia Server Side Rendering (SSR) response.
+     *
+     * @param string $head
+     * @param string $body
+     */
+    public function __construct(string $head, string $body)
     {
         $this->head = $head;
         $this->body = $body;
