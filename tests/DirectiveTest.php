@@ -96,8 +96,8 @@ class DirectiveTest extends TestCase
     public function test_inertia_directive_renders_server_side_rendered_content_when_enabled(): void
     {
         $this->assertSame(
-            "<p>This is some example SSR content</p>",
-            $this->renderView("@inertia", ['page' => self::EXAMPLE_PAGE_OBJECT_SSR])
+            '<p>This is some example SSR content</p>',
+            $this->renderView('@inertia', ['page' => self::EXAMPLE_PAGE_OBJECT_SSR])
         );
     }
 
