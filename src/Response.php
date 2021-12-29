@@ -101,6 +101,10 @@ class Response implements Responsable
             if ($prop instanceof Closure) {
                 $prop = App::call($prop);
             }
+            
+            if ($prop instanceof PromiseInterface) {
+                $prop = $prop->wait();
+            }
 
             if ($prop instanceof ResourceResponse || $prop instanceof JsonResource) {
                 $prop = $prop->toResponse($request)->getData(true);
@@ -108,12 +112,6 @@ class Response implements Responsable
 
             if ($prop instanceof Arrayable) {
                 $prop = $prop->toArray();
-            }
-        });
-
-        array_walk_recursive($props, function (&$prop) {
-            if ($prop instanceof PromiseInterface) {
-                $prop = $prop->wait();
             }
         });
 
