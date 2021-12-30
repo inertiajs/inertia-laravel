@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use Illuminate\Testing\TestResponse;
 use Illuminate\View\FileViewFinder;
+use Inertia\Ssr\Gateway;
+use Inertia\Ssr\HttpGateway;
 use Inertia\Testing\TestResponseMacros;
 use LogicException;
 use ReflectionException;
@@ -18,6 +20,7 @@ class ServiceProvider extends BaseServiceProvider
     public function register(): void
     {
         $this->app->singleton(ResponseFactory::class);
+        $this->app->bind(Gateway::class, HttpGateway::class);
 
         $this->mergeConfigFrom(
             __DIR__.'/../config/inertia.php',
@@ -39,7 +42,7 @@ class ServiceProvider extends BaseServiceProvider
 
     public function boot(): void
     {
-        $this->registerBladeDirective();
+        $this->registerBladeDirectives();
         $this->registerConsoleCommands();
 
         $this->publishes([
@@ -47,11 +50,10 @@ class ServiceProvider extends BaseServiceProvider
         ]);
     }
 
-    protected function registerBladeDirective(): void
+    protected function registerBladeDirectives(): void
     {
-        Blade::directive('inertia', function () {
-            return '<div id="app" data-page="{{ json_encode($page) }}"></div>';
-        });
+        Blade::directive('inertia', [Directive::class, 'compile']);
+        Blade::directive('inertiaHead', [Directive::class, 'compileHead']);
     }
 
     protected function registerConsoleCommands(): void

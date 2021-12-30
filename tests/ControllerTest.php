@@ -20,8 +20,7 @@ class ControllerTest extends TestCase
 
         $response = $this->get('/');
 
-        $page = $response->viewData('page');
-        $this->assertEquals($page, [
+        $this->assertEquals($response->viewData('page'), [
             'component' => 'User/Edit',
             'props' => [
                 'user' => ['name' => 'Jonathan'],
