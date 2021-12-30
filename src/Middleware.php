@@ -25,7 +25,7 @@ class Middleware
      * @param  \Illuminate\Http\Request  $request
      * @return string|null
      */
-    public function version(Request $request): ?string
+    public function version(Request $request)
     {
         if (config('app.asset_url')) {
             return md5(config('app.asset_url'));
@@ -46,7 +46,7 @@ class Middleware
      * @param  \Illuminate\Http\Request  $request
      * @return array
      */
-    public function share(Request $request): array
+    public function share(Request $request)
     {
         return [
             'errors' => function () use ($request) {
@@ -63,7 +63,7 @@ class Middleware
      * @param  Request  $request
      * @return string
      */
-    public function rootView(Request $request): string
+    public function rootView(Request $request)
     {
         return $this->rootView;
     }
@@ -75,7 +75,7 @@ class Middleware
      * @param  Closure  $next
      * @return Response
      */
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next)
     {
         Inertia::version(function () use ($request) {
             return $this->version($request);
@@ -99,7 +99,7 @@ class Middleware
      * @param  Response  $response
      * @return Response
      */
-    public function checkVersion(Request $request, Response $response): Response
+    public function checkVersion(Request $request, Response $response)
     {
         if ($request->header('X-Inertia') &&
             $request->method() === 'GET' &&
@@ -123,7 +123,7 @@ class Middleware
      * @param  Response  $response
      * @return Response
      */
-    public function changeRedirectCode(Request $request, Response $response): Response
+    public function changeRedirectCode(Request $request, Response $response)
     {
         if ($request->header('X-Inertia') &&
             $response->getStatusCode() === 302 &&
@@ -142,7 +142,7 @@ class Middleware
      * @param  Request  $request
      * @return object
      */
-    public function resolveValidationErrors(Request $request): object
+    public function resolveValidationErrors(Request $request)
     {
         if (! $request->session()->has('errors')) {
             return (object) [];
