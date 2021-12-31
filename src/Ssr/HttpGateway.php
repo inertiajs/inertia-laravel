@@ -20,7 +20,7 @@ class HttpGateway implements Gateway
             return null;
         }
 
-        $url = Config::get('inertia.ssr.url', 'http://127.0.0.1:8080/render');
+        $url = Config::get('inertia.ssr.url', 'http://127.0.0.1:13714/render');
 
         try {
             $response = Http::post($url, $page)->throw()->json();
