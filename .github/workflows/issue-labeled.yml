@@ -62,6 +62,6 @@ jobs:
             - If you're simply not sure on how to do a certain thing or are running into a problem specific to your application, I recommend you to ask your question in our [Discord](https://discord.com/invite/inertiajs), as a [GitHub Discussions](https://github.com/inertiajs/inertia/discussions) topic, or perhaps even over at [the Laracasts forums](https://laracasts.com/discuss/channels/inertia), as we have a very active community in those places that would be more than happy to help.
 
               If you feel absolutely certain that your issue still points out a bug in the library, please "@" mention me in a follow-up comment with further explanation so that GitHub will send me a notification of your response.
-              
+
               Thanks!
           labels: "question"
