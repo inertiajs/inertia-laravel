@@ -1,7 +1,7 @@
 name: "\U0001F41E New Bug Report"
 description: Found a bug? Here you can send us a detailed report. We will be happy to look into it for you.
 title: "[Bug]: "
-labels: [bug]
+labels: ["bug", "triage"]
 body:
   - type: markdown
     attributes:
