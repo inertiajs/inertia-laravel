@@ -4,7 +4,8 @@ title: "[Bug]: "
 labels: [bug]
 body:
   - type: markdown
-    value: Thank you for taking the time to report this bug! In order to be able to help you soundly we are dependent on your cooperation. Please provide us all the information you have as detailed as possible. It will save you and us time and improve the chance to fix the bug for all of us quickly.!
+    attributes:
+      value: Thank you for taking the time to report this bug! In order to be able to help you soundly we are dependent on your cooperation. Please provide us all the information you have as detailed as possible. It will save you and us time and improve the chance to fix the bug for all of us quickly.!
   - type: checkboxes
     id: checkboxes
     attributes:
