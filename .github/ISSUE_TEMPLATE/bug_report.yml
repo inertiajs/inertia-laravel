@@ -5,7 +5,7 @@ labels: [bug]
 body:
   - type: markdown
     attributes:
-      value: Thank you for taking the time to report this bug! In order to be able to help you soundly we are dependent on your cooperation. Please provide us all the information you have as detailed as possible. It will save you and us time and improve the chance to fix the bug for all of us quickly.!
+      value: Thank you for taking the time to report this bug! In order to be able to help you soundly we are dependent on your cooperation. Please provide us all the information you have as detailed as possible. It will save you and us time and improve the chance to fix the bug for all of us quickly!
   - type: checkboxes
     id: checkboxes
     attributes:
@@ -16,9 +16,9 @@ body:
           required: true
         - label: Make sure that there isn't [an open issue](https://github.com/inertiajs/inertia-laravel/issues) reporting the same bug.
           required: true
-        - label: Make sure this is a server-side issue in the Laravel adapter and not an issue in the main Javascript package. Please report Javascript related bugs [here](https://github.com/inertiajs/inertia/issues).
+        - label: Make sure this is a server-side bug in the adapter and not a Javascript bug. Please report Javascript bugs [here](https://github.com/inertiajs/inertia/issues).
           required: true
-        - label: Make sure that this is really bug. For questions about usage or for discussions please use [GitHub Discussion](https://github.com/inertiajs/inertia) or our [Discord Server](https://discord.gg/inertiajs).
+        - label: Make sure that this is really a bug. Please use [GitHub Discussion](https://github.com/inertiajs/inertia) or our [Discord Server](https://discord.gg/inertiajs) for questions and discussions.
           required: true
         - label: Make sure the provided reproduction is a [minimal reproducible example](https://stackoverflow.com/help/minimal-reproducible-example) of the bug.
           required: true
@@ -50,11 +50,16 @@ body:
     id: version-info
     attributes:
       label: Versions
-      description: Please specify the versions (for laravel/framework, inertiajs/inertia-laravel and PHP) you use.
+      description: |
+        Please specify the versions (for laravel/framework, inertiajs/inertia-laravel and PHP) you use.
+        - `laravel/framework` version: #.#.#
+        - `inertiajs/inertia-laravel` version: #.#.#
+        - PHP version: #.#.#
       placeholder: |
         - `laravel/framework` version: #.#.#
         - `inertiajs/inertia-laravel` version: #.#.#
         - PHP version: #.#.#
+      render: shell
     validations:
       required: true
   - type: textarea
