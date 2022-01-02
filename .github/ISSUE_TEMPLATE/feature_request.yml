@@ -23,15 +23,16 @@ body:
     id: feature-description
     attributes:
       label: What would you enhance in Inertia.js?
-      description: Please give us a clear and concise description of the current state and how you would like to see it in a future version of Inertia.js (e.g. "I would like to [goal / wish], because [enhancement] would cause [benefit]...")
-      render: shell
+      description: Please give us a clear and concise description of the current state and how you would like to see it in a future version of Inertia.js.
+      placeholder: e.g. "I would like to [goal / wish], because [enhancement] would cause [benefit]..."
     validations:
       required: true
   - type: textarea
     id: suggested-solution
     attributes:
       label: Suggested solution
-      description: Please give us a clear and concise description of how you would introduce this enhancement into Interia.js (e.g. "To achieve the mentioned [goal / wish] we could implement [functionality] to...").
+      description: Please give us a clear and concise description of how you would introduce this enhancement into Interia.js.
+      placeholder: e.g. "To achieve the mentioned [goal / wish] we could implement [functionality] to..."
     validations:
       required: true
   - type: textarea
