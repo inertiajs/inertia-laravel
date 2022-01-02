@@ -18,7 +18,7 @@ body:
           required: true
         - label: Make sure this is a server-side bug in the adapter and not a Javascript bug. Please report Javascript bugs [here](https://github.com/inertiajs/inertia/issues).
           required: true
-        - label: Make sure that this is really a bug. Please use [GitHub Discussion](https://github.com/inertiajs/inertia) or our [Discord Server](https://discord.gg/inertiajs) for questions and discussions.
+        - label: Make sure that this is really a bug. Please use [GitHub Discussion](https://github.com/inertiajs/inertia/discussions/new?category=help) or our [Discord Server](https://discord.gg/inertiajs) for questions and discussions.
           required: true
         - label: Make sure the provided reproduction is a [minimal reproducible example](https://stackoverflow.com/help/minimal-reproducible-example) of the bug.
           required: true
