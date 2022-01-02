@@ -22,8 +22,8 @@ body:
   - type: textarea
     id: feature-description
     attributes:
-      label: Clear and concise description of the problem
-      description: "As a developer using Inertia.js I would like to [goal / wish] so that [benefit]."
+      label: What would you enhance in Inertia.js?
+      description: "Please give us a clear and concise description of the current state and how you would like to see it in the future. (e.g. I would like to [goal / wish] so that [benefit]..."
       render: shell
     validations:
       required: true
