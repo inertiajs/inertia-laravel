@@ -1,4 +1,4 @@
-name: "\U0001F680 New enhancement proposal"
+name: "\U0001F680 New Enhancement Proposal"
 description: Found something in Inertia.js that could be better? Here you can propose an enhancement.
 title: "[Enhancement]: "
 labels: ["enhancement", "triage"]
@@ -45,8 +45,8 @@ body:
       label: Would you like to PR this?
       description: If you would be able and keen to send us a PR to get this enhancement in the core, please let us know about it here. Thank you!
       options:
-        - Yay
-        - Nay
+        - 👍 Yay
+        - 👎 Nay
     validations:
       required: true
   - type: textarea
