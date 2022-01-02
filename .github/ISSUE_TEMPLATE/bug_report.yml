@@ -51,15 +51,11 @@ body:
     attributes:
       label: Versions
       description: |
-        Please specify the versions (for laravel/framework, inertiajs/inertia-laravel and PHP) you use.
+        Please specify the versions  for:
         - `laravel/framework` version: #.#.#
         - `inertiajs/inertia-laravel` version: #.#.#
-        - PHP version: #.#.#
-      placeholder: |
-        - `laravel/framework` version: #.#.#
-        - `inertiajs/inertia-laravel` version: #.#.#
-        - PHP version: #.#.#
-      render: shell
+        - `PHP` version: #.#.#
+      placeholder: Copy the above block and provide the used version for each
     validations:
       required: true
   - type: textarea
