@@ -1,0 +1,64 @@
+name: "\U0001F41E New Bug Report"
+description: Found a bug? Here you can send us a detailed report. We will be happy to look into it for you.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+      Thank you for taking the time to report this bug! In order to be able to help you soundly we are dependent on your cooperation. Please provide us all the information you have as detailed as possible. It will save you and us time and improve the chance to fix the bug for all of us quickly.!
+  - type: checkboxes
+    id: checkboxes
+    attributes:
+      label: First things first 🤗
+      description: "Before submitting a bug here, please make sure you do the following:"
+      options:
+        - label: Make sure that you did read the [docs for server-side setup](https://inertiajs.com/server-side-setup).
+          required: true
+        - label: Make sure that there isn't [an open issue](https://github.com/inertiajs/inertia-laravel/issues) reporting the same bug.
+          required: true
+        - label: Make sure this is a server-side issue in the Laravel adapter and not an issue in the main Javascript package. Please report Javascript related bugs [here](https://github.com/inertiajs/inertia/issues).
+          required: true
+        - label: Make sure that this is really bug. For questions about usage or for discussions please use [GitHub Discussion](https://github.com/inertiajs/inertia) or our [Discord Server](https://discord.gg/inertiajs).
+          required: true
+        - label: Make sure the provided reproduction is a [minimal reproducible example](https://stackoverflow.com/help/minimal-reproducible-example) of the bug.
+          required: true
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Describe the bug
+      description: Please provide us a clear and concise description of the bug. If you intend to submit a PR for this issue, please let us know as well. Thank you!
+      placeholder: Bug description
+    validations:
+      required: true
+  - type: input
+    id: reproduction-link
+    attributes:
+      label: Link to reproduction
+      description: Ideally, please provide a link to a repo that can be used to reproduce the problem you are having. If a report is vague (e.g. just a general error message) and we have no way to easily reproduce the error, it is likely that fixing the error will take much longer.
+      placeholder: https://github.com/yourGitHub/minimal-reproduction-repo
+    validations:
+      required: false
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: Describe the bug
+      description: Please provide us a step by step description of how we can reproduce the error.
+      placeholder: Steps to reproduce
+    validations:
+      required: true
+  - type: textarea
+    id: version-info
+    attributes:
+      label: Versions
+      description: Please specify the versions (for laravel/framework, inertiajs/inertia-laravel and PHP) you use.
+      placeholder: |
+        - `laravel/framework` version: #.#.#
+        - `inertiajs/inertia-laravel` version: #.#.#
+        - PHP version: #.#.#
+    validations:
+      required: true
+  - type: textarea
+    id: misc
+    attributes:
+      label: Additional infos
+      description: Feel free to provide us with any other relevant information (e.g. data dumps, screenshots).
