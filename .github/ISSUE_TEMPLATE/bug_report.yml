@@ -1,11 +1,10 @@
 name: "\U0001F41E New Bug Report"
 description: Found a bug? Here you can send us a detailed report. We will be happy to look into it for you.
+title: "[Bug]: "
 labels: [bug]
 body:
   - type: markdown
-    attributes:
-      value: |
-      Thank you for taking the time to report this bug! In order to be able to help you soundly we are dependent on your cooperation. Please provide us all the information you have as detailed as possible. It will save you and us time and improve the chance to fix the bug for all of us quickly.!
+    value: Thank you for taking the time to report this bug! In order to be able to help you soundly we are dependent on your cooperation. Please provide us all the information you have as detailed as possible. It will save you and us time and improve the chance to fix the bug for all of us quickly.!
   - type: checkboxes
     id: checkboxes
     attributes:
