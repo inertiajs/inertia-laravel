@@ -21,7 +21,7 @@ jobs:
             We like your proposal/feedback and would appreciate a pull request by you or anyone else. We are looking forward to reviewing it!
           labels: "question"
 
-      - name: contribution welcome
+      - name: help wanted
         if: github.event.label.name == 'help wanted'
         uses: actions-cool/issues-helper@v2
         with:
@@ -31,7 +31,7 @@ jobs:
           body: |
             Hey @${{ github.event.issue.user.login }} 👋,
 
-            Sadly we are not able to investigate the issue further at this time. We are putting it on hold for now. Contributions by you or anyone else would be much appreciated!
+            Sadly we are stuck here. We will take a breather and put it on hold for now. Contributions by you or anyone else would be much appreciated!
           labels: "question"
 
       - name: need reproduction
