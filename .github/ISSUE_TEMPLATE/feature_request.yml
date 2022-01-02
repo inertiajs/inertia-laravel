@@ -31,7 +31,7 @@ body:
     id: suggested-solution
     attributes:
       label: Suggested solution
-      description: "To achieve the mentioned [goal / wish] we could implement [functionality] to..."
+      description: Please give us a clear and concise description of how you would introduce this enhancement into Interia.js (e.g. "To achieve the mentioned [goal / wish] we could implement [functionality] to...").
     validations:
       required: true
   - type: textarea
