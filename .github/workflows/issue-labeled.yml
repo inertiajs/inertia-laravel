@@ -16,7 +16,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
           body: |
-            Hi @${{ github.event.issue.user.login }}. We like your proposal/feedback and would appreciate a pull request by you or anyone else. We are looking forward to reviewing it!
+            Hey @${{ github.event.issue.user.login }} 👋,
+
+            We like your proposal/feedback and would appreciate a pull request by you or anyone else. We are looking forward to reviewing it!
           labels: "question"
 
       - name: contribution welcome
@@ -27,7 +29,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
           body: |
-            Sadly we are not able to investigate the issue further at this time. We are putting it on hold for now. Contributions by you @${{ github.event.issue.user.login }} or anyone else would be much appreciated!
+            Hey @${{ github.event.issue.user.login }} 👋,
+
+            Sadly we are not able to investigate the issue further at this time. We are putting it on hold for now. Contributions by you or anyone else would be much appreciated!
           labels: "question"
 
       - name: need reproduction
@@ -38,5 +42,26 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
           body: |
-            Hi @${{ github.event.issue.user.login }}. Sadly we can not reproduce the issue on our end. Please provide us a repo with a [minimal reproduction](https://stackoverflow.com/help/minimal-reproducible-example). We are looking forward to have another look then. Thanks in advance! Please note: Issues marked with `need reproduction` will be auto-closed if they have no activity within 30 days.
+            Hey @${{ github.event.issue.user.login }} 👋,
+
+            Sadly we can not reproduce the issue on our end. Please provide us a repo with a [minimal reproduction](https://stackoverflow.com/help/minimal-reproducible-example). We are looking forward to have another look then. Thanks in advance! Please note: Issues marked with `need reproduction` will be auto-closed if they have no activity within 30 days.
+          labels: "question"
+
+      - name: unclear
+        if: github.event.label.name == 'unclear'
+        uses: actions-cool/issues-helper@v2
+        with:
+          actions: "create-comment, remove-labels"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            Hey @${{ github.event.issue.user.login }} 👋,
+
+            I'm going to close this issue, because it either lacks sufficient explanation regarding your exact problem, how to reproduce said problem, or how the problem relates to a bug or feature with the Inertia library itself.
+            - If you're not sure how or where to get started with Inertia, I can highly recommend Laracasts's incredible (free!) video series: https://laracasts.com/series/build-modern-laravel-apps-using-inertia-js
+            - If you're simply not sure on how to do a certain thing or are running into a problem specific to your application, I recommend you to ask your question in our [Discord](https://discord.com/invite/inertiajs), as a [GitHub Discussions](https://github.com/inertiajs/inertia/discussions) topic, or perhaps even over at [the Laracasts forums](https://laracasts.com/discuss/channels/inertia), as we have a very active community in those places that would be more than happy to help.
+
+              If you feel absolutely certain that your issue still points out a bug in the library, please "@" mention me in a follow-up comment with further explanation so that GitHub will send me a notification of your response.
+              
+              Thanks!
           labels: "question"
