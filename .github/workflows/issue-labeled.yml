@@ -1,0 +1,42 @@
+name: Issue Labeled
+
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  reply-labeled:
+    runs-on: ubuntu-latest
+    steps:
+      - name: contribution welcome
+        if: github.event.label.name == 'contribution welcome'
+        uses: actions-cool/issues-helper@v2
+        with:
+          actions: "create-comment"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            Hi @${{ github.event.issue.user.login }}. We like your proposal/feedback and would appreciate a pull request by you or anyone else. We are looking forward to reviewing it!
+          labels: "question"
+
+      - name: contribution welcome
+        if: github.event.label.name == 'help wanted'
+        uses: actions-cool/issues-helper@v2
+        with:
+          actions: "create-comment"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            Sadly we are not able to investigate the issue further at this time. We are putting it on hold for now. Contributions by you @${{ github.event.issue.user.login }} or anyone else would be much appreciated!
+          labels: "question"
+
+      - name: need reproduction
+        if: github.event.label.name == 'need reproduction'
+        uses: actions-cool/issues-helper@v2
+        with:
+          actions: "create-comment, remove-labels"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            Hi @${{ github.event.issue.user.login }}. Sadly we can not reproduce the issue on our end. Please provide us a repo with a [minimal reproduction](https://stackoverflow.com/help/minimal-reproducible-example). We are looking forward to have another look then. Thanks in advance! Please note: Issues marked with `need reproduction` will be auto-closed if they have no activity within 30 days.
+          labels: "question"
