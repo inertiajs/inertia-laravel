@@ -1,0 +1,57 @@
+name: "\U0001F680 New enhancement proposal"
+description: Found something in Inertia.js that could be better? Here you can propose an enhancement.
+title: "[Enhancement]: "
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to propose an enhancement to make Inertia.js better! Please describe us your idea as detailed as possible. We will be happy to look into it for you.
+  - type: checkboxes
+    id: checkboxes
+    attributes:
+      label: First things first 🤗
+      description: "Before submitting a enhancement proposal here, please make sure you do the following:"
+      options:
+        - label: Make sure that there isn't [an open issue](https://github.com/inertiajs/inertia-laravel/issues) proposing the same or a similar enhancement.
+          required: true
+        - label: Make sure this enhancement is for the server-side adapter and not for the Javascript part of the project. Please propose enhancements for the Javascript package [here](https://github.com/inertiajs/inertia/issues).
+          required: true
+        - label: Feel free to use [GitHub Discussion](https://github.com/inertiajs/inertia/discussions/new?category=help) or our [Discord Server](https://discord.gg/inertiajs) to talk with others about your idea first.
+          required: true
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: Clear and concise description of the problem
+      description: "As a developer using Inertia.js I would like to [goal / wish] so that [benefit]."
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: suggested-solution
+    attributes:
+      label: Suggested solution
+      description: "To achieve the mentioned [goal / wish] we could implement [functionality] to..."
+    validations:
+      required: true
+  - type: textarea
+    id: alternate-solution
+    attributes:
+      label: Alternate solution
+      description: Please give us a clear and detailed idea of any alternative solutions you've considered to enhance the current behavior.
+  - type: dropdown
+    id: package-manager
+    attributes:
+      label: Would you like to PR this?
+      description: If you would be able and keen to send us a PR to get this enhancement in the core, please let us know about it here. Thank you!
+      options:
+        - Yay
+        - Nay
+    validations:
+      required: true
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Any other context, screenshots or data you have related to this enhancement proposal.
+
