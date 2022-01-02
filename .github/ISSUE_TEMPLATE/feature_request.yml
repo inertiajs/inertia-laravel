@@ -23,7 +23,7 @@ body:
     id: feature-description
     attributes:
       label: What would you enhance in Inertia.js?
-      description: "Please give us a clear and concise description of the current state and how you would like to see it in the future. (e.g. I would like to [goal / wish] so that [benefit]..."
+      description: Please give us a clear and concise description of the current state and how you would like to see it in a future version of Inertia.js (e.g. "I would like to [goal / wish], because [enhancement] would cause [benefit]...")
       render: shell
     validations:
       required: true
