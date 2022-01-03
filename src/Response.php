@@ -130,7 +130,6 @@ class Response implements Responsable
     public function resolvePropertyInstances(array $props, Request $request): array
     {
         foreach ($props as $key => $prop) {
-
             if ($prop instanceof Closure) {
                 $prop = App::call($prop);
             }
