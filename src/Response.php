@@ -119,7 +119,7 @@ class Response implements Responsable
         return ResponseFactory::view($this->rootView, $this->viewData + ['page' => $page]);
     }
 
-    public static function resolvePropertyInstances($props, $request): array
+    private static function resolvePropertyInstances($props, $request): array
     {
         array_walk_recursive($props, static function (&$prop) use ($request) {
             if ($prop instanceof LazyProp) {
