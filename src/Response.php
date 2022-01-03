@@ -123,8 +123,8 @@ class Response implements Responsable
     /**
      * Resolve all necessary class instances in the given props.
      *
-     * @param  array $props
-     * @param  \Illuminate\Http\Request $request
+     * @param  array  $props
+     * @param  \Illuminate\Http\Request  $request
      * @return array
      */
     public function resolvePropertyInstances(array $props, Request $request): array
