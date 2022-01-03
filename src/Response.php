@@ -7,6 +7,7 @@ use GuzzleHttp\Promise\PromiseInterface;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceResponse;
 use Illuminate\Support\Arr;
@@ -119,7 +120,14 @@ class Response implements Responsable
         return ResponseFactory::view($this->rootView, $this->viewData + ['page' => $page]);
     }
 
-    public function resolvePropertyInstances($props, $request): array
+    /**
+     * Resolve all necessary class instances in the given props.
+     *
+     * @param  array $props
+     * @param  \Illuminate\Http\Request $request
+     * @return array
+     */
+    public function resolvePropertyInstances(array $props, Request $request): array
     {
         foreach ($props as $key => $prop) {
 
@@ -144,7 +152,7 @@ class Response implements Responsable
             }
 
             // to be able to handle nested props, we need to re-run
-            // the same function again if the prop is an array.
+            // the function if the prop is an array.
             if (is_array($prop)) {
                 $prop = $this->resolvePropertyInstances($prop, $request);
             }
