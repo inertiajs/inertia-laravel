@@ -152,7 +152,7 @@ class ResponseTest extends TestCase
 
             // nested array with ResourceCollection to resolve
             return [
-                'users' => new class($page, JsonResource::class) extends ResourceCollection {}
+                'users' => new class($page, JsonResource::class) extends ResourceCollection {},
             ];
         };
 
@@ -178,7 +178,7 @@ class ResponseTest extends TestCase
                     'to' => 2,
                     'total' => 3,
                 ],
-            ]
+            ],
         ];
 
         $this->assertInstanceOf(JsonResponse::class, $response);
