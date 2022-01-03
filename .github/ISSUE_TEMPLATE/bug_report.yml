@@ -41,8 +41,8 @@ body:
   - type: textarea
     id: reproduction-steps
     attributes:
-      label: Describe the bug
-      description: Please provide us a step by step description of how we can reproduce the error.
+      label: Steps to reproduce
+      description: Please provide us a step by step description of how we can reproduce the bug.
       placeholder: Steps to reproduce
     validations:
       required: true
