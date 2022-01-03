@@ -131,11 +131,11 @@ class Response implements Responsable
     {
         foreach ($props as $key => $prop) {
 
-            if ($prop instanceof LazyProp) {
+            if ($prop instanceof Closure) {
                 $prop = App::call($prop);
             }
 
-            if ($prop instanceof Closure) {
+            if ($prop instanceof LazyProp) {
                 $prop = App::call($prop);
             }
 
@@ -151,7 +151,7 @@ class Response implements Responsable
                 $prop = $prop->toArray();
             }
 
-            // to be able to handle nested props, we need to re-run
+            // To be able to handle nested props, we need to re-run
             // the function if the prop is an array.
             if (is_array($prop)) {
                 $prop = $this->resolvePropertyInstances($prop, $request);
