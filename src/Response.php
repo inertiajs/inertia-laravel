@@ -93,9 +93,7 @@ class Response implements Responsable
                 return ! ($prop instanceof LazyProp);
             });
 
-        $props = $this->resolvePropertyInstances($props, $request);
-
-        foreach ($props as $key => $value) {
+        foreach ($this->resolvePropertyInstances($props, $request) as $key => $value) {
             if (str_contains($key, '.')) {
                 data_set($props, $key, $value);
                 unset($props[$key]);
