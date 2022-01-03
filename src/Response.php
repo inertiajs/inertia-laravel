@@ -122,6 +122,7 @@ class Response implements Responsable
     public function resolvePropertyInstances($props, $request): array
     {
         foreach ($props as $key => $prop) {
+
             if ($prop instanceof LazyProp) {
                 $prop = App::call($prop);
             }
