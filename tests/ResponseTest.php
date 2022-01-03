@@ -136,6 +136,62 @@ class ResponseTest extends TestCase
         });
     }
 
+    public function test_nested_lazy_resource_response(): void
+    {
+        $request = Request::create('/users', 'GET', ['page' => 1]);
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $users = Collection::make([
+            new Fluent(['name' => 'Jonathan']),
+            new Fluent(['name' => 'Taylor']),
+            new Fluent(['name' => 'Jeffrey']),
+        ]);
+
+        $callable = static function () use ($users) {
+            $page = new LengthAwarePaginator($users->take(2), $users->count(), 2);
+
+            // nested array with ResourceCollection to resolve
+            return [
+                'users' => new class($page, JsonResource::class) extends ResourceCollection {}
+            ];
+        };
+
+        $response = new Response('User/Index', ['something' => $callable], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $expected = [
+            'users' => [
+                'data' => $users->take(2),
+                'links' => [
+                    'first' => '/?page=1',
+                    'last' => '/?page=2',
+                    'prev' => null,
+                    'next' => '/?page=2',
+                ],
+                'meta' => [
+                    'current_page' => 1,
+                    'from' => 1,
+                    'last_page' => 2,
+                    'path' => '/',
+                    'per_page' => 2,
+                    'to' => 2,
+                    'total' => 3,
+                ],
+            ]
+        ];
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertSame('User/Index', $page->component);
+        $this->assertSame('/users?page=1', $page->url);
+        $this->assertSame('123', $page->version);
+        tap($page->props->something->users, function ($users) use ($expected) {
+            $this->assertSame(json_encode($expected['users']['data']), json_encode($users->data));
+            $this->assertSame(json_encode($expected['users']['links']), json_encode($users->links));
+            $this->assertSame('/', $users->meta->path);
+        });
+    }
+
     public function test_arrayable_prop_response(): void
     {
         $request = Request::create('/user/123', 'GET');
