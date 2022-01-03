@@ -93,7 +93,7 @@ class Response implements Responsable
                 return ! ($prop instanceof LazyProp);
             });
 
-        $props = static::resolvePropertyInstances($props, $request);
+        $props = $this->resolvePropertyInstances($props, $request);
 
         foreach ($props as $key => $value) {
             if (str_contains($key, '.')) {
@@ -119,9 +119,9 @@ class Response implements Responsable
         return ResponseFactory::view($this->rootView, $this->viewData + ['page' => $page]);
     }
 
-    private static function resolvePropertyInstances($props, $request): array
+    public function resolvePropertyInstances($props, $request): array
     {
-        array_walk_recursive($props, static function (&$prop) use ($request) {
+        foreach ($props as $key => $prop) {
             if ($prop instanceof LazyProp) {
                 $prop = App::call($prop);
             }
@@ -145,9 +145,11 @@ class Response implements Responsable
             // to be able to handle nested props, we need to re-run
             // the same function again if the prop is an array.
             if (is_array($prop)) {
-                $prop = self::resolvePropertyInstances($prop, $request);
+                $prop = $this->resolvePropertyInstances($prop, $request);
             }
-        });
+
+            $props[$key] = $prop;
+        }
 
         return $props;
     }
