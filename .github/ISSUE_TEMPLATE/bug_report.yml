@@ -59,7 +59,7 @@ body:
     validations:
       required: true
   - type: textarea
-    id: misc
+    id: additional-context
     attributes:
-      label: Additional infos
-      description: Feel free to provide us with any other relevant information (e.g. data dumps, screenshots).
+      label: Additional context
+      description: Feel free to provide additional relevant information and context (e.g. data dumps, screen shots).

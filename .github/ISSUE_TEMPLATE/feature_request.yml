@@ -54,5 +54,5 @@ body:
     id: additional-context
     attributes:
       label: Additional context
-      description: Any other context, screenshots or data you have related to this enhancement proposal.
+      description: Feel free to provide additional relevant information and context (e.g. data dumps, screen shots).
 
