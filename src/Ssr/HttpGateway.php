@@ -27,7 +27,7 @@ class HttpGateway implements Gateway
         } catch (Exception $e) {
             return null;
         }
-        
+
         if (is_null($response)) {
             return null;
         }
