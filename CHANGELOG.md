@@ -34,7 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-- PHP 5.4 Support ([#327](https://github.com/inertiajs/inertia-laravel/pull/327))
+- Laravel 5.4 Support ([#327](https://github.com/inertiajs/inertia-laravel/pull/327))
 
 ### Fixed
 
