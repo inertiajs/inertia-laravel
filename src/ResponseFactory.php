@@ -4,8 +4,10 @@ namespace Inertia;
 
 use Closure;
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response as BaseResponse;
 use Illuminate\Support\Traits\Macroable;
 
@@ -13,16 +15,25 @@ class ResponseFactory
 {
     use Macroable;
 
+    /** @var string */
     protected $rootView = 'app';
-    protected $sharedProps = [];
-    protected $version = null;
 
-    public function setRootView($name)
+    /** @var array */
+    protected $sharedProps = [];
+
+    /** @var Closure|string|null */
+    protected $version;
+
+    public function setRootView(string $name): void
     {
         $this->rootView = $name;
     }
 
-    public function share($key, $value = null)
+    /**
+     * @param  string|array|Arrayable  $key
+     * @param  mixed|null  $value
+     */
+    public function share($key, $value = null): void
     {
         if (is_array($key)) {
             $this->sharedProps = array_merge($this->sharedProps, $key);
@@ -33,7 +44,12 @@ class ResponseFactory
         }
     }
 
-    public function getShared($key = null, $default = null)
+    /**
+     * @param  string|null  $key
+     * @param  null|mixed  $default
+     * @return mixed
+     */
+    public function getShared(string $key = null, $default = null)
     {
         if ($key) {
             return Arr::get($this->sharedProps, $key, $default);
@@ -42,17 +58,20 @@ class ResponseFactory
         return $this->sharedProps;
     }
 
-    public function flushShared()
+    public function flushShared(): void
     {
         $this->sharedProps = [];
     }
 
-    public function version($version)
+    /**
+     * @param  Closure|string|null  $version
+     */
+    public function version($version): void
     {
         $this->version = $version;
     }
 
-    public function getVersion()
+    public function getVersion(): string
     {
         $version = $this->version instanceof Closure
             ? App::call($this->version)
@@ -61,12 +80,12 @@ class ResponseFactory
         return (string) $version;
     }
 
-    public function lazy(callable $callback)
+    public function lazy(callable $callback): LazyProp
     {
         return new LazyProp($callback);
     }
 
-    public function render($component, $props = [])
+    public function render($component, array $props = []): Response
     {
         if ($props instanceof Arrayable) {
             $props = $props->toArray();
@@ -80,8 +99,19 @@ class ResponseFactory
         );
     }
 
-    public function location($url)
+    /**
+     * @param  string|RedirectResponse  $url
+     */
+    public function location($url): \Symfony\Component\HttpFoundation\Response
     {
-        return BaseResponse::make('', 409, ['X-Inertia-Location' => $url]);
+        if ($url instanceof RedirectResponse) {
+            $url = $url->getTargetUrl();
+        }
+
+        if (Request::inertia()) {
+            return BaseResponse::make('', 409, ['X-Inertia-Location' => $url]);
+        }
+
+        return new RedirectResponse($url);
     }
 }

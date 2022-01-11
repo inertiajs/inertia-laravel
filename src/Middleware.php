@@ -34,6 +34,8 @@ class Middleware
         if (file_exists($manifest = public_path('mix-manifest.json'))) {
             return md5_file($manifest);
         }
+
+        return null;
     }
 
     /**
@@ -85,9 +87,8 @@ class Middleware
 
         $response = $next($request);
         $response = $this->checkVersion($request, $response);
-        $response = $this->changeRedirectCode($request, $response);
 
-        return $response;
+        return $this->changeRedirectCode($request, $response);
     }
 
     /**
@@ -154,11 +155,13 @@ class Middleware
         })->pipe(function ($bags) use ($request) {
             if ($bags->has('default') && $request->header('x-inertia-error-bag')) {
                 return [$request->header('x-inertia-error-bag') => $bags->get('default')];
-            } elseif ($bags->has('default')) {
-                return $bags->get('default');
-            } else {
-                return $bags->toArray();
             }
+
+            if ($bags->has('default')) {
+                return $bags->get('default');
+            }
+
+            return $bags->toArray();
         });
     }
 }
