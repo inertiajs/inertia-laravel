@@ -17,7 +17,9 @@ jobs:
         composerFlags: ['--prefer-lowest', '']
         exclude:
           - php: 7.2
-            laravel: [ ^8.74, ^9.0 ]
+            laravel: ^8.74
+          - php: 7.2
+            laravel: ^9.0
           - php: 7.3
             laravel: ^9.0
           - php: 7.4
