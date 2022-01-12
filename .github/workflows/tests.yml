@@ -17,7 +17,7 @@ jobs:
         stability: ['prefer-lowest', 'prefer-stable']
         exclude:
           - php: 7.2
-            laravel: 8.74
+            laravel: 8
           - php: 7.2
             laravel: 9
           - php: 7.3
