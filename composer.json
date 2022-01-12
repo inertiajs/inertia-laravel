@@ -41,5 +41,7 @@
                 "Inertia\\ServiceProvider"
             ]
         }
-    }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }
