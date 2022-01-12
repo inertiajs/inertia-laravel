@@ -125,7 +125,7 @@ class Response implements Responsable
         $page = [
             'component' => $this->component,
             'props' => $props,
-            'url' => $request->getRequestUri(),
+            'url' => $request->getBaseUrl().$request->getRequestUri(),
             'version' => $this->version,
         ];
 
