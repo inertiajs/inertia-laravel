@@ -50,20 +50,20 @@ jobs:
           max_attempts: 5
           command: composer require "laravel/framework=^${{ matrix.laravel }}" --no-interaction --no-update
           
+      - name: Set Minimum PHP 8.1 Versions
+        uses: nick-invision/retry@v1
+        with:
+          timeout_minutes: 5
+          max_attempts: 5
+          command: composer require phpunit/phpunit:^9.5.8 --${{ matrix.stability }} --dev --no-interaction --no-update
+        if: matrix.php >= 8.1 && matrix.stability == 'prefer-lowest'
+          
       - name: Install dependencies
         uses: nick-invision/retry@v1
         with:
           timeout_minutes: 5
           max_attempts: 5
           command: composer update --${{ matrix.stability }} --prefer-dist --no-interaction --no-progress
-          
-      - name: Fix Minimum PHP 8.1 Versions
-        uses: nick-invision/retry@v1
-        with:
-          timeout_minutes: 5
-          max_attempts: 5
-          command: composer require phpunit/phpunit:^9.5.8 --${{ matrix.stability }} --dev --no-interaction --no-update --with-all-dependencies
-        if: matrix.php >= 8.1 && matrix.stability == 'prefer-lowest'
 
       - name: Execute tests
         run: vendor/bin/phpunit --verbose
