@@ -14,6 +14,42 @@ use Inertia\Tests\Stubs\ExampleMiddleware;
 
 class MiddlewareTest extends TestCase
 {
+    public function test_no_response_value_means_redirect_back_for_inertia_requests(): void
+    {
+        $fooCalled = false;
+        Route::middleware(Middleware::class)->get('/', function () use (&$fooCalled) {
+            $fooCalled = true;
+        });
+
+        $response = $this
+            ->from('/foo')
+            ->get('/', [
+                'X-Inertia' => 'true',
+                'Content-Type' => 'application/json',
+            ]);
+
+        $response->assertRedirect('/foo');
+        $response->assertStatus(303);
+        $this->assertTrue($fooCalled);
+    }
+
+    public function test_no_response_means_no_response_for_non_inertia_requests(): void
+    {
+        $fooCalled = false;
+        Route::middleware(Middleware::class)->get('/', function () use (&$fooCalled) {
+            $fooCalled = true;
+        });
+
+        $response = $this
+            ->from('/foo')
+            ->get('/', [
+                'Content-Type' => 'application/json',
+            ]);
+
+        $response->assertNoContent(200);
+        $this->assertTrue($fooCalled);
+    }
+
     public function test_the_version_is_optional(): void
     {
         $this->prepareMockEndpoint();

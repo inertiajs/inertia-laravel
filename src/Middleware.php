@@ -4,6 +4,7 @@ namespace Inertia;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redirect;
 use Symfony\Component\HttpFoundation\Response;
 
 class Middleware
@@ -86,9 +87,29 @@ class Middleware
         Inertia::setRootView($this->rootView($request));
 
         $response = $next($request);
+        $response = $this->changeEmptyToRedirect($request, $response);
         $response = $this->checkVersion($request, $response);
 
         return $this->changeRedirectCode($request, $response);
+    }
+
+    /**
+     * Changes empty/no-response Inertia requests to redirects back.
+     *
+     * @param  Request  $request
+     * @param  Response  $response
+     * @return Response
+     */
+    public function changeEmptyToRedirect(Request $request, Response $response)
+    {
+        if ($request->header('X-Inertia') &&
+            $response->getStatusCode() === 200 &&
+            empty($response->getContent())
+        ) {
+            return Redirect::back(303);
+        }
+
+        return $response;
     }
 
     /**
