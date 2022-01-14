@@ -96,13 +96,6 @@ class Response implements Responsable
 
         $props = $this->resolvePropertyInstances($props, $request);
 
-        foreach ($props as $key => $value) {
-            if (str_contains($key, '.')) {
-                data_set($props, $key, $value);
-                unset($props[$key]);
-            }
-        }
-
         $page = [
             'component' => $this->component,
             'props' => $props,
@@ -129,34 +122,32 @@ class Response implements Responsable
      */
     public function resolvePropertyInstances(array $props, Request $request): array
     {
-        foreach ($props as $key => $prop) {
-            if ($prop instanceof Closure) {
-                $prop = App::call($prop);
+        foreach ($props as $key => $value) {
+            if ($value instanceof Closure) {
+                $value = App::call($value);
             }
 
-            if ($prop instanceof LazyProp) {
-                $prop = App::call($prop);
+            if ($value instanceof LazyProp) {
+                $value = App::call($value);
             }
 
-            if ($prop instanceof PromiseInterface) {
-                $prop = $prop->wait();
+            if ($value instanceof PromiseInterface) {
+                $value = $value->wait();
             }
 
-            if ($prop instanceof ResourceResponse || $prop instanceof JsonResource) {
-                $prop = $prop->toResponse($request)->getData(true);
+            if ($value instanceof ResourceResponse || $value instanceof JsonResource) {
+                $value = $value->toResponse($request)->getData(true);
             }
 
-            if ($prop instanceof Arrayable) {
-                $prop = $prop->toArray();
+            if ($value instanceof Arrayable) {
+                $value = $value->toArray();
             }
 
-            // To be able to handle nested props, we need to re-run
-            // the function if the prop is an array.
-            if (is_array($prop)) {
-                $prop = $this->resolvePropertyInstances($prop, $request);
+            if (is_array($value)) {
+                $value = $this->resolvePropertyInstances($value, $request);
             }
 
-            $props[$key] = $prop;
+            Arr::set($props, $key, $value);
         }
 
         return $props;
