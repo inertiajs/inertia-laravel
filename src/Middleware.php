@@ -83,77 +83,57 @@ class Middleware
         });
 
         Inertia::share($this->share($request));
-
         Inertia::setRootView($this->rootView($request));
 
         $response = $next($request);
-        $response = $this->changeEmptyToRedirect($request, $response);
-        $response = $this->checkVersion($request, $response);
 
-        return $this->changeRedirectCode($request, $response);
-    }
-
-    /**
-     * Changes empty/no-response Inertia requests to redirects back.
-     *
-     * @param  Request  $request
-     * @param  Response  $response
-     * @return Response
-     */
-    public function changeEmptyToRedirect(Request $request, Response $response)
-    {
-        if ($request->header('X-Inertia') &&
-            $response->getStatusCode() === 200 &&
-            empty($response->getContent())
-        ) {
-            return Redirect::back(303);
+        if (! $request->header('X-Inertia')) {
+            return $response;
         }
 
-        return $response;
-    }
-
-    /**
-     * In the event that the assets change, initiate a
-     * client-side location visit to force an update.
-     *
-     * @param  Request  $request
-     * @param  Response  $response
-     * @return Response
-     */
-    public function checkVersion(Request $request, Response $response)
-    {
-        if ($request->header('X-Inertia') &&
-            $request->method() === 'GET' &&
-            $request->header('X-Inertia-Version', '') !== Inertia::getVersion()
-        ) {
-            if ($request->hasSession()) {
-                $request->session()->reflash();
-            }
-
-            return Inertia::location($request->fullUrl());
+        if ($request->method() === 'GET' && $request->header('X-Inertia-Version', '') !== Inertia::getVersion()) {
+            $response = $this->onVersionChange($request, $response);
         }
 
-        return $response;
-    }
+        if ($response->isOk() && empty($response->getContent())) {
+            $response = $this->onEmptyResponse($request, $response);
+        }
 
-    /**
-     * Changes the status code during redirects, ensuring they are made as
-     * GET requests, preventing "MethodNotAllowedHttpException" errors.
-     *
-     * @param  Request  $request
-     * @param  Response  $response
-     * @return Response
-     */
-    public function changeRedirectCode(Request $request, Response $response)
-    {
-        if ($request->header('X-Inertia') &&
-            $response->getStatusCode() === 302 &&
-            in_array($request->method(), ['PUT', 'PATCH', 'DELETE'])
-        ) {
+        if ($response->getStatusCode() === 302 && in_array($request->method(), ['PUT', 'PATCH', 'DELETE'])) {
             $response->setStatusCode(303);
         }
 
         return $response;
+    }
+
+    /**
+     * Determines what to do when an Inertia action returned with no response.
+     * By default, we'll redirect the user back to where they came from.
+     *
+     * @param  Request  $request
+     * @param  Response  $response
+     * @return Response
+     */
+    public function onEmptyResponse(Request $request, Response $response): Response
+    {
+        return Redirect::back();
+    }
+
+    /**
+     * Determines what to do when the Inertia asset version has changed.
+     * By default, we'll initiate a client-side location visit to force an update.
+     *
+     * @param  Request  $request
+     * @param  Response  $response
+     * @return Response
+     */
+    public function onVersionChange(Request $request, Response $response): Response
+    {
+        if ($request->hasSession()) {
+            $request->session()->reflash();
+        }
+
+        return Inertia::location($request->fullUrl());
     }
 
     /**
@@ -163,7 +143,7 @@ class Middleware
      * @param  Request  $request
      * @return object
      */
-    public function resolveValidationErrors(Request $request)
+    protected function resolveValidationErrors(Request $request)
     {
         if (! $request->session()->has('errors')) {
             return (object) [];

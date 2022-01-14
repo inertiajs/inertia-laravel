@@ -14,16 +14,16 @@ use Inertia\Tests\Stubs\ExampleMiddleware;
 
 class MiddlewareTest extends TestCase
 {
-    public function test_no_response_value_means_redirect_back_for_inertia_requests(): void
+    public function test_no_response_value_by_default_means_automatically_redirecting_back_for_inertia_requests(): void
     {
         $fooCalled = false;
-        Route::middleware(Middleware::class)->get('/', function () use (&$fooCalled) {
+        Route::middleware(Middleware::class)->put('/', function () use (&$fooCalled) {
             $fooCalled = true;
         });
 
         $response = $this
             ->from('/foo')
-            ->get('/', [
+            ->put('/', [], [
                 'X-Inertia' => 'true',
                 'Content-Type' => 'application/json',
             ]);
@@ -33,16 +33,34 @@ class MiddlewareTest extends TestCase
         $this->assertTrue($fooCalled);
     }
 
+    public function test_no_response_value_can_be_customized_by_overriding_the_middleware_method(): void
+    {
+        Route::middleware(ExampleMiddleware::class)->get('/', function () {
+            // Do nothing..
+        });
+
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('An empty Inertia response was returned.');
+
+        $this
+            ->withoutExceptionHandling()
+            ->from('/foo')
+            ->get('/', [
+                'X-Inertia' => 'true',
+                'Content-Type' => 'application/json',
+            ]);
+    }
+
     public function test_no_response_means_no_response_for_non_inertia_requests(): void
     {
         $fooCalled = false;
-        Route::middleware(Middleware::class)->get('/', function () use (&$fooCalled) {
+        Route::middleware(Middleware::class)->put('/', function () use (&$fooCalled) {
             $fooCalled = true;
         });
 
         $response = $this
             ->from('/foo')
-            ->get('/', [
+            ->put('/', [], [
                 'Content-Type' => 'application/json',
             ]);
 
