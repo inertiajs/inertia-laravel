@@ -3,6 +3,7 @@
 namespace Inertia\Tests;
 
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Config;
 use Illuminate\View\Compilers\BladeCompiler;
 use Illuminate\View\Engines\PhpEngine;
@@ -50,6 +51,11 @@ class DirectiveTest extends TestCase
 
     protected function renderView($contents, $data = [])
     {
+        // Laravel 8+ only: https://github.com/laravel/framework/pull/40425
+        if (method_exists(BladeCompiler::class, 'render')) {
+            return Blade::render($contents, $data, false);
+        }
+
         // First, we'll create a temporary file, and use compileString to 'emulate' compilation of our view.
         // This skips caching, and a bunch of other logic that's not relevant for what we need here.
         $path = tempnam(sys_get_temp_dir(), 'inertia_tests_render_');
