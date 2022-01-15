@@ -53,7 +53,7 @@ class DirectiveTest extends TestCase
     {
         // Laravel 8+ only: https://github.com/laravel/framework/pull/40425
         if (method_exists(BladeCompiler::class, 'render')) {
-            return Blade::render($contents, $data, false);
+            return Blade::render($contents, $data, true);
         }
 
         // First, we'll create a temporary file, and use compileString to 'emulate' compilation of our view.
