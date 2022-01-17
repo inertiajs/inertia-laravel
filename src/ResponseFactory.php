@@ -86,8 +86,8 @@ class ResponseFactory
     }
 
     /** 
-     * @param string          $component
-     * @param array|Arrayable $props
+     * @param  string  $component
+     * @param  array|Arrayable  $props
      */
     public function render($component, $props = []): Response
     {
