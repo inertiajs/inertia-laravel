@@ -88,8 +88,9 @@ class ResponseFactory
     /**
      * @param  string  $component
      * @param  array|Arrayable  $props
+     * @return Response
      */
-    public function render($component, $props = []): Response
+    public function render(string $component, $props = []): Response
     {
         if ($props instanceof Arrayable) {
             $props = $props->toArray();
