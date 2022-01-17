@@ -142,7 +142,7 @@ class ResponseFactoryTest extends TestCase
                 public function toArray()
                 {
                     return [
-                        'user' => 'rhys'
+                        'foo' => 'bar'
                     ];
                 }
             });
@@ -153,7 +153,7 @@ class ResponseFactoryTest extends TestCase
         $response->assertJson([
             'component' => 'User/Edit',
             'props' => [
-                'user' => 'rhys'
+                'foo' => 'bar'
             ],
         ]);
     }
