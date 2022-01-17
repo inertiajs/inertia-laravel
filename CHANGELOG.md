@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Incorrect `Arrayable` type-hint ([#353](https://github.com/inertiajs/inertia-laravel/pull/353))
 - Pagination with API Resources and other nested props weren't resolving properly ([#342](https://github.com/inertiajs/inertia-laravel/pull/342), [#298](https://github.com/inertiajs/inertia-laravel/pull/298))
 
 ## [v0.5.2](https://github.com/inertiajs/inertia-laravel/compare/v0.5.1...v0.5.2) - 2022-01-12
