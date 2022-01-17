@@ -2,8 +2,8 @@
 
 namespace Inertia\Tests;
 
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Request;
@@ -138,11 +138,11 @@ class ResponseFactoryTest extends TestCase
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
             Inertia::share('foo', 'bar');
 
-            return Inertia::render('User/Edit',  new class implements Arrayable {
+            return Inertia::render('User/Edit', new class implements Arrayable {
                 public function toArray()
                 {
                     return [
-                        'foo' => 'bar'
+                        'foo' => 'bar',
                     ];
                 }
             });
@@ -153,7 +153,7 @@ class ResponseFactoryTest extends TestCase
         $response->assertJson([
             'component' => 'User/Edit',
             'props' => [
-                'foo' => 'bar'
+                'foo' => 'bar',
             ],
         ]);
     }
