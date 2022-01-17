@@ -85,6 +85,10 @@ class ResponseFactory
         return new LazyProp($callback);
     }
 
+    /** 
+     * @param string          $component
+     * @param array|Arrayable $props
+     */
     public function render($component, $props = []): Response
     {
         if ($props instanceof Arrayable) {
