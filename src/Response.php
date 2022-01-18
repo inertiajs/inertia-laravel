@@ -13,7 +13,6 @@ use Illuminate\Http\Resources\Json\ResourceResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Response as ResponseFactory;
-use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
 
 class Response implements Responsable
