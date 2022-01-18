@@ -5,7 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v0.5.3...HEAD)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v0.5.4...HEAD)
+
+## [v0.5.4](https://github.com/inertiajs/inertia-laravel/compare/v0.5.3...v0.5.4) - 2022-01-18
+
+### Added
+
+- `.tsx` extension is now included to the testing paths by default ([#354](https://github.com/inertiajs/inertia-laravel/pull/354))
+
+### Fixed
+
+- Dot-notated props weren't being removed after unpacking ([507b0a](https://github.com/inertiajs/inertia-laravel/commit/507b0a0ad8321028b8651528099f73a88b158359))
 
 ## [v0.5.3](https://github.com/inertiajs/inertia-laravel/compare/v0.5.2...v0.5.3) - 2022-01-17
 
