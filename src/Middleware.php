@@ -38,6 +38,8 @@ class Middleware
         if (file_exists($manifest = public_path(config('vite.build_path', 'build').'/manifest.json'))) {
             return md5_file($manifest);
         }
+
+        return null;
     }
 
     /**
