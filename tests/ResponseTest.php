@@ -2,7 +2,6 @@
 
 namespace Inertia\Tests;
 
-use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -14,10 +13,12 @@ use Illuminate\Support\Fluent;
 use Illuminate\View\View;
 use Inertia\LazyProp;
 use Inertia\Response;
+use Inertia\Tests\Stubs\FakeResource;
+use Mockery;
 
 class ResponseTest extends TestCase
 {
-    public function test_can_macro()
+    public function test_can_macro(): void
     {
         $response = new Response('User/Edit', []);
         $response->macro('foo', function () {
@@ -27,7 +28,7 @@ class ResponseTest extends TestCase
         $this->assertEquals('bar', $response->foo());
     }
 
-    public function test_server_response()
+    public function test_server_response(): void
     {
         $request = Request::create('/user/123', 'GET');
 
@@ -44,10 +45,10 @@ class ResponseTest extends TestCase
         $this->assertSame('Jonathan', $page['props']['user']['name']);
         $this->assertSame('/user/123', $page['url']);
         $this->assertSame('123', $page['version']);
-        $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;user&quot;:{&quot;name&quot;:&quot;Jonathan&quot;}},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;}"></div>'."\n", $view->render());
+        $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;user&quot;:{&quot;name&quot;:&quot;Jonathan&quot;}},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;}"></div>', $view->render());
     }
 
-    public function test_xhr_response()
+    public function test_xhr_response(): void
     {
         $request = Request::create('/user/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
@@ -64,22 +65,12 @@ class ResponseTest extends TestCase
         $this->assertSame('123', $page->version);
     }
 
-    public function test_resource_response()
+    public function test_resource_response(): void
     {
         $request = Request::create('/user/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
 
-        $user = (object) ['name' => 'Jonathan'];
-
-        $resource = new class($user) extends JsonResource
-        {
-            public static $wrap = null;
-
-            public function toArray($request)
-            {
-                return ['name' => $this->name];
-            }
-        };
+        $resource = new FakeResource(['name' => 'Jonathan']);
 
         $response = new Response('User/Edit', ['user' => $resource], 'app', '123');
         $response = $response->toResponse($request);
@@ -92,7 +83,7 @@ class ResponseTest extends TestCase
         $this->assertSame('123', $page->version);
     }
 
-    public function test_lazy_resource_response()
+    public function test_lazy_resource_response(): void
     {
         $request = Request::create('/users', 'GET', ['page' => 1]);
         $request->headers->add(['X-Inertia' => 'true']);
@@ -103,7 +94,7 @@ class ResponseTest extends TestCase
             new Fluent(['name' => 'Jeffrey']),
         ]);
 
-        $callable = function () use ($users) {
+        $callable = static function () use ($users) {
             $page = new LengthAwarePaginator($users->take(2), $users->count(), 2);
 
             return new class($page, JsonResource::class) extends ResourceCollection
@@ -145,27 +136,68 @@ class ResponseTest extends TestCase
         });
     }
 
-    public function test_arrayable_prop_response()
+    public function test_nested_lazy_resource_response(): void
+    {
+        $request = Request::create('/users', 'GET', ['page' => 1]);
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $users = Collection::make([
+            new Fluent(['name' => 'Jonathan']),
+            new Fluent(['name' => 'Taylor']),
+            new Fluent(['name' => 'Jeffrey']),
+        ]);
+
+        $callable = static function () use ($users) {
+            $page = new LengthAwarePaginator($users->take(2), $users->count(), 2);
+
+            // nested array with ResourceCollection to resolve
+            return [
+                'users' => new class($page, JsonResource::class) extends ResourceCollection {},
+            ];
+        };
+
+        $response = new Response('User/Index', ['something' => $callable], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $expected = [
+            'users' => [
+                'data' => $users->take(2),
+                'links' => [
+                    'first' => '/?page=1',
+                    'last' => '/?page=2',
+                    'prev' => null,
+                    'next' => '/?page=2',
+                ],
+                'meta' => [
+                    'current_page' => 1,
+                    'from' => 1,
+                    'last_page' => 2,
+                    'path' => '/',
+                    'per_page' => 2,
+                    'to' => 2,
+                    'total' => 3,
+                ],
+            ],
+        ];
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertSame('User/Index', $page->component);
+        $this->assertSame('/users?page=1', $page->url);
+        $this->assertSame('123', $page->version);
+        tap($page->props->something->users, function ($users) use ($expected) {
+            $this->assertSame(json_encode($expected['users']['data']), json_encode($users->data));
+            $this->assertSame(json_encode($expected['users']['links']), json_encode($users->links));
+            $this->assertSame('/', $users->meta->path);
+        });
+    }
+
+    public function test_arrayable_prop_response(): void
     {
         $request = Request::create('/user/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
 
-        $user = (object) ['name' => 'Jonathan'];
-
-        $resource = new class($user) implements Arrayable
-        {
-            public $user;
-
-            public function __construct($user)
-            {
-                $this->user = $user;
-            }
-
-            public function toArray()
-            {
-                return ['name' => $this->user->name];
-            }
-        };
+        $resource = FakeResource::make(['name' => 'Jonathan']);
 
         $response = new Response('User/Edit', ['user' => $resource], 'app', '123');
         $response = $response->toResponse($request);
@@ -178,7 +210,30 @@ class ResponseTest extends TestCase
         $this->assertSame('123', $page->version);
     }
 
-    public function test_xhr_partial_response()
+    public function test_promise_props_are_resolved(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $user = (object) ['name' => 'Jonathan'];
+
+        $promise = Mockery::mock('GuzzleHttp\Promise\PromiseInterface')
+            ->shouldReceive('wait')
+            ->andReturn($user)
+            ->mock();
+
+        $response = new Response('User/Edit', ['user' => $promise], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertSame('User/Edit', $page->component);
+        $this->assertSame('Jonathan', $page->props->user->name);
+        $this->assertSame('/user/123', $page->url);
+        $this->assertSame('123', $page->version);
+    }
+
+    public function test_xhr_partial_response(): void
     {
         $request = Request::create('/user/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
@@ -201,7 +256,7 @@ class ResponseTest extends TestCase
         $this->assertSame('123', $page->version);
     }
 
-    public function test_lazy_props_are_not_included_by_default()
+    public function test_lazy_props_are_not_included_by_default(): void
     {
         $request = Request::create('/users', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
@@ -218,7 +273,7 @@ class ResponseTest extends TestCase
         $this->assertObjectNotHasAttribute('lazy', $page->props);
     }
 
-    public function test_lazy_props_are_included_in_partial_reload()
+    public function test_lazy_props_are_included_in_partial_reload(): void
     {
         $request = Request::create('/users', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
@@ -237,25 +292,74 @@ class ResponseTest extends TestCase
         $this->assertSame('A lazy value', $page->props->lazy);
     }
 
-    public function test_can_nest_props_using_dot_notation()
+    public function test_top_level_dot_props_get_unpacked(): void
     {
-        $request = Request::create('/products/123', 'GET');
-
         $props = [
             'auth' => [
                 'user' => [
                     'name' => 'Jonathan Reinink',
                 ],
             ],
-            'auth.user.can.deleteProducts' => true,
+            'auth.user.can' => [
+                'do.stuff' => true,
+            ],
             'product' => ['name' => 'My example product'],
         ];
-        $response = new Response('Products/Edit', $props, 'app', '123');
-        $response = $response->toResponse($request);
-        $view = $response->getOriginalContent();
-        $user = $view->getData()['page']['props']['auth']['user'];
 
+        $request = Request::create('/products/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $response = new Response('User/Edit', $props, 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData(true);
+
+        $user = $page['props']['auth']['user'];
         $this->assertSame('Jonathan Reinink', $user['name']);
-        $this->assertTrue($user['can']['deleteProducts']);
+        $this->assertTrue($user['can']['do.stuff']);
+        $this->assertFalse(array_key_exists('auth.user.can', $page['props']));
+    }
+
+    public function test_nested_dot_props_do_not_get_unpacked(): void
+    {
+        $props = [
+            'auth' => [
+                'user.can' => [
+                    'do.stuff' => true,
+                ],
+                'user' => [
+                    'name' => 'Jonathan Reinink',
+                ],
+            ],
+            'product' => ['name' => 'My example product'],
+        ];
+
+        $request = Request::create('/products/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $response = new Response('User/Edit', $props, 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData(true);
+
+        $auth = $page['props']['auth'];
+        $this->assertSame('Jonathan Reinink', $auth['user']['name']);
+        $this->assertTrue($auth['user.can']['do.stuff']);
+        $this->assertFalse(array_key_exists('can', $auth));
+    }
+
+    public function test_responsable_with_invalid_key(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $resource = new FakeResource(["\x00*\x00_invalid_key" => 'for object']);
+
+        $response = new Response('User/Edit', ['resource' => $resource], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData(true);
+
+        $this->assertSame(
+            ["\x00*\x00_invalid_key" => 'for object'],
+            $page['props']['resource']
+        );
     }
 }

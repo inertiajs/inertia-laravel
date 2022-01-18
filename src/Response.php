@@ -3,9 +3,13 @@
 namespace Inertia;
 
 use Closure;
+use GuzzleHttp\Promise\PromiseInterface;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Resources\Json\ResourceResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Response as ResponseFactory;
@@ -21,7 +25,13 @@ class Response implements Responsable
     protected $version;
     protected $viewData = [];
 
-    public function __construct($component, $props, $rootView = 'app', $version = null)
+    /**
+     * @param  string  $component
+     * @param  array|Arrayable  $props
+     * @param  string  $rootView
+     * @param  string  $version
+     */
+    public function __construct(string $component, $props, string $rootView = 'app', string $version = '')
     {
         $this->component = $component;
         $this->props = $props instanceof Arrayable ? $props->toArray() : $props;
@@ -29,7 +39,12 @@ class Response implements Responsable
         $this->version = $version;
     }
 
-    public function with($key, $value = null)
+    /**
+     * @param  string|array  $key
+     * @param  mixed|null  $value
+     * @return $this
+     */
+    public function with($key, $value = null): self
     {
         if (is_array($key)) {
             $this->props = array_merge($this->props, $key);
@@ -40,7 +55,12 @@ class Response implements Responsable
         return $this;
     }
 
-    public function withViewData($key, $value = null)
+    /**
+     * @param  string|array  $key
+     * @param  mixed|null  $value
+     * @return $this
+     */
+    public function withViewData($key, $value = null): self
     {
         if (is_array($key)) {
             $this->viewData = array_merge($this->viewData, $key);
@@ -51,52 +71,35 @@ class Response implements Responsable
         return $this;
     }
 
-    public function rootView($rootView)
+    public function rootView(string $rootView): self
     {
         $this->rootView = $rootView;
 
         return $this;
     }
 
+    /**
+     * Create an HTTP response that represents the object.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
     public function toResponse($request)
     {
-        $only = array_filter(explode(',', $request->header('X-Inertia-Partial-Data')));
+        $only = array_filter(explode(',', $request->header('X-Inertia-Partial-Data', '')));
 
         $props = ($only && $request->header('X-Inertia-Partial-Component') === $this->component)
             ? Arr::only($this->props, $only)
-            : array_filter($this->props, function ($prop) {
+            : array_filter($this->props, static function ($prop) {
                 return ! ($prop instanceof LazyProp);
             });
 
-        array_walk_recursive($props, function (&$prop) use ($request) {
-            if ($prop instanceof LazyProp) {
-                $prop = App::call($prop);
-            }
-
-            if ($prop instanceof Closure) {
-                $prop = App::call($prop);
-            }
-
-            if ($prop instanceof Responsable) {
-                $prop = $prop->toResponse($request)->getData();
-            }
-
-            if ($prop instanceof Arrayable) {
-                $prop = $prop->toArray();
-            }
-        });
-
-        foreach ($props as $key => $value) {
-            if (str_contains($key, '.')) {
-                data_set($props, $key, $value);
-                unset($props[$key]);
-            }
-        }
+        $props = $this->resolvePropertyInstances($props, $request);
 
         $page = [
             'component' => $this->component,
             'props' => $props,
-            'url' => $request->getRequestUri(),
+            'url' => $request->getBaseUrl().$request->getRequestUri(),
             'version' => $this->version,
         ];
 
@@ -108,5 +111,51 @@ class Response implements Responsable
         }
 
         return ResponseFactory::view($this->rootView, $this->viewData + ['page' => $page]);
+    }
+
+    /**
+     * Resolve all necessary class instances in the given props.
+     *
+     * @param  array  $props
+     * @param  \Illuminate\Http\Request  $request
+     * @param  bool  $unpackDotProps
+     * @return array
+     */
+    public function resolvePropertyInstances(array $props, Request $request, bool $unpackDotProps = true): array
+    {
+        foreach ($props as $key => $value) {
+            if ($value instanceof Closure) {
+                $value = App::call($value);
+            }
+
+            if ($value instanceof LazyProp) {
+                $value = App::call($value);
+            }
+
+            if ($value instanceof PromiseInterface) {
+                $value = $value->wait();
+            }
+
+            if ($value instanceof ResourceResponse || $value instanceof JsonResource) {
+                $value = $value->toResponse($request)->getData(true);
+            }
+
+            if ($value instanceof Arrayable) {
+                $value = $value->toArray();
+            }
+
+            if (is_array($value)) {
+                $value = $this->resolvePropertyInstances($value, $request, false);
+            }
+
+            if ($unpackDotProps && str_contains($key, '.')) {
+                Arr::set($props, $key, $value);
+                unset($props[$key]);
+            } else {
+                $props[$key] = $value;
+            }
+        }
+
+        return $props;
     }
 }

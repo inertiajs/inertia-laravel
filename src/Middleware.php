@@ -12,6 +12,7 @@ class Middleware
      * The root template that's loaded on the first page visit.
      *
      * @see https://inertiajs.com/server-side-setup#root-template
+     *
      * @var string
      */
     protected $rootView = 'app';
@@ -20,6 +21,7 @@ class Middleware
      * Determines the current asset version.
      *
      * @see https://inertiajs.com/asset-versioning
+     *
      * @param  \Illuminate\Http\Request  $request
      * @return string|null
      */
@@ -33,7 +35,7 @@ class Middleware
             return md5_file($manifest);
         }
 
-        if (file_exists($manifest = public_path('build/manifest.json'))) {
+        if (file_exists($manifest = public_path(config('vite.build_path', 'build').'/manifest.json'))) {
             return md5_file($manifest);
         }
     }
@@ -42,6 +44,7 @@ class Middleware
      * Defines the props that are shared by default.
      *
      * @see https://inertiajs.com/shared-data
+     *
      * @param  \Illuminate\Http\Request  $request
      * @return array
      */
@@ -58,7 +61,8 @@ class Middleware
      * Sets the root template that's loaded on the first page visit.
      *
      * @see https://inertiajs.com/server-side-setup#root-template
-     * @param Request $request
+     *
+     * @param  Request  $request
      * @return string
      */
     public function rootView(Request $request)
@@ -85,9 +89,8 @@ class Middleware
 
         $response = $next($request);
         $response = $this->checkVersion($request, $response);
-        $response = $this->changeRedirectCode($request, $response);
 
-        return $response;
+        return $this->changeRedirectCode($request, $response);
     }
 
     /**
@@ -154,11 +157,13 @@ class Middleware
         })->pipe(function ($bags) use ($request) {
             if ($bags->has('default') && $request->header('x-inertia-error-bag')) {
                 return [$request->header('x-inertia-error-bag') => $bags->get('default')];
-            } elseif ($bags->has('default')) {
-                return $bags->get('default');
-            } else {
-                return $bags->toArray();
             }
+
+            if ($bags->has('default')) {
+                return $bags->get('default');
+            }
+
+            return $bags->toArray();
         });
     }
 }
