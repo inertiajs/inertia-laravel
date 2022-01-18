@@ -309,7 +309,7 @@ class ResponseTest extends TestCase
         $request = Request::create('/products/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
 
-        $response = new Response('User/Edit',$props, 'app', '123');
+        $response = new Response('User/Edit', $props, 'app', '123');
         $response = $response->toResponse($request);
         $page = $response->getData(true);
 
@@ -336,7 +336,7 @@ class ResponseTest extends TestCase
         $request = Request::create('/products/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
 
-        $response = new Response('User/Edit',$props, 'app', '123');
+        $response = new Response('User/Edit', $props, 'app', '123');
         $response = $response->toResponse($request);
         $page = $response->getData(true);
 
