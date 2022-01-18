@@ -292,26 +292,58 @@ class ResponseTest extends TestCase
         $this->assertSame('A lazy value', $page->props->lazy);
     }
 
-    public function test_can_nest_props_using_dot_notation(): void
+    public function test_top_level_dot_props_get_unpacked(): void
     {
-        $request = Request::create('/products/123', 'GET');
-
         $props = [
             'auth' => [
                 'user' => [
                     'name' => 'Jonathan Reinink',
                 ],
             ],
-            'auth.user.can.deleteProducts' => true,
+            'auth.user.can' => [
+                'do.stuff' => true,
+            ],
             'product' => ['name' => 'My example product'],
         ];
-        $response = new Response('Products/Edit', $props, 'app', '123');
-        $response = $response->toResponse($request);
-        $view = $response->getOriginalContent();
-        $user = $view->getData()['page']['props']['auth']['user'];
 
+        $request = Request::create('/products/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $response = new Response('User/Edit',$props, 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData(true);
+
+        $user = $page['props']['auth']['user'];
         $this->assertSame('Jonathan Reinink', $user['name']);
-        $this->assertTrue($user['can']['deleteProducts']);
+        $this->assertTrue($user['can']['do.stuff']);
+        $this->assertFalse(array_key_exists('auth.user.can', $page['props']));
+    }
+
+    public function test_nested_dot_props_do_not_get_unpacked(): void
+    {
+        $props = [
+            'auth' => [
+                'user.can' => [
+                    'do.stuff' => true,
+                ],
+                'user' => [
+                    'name' => 'Jonathan Reinink',
+                ],
+            ],
+            'product' => ['name' => 'My example product'],
+        ];
+
+        $request = Request::create('/products/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $response = new Response('User/Edit',$props, 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData(true);
+
+        $auth = $page['props']['auth'];
+        $this->assertSame('Jonathan Reinink', $auth['user']['name']);
+        $this->assertTrue($auth['user.can']['do.stuff']);
+        $this->assertFalse(array_key_exists('can', $auth));
     }
 
     public function test_responsable_with_invalid_key(): void
