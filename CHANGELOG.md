@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v0.5.4...HEAD)
 
+### Added
+
+- Inertia now redirects back by default when no response is returned from a controller ([#350](https://github.com/inertiajs/inertia-laravel/pull/350))
+- The Middleware has an overrideable `onEmptyResponse` hook to customize the default 'redirect back' behaviour ([#350](https://github.com/inertiajs/inertia-laravel/pull/350))
+
+### Changed
+
+- Internal: Replaced the Middleware's `checkVersion` method with an `onVersionChange` hook ([#350](https://github.com/inertiajs/inertia-laravel/pull/350))
+
 ## [v0.5.4](https://github.com/inertiajs/inertia-laravel/compare/v0.5.3...v0.5.4) - 2022-01-18
 
 ### Added
