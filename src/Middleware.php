@@ -143,7 +143,7 @@ class Middleware
      * @param  Request  $request
      * @return object
      */
-    protected function resolveValidationErrors(Request $request)
+    public function resolveValidationErrors(Request $request)
     {
         if (! $request->session()->has('errors')) {
             return (object) [];
