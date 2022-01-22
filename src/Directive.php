@@ -49,4 +49,22 @@ class Directive
 
         return implode(' ', array_map('trim', explode("\n", $template)));
     }
+
+    /**
+     * Compiles the "@ifInertiaSSR" directive.
+     *
+     * @return string
+     */
+    public static function compileIfInertiaSSR($expression = ''): string
+    {
+        $template = '<?php
+            if (!isset($__inertiaSsr)) {
+                $__inertiaSsr = app(\Inertia\Ssr\Gateway::class)->dispatch($page);
+            }
+
+            if (isset($__inertiaSsr) && $__inertiaSsr instanceof \Inertia\Ssr\Response ):
+        ?>';
+        
+        return implode(' ', array_map('trim', explode("\n", $template)));
+    }
 }

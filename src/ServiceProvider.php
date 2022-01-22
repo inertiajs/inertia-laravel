@@ -54,6 +54,7 @@ class ServiceProvider extends BaseServiceProvider
     {
         Blade::directive('inertia', [Directive::class, 'compile']);
         Blade::directive('inertiaHead', [Directive::class, 'compileHead']);
+        Blade::directive('ifInertiaSSR', [Directive::class, 'compileIfInertiaSSR']);
     }
 
     protected function registerConsoleCommands(): void
