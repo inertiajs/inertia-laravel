@@ -64,7 +64,7 @@ class Directive
 
             if (isset($__inertiaSsr) && $__inertiaSsr instanceof \Inertia\Ssr\Response ):
         ?>';
-        
+
         return implode(' ', array_map('trim', explode("\n", $template)));
     }
 }
