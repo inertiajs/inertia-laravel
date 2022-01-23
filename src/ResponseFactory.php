@@ -146,6 +146,7 @@ class ResponseFactory
                 return true;
             }
         }
+
         return false;
     }
 }
