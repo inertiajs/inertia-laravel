@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response as BaseResponse;
 use Illuminate\Support\Traits\Macroable;
+use Illuminate\Support\Facades\Validator;
 
 class ResponseFactory
 {
@@ -118,5 +119,28 @@ class ResponseFactory
         }
 
         return new RedirectResponse($url);
+    }
+
+    /**
+     * @param  array|Arrayable  $rules
+     * @return bool
+     */
+    public function realtimeValidation($rules = []): bool
+    {
+        if(Request::has('_realtimeValidation')){
+            $realtimeValidator = Validator::make(
+                Request::except('_realtimeValidation'),
+                collect($rules)->map(function ($rule, $attribute) use ($rules) {
+                    if (is_string($rule)) $rule = explode('|', $rule);
+                    if (! in_array('sometimes', $rule)) array_unshift($rule, 'sometimes');
+                    return $rule;
+                })->toArray()
+            );
+            $realtimeValidator->validate();
+            if(!$realtimeValidator->fails()) {
+                return true;
+            }
+        }
+        return false;
     }
 }
