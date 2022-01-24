@@ -126,30 +126,32 @@ class ResponseFactory
      */
     public function realtimeValidation($rules = []): void
     {
-        $attributes = [];
-        foreach ($rules as $key => $value) {
-            if (is_string($key)) {
-                $attributes[] = $key;
+        if (!empty($rules)) {
+            $attributes = [];
+            foreach ($rules as $key => $value) {
+                if (is_string($key)) {
+                    $attributes[] = $key;
+                }
             }
-        }
-        if (Request::has(['_realtimeValidation', $attributes])) {
-            $realtimeValidator = \Illuminate\Support\Facades\Validator::make(
-                Request::except('_realtimeValidation'),
-                collect($rules)->map(function ($rule, $attribute) {
-                    if (is_string($rule)) {
-                        $rule = explode('|', $rule);
-                    }
-                    if (! in_array('sometimes', $rule)) {
-                        array_unshift($rule, 'sometimes');
-                    }
-
-                    return $rule;
-                })->toArray()
-            );
-            $realtimeValidator->validate();
-
-            if (! $realtimeValidator->fails()) {
-                throw new \Illuminate\Validation\ValidationException($realtimeValidator);
+            if (Request::has(['_realtimeValidation', $attributes])) {
+                $realtimeValidator = \Illuminate\Support\Facades\Validator::make(
+                    Request::except('_realtimeValidation'),
+                    collect($rules)->map(function ($rule, $attribute) {
+                        if (is_string($rule)) {
+                            $rule = explode('|', $rule);
+                        }
+                        if (! in_array('sometimes', $rule)) {
+                            array_unshift($rule, 'sometimes');
+                        }
+    
+                        return $rule;
+                    })->toArray()
+                );
+                $realtimeValidator->validate();
+    
+                if (! $realtimeValidator->fails()) {
+                    throw new \Illuminate\Validation\ValidationException($realtimeValidator);
+                }
             }
         }
     }
