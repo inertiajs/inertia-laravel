@@ -126,7 +126,7 @@ class ResponseFactory
      */
     public function realtimeValidation($rules = []): void
     {
-        if (!empty($rules)) {
+        if (! empty($rules)) {
             $attributes = [];
             foreach ($rules as $key => $value) {
                 if (is_string($key)) {
@@ -143,12 +143,12 @@ class ResponseFactory
                         if (! in_array('sometimes', $rule)) {
                             array_unshift($rule, 'sometimes');
                         }
-    
+
                         return $rule;
                     })->toArray()
                 );
                 $realtimeValidator->validate();
-    
+
                 if (! $realtimeValidator->fails()) {
                     throw new \Illuminate\Validation\ValidationException($realtimeValidator);
                 }
