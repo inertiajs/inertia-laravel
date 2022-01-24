@@ -124,7 +124,7 @@ class ResponseFactory
      * @param  array|Arrayable  $rules
      * @return void
      */
-    public function realtimeValidation($rules = []): void
+    public function validate($rules = []): void
     {
         if (! empty($rules)) {
             $attributes = [];
@@ -133,8 +133,8 @@ class ResponseFactory
                     $attributes[] = $key;
                 }
             }
-            if (Request::has($attributes) && Request::hasHeader('X-Inertia-Real-Time-Validation')) {
-                $realtimeValidator = validator(
+            if (Request::has($attributes) && Request::hasHeader('X-Inertia-Validate')) {
+                $validator = validator(
                     Request::only($attributes),
                     collect($rules)->map(function ($rule, $attribute) {
                         if (is_string($rule)) {
@@ -147,10 +147,10 @@ class ResponseFactory
                         return $rule;
                     })->toArray()
                 );
-                $realtimeValidator->validate();
+                $validator->validate();
 
-                if (! $realtimeValidator->fails()) {
-                    throw new \Illuminate\Validation\ValidationException($realtimeValidator);
+                if (! $validator->fails()) {
+                    throw new \Illuminate\Validation\ValidationException($validator);
                 }
             }
         }
