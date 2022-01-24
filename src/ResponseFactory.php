@@ -9,7 +9,6 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response as BaseResponse;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Traits\Macroable;
 
 class ResponseFactory
@@ -123,9 +122,9 @@ class ResponseFactory
 
     /**
      * @param  array|Arrayable  $rules
-     * @return bool
+     * @return void
      */
-    public function realtimeValidation($rules = []): bool
+    public function realtimeValidation($rules = []): void
     {
         $attributes = [];
         foreach ($rules as $key => $value) {
@@ -134,7 +133,7 @@ class ResponseFactory
             }
         }
         if (Request::has(['_realtimeValidation', $attributes])) {
-            $realtimeValidator = Validator::make(
+            $realtimeValidator = \Illuminate\Support\Facades\Validator::make(
                 Request::except('_realtimeValidation'),
                 collect($rules)->map(function ($rule, $attribute) {
                     if (is_string($rule)) {
@@ -148,11 +147,10 @@ class ResponseFactory
                 })->toArray()
             );
             $realtimeValidator->validate();
+
             if (! $realtimeValidator->fails()) {
-                return true;
+                throw new \Illuminate\Validation\ValidationException($realtimeValidator);
             }
         }
-
-        return false;
     }
 }
