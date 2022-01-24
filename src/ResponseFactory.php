@@ -127,7 +127,13 @@ class ResponseFactory
      */
     public function realtimeValidation($rules = []): bool
     {
-        if (Request::has('_realtimeValidation')) {
+        $attributes = [];
+        foreach ($rules as $key => $value) {
+            if (is_string($key)) {
+                $attributes[] = $key;
+            }
+        }
+        if (Request::has(['_realtimeValidation', $attributes])) {
             $realtimeValidator = Validator::make(
                 Request::except('_realtimeValidation'),
                 collect($rules)->map(function ($rule, $attribute) {
