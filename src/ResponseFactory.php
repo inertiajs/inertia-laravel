@@ -133,9 +133,9 @@ class ResponseFactory
                     $attributes[] = $key;
                 }
             }
-            if (Request::has(['_realtimeValidation', $attributes])) {
-                $realtimeValidator = \Illuminate\Support\Facades\Validator::make(
-                    Request::except('_realtimeValidation'),
+            if (Request::has($attributes) && Request::hasHeader('X-Inertia-Real-Time-Validation')) {
+                $realtimeValidator = validator(
+                    Request::only($attributes),
                     collect($rules)->map(function ($rule, $attribute) {
                         if (is_string($rule)) {
                             $rule = explode('|', $rule);
