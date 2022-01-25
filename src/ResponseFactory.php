@@ -143,6 +143,7 @@ class ResponseFactory
                         if (! in_array('sometimes', $rule)) {
                             array_unshift($rule, 'sometimes');
                         }
+
                         return $rule;
                     })->toArray()
                 );
