@@ -149,9 +149,8 @@ class ResponseFactory
                 );
                 $validator->validate();
             }
-            // We throw this exception to stop the controller from continuing
-            // Since at this point, we know the request has a 'X-Inertia-Validate' header
-            // And because we're doing real-time validation, we don't want the controller to continue
+            // We throw this exception because at this point, we know the request has a 'X-Inertia-Validate' header
+            // And since we're doing a real-time validation, we don't want the controller to continue
             throw \Illuminate\Validation\ValidationException::withMessages([]);
         }
     }
