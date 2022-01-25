@@ -124,7 +124,7 @@ class ResponseFactory
      * @param  array|Arrayable  $rules
      * @return void
      */
-    public function validate($rules = []): void
+    public function validate($rules = [], $messages = []): void
     {
         if (Request::hasHeader('X-Inertia-Validate')) {
             // We extract the attribute names from the $rules
@@ -137,7 +137,8 @@ class ResponseFactory
                 $validator = validator(
                     Request::only($inertia_validate),
                     // Only pass the rules that are present in the 'X-Inertia-Validate' header
-                    array_intersect_key($rules, array_flip($inertia_validate))
+                    array_intersect_key($rules, array_flip($inertia_validate)),
+                    $messages
                 );
                 $validator->validate();
             }
