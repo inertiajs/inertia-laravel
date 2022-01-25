@@ -126,16 +126,16 @@ class ResponseFactory
      */
     public function validate($rules = []): void
     {
-        if (! empty($rules)) {
-            $attributes = [];
-            foreach ($rules as $key => $value) {
-                if (is_string($key)) {
-                    $attributes[] = $key;
-                }
-            }
-            if (Request::has($attributes) && Request::hasHeader('X-Inertia-Validate')) {
+        if (Request::hasHeader('X-Inertia-Validate')) {
+            // We extract the attribute names from the $rules
+            $rules_attribute_names = array_filter(array_keys($rules), fn ($key) => is_string($key));
+            // We take the input data that the client wants to be validated from the 'X-Inertia-Validate' header
+            $inertia_validate = explode(',', Request::header('X-Inertia-Validate'));
+            // We remove any input data that is not in the $rules and the Request::all()
+            $inertia_validate = array_intersect($inertia_validate, $rules_attribute_names, collect(Request::all())->keys()->toArray());
+            if (! empty($inertia_validate) && ! empty($rules)) {
                 $validator = validator(
-                    Request::only($attributes),
+                    Request::only($inertia_validate),
                     collect($rules)->map(function ($rule, $attribute) {
                         if (is_string($rule)) {
                             $rule = explode('|', $rule);
@@ -143,16 +143,15 @@ class ResponseFactory
                         if (! in_array('sometimes', $rule)) {
                             array_unshift($rule, 'sometimes');
                         }
-
                         return $rule;
                     })->toArray()
                 );
                 $validator->validate();
-
-                if (! $validator->fails()) {
-                    throw new \Illuminate\Validation\ValidationException($validator);
-                }
             }
+            // We throw this exception to stop the controller from continuing
+            // Since at this point, we know the request has a 'X-Inertia-Validate' header
+            // And because we're doing real-time validation, we don't want the controller to continue
+            throw \Illuminate\Validation\ValidationException::withMessages([]);
         }
     }
 }
