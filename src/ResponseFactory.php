@@ -136,16 +136,8 @@ class ResponseFactory
             if (! empty($inertia_validate) && ! empty($rules)) {
                 $validator = validator(
                     Request::only($inertia_validate),
-                    collect($rules)->map(function ($rule, $attribute) {
-                        if (is_string($rule)) {
-                            $rule = explode('|', $rule);
-                        }
-                        if (! in_array('sometimes', $rule)) {
-                            array_unshift($rule, 'sometimes');
-                        }
-
-                        return $rule;
-                    })->toArray()
+                    // Only pass the rules that are present in the 'X-Inertia-Validate' header
+                    array_intersect_key($rules, array_flip($inertia_validate))
                 );
                 $validator->validate();
             }
