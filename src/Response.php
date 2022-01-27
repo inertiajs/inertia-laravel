@@ -99,7 +99,7 @@ class Response implements Responsable
         $page = [
             'component' => $this->component,
             'props' => $props,
-            'url' => $request->getBaseUrl().$request->getRequestUri(),
+            'url' => $request->getBaseUrl().$request->getPathInfo(),
             'version' => $this->version,
         ];
 
