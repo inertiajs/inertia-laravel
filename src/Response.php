@@ -96,10 +96,16 @@ class Response implements Responsable
 
         $props = $this->resolvePropertyInstances($props, $request);
 
+        $queryString = $request->getQueryString();
+
+        if (null !== $queryString) {
+            $queryString = '?'.$queryString;
+        }
+
         $page = [
             'component' => $this->component,
             'props' => $props,
-            'url' => $request->getBaseUrl().$request->getPathInfo(),
+            'url' => $request->getBaseUrl().$request->getPathInfo().$queryString,
             'version' => $this->version,
         ];
 
