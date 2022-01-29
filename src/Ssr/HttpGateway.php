@@ -21,9 +21,13 @@ class HttpGateway implements Gateway
         }
 
         $url = Config::get('inertia.ssr.url', 'http://127.0.0.1:13714/render');
+        $timeout = Config::get('inertia.ssr.timeout', 0);
 
         try {
-            $response = Http::post($url, $page)->throw()->json();
+            $response = Http::withOptions(['connect_timeout' => $timeout])
+                ->post($url, $page)
+                ->throw()
+                ->json();
         } catch (Exception $e) {
             return null;
         }
