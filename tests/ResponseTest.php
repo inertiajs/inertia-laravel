@@ -362,4 +362,19 @@ class ResponseTest extends TestCase
             $page['props']['resource']
         );
     }
+
+    public function test_response_url_in_laravel_subpath_install(): void
+    {
+        $request = Request::create('/subpath/product/123', 'GET', [], [], [], [
+            'SCRIPT_FILENAME' => '/project/public/index.php',
+            'SCRIPT_NAME' => '/subpath/index.php',
+        ]);
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $response = new Response('Product/Show', []);
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertSame('/subpath/product/123', $page->url);
+    }
 }
