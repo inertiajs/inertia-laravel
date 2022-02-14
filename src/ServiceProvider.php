@@ -77,7 +77,7 @@ class ServiceProvider extends BaseServiceProvider
     protected function registerRouterMacro(): void
     {
         Router::macro('inertia', function ($uri, $component, $props = []) {
-            return $this->match(['GET', 'HEAD'], $uri, Controller::class)
+            return $this->match(['GET', 'HEAD'], $uri, '\Inertia\Controller')
                 ->defaults('component', $component)
                 ->defaults('props', $props);
         });
