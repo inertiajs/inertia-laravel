@@ -77,6 +77,17 @@ class Response implements Responsable
 
         return $this;
     }
+    
+    /**
+     * Returns the HTML for this view.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return string
+     */
+    public function toHtml($request)
+    {
+        return $this->toResponse($request ?? app('request'))->getContent();
+    }
 
     /**
      * Create an HTTP response that represents the object.
