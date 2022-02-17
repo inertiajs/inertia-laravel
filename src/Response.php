@@ -77,7 +77,7 @@ class Response implements Responsable
 
         return $this;
     }
-    
+
     /**
      * Returns the HTML for this view.
      *
