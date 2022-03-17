@@ -2,6 +2,8 @@
 
 namespace Inertia;
 
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Foundation\Testing\TestResponse as LegacyTestResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
@@ -30,6 +32,7 @@ class ServiceProvider extends BaseServiceProvider
         $this->registerRequestMacro();
         $this->registerRouterMacro();
         $this->registerTestingMacros();
+        $this->registerUnauthenticatedRedirection();
 
         $this->app->bind('inertia.testing.view-finder', function ($app) {
             return new FileViewFinder(
@@ -48,6 +51,19 @@ class ServiceProvider extends BaseServiceProvider
         $this->publishes([
             __DIR__.'/../config/inertia.php' => config_path('inertia.php'),
         ]);
+    }
+
+    protected function registerUnauthenticatedRedirection(): void
+    {
+        app(ExceptionHandler::class)->renderable(function (AuthenticationException $e, $request) {
+            if (! $request->inertia() && $request->expectsJson()) {
+                return response()->json(['message' => $e->getMessage()], 401);
+            }
+
+            $status = $request->inertia() && in_array($request->method(), ['PUT', 'PATCH', 'DELETE']) ? 303 : 302;
+
+            return redirect()->guest($e->redirectTo() ?? route('login'), $status);
+        });
     }
 
     protected function registerBladeDirectives(): void
