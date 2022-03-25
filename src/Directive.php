@@ -12,7 +12,9 @@ class Directive
      */
     public static function compile($expression = ''): string
     {
-        $id = trim(trim($expression), "\'\"") ?: 'app';
+        $args = explode(',', $expression);
+        $id = !empty($args[0]) ?  trim(trim($args[0]), "\'\"") : 'app';
+        $classes = isset($args[1]) ? trim(trim($args[1]), "\'\"") : '';
 
         $template = '<?php
             if (!isset($__inertiaSsr)) {
@@ -22,7 +24,7 @@ class Directive
             if ($__inertiaSsr instanceof \Inertia\Ssr\Response) {
                 echo $__inertiaSsr->body;
             } else {
-                ?><div id="'.$id.'" data-page="{{ json_encode($page) }}"></div><?php
+                ?><div id="'.$id.'" ' . (!empty($classes) ? 'class="' . $classes . '"' : '') . 'data-page="{{ json_encode($page) }}"></div><?php
             }
         ?>';
 
