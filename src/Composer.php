@@ -13,7 +13,7 @@ class Composer
     protected $composers = [];
 
     /**
-     * @param ResponseFactory $factory
+     * @param  ResponseFactory  $factory
      */
     public function __construct(ResponseFactory $factory)
     {
@@ -21,8 +21,8 @@ class Composer
     }
 
     /**
-     * @param string $component
-     * @param Closure|mixed $composer
+     * @param  string  $component
+     * @param  Closure|mixed  $composer
      */
     public function set($component, $composer)
     {
@@ -32,7 +32,7 @@ class Composer
     }
 
     /**
-     * @param  string|null $component
+     * @param  string|null  $component
      */
     public function get($component = null)
     {
@@ -42,7 +42,7 @@ class Composer
     }
 
     /**
-     * @param  string $component
+     * @param  string  $component
      */
     public function compose($component)
     {

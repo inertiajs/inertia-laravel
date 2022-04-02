@@ -164,7 +164,7 @@ class ResponseFactoryTest extends TestCase
         ];
 
         Inertia::composer('User/Edit', UserComposer::class);
-        Inertia::composer('User/Edit', function ($inertia) use ($post) {
+        Inertia::composer('User/Edit', function (ResponseFactory $inertia) use ($post) {
             $inertia->with(['post' => $post]);
         });
 
@@ -184,7 +184,6 @@ class ResponseFactoryTest extends TestCase
             ),
         ]);
     }
-
 
     public function test_can_flush_shared_data(): void
     {
@@ -209,7 +208,8 @@ class ResponseFactoryTest extends TestCase
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
             Inertia::share('foo', 'bar');
 
-            return Inertia::render('User/Edit', new class implements Arrayable {
+            return Inertia::render('User/Edit', new class implements Arrayable
+            {
                 public function toArray()
                 {
                     return [

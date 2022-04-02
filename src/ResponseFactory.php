@@ -126,8 +126,8 @@ class ResponseFactory
     }
 
     /**
-     * @param  string $component
-     * @param  Closure|string $composer
+     * @param  string  $component
+     * @param  Closure|string  $composer
      */
     public function composer($component, $composer)
     {
@@ -157,7 +157,7 @@ class ResponseFactory
     }
 
     /**
-     * @param  string $component
+     * @param  string  $component
      */
     protected function resolveComposedProps($component)
     {
