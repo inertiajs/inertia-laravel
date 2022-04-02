@@ -36,9 +36,7 @@ class ComposerBag
      */
     public function get($component = null)
     {
-        return is_null($component)
-            ? $this->composers
-            : Arr::get($this->composers, $component);
+        return Arr::get($this->composers, $component);
     }
 
     /**

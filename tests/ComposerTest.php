@@ -11,6 +11,29 @@ use Inertia\Tests\Stubs\ExampleMiddleware;
 
 class ComposerTest extends TestCase
 {
+    public function test_can_set_composers_to_composer_bag()
+    {
+        app(ComposerBag::class)->set('User', UserComposer::class);
+        app(ComposerBag::class)->set('User', $callback = fn () => 'Hello User!');
+
+        $this->assertEquals(
+            [UserComposer::class, $callback],
+            app(ComposerBag::class)->get('User')
+        );
+    }
+
+    public function test_can_get_all_composers_from_composer_bag()
+    {
+        app(ComposerBag::class)->set('User', UserComposer::class);
+        app(ComposerBag::class)->set('User', $user = fn () => 'Hello User!');
+        app(ComposerBag::class)->set('User/Profile', $profile = fn () => 'Hello User Profile!');
+
+        $this->assertEquals([
+            'User' => [UserComposer::class, $user],
+            'User/Profile' => [$profile]
+        ], app(ComposerBag::class)->get());
+    }
+
     public function test_can_use_class_based_composers_for_a_component()
     {
         Inertia::composer('User/Profile', UserComposer::class);
