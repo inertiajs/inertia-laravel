@@ -24,6 +24,9 @@ class ResponseFactory
     /** @var Closure|string|null */
     protected $version;
 
+    /** @var array */
+    protected $composedProps = [];
+
     public function setRootView(string $name): void
     {
         $this->rootView = $name;
@@ -96,9 +99,11 @@ class ResponseFactory
             $props = $props->toArray();
         }
 
+        $this->resolveComposedProps($component);
+
         return new Response(
             $component,
-            array_merge($this->sharedProps, $props),
+            array_merge($this->sharedProps, $props, $this->composedProps),
             $this->rootView,
             $this->getVersion()
         );
@@ -118,5 +123,44 @@ class ResponseFactory
         }
 
         return new RedirectResponse($url);
+    }
+
+    /**
+     * @param  string $component
+     * @param  Closure|string $composer
+     */
+    public function composer($component, $composer)
+    {
+        $this->composerClass()->set($component, $composer);
+
+        return $this;
+    }
+
+    /**
+     * @param  string|array|Arrayable  $key
+     * @param  mixed|null  $value
+     */
+    public function with($key, $value = null)
+    {
+        if (is_array($key)) {
+            $this->composedProps = array_merge($this->composedProps, $key);
+        } else {
+            $this->composedProps[$key] = $value;
+        }
+
+        return $this;
+    }
+
+    protected function composerClass()
+    {
+        return app(Composer::class);
+    }
+
+    /**
+     * @param  string $component
+     */
+    protected function resolveComposedProps($component)
+    {
+        $this->composerClass()->compose($component);
     }
 }

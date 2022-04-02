@@ -115,6 +115,77 @@ class ResponseFactoryTest extends TestCase
         ]);
     }
 
+    public function test_can_use_class_based_composers_for_a_component()
+    {
+        Inertia::composer('User/Edit', UserComposer::class);
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            return Inertia::render('User/Edit', ['user' => 'John Doe']);
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Edit',
+            'props' => array_merge(['user' => 'John Doe'], ['list' => UserComposer::$data]),
+        ]);
+    }
+
+    public function test_can_use_closure_based_composer_for_a_component()
+    {
+        $post = [
+            'title' => 'Composer from callback',
+            'description' => 'This is just a test. Please disregard.',
+        ];
+
+        Inertia::composer('User/Edit', function ($inertia) use ($post) {
+            $inertia->with(['post' => $post]);
+        });
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            return Inertia::render('User/Edit', ['user' => 'John Doe']);
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Edit',
+            'props' => array_merge(['user' => 'John Doe'], ['post' => $post]),
+        ]);
+    }
+
+    public function test_can_use_multiple_composer_for_a_component()
+    {
+        $post = [
+            'title' => 'Composer from callback',
+            'description' => 'This is just a test. Please disregard.',
+        ];
+
+        Inertia::composer('User/Edit', UserComposer::class);
+        Inertia::composer('User/Edit', function ($inertia) use ($post) {
+            $inertia->with(['post' => $post]);
+        });
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            return Inertia::render('User/Edit', ['user' => 'John Doe']);
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Edit',
+            'props' => array_merge(
+                ['user' => 'John Doe'],
+                ['list' => UserComposer::$data],
+                ['post' => $post]
+            ),
+        ]);
+    }
+
+
     public function test_can_flush_shared_data(): void
     {
         Inertia::share('foo', 'bar');
@@ -138,8 +209,7 @@ class ResponseFactoryTest extends TestCase
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
             Inertia::share('foo', 'bar');
 
-            return Inertia::render('User/Edit', new class implements Arrayable
-            {
+            return Inertia::render('User/Edit', new class implements Arrayable {
                 public function toArray()
                 {
                     return [
@@ -157,5 +227,15 @@ class ResponseFactoryTest extends TestCase
                 'foo' => 'bar',
             ],
         ]);
+    }
+}
+
+class UserComposer
+{
+    public static $data = ['foo' => 'bar', 'baz' => 'buzz'];
+
+    public function compose(ResponseFactory $inertia)
+    {
+        $inertia->with('list', static::$data);
     }
 }
