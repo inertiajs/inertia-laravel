@@ -4,7 +4,7 @@ namespace Inertia;
 
 use Illuminate\Support\Arr;
 
-class Composer
+class ComposerBag
 {
     /** @var ResponseFactory */
     protected $factory;

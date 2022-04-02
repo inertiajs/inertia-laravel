@@ -21,11 +21,11 @@ class ResponseFactory
     /** @var array */
     protected $sharedProps = [];
 
-    /** @var Closure|string|null */
-    protected $version;
-
     /** @var array */
     protected $composedProps = [];
+
+    /** @var Closure|string|null */
+    protected $version;
 
     public function setRootView(string $name): void
     {
@@ -64,6 +64,7 @@ class ResponseFactory
     public function flushShared(): void
     {
         $this->sharedProps = [];
+        $this->composedProps = [];
     }
 
     /**
@@ -131,7 +132,7 @@ class ResponseFactory
      */
     public function composer($component, $composer)
     {
-        $this->composerClass()->set($component, $composer);
+        $this->composerBag()->set($component, $composer);
 
         return $this;
     }
@@ -151,9 +152,9 @@ class ResponseFactory
         return $this;
     }
 
-    protected function composerClass()
+    protected function composerBag()
     {
-        return app(Composer::class);
+        return app(ComposerBag::class);
     }
 
     /**
@@ -161,6 +162,6 @@ class ResponseFactory
      */
     protected function resolveComposedProps($component)
     {
-        $this->composerClass()->compose($component);
+        $this->composerBag()->compose($component);
     }
 }
