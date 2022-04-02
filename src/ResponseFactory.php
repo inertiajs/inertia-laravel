@@ -127,12 +127,14 @@ class ResponseFactory
     }
 
     /**
-     * @param  string  $component
+     * @param  string|array  $component
      * @param  Closure|string  $composer
      */
-    public function composer($component, $composer)
+    public function composer($components, $composer)
     {
-        $this->composerBag()->set($component, $composer);
+        foreach ((array) $components as $component) {
+            $this->composerBag()->set($component, $composer);
+        }
 
         return $this;
     }

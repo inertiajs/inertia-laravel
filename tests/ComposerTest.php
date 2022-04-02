@@ -34,6 +34,16 @@ class ComposerTest extends TestCase
         ], app(ComposerBag::class)->get());
     }
 
+    public function test_can_set_same_composer_for_multiple_components()
+    {
+        Inertia::composer(['User', 'User/Profile'], UserComposer::class);
+
+        $this->assertEquals([
+            'User' => [UserComposer::class],
+            'User/Profile' => [UserComposer::class],
+        ], app(ComposerBag::class)->get());
+    }
+
     public function test_can_use_class_based_composers_for_a_component()
     {
         Inertia::composer('User/Profile', UserComposer::class);
