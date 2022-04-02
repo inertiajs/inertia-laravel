@@ -30,7 +30,7 @@ class ComposerTest extends TestCase
 
         $this->assertEquals([
             'User' => [UserComposer::class, $user],
-            'User/Profile' => [$profile]
+            'User/Profile' => [$profile],
         ], app(ComposerBag::class)->get());
     }
 
