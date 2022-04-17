@@ -28,6 +28,10 @@ class HttpGateway implements Gateway
             return null;
         }
 
+        if (is_null($response)) {
+            return null;
+        }
+
         return new Response(
             implode("\n", $response['head']),
             $response['body']

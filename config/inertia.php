@@ -52,6 +52,7 @@ return [
             'jsx',
             'svelte',
             'ts',
+            'tsx',
             'vue',
 
         ],

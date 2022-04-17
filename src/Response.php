@@ -7,6 +7,7 @@ use GuzzleHttp\Promise\PromiseInterface;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceResponse;
 use Illuminate\Support\Arr;
@@ -93,39 +94,12 @@ class Response implements Responsable
                 return ! ($prop instanceof LazyProp);
             });
 
-        array_walk_recursive($props, static function (&$prop) use ($request) {
-            if ($prop instanceof LazyProp) {
-                $prop = App::call($prop);
-            }
-
-            if ($prop instanceof Closure) {
-                $prop = App::call($prop);
-            }
-
-            if ($prop instanceof PromiseInterface) {
-                $prop = $prop->wait();
-            }
-
-            if ($prop instanceof ResourceResponse || $prop instanceof JsonResource) {
-                $prop = $prop->toResponse($request)->getData(true);
-            }
-
-            if ($prop instanceof Arrayable) {
-                $prop = $prop->toArray();
-            }
-        });
-
-        foreach ($props as $key => $value) {
-            if (str_contains($key, '.')) {
-                data_set($props, $key, $value);
-                unset($props[$key]);
-            }
-        }
+        $props = $this->resolvePropertyInstances($props, $request);
 
         $page = [
             'component' => $this->component,
             'props' => $props,
-            'url' => $request->getRequestUri(),
+            'url' => $request->getBaseUrl().$request->getRequestUri(),
             'version' => $this->version,
         ];
 
@@ -137,5 +111,51 @@ class Response implements Responsable
         }
 
         return ResponseFactory::view($this->rootView, $this->viewData + ['page' => $page]);
+    }
+
+    /**
+     * Resolve all necessary class instances in the given props.
+     *
+     * @param  array  $props
+     * @param  \Illuminate\Http\Request  $request
+     * @param  bool  $unpackDotProps
+     * @return array
+     */
+    public function resolvePropertyInstances(array $props, Request $request, bool $unpackDotProps = true): array
+    {
+        foreach ($props as $key => $value) {
+            if ($value instanceof Closure) {
+                $value = App::call($value);
+            }
+
+            if ($value instanceof LazyProp) {
+                $value = App::call($value);
+            }
+
+            if ($value instanceof PromiseInterface) {
+                $value = $value->wait();
+            }
+
+            if ($value instanceof ResourceResponse || $value instanceof JsonResource) {
+                $value = $value->toResponse($request)->getData(true);
+            }
+
+            if ($value instanceof Arrayable) {
+                $value = $value->toArray();
+            }
+
+            if (is_array($value)) {
+                $value = $this->resolvePropertyInstances($value, $request, false);
+            }
+
+            if ($unpackDotProps && str_contains($key, '.')) {
+                Arr::set($props, $key, $value);
+                unset($props[$key]);
+            } else {
+                $props[$key] = $value;
+            }
+        }
+
+        return $props;
     }
 }
