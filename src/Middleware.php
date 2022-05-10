@@ -145,7 +145,7 @@ class Middleware
      */
     public function resolveValidationErrors(Request $request)
     {
-        if (! $request->session()->has('errors')) {
+        if (! $request->hasSession() || ! $request->session()->has('errors')) {
             return (object) [];
         }
 
