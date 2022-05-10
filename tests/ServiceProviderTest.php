@@ -5,7 +5,6 @@ namespace Inertia\Tests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
-use Inertia\Controller;
 
 class ServiceProviderTest extends TestCase
 {
