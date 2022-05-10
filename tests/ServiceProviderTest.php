@@ -34,7 +34,7 @@ class ServiceProviderTest extends TestCase
         $this->assertEquals($route, $routes->getRoutes()[0]);
         $this->assertEquals(['GET', 'HEAD'], $route->methods);
         $this->assertEquals('/', $route->uri);
-        $this->assertEquals(['uses' => 'Inertia\Controller@__invoke', 'controller' => Controller::class], $route->action);
+        $this->assertEquals(['uses' => '\Inertia\Controller@__invoke', 'controller' => '\Inertia\Controller'], $route->action);
         $this->assertEquals(['component' => 'User/Edit', 'props' => ['user' => ['name' => 'Jonathan']]], $route->defaults);
     }
 }
