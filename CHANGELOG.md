@@ -16,6 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Internal: Replaced the Middleware's `checkVersion` method with an `onVersionChange` hook ([#350](https://github.com/inertiajs/inertia-laravel/pull/350))
 
+### Fixed
+
+- Fixed namespace issue with `Route::inertia()` method ([#368](https://github.com/inertiajs/inertia-laravel/pull/368))
+- Added session check when sharing validation errors ([#380](https://github.com/inertiajs/inertia-laravel/pull/380))
+- Fixed docblock on facade render method ([#387](https://github.com/inertiajs/inertia-laravel/pull/387))
+
 ## [v0.5.4](https://github.com/inertiajs/inertia-laravel/compare/v0.5.3...v0.5.4) - 2022-01-18
 
 ### Added
