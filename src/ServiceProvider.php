@@ -5,7 +5,6 @@ namespace Inertia;
 use Illuminate\Foundation\Testing\TestResponse as LegacyTestResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use Illuminate\Testing\TestResponse;
 use Illuminate\View\FileViewFinder;
@@ -27,6 +26,7 @@ class ServiceProvider extends BaseServiceProvider
             'inertia'
         );
 
+        $this->registerBladeDirectives();
         $this->registerRequestMacro();
         $this->registerRouterMacro();
         $this->registerTestingMacros();
@@ -42,7 +42,6 @@ class ServiceProvider extends BaseServiceProvider
 
     public function boot(): void
     {
-        $this->registerBladeDirectives();
         $this->registerConsoleCommands();
 
         $this->publishes([
@@ -52,8 +51,10 @@ class ServiceProvider extends BaseServiceProvider
 
     protected function registerBladeDirectives(): void
     {
-        Blade::directive('inertia', [Directive::class, 'compile']);
-        Blade::directive('inertiaHead', [Directive::class, 'compileHead']);
+        $this->callAfterResolving('blade.compiler', function ($blade) {
+            $blade->directive('inertia', [Directive::class, 'compile']);
+            $blade->directive('inertiaHead', [Directive::class, 'compileHead']);
+        });
     }
 
     protected function registerConsoleCommands(): void
