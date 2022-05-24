@@ -87,7 +87,7 @@ class Middleware
 
         $response = $next($request);
 
-        $response->header('Vary', 'Accept');
+        $response->headers->set('Vary', 'Accept');
 
         if (! $request->header('X-Inertia')) {
             return $response;
