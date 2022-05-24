@@ -5,7 +5,10 @@ namespace Inertia;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class Middleware
 {
@@ -87,6 +90,10 @@ class Middleware
 
         $response = $next($request);
 
+        if ($this->responseShouldNotBeTempered($response)) {
+            return $response;
+        }
+
         $response->header('Vary', 'Accept');
 
         if (! $request->header('X-Inertia')) {
@@ -166,5 +173,18 @@ class Middleware
 
             return $bags->toArray();
         });
+    }
+
+    /**
+     * Determine if the response shouldn't be altered by Inertia.
+     *
+     * @param  \Symfony\Component\HttpFoundation\Response  $response
+     * @return bool
+     */
+    protected function responseShouldNotBeTempered($response): bool
+    {
+        return $response instanceof BinaryFileResponse ||
+            $response instanceof RedirectResponse ||
+            $response instanceof StreamedResponse;
     }
 }
