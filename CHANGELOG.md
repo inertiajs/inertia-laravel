@@ -5,9 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v0.6.1...HEAD)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v0.6.2...HEAD)
 
 Nothing!
+
+## [v0.6.2](https://github.com/inertiajs/inertia-laravel/compare/v0.6.1...v0.6.2) - 2022-05-24
+
+- Switch to using the `Vary: X-Inertia` header ([#404](https://github.com/inertiajs/inertia-laravel/pull/404))
+- Fix bug with incompatible `$request->header()` method ([#404](https://github.com/inertiajs/inertia-laravel/pull/404))
 
 ## [v0.6.1](https://github.com/inertiajs/inertia-laravel/compare/v0.6.0...v0.6.1) - 2022-05-24
 
