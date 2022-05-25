@@ -3,6 +3,7 @@
 namespace Inertia;
 
 use Closure;
+use Illuminate\Http\RedirectResponse as LaravelRedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -90,7 +91,7 @@ class Middleware
 
         $response = $next($request);
 
-        if ($this->responseShouldNotBeTempered($response)) {
+        if ($this->responseShouldBeSkipped($response)) {
             return $response;
         }
 
@@ -181,10 +182,10 @@ class Middleware
      * @param  \Symfony\Component\HttpFoundation\Response  $response
      * @return bool
      */
-    protected function responseShouldNotBeTempered($response): bool
+    protected function responseShouldBeSkipped($response): bool
     {
         return $response instanceof BinaryFileResponse ||
-            $response instanceof RedirectResponse ||
+            ($response instanceof RedirectResponse && ! $response instanceof LaravelRedirectResponse) ||
             $response instanceof StreamedResponse;
     }
 }
