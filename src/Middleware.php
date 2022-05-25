@@ -3,13 +3,12 @@
 namespace Inertia;
 
 use Closure;
+use Illuminate\Http\JsonResponse as LaravelJsonResponse;
+use Illuminate\Http\Response as LaravelResponse;
 use Illuminate\Http\RedirectResponse as LaravelRedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class Middleware
 {
@@ -91,7 +90,7 @@ class Middleware
 
         $response = $next($request);
 
-        if ($this->responseShouldBeSkipped($response)) {
+        if (! $this->isIlluminateResponse($response)) {
             return $response;
         }
 
@@ -177,15 +176,15 @@ class Middleware
     }
 
     /**
-     * Determine if the response shouldn't be altered by Inertia.
+     * Determine if the response from Laravel's Response.
      *
      * @param  \Symfony\Component\HttpFoundation\Response  $response
      * @return bool
      */
-    protected function responseShouldBeSkipped($response): bool
+    protected function isIlluminateResponse($response): bool
     {
-        return $response instanceof BinaryFileResponse ||
-            ($response instanceof RedirectResponse && ! $response instanceof LaravelRedirectResponse) ||
-            $response instanceof StreamedResponse;
+        return $response instanceof LaravelResponse ||
+            $response instanceof LaravelJsonResponse ||
+            $response instanceof LaravelRedirectResponse;
     }
 }
