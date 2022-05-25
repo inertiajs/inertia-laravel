@@ -2,6 +2,8 @@
 
 namespace Inertia;
 
+use Illuminate\Support\Facades\Config;
+
 class Directive
 {
     /**
@@ -12,13 +14,10 @@ class Directive
      */
     public static function compile($expression = ''): string
     {
-        $args = explode(',', $expression);
-        $id = ! empty($args[0]) ? trim(trim($args[0]), "\'\"") : 'app';
-        $classes = isset($args[1]) ? trim(trim($args[1]), "\'\"") : '';
-
+        $id = trim(trim($expression), "\'\"") ?: Config::get('inertia.app.root', 'app');
+        $classes = Config::get('inertia.app.classes', '');
         $template = '<?php
             if (!isset($__inertiaSsr)) {
-                '.(! empty($classes) ? '$page["classes"]="'.$classes.'"; ' : '').'
                 $__inertiaSsr = app(\Inertia\Ssr\Gateway::class)->dispatch($page);
             }
 
