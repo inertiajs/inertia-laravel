@@ -5,16 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v0.5.4...HEAD)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v0.6.2...HEAD)
+
+Nothing!
+
+## [v0.6.2](https://github.com/inertiajs/inertia-laravel/compare/v0.6.1...v0.6.2) - 2022-05-24
+
+- Switch to using the `Vary: X-Inertia` header ([#404](https://github.com/inertiajs/inertia-laravel/pull/404))
+- Fix bug with incompatible `$request->header()` method ([#404](https://github.com/inertiajs/inertia-laravel/pull/404))
+
+## [v0.6.1](https://github.com/inertiajs/inertia-laravel/compare/v0.6.0...v0.6.1) - 2022-05-24
+
+- Set `Vary: Accept` header for all responses ([#398](https://github.com/inertiajs/inertia-laravel/pull/398))
+- Only register Blade directives when actually needed ([#395](https://github.com/inertiajs/inertia-laravel/pull/395))
+
+## [v0.6.0](https://github.com/inertiajs/inertia-laravel/compare/v0.5.4...v0.6.0) - 2022-05-10
 
 ### Added
 
 - Inertia now redirects back by default when no response is returned from a controller ([#350](https://github.com/inertiajs/inertia-laravel/pull/350))
-- The Middleware has an overrideable `onEmptyResponse` hook to customize the default 'redirect back' behaviour ([#350](https://github.com/inertiajs/inertia-laravel/pull/350))
+- The Middleware has an overridable `onEmptyResponse` hook to customize the default 'redirect back' behavior ([#350](https://github.com/inertiajs/inertia-laravel/pull/350))
 
 ### Changed
 
 - Internal: Replaced the Middleware's `checkVersion` method with an `onVersionChange` hook ([#350](https://github.com/inertiajs/inertia-laravel/pull/350))
+
+### Fixed
+
+- Fixed namespace issue with `Route::inertia()` method ([#368](https://github.com/inertiajs/inertia-laravel/pull/368))
+- Added session check when sharing validation errors ([#380](https://github.com/inertiajs/inertia-laravel/pull/380))
+- Fixed docblock on facade render method ([#387](https://github.com/inertiajs/inertia-laravel/pull/387))
 
 ## [v0.5.4](https://github.com/inertiajs/inertia-laravel/compare/v0.5.3...v0.5.4) - 2022-01-18
 

@@ -40,17 +40,4 @@ class {{ class }} extends Middleware
             //
         ]);
     }
-
-    /**
-     * Determines what to do when an Inertia action returned with no response.
-     * By default, we'll redirect the user back to where they came from.
-     *
-     * @param  Request  $request
-     * @param  Response  $response
-     * @return Response
-     */
-    public function onEmptyResponse(Request $request, Response $response): Response
-    {
-        return parent::onEmptyResponse($request, $response);
-    }
 }

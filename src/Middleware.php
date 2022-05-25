@@ -86,6 +86,7 @@ class Middleware
         Inertia::setRootView($this->rootView($request));
 
         $response = $next($request);
+        $response->headers->set('Vary', 'X-Inertia');
 
         if (! $request->header('X-Inertia')) {
             return $response;
@@ -145,7 +146,7 @@ class Middleware
      */
     public function resolveValidationErrors(Request $request)
     {
-        if (! $request->session()->has('errors')) {
+        if (! $request->hasSession() || ! $request->session()->has('errors')) {
             return (object) [];
         }
 
