@@ -18,6 +18,7 @@ class Directive
 
         $template = '<?php
             if (!isset($__inertiaSsr)) {
+                '.(! empty($classes) ? '$page["classes"]="'.$classes.'"; ' : '').'
                 $__inertiaSsr = app(\Inertia\Ssr\Gateway::class)->dispatch($page);
             }
 
