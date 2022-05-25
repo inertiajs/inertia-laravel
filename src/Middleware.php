@@ -86,8 +86,7 @@ class Middleware
         Inertia::setRootView($this->rootView($request));
 
         $response = $next($request);
-
-        $response->header('Vary', 'Accept');
+        $response->headers->set('Vary', 'X-Inertia');
 
         if (! $request->header('X-Inertia')) {
             return $response;
