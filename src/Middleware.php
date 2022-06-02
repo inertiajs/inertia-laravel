@@ -117,7 +117,7 @@ class Middleware
      */
     public function onEmptyResponse(Request $request, Response $response): Response
     {
-        return Redirect::back();
+        return config('inertia.middleware.redirect_back_on_empty_response', false) ? Redirect::back() : $response;
     }
 
     /**

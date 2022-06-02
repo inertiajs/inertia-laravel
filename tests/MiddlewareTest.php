@@ -4,6 +4,7 @@ namespace Inertia\Tests;
 
 use Illuminate\Http\Request;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\MessageBag;
@@ -14,8 +15,9 @@ use Inertia\Tests\Stubs\ExampleMiddleware;
 
 class MiddlewareTest extends TestCase
 {
-    public function test_no_response_value_by_default_means_automatically_redirecting_back_for_inertia_requests(): void
+    public function test_no_response_value_by_default_means_automatically_redirecting_back_for_inertia_requests_when_enabled(): void
     {
+        Config::set(['inertia.middleware.redirect_back_on_empty_response' => true]);
         $fooCalled = false;
         Route::middleware(Middleware::class)->put('/', function () use (&$fooCalled) {
             $fooCalled = true;
@@ -30,6 +32,24 @@ class MiddlewareTest extends TestCase
 
         $response->assertRedirect('/foo');
         $response->assertStatus(303);
+        $this->assertTrue($fooCalled);
+    }
+
+    public function test_no_response_value_does_not_automatically_redirect_back(): void
+    {
+        $fooCalled = false;
+        Route::middleware(Middleware::class)->put('/', function () use (&$fooCalled) {
+            $fooCalled = true;
+        });
+
+        $response = $this
+            ->from('/foo')
+            ->put('/', [], [
+                'X-Inertia' => 'true',
+                'Content-Type' => 'application/json',
+            ]);
+
+        $response->assertNoContent(200);
         $this->assertTrue($fooCalled);
     }
 
