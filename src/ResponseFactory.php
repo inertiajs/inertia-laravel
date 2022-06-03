@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response as BaseResponse;
 use Illuminate\Support\Traits\Macroable;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class ResponseFactory
 {
@@ -107,7 +108,7 @@ class ResponseFactory
     /**
      * @param  string|RedirectResponse  $url
      */
-    public function location($url): \Symfony\Component\HttpFoundation\Response
+    public function location($url): SymfonyResponse
     {
         if ($url instanceof RedirectResponse) {
             $url = $url->getTargetUrl();
