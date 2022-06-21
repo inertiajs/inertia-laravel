@@ -5,6 +5,7 @@ namespace Inertia\Ssr;
 use Exception;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class HttpGateway implements Gateway
 {
@@ -25,6 +26,7 @@ class HttpGateway implements Gateway
         try {
             $response = Http::post($url, $page)->throw()->json();
         } catch (Exception $e) {
+            Log::error($e->response->body());
             return null;
         }
 
