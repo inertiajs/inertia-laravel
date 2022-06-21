@@ -26,7 +26,9 @@ class HttpGateway implements Gateway
         try {
             $response = Http::post($url, $page)->throw()->json();
         } catch (Exception $e) {
-            Log::error($e->response->body());
+            if (isset($e->response)) {
+                Log::error($e->response->body());
+            }
             return null;
         }
 
