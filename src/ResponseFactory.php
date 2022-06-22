@@ -24,6 +24,9 @@ class ResponseFactory
     /** @var Closure|string|null */
     protected $version;
 
+    /** @var array */
+    protected $preservedProps = [];
+
     public function setRootView(string $name): void
     {
         $this->rootView = $name;
@@ -100,7 +103,8 @@ class ResponseFactory
             $component,
             array_merge($this->sharedProps, $props),
             $this->rootView,
-            $this->getVersion()
+            $this->getVersion(),
+            $this->preservedProps
         );
     }
 
@@ -118,5 +122,14 @@ class ResponseFactory
         }
 
         return new RedirectResponse($url);
+    }
+
+    /**
+     * @param  array  $value
+     * @return void 
+     */
+    public function preserveProps(array $props = []): void
+    {
+        $this->preservedProps = $props;
     }
 }

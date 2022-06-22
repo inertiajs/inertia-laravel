@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static LazyProp lazy(callable $callback)
  * @method static Response render($component, array|Arrayable $props = [])
  * @method static \Symfony\Component\HttpFoundation\Response location(string $url)
+ * @method static void preserveProps(array $props = [])
  *
  * @see \Inertia\ResponseFactory
  */

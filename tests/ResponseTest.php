@@ -292,6 +292,22 @@ class ResponseTest extends TestCase
         $this->assertSame('A lazy value', $page->props->lazy);
     }
 
+    public function test_preserved_props_are_included_in_partial_reload(): void
+    {
+        $request = Request::create('/users', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'Users']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'partial']);
+
+        $response = new Response('Users', ['users' => [], 'partial' => 'partial-data', 'alert' => 'alert-data'], 'app', '123', ['alert']);
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertObjectNotHasAttribute('users', $page->props);
+        $this->assertSame('alert-data', $page->props->alert);
+        $this->assertSame('partial-data', $page->props->partial);
+    }
+
     public function test_top_level_dot_props_get_unpacked(): void
     {
         $props = [
