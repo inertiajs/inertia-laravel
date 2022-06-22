@@ -126,7 +126,7 @@ class ResponseFactory
 
     /**
      * @param  array  $value
-     * @return void 
+     * @return void
      */
     public function preserveProps(array $props = []): void
     {
