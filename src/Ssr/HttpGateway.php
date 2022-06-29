@@ -29,6 +29,7 @@ class HttpGateway implements Gateway
             if (isset($e->response)) {
                 Log::error($e->response->body());
             }
+
             return null;
         }
 
