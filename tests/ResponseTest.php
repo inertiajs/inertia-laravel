@@ -291,6 +291,84 @@ class ResponseTest extends TestCase
         $this->assertSame('A lazy value', $page->props->lazy);
     }
 
+    public function test_nested_lazy_props(): void
+    {
+        $request = Request::create('/users', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'Users']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'lazy.nested.prop,nonLazy.another']);
+
+        $access = 0;
+        $trap = 0;
+        $lazyProp = new LazyProp(function () use(&$access, &$trap) {
+            $access++;
+            return [
+                'prop' => new LazyProp(function () use (&$access) {
+                    $access++;
+                    return 'A lazy value';
+                }),
+                'another' => new LazyProp(function () use (&$trap) {
+                    return $trap++;
+                }),
+                'nonLazy' => 'ok',
+            ];
+        });
+        $nonLazyProp = function () use (&$access) {
+            return [
+                'prop' => new LazyProp(function () use (&$trap) {
+                    return $trap++;
+                }),
+                'another' => new LazyProp(function () use (&$access) {
+                    $access++;
+                    return 'Another lazy value';
+                }),
+            ];
+        };
+
+        $response = new Response('Users', ['users' => [], 'lazy' => ['nested' => $lazyProp], 'nonLazy' => $nonLazyProp], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertEquals(0, $trap);
+        $this->assertEquals(3, $access);
+
+        $this->assertObjectNotHasAttribute('users', $page->props);
+        $this->assertEquals(json_decode(json_encode([
+            'lazy' => [
+                'nested' => [
+                    'prop' => 'A lazy value',
+                ],
+            ],
+            'nonLazy' => [
+                'another' => 'Another lazy value',
+            ]
+        ])), $page->props);
+
+    }
+
+    public function test_resolve_only(): void
+    {
+        $r = new Response('Whatever', []);
+
+        $res = $r->resolveOnly([
+            'foo.baz',
+            'baz',
+            'baz..foo',
+            'foo.bar.baz',
+        ]);
+
+        $this->assertEquals([
+            'foo' => [
+                'baz' => [],
+                'bar' => [
+                    'baz' => []
+                ],
+            ],
+            'baz' => [],
+            'baz..foo' => [],
+        ], $res);
+    }
+
     public function test_top_level_dot_props_get_unpacked(): void
     {
         $props = [

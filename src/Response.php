@@ -88,13 +88,7 @@ class Response implements Responsable
     {
         $only = array_filter(explode(',', $request->header('X-Inertia-Partial-Data', '')));
 
-        $props = ($only && $request->header('X-Inertia-Partial-Component') === $this->component)
-            ? Arr::only($this->props, $only)
-            : array_filter($this->props, static function ($prop) {
-                return ! ($prop instanceof LazyProp);
-            });
-
-        $props = $this->resolvePropertyInstances($props, $request);
+        $props = $this->resolvePropertyInstances($this->props, $request, true, $this->resolveOnly($only));
 
         $page = [
             'component' => $this->component,
@@ -110,12 +104,35 @@ class Response implements Responsable
         return ResponseFactory::view($this->rootView, $this->viewData + ['page' => $page]);
     }
 
+    public function resolveOnly($only) {
+        // Inspired from js unflatten https://stackoverflow.com/a/59787588/2977175
+        $result = [];
+        foreach ($only as $key) {
+            $carry = &$result;
+            // This is basically explode('.', $key) but more thorough as it only splits valid dot notations and prevents splitting things like `foo...bar`
+            preg_match_all('/^\.+[^.]*|[^.]*\.+$|(?:\.{2,}|[^.])+(?:\.+$)?/', $key, $matches);
+            foreach ($matches[0] ?? [$key] as $match) {
+                if (!isset($carry[$match])) {
+                    $carry[$match] = [];
+                }
+                $carry = &$carry[$match];
+            }
+        }
+        return $result;
+    }
+
     /**
      * Resolve all necessary class instances in the given props.
      */
-    public function resolvePropertyInstances(array $props, Request $request, bool $unpackDotProps = true): array
+    public function resolvePropertyInstances(array $props, Request $request, bool $unpackDotProps = true, array $only = null): array
     {
         foreach ($props as $key => $value) {
+            if ((!empty($only) && !isset($only[$key]))
+                || (empty($only) && $value instanceof LazyProp)) {
+                unset($props[$key]);
+                continue;
+            }
+
             if ($value instanceof Closure) {
                 $value = App::call($value);
             }
@@ -137,7 +154,7 @@ class Response implements Responsable
             }
 
             if (is_array($value)) {
-                $value = $this->resolvePropertyInstances($value, $request, false);
+                $value = $this->resolvePropertyInstances($value, $request, false, $only[$key] ?? null);
             }
 
             if ($unpackDotProps && str_contains($key, '.')) {
