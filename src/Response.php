@@ -119,6 +119,7 @@ class Response implements Responsable
                 $carry = &$carry[$match];
             }
         }
+
         return $result;
     }
 
