@@ -264,12 +264,13 @@ class ResponseTest extends TestCase
             return 'A lazy value';
         });
 
-        $response = new Response('Users', ['users' => [], 'lazy' => $lazyProp], 'app', '123');
+        $response = new Response('Users', ['users' => [], 'lazy' => $lazyProp, 'nested' => ['lazy' => $lazyProp]], 'app', '123');
         $response = $response->toResponse($request);
         $page = $response->getData();
 
         $this->assertSame([], $page->props->users);
         $this->assertObjectNotHasAttribute('lazy', $page->props);
+        $this->assertFalse(isset($page->props->nested->lazy));
     }
 
     public function test_lazy_props_are_included_in_partial_reload(): void
@@ -300,7 +301,7 @@ class ResponseTest extends TestCase
 
         $access = 0;
         $trap = 0;
-        $lazyProp = new LazyProp(function () use(&$access, &$trap) {
+        $lazyProp = new LazyProp(function () use (&$access, &$trap) {
             $access++;
             return [
                 'prop' => new LazyProp(function () use (&$access) {
@@ -341,7 +342,7 @@ class ResponseTest extends TestCase
             ],
             'nonLazy' => [
                 'another' => 'Another lazy value',
-            ]
+            ],
         ])), $page->props);
 
     }
@@ -361,7 +362,7 @@ class ResponseTest extends TestCase
             'foo' => [
                 'baz' => [],
                 'bar' => [
-                    'baz' => []
+                    'baz' => [],
                 ],
             ],
             'baz' => [],

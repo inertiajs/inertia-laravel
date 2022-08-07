@@ -104,7 +104,8 @@ class Response implements Responsable
         return ResponseFactory::view($this->rootView, $this->viewData + ['page' => $page]);
     }
 
-    public function resolveOnly($only) {
+    public function resolveOnly($only)
+    {
         // Inspired from js unflatten https://stackoverflow.com/a/59787588/2977175
         $result = [];
         foreach ($only as $key) {
@@ -112,7 +113,7 @@ class Response implements Responsable
             // This is basically explode('.', $key) but more thorough as it only splits valid dot notations and prevents splitting things like `foo...bar`
             preg_match_all('/^\.+[^.]*|[^.]*\.+$|(?:\.{2,}|[^.])+(?:\.+$)?/', $key, $matches);
             foreach ($matches[0] ?? [$key] as $match) {
-                if (!isset($carry[$match])) {
+                if (! isset($carry[$match])) {
                     $carry[$match] = [];
                 }
                 $carry = &$carry[$match];
@@ -127,7 +128,7 @@ class Response implements Responsable
     public function resolvePropertyInstances(array $props, Request $request, bool $unpackDotProps = true, array $only = null): array
     {
         foreach ($props as $key => $value) {
-            if ((!empty($only) && !isset($only[$key]))
+            if ((! empty($only) && ! isset($only[$key]))
                 || (empty($only) && $value instanceof LazyProp)) {
                 unset($props[$key]);
                 continue;
