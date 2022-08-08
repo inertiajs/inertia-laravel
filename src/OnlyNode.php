@@ -9,8 +9,8 @@ class OnlyNode implements ArrayAccess
     public function __construct(
         /** @property self[] */
         protected array $nodes = [],
-        protected $isLeaf = false) {
-
+        protected $isLeaf = false)
+    {
     }
 
     public function isLeaf(): bool
@@ -47,7 +47,6 @@ class OnlyNode implements ArrayAccess
     {
         return empty($this->nodes);
     }
-
 
     /** @return self[] */
     public function getNodes(): array

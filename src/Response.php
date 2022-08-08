@@ -131,7 +131,7 @@ class Response implements Responsable
     {
         foreach ($props as $key => $value) {
             if ((! $only->isLeaf() && ! isset($only[$key]))
-                || (!isset($only[$key]) && $value instanceof LazyProp)) {
+                || (! isset($only[$key]) && $value instanceof LazyProp)) {
                 unset($props[$key]);
                 continue;
             }
