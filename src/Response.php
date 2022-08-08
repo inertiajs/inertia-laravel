@@ -133,7 +133,7 @@ class Response implements Responsable
      */
     public function resolvePropertyInstances(array $props, Request $request, OnlyNode $only, bool $unpackDotProps = true): array
     {
-        $isWildcard = isset($only['*']);
+        $isWildcard = isset($only['*']) || isset($only['**']);
         foreach ($props as $key => $value) {
             if (! isset($only[$key]) && ! $isWildcard && (! $only->isLeaf() || $value instanceof LazyProp)) {
                 unset($props[$key]);
@@ -161,7 +161,7 @@ class Response implements Responsable
             }
 
             if (is_array($value)) {
-                $value = $this->resolvePropertyInstances($value, $request, $only[$key] ?? new OnlyNode($isWildcard ? ['*' => ''] : [], true), false);
+                $value = $this->resolvePropertyInstances($value, $request, $only[$key] ?? $only['*'] ?? new OnlyNode(isset($only['**']) ? ['**' => ''] : [], true), false);
             }
 
             if ($unpackDotProps && str_contains($key, '.')) {

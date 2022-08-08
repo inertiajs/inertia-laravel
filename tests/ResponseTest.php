@@ -295,7 +295,7 @@ class ResponseTest extends TestCase
 
     public function test_nested_lazy_props(): void
     {
-        $request = Request::create('/users', 'GET');
+        $request = Request::create('/users');
         $request->headers->add(['X-Inertia' => 'true']);
         $request->headers->add(['X-Inertia-Partial-Component' => 'Users']);
         $request->headers->add(['X-Inertia-Partial-Data' => 'lazy.nested.prop,nonLazy.another,nonLazy']);
@@ -351,9 +351,10 @@ class ResponseTest extends TestCase
 
     public function test_backward_compat_packed_array(): void
     {
-        $request = Request::create('/users', 'GET');
+        $request = Request::create('/users');
         $request->headers->add(['X-Inertia' => 'true']);
         $request->headers->add(['X-Inertia-Partial-Component' => 'Users']);
+        // Note: wildcards are a new feature and packed arrays support for them is not planned so lazy.packed.* would not work in this case
         $request->headers->add(['X-Inertia-Partial-Data' => 'lazy.packed.prop']);
 
         $lazy = new LazyProp(fn () => 'A lazy value');
@@ -373,22 +374,50 @@ class ResponseTest extends TestCase
 
     public function test_wildcard_lazy_props(): void
     {
-        $request = Request::create('/users', 'GET');
+        $request = Request::create('/users');
         $request->headers->add(['X-Inertia' => 'true']);
         $request->headers->add(['X-Inertia-Partial-Component' => 'Users']);
         $request->headers->add(['X-Inertia-Partial-Data' => 'lazy.*']);
 
         $lazy = new LazyProp(fn () => 'A lazy value');
 
-        $lazyProp = new LazyProp(function () use ($lazy) {
-            return [
-                'prop' => $lazy,
-                'another' => $lazy,
-                'nonLazy' => 'ok',
-            ];
-        });
+        $lazyProp = new LazyProp(fn () => [
+            'prop' => $lazy,
+            'another' => $lazy,
+            'nonLazy' => 'ok',
+        ]);
 
-        $response = new Response('Users', ['lazy' => ['nested' => $lazyProp, 'second' => fn () => 'sec'], 'nope' => 'no'], 'app', '123');
+        $response = new Response('Users', ['lazy' => ['nested' => $lazyProp, 'lazy' => $lazy, 'second' => fn () => 'sec'], 'nope' => 'no'], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertEquals(json_decode(json_encode([
+            'lazy' => [
+                'nested' => [
+                    'nonLazy' => 'ok',
+                ],
+                'lazy' => 'A lazy value',
+                'second' => 'sec',
+            ],
+        ])), $page->props);
+    }
+
+    public function test_semi_wildcard_lazy_props(): void
+    {
+        $request = Request::create('/users');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'Users']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'lazy.*.prop']);
+
+        $lazy = new LazyProp(fn () => 'A lazy value');
+
+        $lazyProp = new LazyProp(fn () => [
+            'prop' => $lazy,
+            'another' => $lazy,
+            'nonLazy' => 'nope',
+        ]);
+
+        $response = new Response('Users', ['lazy' => ['nested' => $lazyProp, 'other' => $lazyProp]], 'app', '123');
         $response = $response->toResponse($request);
         $page = $response->getData();
 
@@ -396,9 +425,41 @@ class ResponseTest extends TestCase
             'lazy' => [
                 'nested' => [
                     'prop' => 'A lazy value',
-                    'another' => 'A lazy value',
+                ],
+                'other' => [
+                    'prop' => 'A lazy value',
+                ],
+            ],
+        ])), $page->props);
+    }
+
+    public function test_deep_wildcard_lazy_props(): void
+    {
+        $request = Request::create('/users');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'Users']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'lazy.**']);
+
+        $lazy = new LazyProp(fn () => 'A lazy value');
+
+        $lazyProp = new LazyProp(fn () => [
+            'prop' => $lazy,
+            'another' => new LazyProp(fn () => ['deep' => $lazy]),
+            'nonLazy' => 'ok',
+        ]);
+
+        $response = new Response('Users', ['lazy' => ['nested' => $lazyProp, 'lazy' => $lazy, 'second' => fn () => 'sec'], 'nope' => 'no'], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertEquals(json_decode(json_encode([
+            'lazy' => [
+                'nested' => [
+                    'prop' => 'A lazy value',
+                    'another' => ['deep' => 'A lazy value'],
                     'nonLazy' => 'ok',
                 ],
+                'lazy' => 'A lazy value',
                 'second' => 'sec',
             ],
         ])), $page->props);
