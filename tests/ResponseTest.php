@@ -4,6 +4,7 @@ namespace Inertia\Tests;
 
 use Mockery;
 use Inertia\LazyProp;
+use Inertia\OnlyNode;
 use Inertia\Response;
 use Illuminate\View\View;
 use Illuminate\Http\Request;
@@ -297,44 +298,39 @@ class ResponseTest extends TestCase
         $request = Request::create('/users', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
         $request->headers->add(['X-Inertia-Partial-Component' => 'Users']);
-        $request->headers->add(['X-Inertia-Partial-Data' => 'lazy.nested.prop,nonLazy.another']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'lazy.nested.prop,nonLazy.another,nonLazy']);
 
         $access = 0;
         $trap = 0;
-        $lazyProp = new LazyProp(function () use (&$access, &$trap) {
+        $expectedLazy = new LazyProp(function () use (&$access) {
+            $access++;
+
+            return 'A lazy value';
+        });
+        $trapLazy = new LazyProp(function () use (&$trap) {
+            return $trap++;
+        });
+
+        $lazyProp = new LazyProp(function () use (&$access, $trapLazy, $expectedLazy) {
             $access++;
 
             return [
-                'prop' => new LazyProp(function () use (&$access) {
-                    $access++;
-
-                    return 'A lazy value';
-                }),
-                'another' => new LazyProp(function () use (&$trap) {
-                    return $trap++;
-                }),
+                'prop' => $expectedLazy,
+                'another' => $trapLazy,
                 'nonLazy' => 'ok',
             ];
         });
-        $nonLazyProp = function () use (&$access) {
+        $nonLazyProp = function () use (&$access, $trapLazy, $expectedLazy) {
             return [
-                'prop' => new LazyProp(function () use (&$trap) {
-                    return $trap++;
-                }),
-                'another' => new LazyProp(function () use (&$access) {
-                    $access++;
-
-                    return 'Another lazy value';
-                }),
+                'prop' => $trapLazy,
+                'another' => $expectedLazy,
+                'leafNode' => 'ok'
             ];
         };
 
-        $response = new Response('Users', ['users' => [], 'lazy' => ['nested' => $lazyProp], 'nonLazy' => $nonLazyProp], 'app', '123');
+        $response = new Response('Users', ['users' => [], 'lazy' => ['nested' => $lazyProp, 'notAsked' => 'ok', 'trapLazy' => $trapLazy], 'nonLazy' => $nonLazyProp], 'app', '123');
         $response = $response->toResponse($request);
         $page = $response->getData();
-
-        $this->assertEquals(0, $trap);
-        $this->assertEquals(3, $access);
 
         $this->assertObjectNotHasAttribute('users', $page->props);
         $this->assertEquals(json_decode(json_encode([
@@ -344,9 +340,13 @@ class ResponseTest extends TestCase
                 ],
             ],
             'nonLazy' => [
-                'another' => 'Another lazy value',
+                'another' => 'A lazy value',
+                'leafNode' => 'ok'
             ],
         ])), $page->props);
+
+        $this->assertEquals(0, $trap);
+        $this->assertEquals(3, $access);
     }
 
     public function test_resolve_only(): void
@@ -356,20 +356,23 @@ class ResponseTest extends TestCase
         $res = $r->resolveOnly([
             'foo.baz',
             'baz',
-            'baz..foo',
+            '.baz..foo.bar.',
             'foo.bar.baz',
+            'foo'
         ]);
 
-        $this->assertEquals([
-            'foo' => [
-                'baz' => [],
-                'bar' => [
-                    'baz' => [],
-                ],
-            ],
-            'baz' => [],
-            'baz..foo' => [],
-        ], $res);
+        $this->assertEquals(new OnlyNode([
+            'foo' => new OnlyNode([
+                'baz' => new OnlyNode([], true),
+                'bar' => new OnlyNode([
+                    'baz' => new OnlyNode([], true),
+                ]),
+            ], true),
+            'baz' => new OnlyNode([], true),
+            '.baz..foo' => new OnlyNode(['bar.' => new OnlyNode([], true)]),
+        ]), $res);
+
+        $this->assertEquals(new OnlyNode([], true), $r->resolveOnly([]));
     }
 
     public function test_top_level_dot_props_get_unpacked(): void

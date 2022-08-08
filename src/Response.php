@@ -107,17 +107,18 @@ class Response implements Responsable
     public function resolveOnly($only)
     {
         // Inspired from js unflatten https://stackoverflow.com/a/59787588/2977175
-        $result = [];
+        $result = new OnlyNode([], empty($only));
         foreach ($only as $key) {
             $carry = &$result;
             // This is basically explode('.', $key) but more thorough as it only splits valid dot notations and prevents splitting things like `foo...bar`
-            preg_match_all('/^\.+[^.]*|[^.]*\.+$|(?:\.{2,}|[^.])+(?:\.+$)?/', $key, $matches);
+            preg_match_all('/(?:^\.+)?((?:\.{2,}|[^.])+(?:\.+$)?)/', $key, $matches);
             foreach ($matches[0] ?? [$key] as $match) {
                 if (! isset($carry[$match])) {
-                    $carry[$match] = [];
+                    $carry[$match] = new OnlyNode();
                 }
                 $carry = &$carry[$match];
             }
+            $carry->setLeaf();
         }
 
         return $result;
@@ -126,11 +127,11 @@ class Response implements Responsable
     /**
      * Resolve all necessary class instances in the given props.
      */
-    public function resolvePropertyInstances(array $props, Request $request, bool $unpackDotProps = true, array $only = null): array
+    public function resolvePropertyInstances(array $props, Request $request, bool $unpackDotProps = true, OnlyNode $only = null): array
     {
         foreach ($props as $key => $value) {
-            if ((! empty($only) && ! isset($only[$key]))
-                || (empty($only) && $value instanceof LazyProp)) {
+            if ((! $only->isLeaf() && ! isset($only[$key]))
+                || (!isset($only[$key]) && $value instanceof LazyProp)) {
                 unset($props[$key]);
                 continue;
             }
@@ -156,7 +157,7 @@ class Response implements Responsable
             }
 
             if (is_array($value)) {
-                $value = $this->resolvePropertyInstances($value, $request, false, $only[$key] ?? null);
+                $value = $this->resolvePropertyInstances($value, $request, false, $only[$key] ?? new OnlyNode([], true));
             }
 
             if ($unpackDotProps && str_contains($key, '.')) {
