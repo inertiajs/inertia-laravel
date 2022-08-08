@@ -104,14 +104,18 @@ class Response implements Responsable
         return ResponseFactory::view($this->rootView, $this->viewData + ['page' => $page]);
     }
 
-    public function resolveOnly($only): OnlyNode
+    public function resolveOnly(array $only = null): OnlyNode
     {
         // Inspired from js unflatten https://stackoverflow.com/a/59787588/2977175
         $result = new OnlyNode([], empty($only));
         foreach ($only as $key) {
             $carry = &$result;
             // This is basically explode('.', $key) but more thorough as it only splits valid dot notations and prevents splitting things like `foo...bar`
-            preg_match_all('/(?:^\.+)?((?:\.{2,}|[^.])+(?:\.+$)?)/', $key, $matches);
+            preg_match_all('/(?:^\.+)?(?:\.{2,}|[^.])+(?:\.+$)?/', $key, $matches);
+            if (count($matches[0]) > 1) {
+                // Backward compatibility with packed arrays
+                $result[$key] = new OnlyNode([], false);
+            }
             foreach ($matches[0] ?? [$key] as $match) {
                 if (! isset($carry[$match])) {
                     $carry[$match] = new OnlyNode();

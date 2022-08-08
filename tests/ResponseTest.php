@@ -349,6 +349,28 @@ class ResponseTest extends TestCase
         $this->assertEquals(3, $access);
     }
 
+    public function test_backward_compat_packed_array(): void
+    {
+        $request = Request::create('/users', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'Users']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'lazy.packed.prop']);
+
+        $lazy = new LazyProp(fn () => 'A lazy value');
+
+        $response = new Response('Users', ['lazy' => ['packed' => ['not_packed' => 'ok']], 'lazy.packed.prop' => $lazy], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertEquals(json_decode(json_encode([
+            'lazy' => [
+                'packed' => [
+                    'prop' => 'A lazy value',
+                ],
+            ],
+        ])), $page->props);
+    }
+
     public function test_wildcard_lazy_props(): void
     {
         $request = Request::create('/users', 'GET');
@@ -395,6 +417,7 @@ class ResponseTest extends TestCase
         ]);
 
         $this->assertEquals(new OnlyNode([
+            'foo.baz.*' => new OnlyNode([], false),
             'foo' => new OnlyNode([
                 'baz' => new OnlyNode(['*' => new OnlyNode([], true)], false),
                 'bar' => new OnlyNode([
@@ -402,6 +425,8 @@ class ResponseTest extends TestCase
                 ]),
             ], true),
             'baz' => new OnlyNode([], true),
+            '.baz..foo.bar.' => new OnlyNode([], false),
+            'foo.bar.baz' => new OnlyNode([], false),
             '.baz..foo' => new OnlyNode(['bar.' => new OnlyNode([], true)]),
         ]), $res);
 
