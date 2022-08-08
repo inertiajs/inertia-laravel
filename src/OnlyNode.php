@@ -42,15 +42,4 @@ class OnlyNode implements ArrayAccess
     {
         unset($this->nodes[$offset]);
     }
-
-    public function isEmpty(): bool
-    {
-        return empty($this->nodes);
-    }
-
-    /** @return self[] */
-    public function getNodes(): array
-    {
-        return $this->nodes;
-    }
 }
