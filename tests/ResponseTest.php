@@ -349,12 +349,45 @@ class ResponseTest extends TestCase
         $this->assertEquals(3, $access);
     }
 
+    public function test_wildcard_lazy_props(): void
+    {
+        $request = Request::create('/users', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'Users']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'lazy.*']);
+
+        $lazy = new LazyProp(fn () => 'A lazy value');
+
+        $lazyProp = new LazyProp(function () use ($lazy) {
+            return [
+                'prop' => $lazy,
+                'another' => $lazy,
+                'nonLazy' => 'ok',
+            ];
+        });
+
+        $response = new Response('Users', ['lazy' => ['nested' => $lazyProp, 'second' => fn () => 'sec'], 'nope' => 'no'], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertEquals(json_decode(json_encode([
+            'lazy' => [
+                'nested' => [
+                    'prop' => 'A lazy value',
+                    'another' => 'A lazy value',
+                    'nonLazy' => 'ok'
+                ],
+                'second' => 'sec'
+            ],
+        ])), $page->props);
+    }
+
     public function test_resolve_only(): void
     {
         $r = new Response('Whatever', []);
 
         $res = $r->resolveOnly([
-            'foo.baz',
+            'foo.baz.*',
             'baz',
             '.baz..foo.bar.',
             'foo.bar.baz',
@@ -363,7 +396,7 @@ class ResponseTest extends TestCase
 
         $this->assertEquals(new OnlyNode([
             'foo' => new OnlyNode([
-                'baz' => new OnlyNode([], true),
+                'baz' => new OnlyNode(['*' => new OnlyNode([], true)], false),
                 'bar' => new OnlyNode([
                     'baz' => new OnlyNode([], true),
                 ]),
