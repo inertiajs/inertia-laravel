@@ -161,7 +161,7 @@ class Response implements Responsable
             }
 
             if (is_array($value)) {
-                $value = $this->resolvePropertyInstances($value, $request, $only[$key] ?? $only['*'] ?? new OnlyNode(isset($only['**']) ? ['**' => ''] : [], true), false);
+                $value = $this->resolvePropertyInstances($value, $request, $only[$key] ?? $only['*'] ?? new OnlyNode($isWildcard ? ['**' => ''] : [], true), false);
             }
 
             if ($unpackDotProps && str_contains($key, '.')) {
