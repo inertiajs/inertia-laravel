@@ -375,9 +375,9 @@ class ResponseTest extends TestCase
                 'nested' => [
                     'prop' => 'A lazy value',
                     'another' => 'A lazy value',
-                    'nonLazy' => 'ok'
+                    'nonLazy' => 'ok',
                 ],
-                'second' => 'sec'
+                'second' => 'sec',
             ],
         ])), $page->props);
     }
