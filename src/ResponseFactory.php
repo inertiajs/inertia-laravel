@@ -36,9 +36,9 @@ class ResponseFactory
     public function share($key, $value = null): void
     {
         if (is_array($key)) {
-            $this->sharedProps = array_merge($this->sharedProps, $key);
+            $this->sharedProps = array_merge_recursive($this->sharedProps, $key);
         } elseif ($key instanceof Arrayable) {
-            $this->sharedProps = array_merge($this->sharedProps, $key->toArray());
+            $this->sharedProps = array_merge_recursive($this->sharedProps, $key->toArray());
         } else {
             Arr::set($this->sharedProps, $key, $value);
         }

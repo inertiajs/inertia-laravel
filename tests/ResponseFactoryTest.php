@@ -158,4 +158,44 @@ class ResponseFactoryTest extends TestCase
             ],
         ]);
     }
+
+    public function test_shared_key_value_data_is_merged_recursively(): void
+    {
+        Inertia::share([
+            'foo' => [
+                'bar' => 'baz'
+            ],
+        ]);
+
+        Inertia::share('foo.qux', 'quux');
+
+        $this->assertSame([
+            'foo' => [
+                'bar' => 'baz',
+                'qux' => 'quux',
+            ]
+        ], Inertia::getShared());
+    }
+
+    public function test_shared_array_data_is_merged_recursively(): void
+    {
+        Inertia::share([
+            'foo' => [
+                'bar' => 'baz'
+            ],
+        ]);
+
+        Inertia::share([
+            'foo' => [
+                'qux' => 'quux',
+            ],
+        ]);
+
+        $this->assertSame([
+            'foo' => [
+                'bar' => 'baz',
+                'qux' => 'quux',
+            ]
+        ], Inertia::getShared());
+    }
 }
