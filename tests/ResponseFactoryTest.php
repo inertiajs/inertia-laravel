@@ -163,7 +163,7 @@ class ResponseFactoryTest extends TestCase
     {
         Inertia::share([
             'foo' => [
-                'bar' => 'baz'
+                'bar' => 'baz',
             ],
         ]);
 
@@ -173,7 +173,7 @@ class ResponseFactoryTest extends TestCase
             'foo' => [
                 'bar' => 'baz',
                 'qux' => 'quux',
-            ]
+            ],
         ], Inertia::getShared());
     }
 
@@ -181,7 +181,7 @@ class ResponseFactoryTest extends TestCase
     {
         Inertia::share([
             'foo' => [
-                'bar' => 'baz'
+                'bar' => 'baz',
             ],
         ]);
 
@@ -195,7 +195,7 @@ class ResponseFactoryTest extends TestCase
             'foo' => [
                 'bar' => 'baz',
                 'qux' => 'quux',
-            ]
+            ],
         ], Inertia::getShared());
     }
 }
