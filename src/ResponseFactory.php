@@ -97,10 +97,10 @@ class ResponseFactory
         }
 
         return app()->make(Response::class, [
-            "component" => $component,
-            "props" => array_merge($this->sharedProps, $props),
-            "rootView" => $this->rootView,
-            "version" => $this->getVersion(),
+            'component' => $component,
+            'props' => array_merge($this->sharedProps, $props),
+            'rootView' => $this->rootView,
+            'version' => $this->getVersion(),
         ]);
     }
 
