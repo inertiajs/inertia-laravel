@@ -96,12 +96,12 @@ class ResponseFactory
             $props = $props->toArray();
         }
 
-        return new Response(
-            $component,
-            array_merge($this->sharedProps, $props),
-            $this->rootView,
-            $this->getVersion()
-        );
+        return app()->make(Response::class, [
+            "component" => $component,
+            "props" => array_merge($this->sharedProps, $props),
+            "rootView" => $this->rootView,
+            "version" => $this->getVersion(),
+        ]);
     }
 
     /**
