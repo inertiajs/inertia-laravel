@@ -24,19 +24,22 @@ class Response implements Responsable
     protected $rootView;
     protected $version;
     protected $viewData = [];
+    protected $preservedProps = [];
 
     /**
      * @param  string  $component
      * @param  array|Arrayable  $props
      * @param  string  $rootView
      * @param  string  $version
+     * @param  array  $preservedProps
      */
-    public function __construct(string $component, $props, string $rootView = 'app', string $version = '')
+    public function __construct(string $component, $props, string $rootView = 'app', string $version = '', array $preservedProps = [])
     {
         $this->component = $component;
         $this->props = $props instanceof Arrayable ? $props->toArray() : $props;
         $this->rootView = $rootView;
         $this->version = $version;
+        $this->preservedProps = $preservedProps;
     }
 
     /**
@@ -89,7 +92,7 @@ class Response implements Responsable
         $only = array_filter(explode(',', $request->header('X-Inertia-Partial-Data', '')));
 
         $props = ($only && $request->header('X-Inertia-Partial-Component') === $this->component)
-            ? Arr::only($this->props, $only)
+            ? Arr::only($this->props, array_merge($only, $this->preservedProps))
             : array_filter($this->props, static function ($prop) {
                 return ! ($prop instanceof LazyProp);
             });
