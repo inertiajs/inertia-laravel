@@ -12,6 +12,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Response as ResponseFactory;
 use Illuminate\Support\Traits\Macroable;
 
@@ -102,6 +103,10 @@ class Response implements Responsable
             'url' => $request->getBaseUrl().$request->getRequestUri(),
             'version' => $this->version,
         ];
+
+        if (config('app.debug')) {
+            Event::dispatch('inertia.debug', [$page]);
+        }
 
         if ($request->header('X-Inertia')) {
             return new JsonResponse($page, 200, ['X-Inertia' => 'true']);
