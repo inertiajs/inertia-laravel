@@ -33,6 +33,25 @@ class MiddlewareTest extends TestCase
         $this->assertTrue($fooCalled);
     }
 
+    public function test_inertia_delete_request_while_unauthenticated_should_redirect_using_see_other(): void
+    {
+        Route::middleware('auth', Middleware::class)->delete('/', function () {
+            // Do nothing..
+        });
+        Route::get('/login', function () {
+            // Do nothing..
+        })->name('login');
+
+        $response = $this
+            ->from('/foo')
+            ->delete('/', [], [
+                'X-Inertia' => 'true',
+            ]);
+
+        $response->assertRedirect('/login');
+        $response->assertStatus(303);
+    }
+
     public function test_no_response_value_can_be_customized_by_overriding_the_middleware_method(): void
     {
         Route::middleware(ExampleMiddleware::class)->get('/', function () {
