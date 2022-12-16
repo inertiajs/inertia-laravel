@@ -31,6 +31,9 @@ class AssertableInertia extends AssertableJson
             PHPUnit::assertArrayHasKey('url', $page);
             PHPUnit::assertArrayHasKey('version', $page);
         } catch (AssertionFailedError $e) {
+            if ($response->exception) {
+                $response->json();
+            }
             PHPUnit::fail('Not a valid Inertia response.');
         }
 
