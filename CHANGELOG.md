@@ -5,9 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v0.6.2...HEAD)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v0.6.5...HEAD)
 
 Nothing!
+
+## [v0.6.5](https://github.com/inertiajs/inertia-laravel/compare/v0.6.4...v0.6.5) - 2023-01-10
+
+- Add Laravel v10 support ([#480](https://github.com/inertiajs/inertia-laravel/pull/480))
+
+## [v0.6.4](https://github.com/inertiajs/inertia-laravel/compare/v0.6.3...v0.6.4) - 2022-11-08
+
+- Add PHP 8.2 support ([#463](https://github.com/inertiajs/inertia-laravel/pull/463))
+
+## [v0.6.3](https://github.com/inertiajs/inertia-laravel/compare/v0.6.2...v0.6.3) - 2022-06-27
+
+- Check Vite manifest path (`build/manifest.json`) when determining the current asset version ([#399](https://github.com/inertiajs/inertia-laravel/pull/399))
 
 ## [v0.6.2](https://github.com/inertiajs/inertia-laravel/compare/v0.6.1...v0.6.2) - 2022-05-24
 
