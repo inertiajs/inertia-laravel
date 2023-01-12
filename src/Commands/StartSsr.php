@@ -1,6 +1,6 @@
 <?php
 
-namespace Inertia\Console;
+namespace Inertia\Commands;
 
 use Illuminate\Console\Command;
 use Symfony\Component\Process\Process;
@@ -24,7 +24,7 @@ class StartSsr extends Command
     /**
      * Start the SSR server via a Node process.
      */
-    public function handle()
+    public function handle(): int
     {
         $ssrBundle = config('inertia.ssr.bundle', base_path('bootstrap/ssr/ssr.mjs'));
 
@@ -32,7 +32,7 @@ class StartSsr extends Command
             $this->error('Inertia SSR bundle not found: '.$ssrBundle);
             $this->info('Set the correct Inertia SSR bundle path in your `inertia.ssr.bundle` config.');
 
-            return 1;
+            return self::FAILURE;
         }
 
         $process = new Process(['node', $ssrBundle]);
@@ -46,5 +46,7 @@ class StartSsr extends Command
                 $this->error(trim($data));
             }
         }
+
+        return self::SUCCESS;
     }
 }
