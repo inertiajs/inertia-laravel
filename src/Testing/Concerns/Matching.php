@@ -3,11 +3,11 @@
 namespace Inertia\Testing\Concerns;
 
 use Closure;
+use Illuminate\Support\Collection;
+use PHPUnit\Framework\Assert as PHPUnit;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceResponse;
-use Illuminate\Support\Collection;
-use PHPUnit\Framework\Assert as PHPUnit;
 
 trait Matching
 {

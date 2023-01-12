@@ -2,8 +2,8 @@
 
 namespace Inertia;
 
-use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Facades\Facade;
+use Illuminate\Contracts\Support\Arrayable;
 
 /**
  * @method static void setRootView(string $name)

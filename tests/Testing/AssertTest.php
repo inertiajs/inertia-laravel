@@ -3,16 +3,16 @@
 namespace Inertia\Tests\Testing;
 
 use Exception;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Auth\User;
-use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Collection;
-use Illuminate\Testing\Fluent\AssertableJson;
+use TypeError;
 use Inertia\Inertia;
 use Inertia\Testing\Assert;
 use Inertia\Tests\TestCase;
+use Illuminate\Support\Collection;
+use Illuminate\Foundation\Auth\User;
+use Illuminate\Database\Eloquent\Model;
 use PHPUnit\Framework\AssertionFailedError;
-use TypeError;
+use Illuminate\Testing\Fluent\AssertableJson;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class AssertTest extends TestCase
 {
@@ -695,7 +695,6 @@ class AssertTest extends TestCase
 
         $response->assertInertia(function (Assert $inertia) {
             $inertia->has('bar', function (Assert $inertia) {
-                //
             });
         });
     }

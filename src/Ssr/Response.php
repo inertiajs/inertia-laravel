@@ -16,9 +16,6 @@ class Response
 
     /**
      * Prepare the Inertia Server Side Rendering (SSR) response.
-     *
-     * @param  string  $head
-     * @param  string  $body
      */
     public function __construct(string $head, string $body)
     {

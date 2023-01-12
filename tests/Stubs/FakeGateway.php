@@ -2,9 +2,9 @@
 
 namespace Inertia\Tests\Stubs;
 
-use Illuminate\Support\Facades\Config;
 use Inertia\Ssr\Gateway;
 use Inertia\Ssr\Response;
+use Illuminate\Support\Facades\Config;
 
 class FakeGateway implements Gateway
 {
@@ -17,9 +17,6 @@ class FakeGateway implements Gateway
 
     /**
      * Dispatch the Inertia page to the Server Side Rendering engine.
-     *
-     * @param  array  $page
-     * @return Response|null
      */
     public function dispatch(array $page): ?Response
     {

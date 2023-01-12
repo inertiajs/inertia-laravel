@@ -7,8 +7,7 @@ class Directive
     /**
      * Compiles the "@inertia" directive.
      *
-     * @param  string  $expression
-     * @return string
+     * @param string $expression
      */
     public static function compile($expression = ''): string
     {
@@ -32,8 +31,7 @@ class Directive
     /**
      * Compiles the "@inertiaHead" directive.
      *
-     * @param  string  $expression
-     * @return string
+     * @param string $expression
      */
     public static function compileHead($expression = ''): string
     {
