@@ -5,9 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v0.6.5...HEAD)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v0.6.6...master)
 
 Nothing!
+
+## [v0.6.6](https://github.com/inertiajs/inertia-laravel/compare/v0.6.5...v0.6.6) - 2023-01-11
+
+- Add `inertia:start-ssr` and `inertia:stop-ssr` artisan commands ([#483](https://github.com/inertiajs/inertia-laravel/pull/483))
 
 ## [v0.6.5](https://github.com/inertiajs/inertia-laravel/compare/v0.6.4...v0.6.5) - 2023-01-10
 
