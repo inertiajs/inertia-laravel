@@ -2,19 +2,19 @@
 
 namespace Inertia\Tests;
 
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Http\Resources\Json\ResourceCollection;
-use Illuminate\Http\Response as BaseResponse;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Fluent;
-use Illuminate\View\View;
+use Mockery;
 use Inertia\LazyProp;
 use Inertia\Response;
+use Illuminate\View\View;
+use Illuminate\Http\Request;
+use Illuminate\Support\Fluent;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Collection;
 use Inertia\Tests\Stubs\FakeResource;
-use Mockery;
+use Illuminate\Http\Response as BaseResponse;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Resources\Json\ResourceCollection;
 
 class ResponseTest extends TestCase
 {
@@ -97,8 +97,7 @@ class ResponseTest extends TestCase
         $callable = static function () use ($users) {
             $page = new LengthAwarePaginator($users->take(2), $users->count(), 2);
 
-            return new class($page, JsonResource::class) extends ResourceCollection
-            {
+            return new class($page, JsonResource::class) extends ResourceCollection {
             };
         };
 

@@ -2,17 +2,18 @@
 
 namespace Inertia\Tests;
 
+use Throwable;
+use Mockery as m;
+use Inertia\Directive;
+use Inertia\Ssr\Gateway;
+use Illuminate\View\View;
+use Illuminate\View\Factory;
+use Inertia\Tests\Stubs\FakeGateway;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Config;
-use Illuminate\View\Compilers\BladeCompiler;
 use Illuminate\View\Engines\PhpEngine;
-use Illuminate\View\Factory;
-use Illuminate\View\View;
-use Inertia\Directive;
-use Inertia\Ssr\Gateway;
-use Inertia\Tests\Stubs\FakeGateway;
-use Mockery as m;
+use Illuminate\View\Compilers\BladeCompiler;
 
 class DirectiveTest extends TestCase
 {
@@ -81,7 +82,7 @@ class DirectiveTest extends TestCase
         try {
             $output = $view->render();
             @unlink($path);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             @unlink($path);
             throw $e;
         }

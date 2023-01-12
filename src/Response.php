@@ -3,17 +3,17 @@
 namespace Inertia;
 
 use Closure;
+use Illuminate\Support\Arr;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\App;
 use GuzzleHttp\Promise\PromiseInterface;
+use Illuminate\Support\Traits\Macroable;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Responsable;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceResponse;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Response as ResponseFactory;
-use Illuminate\Support\Traits\Macroable;
 
 class Response implements Responsable
 {
@@ -26,10 +26,7 @@ class Response implements Responsable
     protected $viewData = [];
 
     /**
-     * @param  string  $component
-     * @param  array|Arrayable  $props
-     * @param  string  $rootView
-     * @param  string  $version
+     * @param array|Arrayable $props
      */
     public function __construct(string $component, $props, string $rootView = 'app', string $version = '')
     {
@@ -40,8 +37,9 @@ class Response implements Responsable
     }
 
     /**
-     * @param  string|array  $key
-     * @param  mixed|null  $value
+     * @param string|array $key
+     * @param mixed|null   $value
+     *
      * @return $this
      */
     public function with($key, $value = null): self
@@ -56,8 +54,9 @@ class Response implements Responsable
     }
 
     /**
-     * @param  string|array  $key
-     * @param  mixed|null  $value
+     * @param string|array $key
+     * @param mixed|null   $value
+     *
      * @return $this
      */
     public function withViewData($key, $value = null): self
@@ -81,7 +80,8 @@ class Response implements Responsable
     /**
      * Create an HTTP response that represents the object.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
+     *
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function toResponse($request)
@@ -112,11 +112,6 @@ class Response implements Responsable
 
     /**
      * Resolve all necessary class instances in the given props.
-     *
-     * @param  array  $props
-     * @param  \Illuminate\Http\Request  $request
-     * @param  bool  $unpackDotProps
-     * @return array
      */
     public function resolvePropertyInstances(array $props, Request $request, bool $unpackDotProps = true): array
     {

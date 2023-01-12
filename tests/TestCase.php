@@ -2,13 +2,13 @@
 
 namespace Inertia\Tests;
 
-use Illuminate\Foundation\Testing\TestResponse as LegacyTestResponse;
-use Illuminate\Support\Facades\View;
-use Illuminate\Testing\TestResponse;
+use LogicException;
 use Inertia\Inertia;
 use Inertia\ServiceProvider;
-use LogicException;
+use Illuminate\Support\Facades\View;
+use Illuminate\Testing\TestResponse;
 use Orchestra\Testbench\TestCase as Orchestra;
+use Illuminate\Foundation\Testing\TestResponse as LegacyTestResponse;
 
 abstract class TestCase extends Orchestra
 {
@@ -31,8 +31,6 @@ abstract class TestCase extends Orchestra
     }
 
     /**
-     * @return string
-     *
      * @throws LogicException
      */
     protected function getTestResponseClass(): string

@@ -2,15 +2,17 @@
 
 namespace Inertia\Tests;
 
-use Illuminate\Http\Request;
-use Illuminate\Session\Middleware\StartSession;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\MessageBag;
-use Illuminate\Support\ViewErrorBag;
+use Closure;
+use LogicException;
 use Inertia\Inertia;
 use Inertia\Middleware;
+use Illuminate\Http\Request;
+use Illuminate\Support\MessageBag;
+use Illuminate\Support\ViewErrorBag;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Session;
 use Inertia\Tests\Stubs\ExampleMiddleware;
+use Illuminate\Session\Middleware\StartSession;
 
 class MiddlewareTest extends TestCase
 {
@@ -39,7 +41,7 @@ class MiddlewareTest extends TestCase
             // Do nothing..
         });
 
-        $this->expectException(\LogicException::class);
+        $this->expectException(LogicException::class);
         $this->expectExceptionMessage('An empty Inertia response was returned.');
 
         $this
@@ -123,7 +125,7 @@ class MiddlewareTest extends TestCase
     public function test_validation_errors_are_registered_as_of_default(): void
     {
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
-            $this->assertInstanceOf(\Closure::class, Inertia::getShared('errors'));
+            $this->assertInstanceOf(Closure::class, Inertia::getShared('errors'));
         });
 
         $this->withoutExceptionHandling()->get('/');
@@ -214,8 +216,7 @@ class MiddlewareTest extends TestCase
 
     public function test_middleware_can_change_the_root_view_via_a_property(): void
     {
-        $this->prepareMockEndpoint(null, [], new class extends Middleware
-        {
+        $this->prepareMockEndpoint(null, [], new class() extends Middleware {
             protected $rootView = 'welcome';
         });
 
@@ -226,8 +227,7 @@ class MiddlewareTest extends TestCase
 
     public function test_middleware_can_change_the_root_view_by_overriding_the_rootview_method(): void
     {
-        $this->prepareMockEndpoint(null, [], new class extends Middleware
-        {
+        $this->prepareMockEndpoint(null, [], new class() extends Middleware {
             public function rootView(Request $request): string
             {
                 return 'welcome';

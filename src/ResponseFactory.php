@@ -3,13 +3,13 @@
 namespace Inertia;
 
 use Closure;
-use Illuminate\Contracts\Support\Arrayable;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Request;
-use Illuminate\Support\Facades\Response as BaseResponse;
 use Illuminate\Support\Traits\Macroable;
+use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Support\Facades\Response as BaseResponse;
 
 class ResponseFactory
 {
@@ -30,8 +30,8 @@ class ResponseFactory
     }
 
     /**
-     * @param  string|array|Arrayable  $key
-     * @param  mixed|null  $value
+     * @param string|array|Arrayable $key
+     * @param mixed|null             $value
      */
     public function share($key, $value = null): void
     {
@@ -45,8 +45,8 @@ class ResponseFactory
     }
 
     /**
-     * @param  string|null  $key
-     * @param  null|mixed  $default
+     * @param mixed|null $default
+     *
      * @return mixed
      */
     public function getShared(string $key = null, $default = null)
@@ -64,7 +64,7 @@ class ResponseFactory
     }
 
     /**
-     * @param  Closure|string|null  $version
+     * @param Closure|string|null $version
      */
     public function version($version): void
     {
@@ -86,9 +86,7 @@ class ResponseFactory
     }
 
     /**
-     * @param  string  $component
-     * @param  array|Arrayable  $props
-     * @return Response
+     * @param array|Arrayable $props
      */
     public function render(string $component, $props = []): Response
     {
@@ -105,7 +103,7 @@ class ResponseFactory
     }
 
     /**
-     * @param  string|RedirectResponse  $url
+     * @param string|RedirectResponse $url
      */
     public function location($url): \Symfony\Component\HttpFoundation\Response
     {
