@@ -31,12 +31,12 @@ class StopSsr extends Command
         curl_exec($ch);
 
         if (curl_error($ch) !== 'Empty reply from server') {
-            $this->components->error('Unable to connect to Inertia SSR server.');
+            $this->error('Unable to connect to Inertia SSR server.');
 
             return self::FAILURE;
         }
 
-        $this->components->info('Inertia SSR server stopped.');
+        $this->info('Inertia SSR server stopped.');
 
         curl_close($ch);
 
