@@ -65,6 +65,8 @@ class ServiceProvider extends BaseServiceProvider
 
         $this->commands([
             Console\CreateMiddleware::class,
+            Console\StartSsr::class,
+            Console\StopSsr::class,
         ]);
     }
 
