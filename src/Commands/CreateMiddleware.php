@@ -1,6 +1,6 @@
 <?php
 
-namespace Inertia\Console;
+namespace Inertia\Commands;
 
 use Illuminate\Console\GeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
