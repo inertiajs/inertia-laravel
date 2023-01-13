@@ -44,6 +44,7 @@ class StartSsr extends Command
                 $this->info(trim($data));
             } else {
                 $this->error(trim($data));
+                report(new SsrException($data));
             }
         }
 
