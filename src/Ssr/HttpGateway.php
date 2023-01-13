@@ -12,7 +12,7 @@ class HttpGateway implements Gateway
      */
     public function dispatch(array $page): ?Response
     {
-        if (! config('inertia.ssr.enabled', false)) {
+        if (! (new BundleDetector())->detect()) {
             return null;
         }
 
