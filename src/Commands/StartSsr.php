@@ -44,9 +44,19 @@ class StartSsr extends Command
             $this->warn('Using a default bundle instead: "'.$bundle.'"');
         }
 
+        $this->callSilently('inertia:stop-ssr');
+
         $process = new Process(['node', $bundle]);
         $process->setTimeout(null);
         $process->start();
+
+        $stop = function () use ($process) {
+            $process->stop();
+        };
+        pcntl_async_signals(true);
+        pcntl_signal(SIGINT, $stop);
+        pcntl_signal(SIGQUIT, $stop);
+        pcntl_signal(SIGTERM, $stop);
 
         foreach ($process as $type => $data) {
             if ($process::OUT === $type) {
