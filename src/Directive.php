@@ -14,12 +14,13 @@ class Directive
         $id = trim(trim($expression), "\'\"") ?: 'app';
 
         $template = '<?php
-            if (!isset($__inertiaSsr)) {
-                $__inertiaSsr = app(\Inertia\Ssr\Gateway::class)->dispatch($page);
+            if (!isset($__inertiaSsrDispatched)) {
+                $__inertiaSsrDispatched = true;
+                $__inertiaSsrResponse = app(\Inertia\Ssr\Gateway::class)->dispatch($page);
             }
 
-            if ($__inertiaSsr instanceof \Inertia\Ssr\Response) {
-                echo $__inertiaSsr->body;
+            if ($__inertiaSsrResponse) {
+                echo $__inertiaSsrResponse->body;
             } else {
                 ?><div id="'.$id.'" data-page="{{ json_encode($page) }}"></div><?php
             }
@@ -36,12 +37,13 @@ class Directive
     public static function compileHead($expression = ''): string
     {
         $template = '<?php
-            if (!isset($__inertiaSsr)) {
-                $__inertiaSsr = app(\Inertia\Ssr\Gateway::class)->dispatch($page);
+            if (!isset($__inertiaSsrDispatched)) {
+                $__inertiaSsrDispatched = true;
+                $__inertiaSsrResponse = app(\Inertia\Ssr\Gateway::class)->dispatch($page);
             }
 
-            if ($__inertiaSsr instanceof \Inertia\Ssr\Response) {
-                echo $__inertiaSsr->head;
+            if ($__inertiaSsrResponse) {
+                echo $__inertiaSsrResponse->head;
             }
         ?>';
 
