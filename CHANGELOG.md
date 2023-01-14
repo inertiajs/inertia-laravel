@@ -5,9 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v0.6.7...master)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v0.6.8...master)
 
 Nothing!
+
+## [v0.6.8](https://github.com/inertiajs/inertia-laravel/compare/v0.6.7...v0.6.8) - 2023-01-14
+
+- Reintroduce `inertia.ssr.enabled` config option ([#488](https://github.com/inertiajs/inertia-laravel/pull/488))
+- Fix bug where SSR is dispatched twice when errors exist ([#489](https://github.com/inertiajs/inertia-laravel/pull/489))
 
 ## [v0.6.7](https://github.com/inertiajs/inertia-laravel/compare/v0.6.6...v0.6.7) - 2023-01-12
 
