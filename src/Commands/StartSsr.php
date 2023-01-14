@@ -28,6 +28,12 @@ class StartSsr extends Command
      */
     public function handle(): int
     {
+        if (! config('inertia.ssr.enabled', true)) {
+            $this->error('Inertia SSR is not enabled. Enable it via the `inertia.ssr.enabled` config option.');
+
+            return self::FAILURE;
+        }
+
         $bundle = (new BundleDetector())->detect();
         $configuredBundle = config('inertia.ssr.bundle');
 
