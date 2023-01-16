@@ -28,6 +28,12 @@ class StartSsr extends Command
      */
     public function handle(): int
     {
+        if (! extension_loaded('pcntl')) {
+            $this->error('The pcntl PHP extension (ext-pcntl) is required to run Inertia SSR.');
+
+            return self::FAILURE;
+        }
+
         if (! config('inertia.ssr.enabled', true)) {
             $this->error('Inertia SSR is not enabled. Enable it via the `inertia.ssr.enabled` config option.');
 
