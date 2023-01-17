@@ -19,3 +19,18 @@ if (! function_exists('inertia')) {
         return $instance;
     }
 }
+
+if (! function_exists('inertia_location')) {
+    /**
+     * Inertia location helper.
+     *
+     * @param  string  url
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    function inertia_location($url)
+    {
+        $instance = \Inertia\Inertia::getFacadeRoot();
+
+        return $instance->location($url);
+    }
+}
