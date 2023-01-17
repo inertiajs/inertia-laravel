@@ -56,13 +56,15 @@ class StartSsr extends Command
         $process->setTimeout(null);
         $process->start();
 
-        $stop = function () use ($process) {
-            $process->stop();
-        };
-        pcntl_async_signals(true);
-        pcntl_signal(SIGINT, $stop);
-        pcntl_signal(SIGQUIT, $stop);
-        pcntl_signal(SIGTERM, $stop);
+        if (extension_loaded('pcntl')) {
+            $stop = function () use ($process) {
+                $process->stop();
+            };
+            pcntl_async_signals(true);
+            pcntl_signal(SIGINT, $stop);
+            pcntl_signal(SIGQUIT, $stop);
+            pcntl_signal(SIGTERM, $stop);
+        }
 
         foreach ($process as $type => $data) {
             if ($process::OUT === $type) {

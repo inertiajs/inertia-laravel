@@ -35,6 +35,9 @@
         "mockery/mockery": "^1.3.3",
         "phpunit/phpunit": "^8.0|^9.5.8"
     },
+    "suggest": {
+        "ext-pcntl": "Recommended when running the Inertia SSR server via the `inertia:start-ssr` artisan command."
+    },
     "extra": {
         "laravel": {
             "providers": [
