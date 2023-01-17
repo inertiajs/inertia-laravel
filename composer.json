@@ -36,7 +36,7 @@
         "phpunit/phpunit": "^8.0|^9.5.8"
     },
     "suggest": {
-        "ext-pcntl": "Required to run Inertia SSR through the inertia:start-ssr artisan command"
+        "ext-pcntl": "Recommended when running the Inertia SSR server via the `inertia:start-ssr` artisan command."
     },
     "extra": {
         "laravel": {
