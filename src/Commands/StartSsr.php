@@ -28,12 +28,6 @@ class StartSsr extends Command
      */
     public function handle(): int
     {
-        if (! extension_loaded('pcntl')) {
-            $this->error('The pcntl PHP extension (ext-pcntl) is required to run Inertia SSR.');
-
-            return self::FAILURE;
-        }
-
         if (! config('inertia.ssr.enabled', true)) {
             $this->error('Inertia SSR is not enabled. Enable it via the `inertia.ssr.enabled` config option.');
 
@@ -62,13 +56,15 @@ class StartSsr extends Command
         $process->setTimeout(null);
         $process->start();
 
-        $stop = function () use ($process) {
-            $process->stop();
-        };
-        pcntl_async_signals(true);
-        pcntl_signal(SIGINT, $stop);
-        pcntl_signal(SIGQUIT, $stop);
-        pcntl_signal(SIGTERM, $stop);
+        if (extension_loaded('pcntl')) {
+            $stop = function () use ($process) {
+                $process->stop();
+            };
+            pcntl_async_signals(true);
+            pcntl_signal(SIGINT, $stop);
+            pcntl_signal(SIGQUIT, $stop);
+            pcntl_signal(SIGTERM, $stop);
+        }
 
         foreach ($process as $type => $data) {
             if ($process::OUT === $type) {
