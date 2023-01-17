@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v0.6.9...master)
 
 - Add `inertia_location` helper function ([#491](https://github.com/inertiajs/inertia-laravel/pull/491))
+- Add `Route::inertia()` IDE helper ([#413](https://github.com/inertiajs/inertia-laravel/pull/413))
 
 ## [v0.6.9](https://github.com/inertiajs/inertia-laravel/compare/v0.6.8...v0.6.9) - 2023-01-17
 
