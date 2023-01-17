@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Facade;
  * @method static void version($version)
  * @method static int|string getVersion()
  * @method static Response render($component, $props = [])
+ * @method static Response page($component, $props = [])
+ * @method static Response dialog($component, $props = [])
  * @method static \Illuminate\Http\Response location($url)
  * @method static LazyProp lazy(callable $callback)
  *
