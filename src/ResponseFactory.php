@@ -21,12 +21,20 @@ class ResponseFactory
     /** @var array */
     protected $sharedProps = [];
 
+    /** @var callable|null */
+    protected $urlResolver = null;
+
     /** @var Closure|string|null */
     protected $version;
 
     public function setRootView(string $name): void
     {
         $this->rootView = $name;
+    }
+
+    public function setUrlResolver(?callable $urlResolver): void
+    {
+        $this->urlResolver = $urlResolver;
     }
 
     /**
@@ -98,7 +106,8 @@ class ResponseFactory
             $component,
             array_merge($this->sharedProps, $props),
             $this->rootView,
-            $this->getVersion()
+            $this->getVersion(),
+            $this->urlResolver
         );
     }
 

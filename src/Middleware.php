@@ -83,6 +83,7 @@ class Middleware
 
         Inertia::share($this->share($request));
         Inertia::setRootView($this->rootView($request));
+        Inertia::setUrlResolver($this->urlResolver($request));
 
         $response = $next($request);
         $response->headers->set('Vary', 'X-Inertia');
@@ -155,5 +156,15 @@ class Middleware
 
             return $bags->toArray();
         });
+    }
+
+    /**
+     * Sets the url resolver that is used to resolve the current url in the response.
+     *
+     * @return callable|null
+     */
+    public function urlResolver(Request $request): ?callable
+    {
+        return null;
     }
 }

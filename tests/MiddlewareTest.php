@@ -239,6 +239,26 @@ class MiddlewareTest extends TestCase
         $response->assertViewIs('welcome');
     }
 
+    public function test_middleware_can_change_the_url_resolver_by_overriding_the_urlresolver_method(): void
+    {
+        $this->prepareMockEndpoint(null, [], new class() extends Middleware {
+            public function urlResolver(Request $request): ?callable
+            {
+                return function (Request $request) {
+                    return 'https://inertiajs.com'.$request->getRequestUri();
+                };
+            }
+        });
+
+        $response = $this->get('/', [
+            'X-Inertia' => 'true',
+        ]);
+        $response->assertOk();
+        $response->assertJson([
+            'url' => 'https://inertiajs.com/',
+        ]);
+    }
+
     private function prepareMockEndpoint($version = null, $shared = [], $middleware = null): \Illuminate\Routing\Route
     {
         if (is_null($middleware)) {

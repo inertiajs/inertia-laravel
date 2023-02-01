@@ -361,4 +361,21 @@ class ResponseTest extends TestCase
             $page['props']['resource']
         );
     }
+
+    public function test_url_resolver(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $urlResolver = function (Request $request) {
+            return 'https://inertiajs.com'.$request->getRequestUri();
+        };
+
+        $user = ['name' => 'Jonathan'];
+        $response = new Response('User/Edit', ['user' => $user], 'app', '123', $urlResolver);
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertSame('https://inertiajs.com/user/123', $page->url);
+    }
 }
