@@ -71,6 +71,16 @@ class Middleware
     }
 
     /**
+     * Sets the url resolver that is used to resolve the current url in the response.
+     *
+     * @return callable(Request):string|null
+     */
+    public function urlResolver(Request $request): ?callable
+    {
+        return null;
+    }
+
+    /**
      * Handle the incoming request.
      *
      * @return Response
@@ -156,15 +166,5 @@ class Middleware
 
             return $bags->toArray();
         });
-    }
-
-    /**
-     * Sets the url resolver that is used to resolve the current url in the response.
-     *
-     * @return callable(Request):string|null
-     */
-    public function urlResolver(Request $request): ?callable
-    {
-        return null;
     }
 }

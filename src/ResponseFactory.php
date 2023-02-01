@@ -18,11 +18,11 @@ class ResponseFactory
     /** @var string */
     protected $rootView = 'app';
 
-    /** @var array */
-    protected $sharedProps = [];
-
     /** @var callable(\Illuminate\Http\Request):string|null */
     protected $urlResolver = null;
+
+    /** @var array */
+    protected $sharedProps = [];
 
     /** @var Closure|string|null */
     protected $version;
