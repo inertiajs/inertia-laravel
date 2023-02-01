@@ -81,10 +81,11 @@ class Response implements Responsable
      * Create an HTTP response that represents the object.
      *
      * @param \Illuminate\Http\Request $request
+     * @param string|null              $url
      *
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function toResponse($request)
+    public function toResponse($request, ?string $url = null)
     {
         $only = array_filter(explode(',', $request->header('X-Inertia-Partial-Data', '')));
 
@@ -99,7 +100,7 @@ class Response implements Responsable
         $page = [
             'component' => $this->component,
             'props' => $props,
-            'url' => $request->getBaseUrl().$request->getRequestUri(),
+            'url' => $url ?: $request->getBaseUrl().$request->getRequestUri(),
             'version' => $this->version,
         ];
 
