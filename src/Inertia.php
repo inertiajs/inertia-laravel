@@ -7,6 +7,7 @@ use Illuminate\Contracts\Support\Arrayable;
 
 /**
  * @method static void setRootView(string $name)
+ * @method static void setUrlResolver(?callable $urlResolver)
  * @method static void share($key, $value = null)
  * @method static array getShared(string $key = null, $default = null)
  * @method static array flushShared()

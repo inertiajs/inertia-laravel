@@ -21,7 +21,7 @@ class ResponseFactory
     /** @var array */
     protected $sharedProps = [];
 
-    /** @var callable|null */
+    /** @var callable(\Illuminate\Http\Request):string|null */
     protected $urlResolver = null;
 
     /** @var Closure|string|null */
@@ -32,6 +32,9 @@ class ResponseFactory
         $this->rootView = $name;
     }
 
+    /**
+     * @param callable(\Illuminate\Http\Request):string|null $urlResolver
+     */
     public function setUrlResolver(?callable $urlResolver): void
     {
         $this->urlResolver = $urlResolver;

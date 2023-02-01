@@ -161,7 +161,7 @@ class Middleware
     /**
      * Sets the url resolver that is used to resolve the current url in the response.
      *
-     * @return callable|null
+     * @return callable(Request):string|null
      */
     public function urlResolver(Request $request): ?callable
     {
