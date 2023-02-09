@@ -8,7 +8,7 @@ class OnlyNode implements ArrayAccess
 {
     /** @var self[] */
     protected array $nodes = [];
-    protected book $isLeaf = false;
+    protected bool $isLeaf = false;
 
     public function __construct(array $nodes, bool $isLeaf)
     {
