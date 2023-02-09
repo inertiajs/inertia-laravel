@@ -10,7 +10,7 @@ class OnlyNode implements ArrayAccess
     protected array $nodes = [];
     protected bool $isLeaf = false;
 
-    public function __construct(array $nodes, bool $isLeaf)
+    public function __construct(array $nodes = [], bool $isLeaf = false)
     {
         $this->nodes = $nodes;
         $this->isLeaf = $isLeaf;
