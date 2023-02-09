@@ -6,11 +6,14 @@ use ArrayAccess;
 
 class OnlyNode implements ArrayAccess
 {
-    public function __construct(
-        /** @property self[] */
-        protected array $nodes = [],
-        protected $isLeaf = false)
+    /** @var self[] */
+    protected array $nodes = [];
+    protected book $isLeaf = false;
+
+    public function __construct(array $nodes, bool $isLeaf)
     {
+        $this->nodes = $nodes;
+        $this->isLeaf = $isLeaf;
     }
 
     public function isLeaf(): bool
