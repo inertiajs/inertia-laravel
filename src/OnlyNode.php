@@ -31,7 +31,7 @@ class OnlyNode implements ArrayAccess
         return isset($this->nodes[$offset]);
     }
 
-    public function offsetGet($offset): static
+    public function offsetGet($offset): self
     {
         return $this->nodes[$offset];
     }
