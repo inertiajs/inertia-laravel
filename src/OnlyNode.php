@@ -6,7 +6,7 @@ use ArrayAccess;
 
 class OnlyNode implements ArrayAccess
 {
-    /** @var self[] */
+    /** @var static[] */
     protected array $nodes = [];
     protected bool $isLeaf = false;
 
@@ -31,7 +31,7 @@ class OnlyNode implements ArrayAccess
         return isset($this->nodes[$offset]);
     }
 
-    public function offsetGet($offset): mixed
+    public function offsetGet($offset): static
     {
         return $this->nodes[$offset];
     }
