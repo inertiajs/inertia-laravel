@@ -105,14 +105,18 @@ class ResponseFactory
     /**
      * @param string|RedirectResponse $url
      */
-    public function location($url): \Symfony\Component\HttpFoundation\Response
+    public function location($url, ?array $headers = []): \Symfony\Component\HttpFoundation\Response
     {
         if ($url instanceof RedirectResponse) {
             $url = $url->getTargetUrl();
         }
 
         if (Request::inertia()) {
-            return BaseResponse::make('', 409, ['X-Inertia-Location' => $url]);
+            return BaseResponse::make(
+                '',
+                409,
+                array_merge($headers, ['X-Inertia-Location' => $url])
+            );
         }
 
         return new RedirectResponse($url);
