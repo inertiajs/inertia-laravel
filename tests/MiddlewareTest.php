@@ -242,6 +242,11 @@ class MiddlewareTest extends TestCase
     public function test_middleware_can_change_the_url_resolver_by_overriding_the_urlresolver_method(): void
     {
         $this->prepareMockEndpoint(null, [], new class() extends Middleware {
+            public function version(Request $request)
+            {
+                return '';
+            }
+
             public function urlResolver(Request $request): ?callable
             {
                 return function (Request $request) {
