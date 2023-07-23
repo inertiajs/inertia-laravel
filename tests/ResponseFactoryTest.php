@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Request;
 use Inertia\Tests\Stubs\ExampleMiddleware;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Session\Middleware\StartSession;
+use Inertia\DeferProp;
 
 class ResponseFactoryTest extends TestCase
 {
@@ -133,12 +134,22 @@ class ResponseFactoryTest extends TestCase
         $this->assertInstanceOf(LazyProp::class, $lazyProp);
     }
 
+    public function test_can_create_defer_prop(): void
+    {
+        $factory = new ResponseFactory();
+        $deferProp = $factory->defer(function () {
+            return 'A deferred value';
+        });
+
+        $this->assertInstanceOf(DeferProp::class, $deferProp);
+    }
+
     public function test_will_accept_arrayabe_props()
     {
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
             Inertia::share('foo', 'bar');
 
-            return Inertia::render('User/Edit', new class() implements Arrayable {
+            return Inertia::render('User/Edit', new class () implements Arrayable {
                 public function toArray()
                 {
                     return [

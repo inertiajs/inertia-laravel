@@ -15,6 +15,7 @@ use Illuminate\Http\Response as BaseResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
+use Inertia\DeferProp;
 
 class ResponseTest extends TestCase
 {
@@ -97,7 +98,7 @@ class ResponseTest extends TestCase
         $callable = static function () use ($users) {
             $page = new LengthAwarePaginator($users->take(2), $users->count(), 2);
 
-            return new class($page, JsonResource::class) extends ResourceCollection {
+            return new class ($page, JsonResource::class) extends ResourceCollection {
             };
         };
 
@@ -151,7 +152,7 @@ class ResponseTest extends TestCase
 
             // nested array with ResourceCollection to resolve
             return [
-                'users' => new class($page, JsonResource::class) extends ResourceCollection {},
+                'users' => new class ($page, JsonResource::class) extends ResourceCollection {},
             ];
         };
 
@@ -272,6 +273,24 @@ class ResponseTest extends TestCase
         $this->assertObjectNotHasAttribute('lazy', $page->props);
     }
 
+    public function test_defer_props_are_not_included_by_default(): void
+    {
+        $request = Request::create('/users', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $deferProp = new DeferProp(function () {
+            return 'A defer value';
+        });
+
+        $response = new Response('Users', ['users' => [], 'defer' => $deferProp], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertSame([], $page->props->users);
+        $this->assertSame(['defer'], $page->deferProps);
+        $this->assertObjectNotHasAttribute('defer', $page->props);
+    }
+
     public function test_lazy_props_are_included_in_partial_reload(): void
     {
         $request = Request::create('/users', 'GET');
@@ -289,6 +308,25 @@ class ResponseTest extends TestCase
 
         $this->assertObjectNotHasAttribute('users', $page->props);
         $this->assertSame('A lazy value', $page->props->lazy);
+    }
+
+    public function test_defer_props_are_included_in_partial_reload(): void
+    {
+        $request = Request::create('/users', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'Users']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'defer']);
+
+        $deferProp = new DeferProp(function () {
+            return 'A deferred value';
+        });
+
+        $response = new Response('Users', ['users' => [], 'defer' => $deferProp], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertObjectNotHasAttribute('users', $page->props);
+        $this->assertSame('A deferred value', $page->props->defer);
     }
 
     public function test_top_level_dot_props_get_unpacked(): void
