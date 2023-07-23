@@ -13,6 +13,7 @@ use Illuminate\Contracts\Support\Arrayable;
  * @method static void version($version)
  * @method static int|string getVersion()
  * @method static LazyProp lazy(callable $callback)
+ * @method static DeferProp defer(callable $callback)
  * @method static Response render($component, array|Arrayable $props = [])
  * @method static \Symfony\Component\HttpFoundation\Response location(string $url)
  *
