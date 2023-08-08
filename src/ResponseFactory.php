@@ -105,7 +105,7 @@ class ResponseFactory
     /**
      * @param string|RedirectResponse $url
      */
-    public function location($url, ?array $headers = []): \Symfony\Component\HttpFoundation\Response
+    public function location($url, array $headers = []): \Symfony\Component\HttpFoundation\Response
     {
         if ($url instanceof RedirectResponse) {
             $url = $url->getTargetUrl();
