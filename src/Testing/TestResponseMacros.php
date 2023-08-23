@@ -31,8 +31,8 @@ class TestResponseMacros
         return function () use ($uri) {
             PHPUnit::assertSame(
                 409,
-                $this->getstatusCode(),
-                $this->statusMessageWithDetails('409', $this->getStatusCode()),
+                $this->getStatusCode(),
+                $this->statusMessageWithDetails('409', $this->getStatusCode())
             );
 
             if (! is_null($uri)) {
