@@ -26,9 +26,9 @@ class TestResponseMacros
         };
     }
 
-    public function assertInertiaRedirect($uri = null)
+    public function assertInertiaRedirect()
     {
-        return function () use ($uri) {
+        return function ($uri = null) {
             PHPUnit::assertSame(
                 409,
                 $this->getStatusCode(),
@@ -36,7 +36,7 @@ class TestResponseMacros
             );
 
             if (! is_null($uri)) {
-                $this->assertLocation($uri);
+                $this->assertHeader('X-Inertia-Location', $uri);
             }
 
             return $this;
