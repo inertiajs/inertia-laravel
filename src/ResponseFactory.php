@@ -107,7 +107,13 @@ class ResponseFactory
      */
     public function location($url): \Symfony\Component\HttpFoundation\Response
     {
+        $request = $session = null;
+
         if ($url instanceof RedirectResponse) {
+            $request = $url->getRequest();
+
+            $session = $url->getSession();
+
             $url = $url->getTargetUrl();
         }
 
@@ -115,6 +121,14 @@ class ResponseFactory
             return BaseResponse::make('', 409, ['X-Inertia-Location' => $url]);
         }
 
-        return new RedirectResponse($url);
+        return tap(new RedirectResponse($url), function ($redirect) use ($request, $session) {
+            if ($request) {
+                $redirect->setRequest($request);
+            }
+
+            if ($session) {
+                $redirect->setSession($session);
+            }
+        });
     }
 }
