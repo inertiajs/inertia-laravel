@@ -9,7 +9,10 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Traits\Macroable;
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Response as BaseResponse;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirect;
 
 class ResponseFactory
 {
@@ -103,32 +106,18 @@ class ResponseFactory
     }
 
     /**
-     * @param string|RedirectResponse $url
+     * @param string|SymfonyRedirect $url
      */
-    public function location($url): \Symfony\Component\HttpFoundation\Response
+    public function location($url): SymfonyResponse
     {
-        $request = $session = null;
-
-        if ($url instanceof RedirectResponse) {
-            $request = $url->getRequest();
-
-            $session = $url->getSession();
-
-            $url = $url->getTargetUrl();
-        }
+        [$url, $redirect] = $url instanceof SymfonyRedirect
+            ? [$url->getTargetUrl(), $url]
+            : [$url, Redirect::away($url)];
 
         if (Request::inertia()) {
             return BaseResponse::make('', 409, ['X-Inertia-Location' => $url]);
         }
 
-        return tap(new RedirectResponse($url), function ($redirect) use ($request, $session) {
-            if ($request) {
-                $redirect->setRequest($request);
-            }
-
-            if ($session) {
-                $redirect->setSession($session);
-            }
-        });
+        return $redirect;
     }
 }
