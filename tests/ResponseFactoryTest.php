@@ -78,6 +78,15 @@ class ResponseFactoryTest extends TestCase
         $this->assertEquals('https://inertiajs.com', $response->headers->get('location'));
     }
 
+    public function test_location_redirects_are_not_modified(): void
+    {
+        $response = (new ResponseFactory())->location('/foo');
+
+        $this->assertInstanceOf(RedirectResponse::class, $response);
+        $this->assertEquals(Response::HTTP_FOUND, $response->getStatusCode());
+        $this->assertEquals('/foo', $response->headers->get('location'));
+    }
+
     public function test_location_response_for_non_inertia_requests_using_redirect_response_with_existing_session_and_request_properties(): void
     {
         $redirect = new RedirectResponse('https://inertiajs.com');
@@ -90,6 +99,7 @@ class ResponseFactoryTest extends TestCase
         $this->assertEquals('https://inertiajs.com', $response->headers->get('location'));
         $this->assertSame($session, $response->getSession());
         $this->assertSame($request, $response->getRequest());
+        $this->assertSame($response, $redirect);
     }
 
     public function test_the_version_can_be_a_closure(): void
