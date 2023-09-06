@@ -31,7 +31,7 @@ class ResponseFactory
 
     /**
      * @param string|array|Arrayable $key
-     * @param mixed|null             $value
+     * @param mixed                  $value
      */
     public function share($key, $value = null): void
     {
@@ -45,7 +45,7 @@ class ResponseFactory
     }
 
     /**
-     * @param mixed|null $default
+     * @param mixed $default
      *
      * @return mixed
      */

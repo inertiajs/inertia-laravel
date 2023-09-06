@@ -38,7 +38,7 @@ class Response implements Responsable
 
     /**
      * @param string|array $key
-     * @param mixed|null   $value
+     * @param mixed        $value
      *
      * @return $this
      */
@@ -55,7 +55,7 @@ class Response implements Responsable
 
     /**
      * @param string|array $key
-     * @param mixed|null   $value
+     * @param mixed        $value
      *
      * @return $this
      */

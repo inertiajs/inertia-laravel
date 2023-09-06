@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 class ExampleMiddleware extends Middleware
 {
     /**
-     * @var mixed|null
+     * @var mixed
      */
     protected $version;
 
