@@ -53,6 +53,9 @@ class StartSsr extends Command
         $this->callSilently('inertia:stop-ssr');
 
         $process = new Process(['node', $bundle]);
+        $process->setEnv([
+            'NODE_ENV' => app()->environment()
+        ]);
         $process->setTimeout(null);
         $process->start();
 
