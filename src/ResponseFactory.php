@@ -10,6 +10,7 @@ use Illuminate\Support\Traits\Macroable;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Response as BaseResponse;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirect;
 
@@ -58,6 +59,56 @@ class ResponseFactory
         }
 
         return $this->sharedProps;
+    }
+
+    /**
+     * Resolve the prop value.
+     */
+    public function resolveProp(mixed $prop): mixed
+    {
+        return value($prop instanceof LazyProp ? $prop(...) : $prop);
+    }
+
+    /**
+     * Resolve the shared prop value.
+     */
+    public function resolveShared(string $key = null, $default = null): mixed
+    {
+        return $this->resolveProp($this->getShared($key, $default));
+    }
+
+    /**
+     * Merge existing props with the given array.
+     */
+    public function mergeProps(array|Closure|LazyProp $props, array|Arrayable $new): array|LazyProp|Closure
+    {
+        $new = $new instanceof Arrayable ? $new->toArray() : $new;
+
+        if ($props instanceof LazyProp) {
+            return new LazyProp(fn () => array_merge($props(), $new));
+        }
+
+        if ($props instanceof Closure) {
+            return fn () => array_merge($props(), $new);
+        }
+
+        return array_merge($props, $new);
+    }
+
+    /**
+     * Retrieved the shared props and merge with the given array.
+     */
+    public function getSharedAndMergeProps(string $key, array|Arrayable $new)
+    {
+        $new = $new instanceof Arrayable ? $new->toArray() : $new;
+
+        $shared = $this->getShared($key);
+
+        if ($shared === null) {
+            return $new;
+        }
+
+        return $this->mergeProps($shared, $new);
     }
 
     public function flushShared(): void

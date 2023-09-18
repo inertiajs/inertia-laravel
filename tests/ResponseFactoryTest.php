@@ -2,6 +2,8 @@
 
 namespace Inertia\Tests;
 
+use Closure;
+use Illuminate\Support\Facades\App;
 use Inertia\Inertia;
 use Inertia\LazyProp;
 use Inertia\ResponseFactory;
@@ -150,6 +152,124 @@ class ResponseFactoryTest extends TestCase
         $this->assertSame([], Inertia::getShared());
     }
 
+    public function test_can_resolve_shared_data(): void
+    {
+        Inertia::share('string', 'string-value');
+        Inertia::share('array', ['array-value']);
+        Inertia::share('closure', fn () => 'closure-value');
+        App::instance(BoundInstance::class, new BoundInstance('lazy-value'));
+        Inertia::share('lazy', Inertia::lazy(fn (BoundInstance $instance) => $instance->value));
+
+        $this->assertSame('string-value', Inertia::resolveShared('string'));
+        $this->assertSame(['array-value'], Inertia::resolveShared('array'));
+        $this->assertSame('closure-value', Inertia::resolveShared('closure'));
+        $this->assertSame('lazy-value', Inertia::resolveShared('lazy'));
+    }
+
+    public function test_can_merge_with_shared_data(): void
+    {
+        // Lazy prop closures are called by the app. Want to make sure we are
+        // still able to resolve from the container.
+        App::bind(BoundInstance::class, fn () => new BoundInstance('value'));
+
+        $merged = Inertia::mergeProps(['eager-value'], ['merged-value']);
+        $this->assertIsArray($merged);
+        $this->assertSame(['eager-value', 'merged-value'], $merged);
+
+        $merged = Inertia::mergeProps(['eager' => 'value'], ['merged' => 'value']);
+        $this->assertIsArray($merged);
+        $this->assertSame(['eager' => 'value', 'merged' => 'value'], $merged);
+
+        $merged = Inertia::mergeProps(fn () => ['closure-value'], ['merged-value']);
+        $this->assertInstanceOf(Closure::class, $merged);
+        $this->assertSame(['closure-value', 'merged-value'], $merged());
+
+        $merged = Inertia::mergeProps(fn () => ['closure' => 'value'], ['merged' => 'value']);
+        $this->assertInstanceOf(Closure::class, $merged);
+        $this->assertSame(['closure' => 'value', 'merged' => 'value'], $merged());
+
+        $merged = Inertia::mergeProps(Inertia::lazy(fn (BoundInstance $instance) => ["lazy-{$instance->value}"]), ['merged-value']);
+        $this->assertInstanceOf(LazyProp::class, $merged);
+        $this->assertSame(['lazy-value', 'merged-value'], $merged());
+
+        $merged = Inertia::mergeProps(Inertia::lazy(fn (BoundInstance $instance) => ['lazy' => $instance->value]), ['merged' => 'value']);
+        $this->assertInstanceOf(LazyProp::class, $merged);
+        $this->assertSame(['lazy' => 'value', 'merged' => 'value'], $merged());
+    }
+
+    public function test_closures_are_not_invoked_while_merging()
+    {
+        $invocations = 0;
+
+        $merged = Inertia::mergeProps(function () use (&$invocations) {
+            $invocations++;
+
+            return ['closure-value'];
+        }, ['merged-value']);
+
+        $this->assertInstanceOf(Closure::class, $merged);
+        $this->assertSame(0, $invocations);
+        $this->assertSame(['closure-value', 'merged-value'], $merged());
+        $this->assertSame(1, $invocations);
+
+        $invocations = 0;
+
+        $merged = Inertia::mergeProps(Inertia::lazy(function () use (&$invocations) {
+            $invocations++;
+
+            return ['closure-value'];
+        }), ['merged-value']);
+
+        $this->assertInstanceOf(LazyProp::class, $merged);
+        $this->assertSame(0, $invocations);
+        $this->assertSame(['closure-value', 'merged-value'], $merged());
+        $this->assertSame(1, $invocations);
+    }
+
+    public function test_can_get_shared_and_merge_with_new_props(): void
+    {
+        Inertia::share('eager-list', ['eager-value']);
+        Inertia::share('eager-associative', ['eager' => 'value']);
+        Inertia::share('closure-list', fn () => ['closure-value']);
+        Inertia::share('closure-associative', fn () => ['closure' => 'value']);
+        $alreadyResolved = false;
+        App::bind(BoundInstance::class, function () use (&$alreadyResolved) {
+            if (! $alreadyResolved) {
+                $alreadyResolved = true;
+
+                return new BoundInstance(['lazy-value']);
+            } else {
+                return new BoundInstance(['lazy' => 'value']);
+            }
+        });
+        Inertia::share('lazy-list', Inertia::lazy(fn (BoundInstance $instance) => $instance->value));
+        Inertia::share('lazy-associative', Inertia::lazy(fn (BoundInstance $instance) => $instance->value));
+
+        $merged = Inertia::getSharedAndMergeProps('eager-list', ['merged-value']);
+        $this->assertIsArray($merged);
+        $this->assertSame(['eager-value', 'merged-value'], $merged);
+
+        $merged = Inertia::getSharedAndMergeProps('eager-associative', ['merged' => 'value']);
+        $this->assertIsArray($merged);
+        $this->assertSame(['eager' => 'value', 'merged' => 'value'], $merged);
+
+        $merged = Inertia::getSharedAndMergeProps('closure-list', ['merged-value']);
+        $this->assertInstanceOf(Closure::class, $merged);
+        $this->assertSame(['closure-value', 'merged-value'], $merged());
+
+        $merged = Inertia::getSharedAndMergeProps('closure-associative', ['merged' => 'value']);
+        $this->assertInstanceOf(Closure::class, $merged);
+        $this->assertSame(['closure' => 'value', 'merged' => 'value'], $merged());
+
+        $merged = Inertia::getSharedAndMergeProps('lazy-list', ['merged-value']);
+        $this->assertInstanceOf(LazyProp::class, $merged);
+        $this->assertSame(['lazy-value', 'merged-value'], $merged());
+
+        $merged = Inertia::getSharedAndMergeProps('lazy-associative', ['merged' => 'value']);
+        $this->assertInstanceOf(LazyProp::class, $merged);
+        $this->assertSame(['lazy' => 'value', 'merged' => 'value'], $merged());
+    }
+
     public function test_can_create_lazy_prop(): void
     {
         $factory = new ResponseFactory();
@@ -183,5 +303,13 @@ class ResponseFactoryTest extends TestCase
                 'foo' => 'bar',
             ],
         ]);
+    }
+}
+
+class BoundInstance
+{
+    public function __construct(public $value)
+    {
+        //
     }
 }
