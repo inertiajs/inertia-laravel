@@ -63,33 +63,46 @@ class ResponseFactory
 
     /**
      * Resolve the prop value.
+     *
+     * @param  mixed  $prop
+     * @return mixed
      */
-    public function resolveProp(mixed $prop): mixed
+    public function resolveProp($prop)
     {
-        return value($prop instanceof LazyProp ? $prop(...) : $prop);
+        return value($prop instanceof LazyProp ? Closure::fromCallable($prop) : $prop);
     }
 
     /**
      * Resolve the shared prop value.
+     *
+     * @return mixed
      */
-    public function resolveShared(string $key = null, $default = null): mixed
+    public function resolveShared(string $key = null, mixed $default = null)
     {
         return $this->resolveProp($this->getShared($key, $default));
     }
 
     /**
      * Merge existing props with the given array.
+     *
+     * @param  array|Closure|LazyProp  $props
+     * @param  array|Arrayable  $new
+     * @return array|Closure|LazyProp
      */
-    public function mergeProps(array|Closure|LazyProp $props, array|Arrayable $new): array|LazyProp|Closure
+    public function mergeProps($props, $new)
     {
         $new = $new instanceof Arrayable ? $new->toArray() : $new;
 
         if ($props instanceof LazyProp) {
-            return new LazyProp(fn () => array_merge($props(), $new));
+            return new LazyProp(function () use ($props, $new) {
+                return array_merge($props(), $new);
+            });
         }
 
         if ($props instanceof Closure) {
-            return fn () => array_merge($props(), $new);
+            return function () use ($props, $new) {
+                return array_merge($props(), $new);
+            };
         }
 
         return array_merge($props, $new);
@@ -97,8 +110,11 @@ class ResponseFactory
 
     /**
      * Retrieved the shared props and merge with the given array.
+     *
+     * @param  array|Arrayale  $new
+     * @return array|Closure|LazyProp
      */
-    public function getSharedAndMergeProps(string $key, array|Arrayable $new)
+    public function getSharedAndMergeProps(string $key, $new)
     {
         $new = $new instanceof Arrayable ? $new->toArray() : $new;
 
