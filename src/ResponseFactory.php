@@ -5,11 +5,13 @@ namespace Inertia;
 use Closure;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Traits\Macroable;
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Response as BaseResponse;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirect;
 
 class ResponseFactory
 {
@@ -31,7 +33,7 @@ class ResponseFactory
 
     /**
      * @param string|array|Arrayable $key
-     * @param mixed|null             $value
+     * @param mixed                  $value
      */
     public function share($key, $value = null): void
     {
@@ -45,7 +47,7 @@ class ResponseFactory
     }
 
     /**
-     * @param mixed|null $default
+     * @param mixed $default
      *
      * @return mixed
      */
@@ -103,22 +105,18 @@ class ResponseFactory
     }
 
     /**
-     * @param string|RedirectResponse $url
+     * @param string|SymfonyRedirect $url
      */
-    public function location($url, array $headers = []): \Symfony\Component\HttpFoundation\Response
+    public function location($url, array $headers = []): SymfonyResponse
     {
-        if ($url instanceof RedirectResponse) {
-            $url = $url->getTargetUrl();
-        }
-
         if (Request::inertia()) {
             return BaseResponse::make(
                 '',
                 409,
-                array_merge($headers, ['X-Inertia-Location' => $url])
+                array_merge($headers, ['X-Inertia-Location' => $url instanceof SymfonyRedirect ? $url->getTargetUrl() : $url])
             );
         }
 
-        return new RedirectResponse($url);
+        return $url instanceof SymfonyRedirect ? $url : Redirect::away($url);
     }
 }

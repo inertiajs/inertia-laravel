@@ -3,18 +3,21 @@
 namespace Inertia;
 
 use Illuminate\Support\Facades\Facade;
-use Illuminate\Contracts\Support\Arrayable;
 
 /**
  * @method static void setRootView(string $name)
- * @method static void share($key, $value = null)
- * @method static array getShared(string $key = null, $default = null)
- * @method static array flushShared()
- * @method static void version($version)
- * @method static int|string getVersion()
- * @method static LazyProp lazy(callable $callback)
- * @method static Response render($component, array|Arrayable $props = [])
- * @method static \Symfony\Component\HttpFoundation\Response location(string $url)
+ * @method static void share(string|array|\Illuminate\Contracts\Support\Arrayable $key, mixed $value = null)
+ * @method static mixed getShared(string|null $key = null, mixed $default = null)
+ * @method static void flushShared()
+ * @method static void version(\Closure|string|null $version)
+ * @method static string getVersion()
+ * @method static \Inertia\LazyProp lazy(callable $callback)
+ * @method static \Inertia\Response render(string $component, array|\Illuminate\Contracts\Support\Arrayable $props = [])
+ * @method static \Symfony\Component\HttpFoundation\Response location(string|\Symfony\Component\HttpFoundation\RedirectResponse $url)
+ * @method static void macro(string $name, object|callable $macro)
+ * @method static void mixin(object $mixin, bool $replace = true)
+ * @method static bool hasMacro(string $name)
+ * @method static void flushMacros()
  *
  * @see \Inertia\ResponseFactory
  */
