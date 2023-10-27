@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v0.6.10...master)
 
-- Nothing!
+- Add option for using the `bun` runtime in SSR ([#552](https://github.com/inertiajs/inertia-laravel/pull/552))
 
 ## [v0.6.10](https://github.com/inertiajs/inertia-laravel/compare/v0.6.9...v0.6.10) - 2023-09-13
 
