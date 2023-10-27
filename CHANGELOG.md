@@ -5,7 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v0.6.10...master)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v0.6.11...master)
+
+- Nothing!
+
+## [v0.6.11](https://github.com/inertiajs/inertia-laravel/compare/v0.6.10...v0.6.11) - 2023-09-13
 
 - Add option for using the `bun` runtime in SSR ([#552](https://github.com/inertiajs/inertia-laravel/pull/552))
 
