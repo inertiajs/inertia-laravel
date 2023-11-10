@@ -14,7 +14,7 @@ class StartSsr extends Command
      *
      * @var string
      */
-    protected $signature = 'inertia:start-ssr {--runtime=node : The runtime to use (`node` or `bun`)}';
+    protected $signature = 'inertia:start-ssr {--runtime=node : The runtime to use (`node` or `bun`)} {--runtime_options= : Set any runtime options you might need}';
 
     /**
      * The console command description.
@@ -51,6 +51,7 @@ class StartSsr extends Command
         }
 
         $runtime = $this->option('runtime');
+        $runtime_options = $this->option('runtime_options');
 
         if (! in_array($runtime, ['node', 'bun'])) {
             $this->error('Unsupported runtime: "'.$runtime.'". Supported runtimes are `node` and `bun`.');
@@ -60,7 +61,7 @@ class StartSsr extends Command
 
         $this->callSilently('inertia:stop-ssr');
 
-        $process = new Process([$runtime, $bundle]);
+        $process = new Process(array_filter([$runtime, $runtime_options, $bundle]));
         $process->setTimeout(null);
         $process->start();
 
