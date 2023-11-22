@@ -15,3 +15,5 @@
 /CHANGELOG.md       export-ignore
 /CONTRIBUTING.md    export-ignore
 /README.md          export-ignore
+/.php-cs-fixer.dist export-ignore
+/_ide_helpers.php   export-ignore
