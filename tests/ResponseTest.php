@@ -4,6 +4,7 @@ namespace Inertia\Tests;
 
 use Mockery;
 use Inertia\LazyProp;
+use Inertia\OnlyNode;
 use Inertia\Response;
 use Illuminate\View\View;
 use Illuminate\Http\Request;
@@ -264,12 +265,13 @@ class ResponseTest extends TestCase
             return 'A lazy value';
         });
 
-        $response = new Response('Users', ['users' => [], 'lazy' => $lazyProp], 'app', '123');
+        $response = new Response('Users', ['users' => [], 'lazy' => $lazyProp, 'nested' => ['lazy' => $lazyProp]], 'app', '123');
         $response = $response->toResponse($request);
         $page = $response->getData();
 
         $this->assertSame([], $page->props->users);
         $this->assertObjectNotHasAttribute('lazy', $page->props);
+        $this->assertFalse(isset($page->props->nested->lazy));
     }
 
     public function test_lazy_props_are_included_in_partial_reload(): void
@@ -289,6 +291,207 @@ class ResponseTest extends TestCase
 
         $this->assertObjectNotHasAttribute('users', $page->props);
         $this->assertSame('A lazy value', $page->props->lazy);
+    }
+
+    public function test_nested_lazy_props(): void
+    {
+        $request = Request::create('/users');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'Users']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'lazy.nested.prop,nonLazy.another,nonLazy']);
+
+        $access = 0;
+        $trap = 0;
+        $expectedLazy = new LazyProp(function () use (&$access) {
+            $access++;
+
+            return 'A lazy value';
+        });
+        $trapLazy = new LazyProp(function () use (&$trap) {
+            return $trap++;
+        });
+
+        $lazyProp = new LazyProp(function () use (&$access, $trapLazy, $expectedLazy) {
+            $access++;
+
+            return [
+                'prop' => $expectedLazy,
+                'another' => $trapLazy,
+                'nonLazy' => 'ok',
+            ];
+        });
+        $nonLazyProp = function () use (&$access, $trapLazy, $expectedLazy) {
+            return [
+                'prop' => $trapLazy,
+                'another' => $expectedLazy,
+                'leafNode' => 'ok',
+            ];
+        };
+
+        $response = new Response('Users', ['users' => [], 'lazy' => ['nested' => $lazyProp, 'notAsked' => 'ok', 'trapLazy' => $trapLazy], 'nonLazy' => $nonLazyProp], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertObjectNotHasAttribute('users', $page->props);
+        $this->assertEquals(json_decode(json_encode([
+            'lazy' => [
+                'nested' => [
+                    'prop' => 'A lazy value',
+                ],
+            ],
+            'nonLazy' => [
+                'another' => 'A lazy value',
+                'leafNode' => 'ok',
+            ],
+        ])), $page->props);
+
+        $this->assertEquals(0, $trap);
+        $this->assertEquals(3, $access);
+    }
+
+    public function test_backward_compat_packed_array(): void
+    {
+        $request = Request::create('/users');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'Users']);
+        // Note: wildcards are a new feature and packed arrays support for them is not planned so lazy.packed.* would not work in this case
+        $request->headers->add(['X-Inertia-Partial-Data' => 'lazy.packed.prop']);
+
+        $lazy = new LazyProp(fn () => 'A lazy value');
+
+        $response = new Response('Users', ['lazy' => ['packed' => ['not_packed' => 'ok']], 'lazy.packed.prop' => $lazy], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertEquals(json_decode(json_encode([
+            'lazy' => [
+                'packed' => [
+                    'prop' => 'A lazy value',
+                ],
+            ],
+        ])), $page->props);
+    }
+
+    public function test_wildcard_lazy_props(): void
+    {
+        $request = Request::create('/users');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'Users']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'lazy.*']);
+
+        $lazy = new LazyProp(fn () => 'A lazy value');
+
+        $lazyProp = new LazyProp(fn () => [
+            'prop' => $lazy,
+            'another' => $lazy,
+            'nonLazy' => 'ok',
+        ]);
+
+        $response = new Response('Users', ['lazy' => ['nested' => $lazyProp, 'lazy' => $lazy, 'second' => fn () => 'sec'], 'nope' => 'no'], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertEquals(json_decode(json_encode([
+            'lazy' => [
+                'nested' => [
+                    'nonLazy' => 'ok',
+                ],
+                'lazy' => 'A lazy value',
+                'second' => 'sec',
+            ],
+        ])), $page->props);
+    }
+
+    public function test_semi_wildcard_lazy_props(): void
+    {
+        $request = Request::create('/users');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'Users']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'lazy.*.prop']);
+
+        $lazy = new LazyProp(fn () => 'A lazy value');
+
+        $lazyProp = new LazyProp(fn () => [
+            'prop' => $lazy,
+            'another' => $lazy,
+            'nonLazy' => 'nope',
+        ]);
+
+        $response = new Response('Users', ['lazy' => ['nested' => $lazyProp, 'other' => $lazyProp]], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertEquals(json_decode(json_encode([
+            'lazy' => [
+                'nested' => [
+                    'prop' => 'A lazy value',
+                ],
+                'other' => [
+                    'prop' => 'A lazy value',
+                ],
+            ],
+        ])), $page->props);
+    }
+
+    public function test_deep_wildcard_lazy_props(): void
+    {
+        $request = Request::create('/users');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'Users']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'lazy.**']);
+
+        $lazy = new LazyProp(fn () => 'A lazy value');
+
+        $lazyProp = new LazyProp(fn () => [
+            'prop' => $lazy,
+            'another' => new LazyProp(fn () => ['deep' => $lazy]),
+            'nonLazy' => 'ok',
+        ]);
+
+        $response = new Response('Users', ['lazy' => ['nested' => $lazyProp, 'lazy' => $lazy, 'second' => fn () => 'sec'], 'nope' => 'no'], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertEquals(json_decode(json_encode([
+            'lazy' => [
+                'nested' => [
+                    'prop' => 'A lazy value',
+                    'another' => ['deep' => 'A lazy value'],
+                    'nonLazy' => 'ok',
+                ],
+                'lazy' => 'A lazy value',
+                'second' => 'sec',
+            ],
+        ])), $page->props);
+    }
+
+    public function test_resolve_only(): void
+    {
+        $r = new Response('Whatever', []);
+
+        $res = $r->resolveOnly([
+            'foo.baz.*',
+            'baz',
+            '.baz..foo.bar.',
+            'foo.bar.baz',
+            'foo',
+        ]);
+
+        $this->assertEquals(new OnlyNode([
+            'foo.baz.*' => new OnlyNode([], false),
+            'foo' => new OnlyNode([
+                'baz' => new OnlyNode(['*' => new OnlyNode([], true)], false),
+                'bar' => new OnlyNode([
+                    'baz' => new OnlyNode([], true),
+                ]),
+            ], true),
+            'baz' => new OnlyNode([], true),
+            '.baz..foo.bar.' => new OnlyNode([], false),
+            'foo.bar.baz' => new OnlyNode([], false),
+            '.baz..foo' => new OnlyNode(['bar.' => new OnlyNode([], true)]),
+        ]), $res);
+
+        $this->assertEquals(new OnlyNode([], true), $r->resolveOnly([]));
     }
 
     public function test_top_level_dot_props_get_unpacked(): void
