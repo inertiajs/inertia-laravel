@@ -90,6 +90,7 @@ jobs:
           max_attempts: 5
           command: |
             composer require nesbot/carbon:^2.62.1 --dev --${{ matrix.stability }} --no-update --no-interaction
+            composer require phpunit/phpunit:^10.4 --dev --${{ matrix.stability }} --no-update --no-interaction
         if: matrix.php >= 8.2 && matrix.stability == 'prefer-lowest'
 
       - name: Set Laravel version
