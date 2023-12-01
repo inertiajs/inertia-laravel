@@ -91,7 +91,7 @@ class Response implements Responsable
         $props = ($only && $request->header('X-Inertia-Partial-Component') === $this->component)
             ? Arr::only($this->props, $only)
             : array_filter($this->props, static function ($prop) {
-                return ! ($prop instanceof LazyProp);
+                return !($prop instanceof LazyProp);
             });
 
         $props = $this->resolvePropertyInstances($props, $request);
@@ -99,9 +99,13 @@ class Response implements Responsable
         $page = [
             'component' => $this->component,
             'props' => $props,
-            'url' => $request->getBaseUrl().$request->getRequestUri(),
+            'url' => $request->getBaseUrl() . $request->getRequestUri(),
             'version' => $this->version,
         ];
+
+        if (config('inertia.translation.enabled', false)) {
+            $page['translation'] = Translations::json();
+        }
 
         if ($request->header('X-Inertia')) {
             return new JsonResponse($page, 200, ['X-Inertia' => 'true']);
