@@ -361,4 +361,52 @@ class ResponseTest extends TestCase
             $page['props']['resource']
         );
     }
+
+    public function test_page_url_with_baseurl() : void
+    {
+        $request = Request::create('/app-base-url/user/123', 'GET', [], [], [], [
+            'SCRIPT_FILENAME' => '/ws/test/app-base-url/public/index.php',
+            'SCRIPT_NAME' => '/app-base-url/index.php',
+        ]);
+        $request->headers->add(['X-Inertia' => 'true']);
+        $this->assertSame('/app-base-url', $request->getBaseUrl());
+
+        $user = (object) ['name' => 'Jonathan'];
+        $response = new Response('User/Edit', ['user' => $user], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertSame(
+            '/app-base-url/user/123',
+            $page->url
+        );
+    }
+
+    public function test_page_url_with_baseurl_and_proxy() : void
+    {
+        Request::setTrustedProxies([
+            '8.8.8.8'
+        ], Request::HEADER_X_FORWARDED_FOR | Request::HEADER_X_FORWARDED_PREFIX);
+        $request = Request::create('/app-base-url/user/123', 'GET', [], [], [], [
+            'SCRIPT_FILENAME' => '/ws/test/app-base-url/public/index.php',
+            'SCRIPT_NAME' => '/app-base-url/index.php',
+            'REMOTE_ADDR' => '8.8.8.8',
+            'HTTP_X_FORWARDED_FOR' => '7.7.7.7',
+            'HTTP_X_FORWARDED_PREFIX' => '/proxy-prefix',
+        ]);
+
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $this->assertTrue($request->isFromTrustedProxy());
+
+        $user = (object) ['name' => 'Jonathan'];
+        $response = new Response('User/Edit', ['user' => $user], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertSame(
+            '/proxy-prefix/app-base-url/user/123',
+            $page->url
+        );
+    }
 }
