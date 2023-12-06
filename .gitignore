@@ -1,5 +1,5 @@
 .env
-.phpunit.result.cache
 composer.lock
 phpunit.xml
+/.phpunit.cache
 /vendor
