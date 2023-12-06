@@ -12,52 +12,12 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        php: [7.2, 7.3, 7.4, "8.0", 8.1, 8.2, 8.3]
-        laravel: [6, 7, 8, 9, 10, 11]
+        php: [8.1, 8.2, 8.3]
+        laravel: [9, 10, 11]
         stability: ["prefer-lowest", "prefer-stable"]
         exclude:
-          - php: 7.2
-            laravel: 8
-          - php: 7.2
-            laravel: 9
-          - php: 7.2
-            laravel: 10
-          - php: 7.2
-            laravel: 11
-          - php: 7.3
-            laravel: 9
-          - php: 7.3
-            laravel: 10
-          - php: 7.3
-            laravel: 11
-          - php: 7.4
-            laravel: 9
-          - php: 7.4
-            laravel: 10
-          - php: 7.4
-            laravel: 11
-          - php: '8.0'
-            laravel: 10
-          - php: '8.0'
-            laravel: 11
-          - php: 8.1
-            laravel: 6
-          - php: 8.1
-            laravel: 7
           - php: 8.1
             laravel: 11
-          - php: 8.2
-            laravel: 6
-          - php: 8.2
-            laravel: 7
-          - php: 8.2
-            laravel: 8
-          - php: 8.3
-            laravel: 6
-          - php: 8.3
-            laravel: 7
-          - php: 8.3
-            laravel: 8
 
     name: PHP ${{ matrix.php }} - Laravel ${{ matrix.laravel }} (w/ ${{ matrix.stability }})
     steps:
@@ -73,16 +33,6 @@ jobs:
           tools: composer:v2
           coverage: none
 
-      - name: Set Minimum PHP 8.1 Versions
-        uses: nick-invision/retry@v1
-        with:
-          timeout_minutes: 5
-          max_attempts: 5
-          command: |
-            composer require phpunit/phpunit:^9.5.8 --dev --${{ matrix.stability }} --no-update --no-interaction
-            composer require vlucas/phpdotenv:^5.3.1 --${{ matrix.stability }} --no-update --no-interaction
-        if: matrix.php >= 8.1 && matrix.stability == 'prefer-lowest'
-
       - name: Set Minimum PHP 8.2 Versions
         uses: nick-invision/retry@v1
         with:
@@ -91,15 +41,6 @@ jobs:
           command: |
             composer require nesbot/carbon:^2.62.1 --dev --${{ matrix.stability }} --no-update --no-interaction
         if: matrix.php >= 8.2 && matrix.stability == 'prefer-lowest'
-
-      - name: Set Minimum PHP 8.2 Versions and Laravel > 11
-        uses: nick-invision/retry@v1
-        with:
-          timeout_minutes: 5
-          max_attempts: 5
-          command: |
-            composer require phpunit/phpunit:^10.4 --dev --${{ matrix.stability }} --no-update --no-interaction
-        if: matrix.php >= 8.2 && matrix.stability == 'prefer-lowest' && matrix.laravel >= 11
 
       - name: Set Laravel version
         uses: nick-invision/retry@v1
