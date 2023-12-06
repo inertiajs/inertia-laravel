@@ -20,6 +20,9 @@ class ResponseFactory
     /** @var string */
     protected $rootView = 'app';
 
+    /** @var callable(\Illuminate\Http\Request):string|null */
+    protected $urlResolver = null;
+
     /** @var array */
     protected $sharedProps = [];
 
@@ -29,6 +32,14 @@ class ResponseFactory
     public function setRootView(string $name): void
     {
         $this->rootView = $name;
+    }
+
+    /**
+     * @param callable(\Illuminate\Http\Request):string|null $urlResolver
+     */
+    public function setUrlResolver(?callable $urlResolver): void
+    {
+        $this->urlResolver = $urlResolver;
     }
 
     /**
@@ -100,7 +111,8 @@ class ResponseFactory
             $component,
             array_merge($this->sharedProps, $props),
             $this->rootView,
-            $this->getVersion()
+            $this->getVersion(),
+            $this->urlResolver
         );
     }
 

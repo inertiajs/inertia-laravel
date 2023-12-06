@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Facade;
 
 /**
  * @method static void setRootView(string $name)
+ * @method static void setUrlResolver(?callable $urlResolver)
  * @method static void share(string|array|\Illuminate\Contracts\Support\Arrayable $key, mixed $value = null)
  * @method static mixed getShared(string|null $key = null, mixed $default = null)
  * @method static void flushShared()

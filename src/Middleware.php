@@ -71,6 +71,16 @@ class Middleware
     }
 
     /**
+     * Sets the url resolver that is used to resolve the current url in the response.
+     *
+     * @return callable(Request):string|null
+     */
+    public function urlResolver(Request $request): ?callable
+    {
+        return null;
+    }
+
+    /**
      * Handle the incoming request.
      *
      * @return Response
@@ -83,6 +93,7 @@ class Middleware
 
         Inertia::share($this->share($request));
         Inertia::setRootView($this->rootView($request));
+        Inertia::setUrlResolver($this->urlResolver($request));
 
         $response = $next($request);
         $response->headers->set('Vary', 'X-Inertia');

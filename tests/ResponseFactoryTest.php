@@ -160,7 +160,7 @@ class ResponseFactoryTest extends TestCase
         $this->assertInstanceOf(LazyProp::class, $lazyProp);
     }
 
-    public function test_will_accept_arrayabe_props()
+    public function test_will_accept_arrayabe_props(): void
     {
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
             Inertia::share('foo', 'bar');
@@ -183,5 +183,23 @@ class ResponseFactoryTest extends TestCase
                 'foo' => 'bar',
             ],
         ]);
+    }
+
+    public function test_the_url_resolver_is_used_when_constructing_a_response(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            Inertia::setUrlResolver(function (\Illuminate\Http\Request $request) {
+                return 'https://inertiajs.com'.$request->getRequestUri();
+            });
+
+            return Inertia::render('User/Edit');
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', [
+            'X-Inertia' => 'true',
+        ]);
+
+        $response->assertSuccessful();
+        $response->assertJson(['url' => 'https://inertiajs.com/']);
     }
 }
