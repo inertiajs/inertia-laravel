@@ -95,11 +95,12 @@ class Response implements Responsable
             });
 
         $props = $this->resolvePropertyInstances($props, $request);
+        $requestUri = str_replace($request->getBaseUrl(), '', $request->getRequestUri());
 
         $page = [
             'component' => $this->component,
             'props' => $props,
-            'url' => $request->getBaseUrl().$request->getRequestUri(),
+            'url' => $request->getBaseUrl() . $requestUri,
             'version' => $this->version,
         ];
 
