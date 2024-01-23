@@ -25,6 +25,13 @@ class ExampleMiddleware extends Middleware
         $this->shared = $shared;
     }
 
+    public static $returnOnlyFirstValidationErrorMessage = true;
+
+    public function returnOnlyFirstValidationErrorMessage(): bool
+    {
+        return static::$returnOnlyFirstValidationErrorMessage;
+    }
+
     /**
      * Determines the current asset version.
      *

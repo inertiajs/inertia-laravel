@@ -161,6 +161,46 @@ class MiddlewareTest extends TestCase
         $this->withoutExceptionHandling()->get('/');
     }
 
+    public function test_validation_errors_are_returned_in_the_correct_format_with_first_messages(): void
+    {
+        Session::put('errors', (new ViewErrorBag())->put('default', new MessageBag([
+            'name' => ['The name field is required.', 'The name must be at least 4 characters.'],
+            'email' => ['Not a valid email address.'],
+        ])));
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            $errors = Inertia::getShared('errors')();
+
+            $this->assertIsObject($errors);
+            $this->assertSame('The name field is required.', $errors->name);
+            $this->assertSame('Not a valid email address.', $errors->email);
+        });
+
+        $this->withoutExceptionHandling()->get('/');
+    }
+
+    public function test_validation_errors_are_returned_in_the_correct_format_with_all_messages(): void
+    {
+        ExampleMiddleware::$returnOnlyFirstValidationErrorMessage = false;
+
+        Session::put('errors', (new ViewErrorBag())->put('default', new MessageBag([
+            'name' => ['The name field is required.', 'The name must be at least 4 characters.'],
+            'email' => ['Not a valid email address.'],
+        ])));
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            $errors = Inertia::getShared('errors')();
+
+            $this->assertIsObject($errors);
+            $this->assertSame(['The name field is required.', 'The name must be at least 4 characters.'], $errors->name);
+            $this->assertSame(['Not a valid email address.'], $errors->email);
+        });
+
+        $this->withoutExceptionHandling()->get('/');
+
+        ExampleMiddleware::$returnOnlyFirstValidationErrorMessage = true;
+    }
+
     public function test_validation_errors_with_named_error_bags_are_scoped(): void
     {
         Session::put('errors', (new ViewErrorBag())->put('example', new MessageBag([
