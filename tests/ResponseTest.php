@@ -270,7 +270,7 @@ class ResponseTest extends TestCase
         $page = $response->getData();
 
         $this->assertSame([], $page->props->users);
-        $this->assertObjectNotHasAttribute('lazy', $page->props);
+        $this->assertFalse(property_exists($page->props, 'lazy'));
     }
 
     public function test_defer_props_are_not_included_by_default(): void
@@ -306,7 +306,7 @@ class ResponseTest extends TestCase
         $response = $response->toResponse($request);
         $page = $response->getData();
 
-        $this->assertObjectNotHasAttribute('users', $page->props);
+        $this->assertFalse(property_exists($page->props, 'users'));
         $this->assertSame('A lazy value', $page->props->lazy);
     }
 

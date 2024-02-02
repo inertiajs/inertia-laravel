@@ -11,8 +11,11 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Request;
 use Inertia\Tests\Stubs\ExampleMiddleware;
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Session\Middleware\StartSession;
 use Inertia\DeferProp;
+use Illuminate\Session\NullSessionHandler;
+use Illuminate\Session\Store;
 
 class ResponseFactoryTest extends TestCase
 {
@@ -74,6 +77,30 @@ class ResponseFactoryTest extends TestCase
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertEquals(Response::HTTP_FOUND, $response->getStatusCode());
         $this->assertEquals('https://inertiajs.com', $response->headers->get('location'));
+    }
+
+    public function test_location_redirects_are_not_modified(): void
+    {
+        $response = (new ResponseFactory())->location('/foo');
+
+        $this->assertInstanceOf(RedirectResponse::class, $response);
+        $this->assertEquals(Response::HTTP_FOUND, $response->getStatusCode());
+        $this->assertEquals('/foo', $response->headers->get('location'));
+    }
+
+    public function test_location_response_for_non_inertia_requests_using_redirect_response_with_existing_session_and_request_properties(): void
+    {
+        $redirect = new RedirectResponse('https://inertiajs.com');
+        $redirect->setSession($session = new Store('test', new NullSessionHandler));
+        $redirect->setRequest($request = new HttpRequest);
+        $response = (new ResponseFactory())->location($redirect);
+
+        $this->assertInstanceOf(RedirectResponse::class, $response);
+        $this->assertEquals(Response::HTTP_FOUND, $response->getStatusCode());
+        $this->assertEquals('https://inertiajs.com', $response->headers->get('location'));
+        $this->assertSame($session, $response->getSession());
+        $this->assertSame($request, $response->getRequest());
+        $this->assertSame($response, $redirect);
     }
 
     public function test_the_version_can_be_a_closure(): void

@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Inertia\LazyProp lazy(callable $callback)
  * @method static \Inertia\DeferProp defer(callable $callback)
  * @method static \Inertia\Response render(string $component, array|\Illuminate\Contracts\Support\Arrayable $props = [])
- * @method static \Symfony\Component\HttpFoundation\Response location(string|\Illuminate\Http\RedirectResponse $url)
+ * @method static \Symfony\Component\HttpFoundation\Response location(string|\Symfony\Component\HttpFoundation\RedirectResponse $url)
  * @method static void macro(string $name, object|callable $macro)
  * @method static void mixin(object $mixin, bool $replace = true)
  * @method static bool hasMacro(string $name)

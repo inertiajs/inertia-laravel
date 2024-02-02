@@ -5,10 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v0.6.9...master)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v0.6.11...master)
+
+- Nothing!
+
+## [v0.6.11](https://github.com/inertiajs/inertia-laravel/compare/v0.6.10...v0.6.11) - 2023-09-13
+
+- Add option for using the `bun` runtime in SSR ([#552](https://github.com/inertiajs/inertia-laravel/pull/552))
+
+## [v0.6.10](https://github.com/inertiajs/inertia-laravel/compare/v0.6.9...v0.6.10) - 2023-09-13
 
 - Add `inertia_location` helper function ([#491](https://github.com/inertiajs/inertia-laravel/pull/491))
 - Add `Route::inertia()` IDE helper ([#413](https://github.com/inertiajs/inertia-laravel/pull/413))
+- Automatically update Facade docblocks ([#538](https://github.com/inertiajs/inertia-laravel/pull/538))
+- Restore request and session on redirects ([#539](https://github.com/inertiajs/inertia-laravel/pull/539))
+- Add PHP 8.3 support ([#540](https://github.com/inertiajs/inertia-laravel/pull/540))
 
 ## [v0.6.9](https://github.com/inertiajs/inertia-laravel/compare/v0.6.8...v0.6.9) - 2023-01-17
 
