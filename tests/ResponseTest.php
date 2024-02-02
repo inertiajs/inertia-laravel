@@ -288,7 +288,7 @@ class ResponseTest extends TestCase
 
         $this->assertSame([], $page->props->users);
         $this->assertSame(['defer'], $page->deferProps);
-        $this->assertObjectNotHasAttribute('defer', $page->props);
+        $this->assertFalse(property_exists($page->props, 'defer'));
     }
 
     public function test_lazy_props_are_included_in_partial_reload(): void
@@ -325,7 +325,7 @@ class ResponseTest extends TestCase
         $response = $response->toResponse($request);
         $page = $response->getData();
 
-        $this->assertObjectNotHasAttribute('users', $page->props);
+        $this->assertFalse(property_exists($page->props, 'users'));
         $this->assertSame('A deferred value', $page->props->defer);
     }
 
