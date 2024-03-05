@@ -107,4 +107,4 @@ jobs:
           command: composer update --${{ matrix.stability }} --no-interaction
 
       - name: Execute tests
-        run: vendor/bin/phpunit --verbose
+        run: vendor/bin/phpunit
