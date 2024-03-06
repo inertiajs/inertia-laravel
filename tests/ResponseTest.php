@@ -385,4 +385,19 @@ class ResponseTest extends TestCase
 
         $this->assertSame('/sub/directory/user/123', $page['url']);
     }
+
+    public function test_the_page_url_doesnt_double_up(): void
+    {
+        $request = Request::create('/subpath/product/123', 'GET', [], [], [], [
+            'SCRIPT_FILENAME' => '/project/public/index.php',
+            'SCRIPT_NAME' => '/subpath/index.php',
+        ]);
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $response = new Response('Product/Show', []);
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertSame('/subpath/product/123', $page->url);
+    }
 }
