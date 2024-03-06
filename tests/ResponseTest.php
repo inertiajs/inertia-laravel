@@ -361,4 +361,24 @@ class ResponseTest extends TestCase
             $page['props']['resource']
         );
     }
+
+    public function test_the_page_url_is_prefixed_with_the_proxy_prefix(): void
+    {
+        Request::setTrustedProxies(['1.2.3.4'], Request::HEADER_X_FORWARDED_PREFIX);
+
+        $request = Request::create('/user/123', 'GET');
+        $request->server->set('REMOTE_ADDR', '1.2.3.4');
+        $request->headers->set('X_FORWARDED_PREFIX', '/sub/directory');
+
+        $user = ['name' => 'Jonathan'];
+        $response = new Response('User/Edit', ['user' => $user], 'app', '123');
+        $response = $response->toResponse($request);
+        $view = $response->getOriginalContent();
+        $page = $view->getData()['page'];
+
+        $this->assertInstanceOf(BaseResponse::class, $response);
+        $this->assertInstanceOf(View::class, $view);
+
+        $this->assertSame('/sub/directory/user/123', $page['url']);
+    }
 }
