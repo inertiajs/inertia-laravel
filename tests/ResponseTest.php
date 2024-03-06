@@ -364,6 +364,10 @@ class ResponseTest extends TestCase
 
     public function test_the_page_url_is_prefixed_with_the_proxy_prefix(): void
     {
+        if (version_compare(app()->version(), '7', '<')) {
+            $this->markTestSkipped('This test requires Laravel 7 or higher.');
+        }
+
         Request::setTrustedProxies(['1.2.3.4'], Request::HEADER_X_FORWARDED_PREFIX);
 
         $request = Request::create('/user/123', 'GET');
