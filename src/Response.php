@@ -100,7 +100,7 @@ class Response implements Responsable
         $page = [
             'component' => $this->component,
             'props' => $props,
-            'url' => Str::after($request->fullUrl(), $request->getSchemeAndHttpHost()),
+            'url' => Str::start(Str::after($request->fullUrl(), $request->getSchemeAndHttpHost()), '/'),
             'version' => $this->version,
         ];
 
