@@ -3,6 +3,10 @@
 namespace Inertia\Testing;
 
 use InvalidArgumentException;
+use Closure;
+use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Testing\Fakes\Fake;
 use Illuminate\Testing\TestResponse;
 use PHPUnit\Framework\Assert as PHPUnit;
 use PHPUnit\Framework\AssertionFailedError;
@@ -67,6 +71,40 @@ class AssertableInertia extends AssertableJson
     public function version(string $value): self
     {
         PHPUnit::assertSame($value, $this->version, 'Unexpected Inertia asset version.');
+
+        return $this;
+    }
+
+    public function requestProp(string $prop, Closure $assert = null): self
+    {
+        $request = app('inertia.testing.request');
+        if ($request === null) {
+            if (Event::getFacadeRoot() instanceof Fake) {
+                PHPUnit::fail('Unable to listen to the `\Illuminate\Foundation\Http\Events\RequestHandled` event. Please use Event::fakeExcept(RequestHandled::class) when using requestProp if you want to block other events.');
+            }
+
+            PHPUnit::fail('Unable to catch the previous request via the `\Illuminate\Foundation\Http\Events\RequestHandled` event using listener.');
+        }
+
+        $request->headers->add([
+            'X-Inertia-Partial-Component' => $this->component,
+            'X-Inertia-Partial-Data' => $prop,
+        ]);
+
+
+        $kernel = app()->make(Kernel::class);
+        $response = $kernel->handle($request);
+
+        $kernel->terminate($request, $response);
+
+        $testResponse = TestResponse::fromBaseResponse($response);
+        $testResponse->assertInertia(function (AssertableInertia $page) use ($prop, $assert) {
+            $page->has($prop);
+
+            if($assert !== null){
+                $assert($page);
+            }
+        });
 
         return $this;
     }

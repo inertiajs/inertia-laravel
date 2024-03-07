@@ -3,6 +3,7 @@
 namespace Inertia\Tests\Testing;
 
 use Inertia\Inertia;
+use Inertia\Testing\AssertableInertia;
 use Inertia\Tests\TestCase;
 use PHPUnit\Framework\AssertionFailedError;
 
@@ -205,6 +206,41 @@ class AssertableInertiaTest extends TestCase
 
         $response->assertInertia(function ($inertia) {
             $inertia->version('different-version');
+        });
+    }
+
+    /** @test */
+    public function the_lazy_prop_can_be_fetch_via_the_request_prop_method(): void
+    {
+        $response = $this->makeMockRequest(
+            Inertia::render('foo', [
+                'bar' => Inertia::lazy(function () {
+                    return 'foobar';
+                }),
+            ])
+        );
+        $response->assertInertia(function ($inertia) {
+            $inertia->missing('bar');
+
+            $inertia->requestProp('bar', function ($subInertia) {
+                $this->assertInstanceOf(AssertableInertia::class, $subInertia);
+
+                $subInertia->where('bar', 'foobar');
+            });
+        });
+    }
+
+    /** @test */
+    public function the_request_prop_method_fails_if_prop_does_not_exists(): void
+    {
+        $response = $this->makeMockRequest(
+            Inertia::render('foo')
+        );
+
+        $this->expectException(AssertionFailedError::class);
+
+        $response->assertInertia(function ($inertia) {
+            $inertia->requestProp('bar');
         });
     }
 }
