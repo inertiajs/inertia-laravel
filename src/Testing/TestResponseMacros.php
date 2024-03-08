@@ -26,6 +26,23 @@ class TestResponseMacros
         };
     }
 
+    public function assertInertiaRedirect()
+    {
+        return function ($uri = null) {
+            PHPUnit::assertSame(
+                409,
+                $this->getStatusCode(),
+                $this->statusMessageWithDetails('409', $this->getStatusCode())
+            );
+
+            if (! is_null($uri)) {
+                $this->assertHeader('X-Inertia-Location', $uri);
+            }
+
+            return $this;
+        };
+    }
+
     public function inertiaPage()
     {
         return function () {
