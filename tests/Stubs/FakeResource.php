@@ -13,13 +13,6 @@ class FakeResource extends JsonResource
      */
     private $data;
 
-    /**
-     * The "data" wrapper that should be applied.
-     *
-     * @var string|null
-     */
-    public static $wrap = null;
-
     public function __construct(array $resource)
     {
         parent::__construct(null);
