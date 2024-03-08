@@ -5,9 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v0.6.11...master)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v1.0.0...1.x)
 
 - Nothing!
+
+## [v1.0.0](https://github.com/inertiajs/inertia-laravel/compare/v0.6.11...v1.0.0) - 2024-03-08
+
+- Add Laravel 11 support ([#560](https://github.com/inertiajs/inertia-laravel/pull/560), [#564](https://github.com/inertiajs/inertia-laravel/pull/564))
+- Fix URL generation ([#592](https://github.com/inertiajs/inertia-laravel/pull/592))
 
 ## [v0.6.11](https://github.com/inertiajs/inertia-laravel/compare/v0.6.10...v0.6.11) - 2023-09-13
 
