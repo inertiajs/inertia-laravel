@@ -5,7 +5,8 @@ namespace Inertia\Testing;
 use Closure;
 use const E_USER_DEPRECATED;
 use Illuminate\Contracts\Http\Kernel;
-use Illuminate\Foundation\Testing\TestResponse;
+use Illuminate\Testing\TestResponse;
+use Illuminate\Foundation\Testing\TestResponse as LegacyTestResponse;
 use Illuminate\Support\Traits\Macroable;
 use PHPUnit\Framework\Assert as PHPUnit;
 use Illuminate\Contracts\Support\Arrayable;
@@ -110,7 +111,12 @@ class Assert implements Arrayable
 
         $kernel->terminate($request, $response);
 
-        $testResponse = TestResponse::fromBaseResponse($response);
+        $testResponseClass = TestResponse::class; 
+        if (class_exists($testResponseClass) == false) {
+            $testResponseClass = LegacyTestResponse::class;
+        }
+
+        $testResponse = $testResponseClass::fromBaseResponse($response);
         $testResponse->assertInertia(function (Assert $page) use ($prop, $assert) {
             $page->has($prop);
 
