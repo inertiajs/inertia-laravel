@@ -2,6 +2,8 @@
 
 namespace Inertia;
 
+use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Foundation\Http\Events\RequestHandled;
 use LogicException;
 use Inertia\Ssr\Gateway;
 use ReflectionException;
@@ -13,6 +15,7 @@ use Illuminate\Testing\TestResponse;
 use Inertia\Testing\TestResponseMacros;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use Illuminate\Foundation\Testing\TestResponse as LegacyTestResponse;
+use Inertia\Testing\Listeners\RequestHandledListener;
 
 class ServiceProvider extends BaseServiceProvider
 {
@@ -38,6 +41,10 @@ class ServiceProvider extends BaseServiceProvider
                 $app['config']->get('inertia.testing.page_extensions')
             );
         });
+
+        $this->app->bind('inertia.testing.request', function ($app) {
+            return null;
+        });
     }
 
     public function boot(): void
@@ -47,6 +54,11 @@ class ServiceProvider extends BaseServiceProvider
         $this->publishes([
             __DIR__.'/../config/inertia.php' => config_path('inertia.php'),
         ]);
+
+        if (app()->environment('testing') === true) {
+            $dispatcher = app(Dispatcher::class);
+            $dispatcher->listen(RequestHandled::class, RequestHandledListener::class);
+        }
     }
 
     protected function registerBladeDirectives(): void
