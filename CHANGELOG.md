@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add Laravel 11 support ([#560](https://github.com/inertiajs/inertia-laravel/pull/560), [#564](https://github.com/inertiajs/inertia-laravel/pull/564))
 - Fix URL generation ([#592](https://github.com/inertiajs/inertia-laravel/pull/592))
+- Remove deprecated `Assert` class and Laravel 6 & 7 support. ([#594](https://github.com/inertiajs/inertia-laravel/pull/594))
 
 ## [v0.6.11](https://github.com/inertiajs/inertia-laravel/compare/v0.6.10...v0.6.11) - 2023-09-13
 
