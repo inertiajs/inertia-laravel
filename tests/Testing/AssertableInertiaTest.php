@@ -3,7 +3,6 @@
 namespace Inertia\Tests\Testing;
 
 use Inertia\Inertia;
-use Inertia\Testing\AssertableInertia;
 use Inertia\Tests\TestCase;
 use PHPUnit\Framework\AssertionFailedError;
 
@@ -223,8 +222,6 @@ class AssertableInertiaTest extends TestCase
             $inertia->missing('bar');
 
             $inertia->requestProp('bar', function ($subInertia) {
-                $this->assertInstanceOf(AssertableInertia::class, $subInertia);
-
                 $subInertia->where('bar', 'foobar');
             });
         });

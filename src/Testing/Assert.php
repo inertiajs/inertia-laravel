@@ -4,6 +4,8 @@ namespace Inertia\Testing;
 
 use Closure;
 use const E_USER_DEPRECATED;
+use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Foundation\Testing\TestResponse;
 use Illuminate\Support\Traits\Macroable;
 use PHPUnit\Framework\Assert as PHPUnit;
 use Illuminate\Contracts\Support\Arrayable;
@@ -88,5 +90,35 @@ class Assert implements Arrayable
         }
 
         return new self($page['component'], $page['props'], $page['url'], $page['version']);
+    }
+
+    public function requestProp(string $prop, Closure $assert = null): self
+    {
+        $request = app('inertia.testing.request');
+        if ($request === null) {
+            PHPUnit::fail('Unable to catch the previous request via the `\Illuminate\Foundation\Http\Events\RequestHandled` event using listener. If you are using Event::fake(), please use Event::fakeExcept(RequestHandled::class) instead when calling requestProp if you want to block other events.');
+        }
+
+        $request->headers->add([
+            'X-Inertia-Partial-Component' => $this->component,
+            'X-Inertia-Partial-Data' => $prop,
+        ]);
+
+
+        $kernel = app()->make(Kernel::class);
+        $response = $kernel->handle($request);
+
+        $kernel->terminate($request, $response);
+
+        $testResponse = TestResponse::fromBaseResponse($response);
+        $testResponse->assertInertia(function (Assert $page) use ($prop, $assert) {
+            $page->has($prop);
+
+            if ($assert !== null) {
+                $assert($page);
+            }
+        });
+
+        return $this;
     }
 }
