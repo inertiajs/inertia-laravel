@@ -6,13 +6,8 @@ use Illuminate\Console\Command;
 
 class StopSsr extends Command
 {
-    /**
-     * The console command name.
-     *
-     * @var string
-     */
-    protected $name = 'inertia:stop-ssr';
 
+    protected $signature = 'inertia:stop-ssr {--bundle=default : The path to the Inertia SSR bundle to use (defaults to the configured path)}';
     /**
      * The console command description.
      *
@@ -25,7 +20,9 @@ class StopSsr extends Command
      */
     public function handle(): int
     {
-        $url = str_replace('/render', '', config('inertia.ssr.url', 'http://127.0.0.1:13714')).'/shutdown';
+        $bundleOption = $this->option('bundle');
+
+        $url = str_replace('/render', '', config("inertia.ssr.$bundleOption.url")).'/shutdown';
 
         $ch = curl_init($url);
         curl_exec($ch);

@@ -19,6 +19,13 @@ class Middleware
     protected $rootView = 'app';
 
     /**
+     * Determine which bundle config will be used
+     *
+     * @var string
+     */
+    protected $bundleConfig = 'default';
+
+    /**
      * Determines the current asset version.
      *
      * @see https://inertiajs.com/asset-versioning
@@ -71,6 +78,17 @@ class Middleware
     }
 
     /**
+     * Determines the current asset version.
+     *
+     *
+     * @return string
+     */
+    public function bundleConfig(): string
+    {
+        return $this->bundleConfig;
+    }
+
+    /**
      * Handle the incoming request.
      *
      * @return Response
@@ -83,6 +101,7 @@ class Middleware
 
         Inertia::share($this->share($request));
         Inertia::setRootView($this->rootView($request));
+        Inertia::setBundleConfig($this->bundleConfig());
 
         $response = $next($request);
         $response->headers->set('Vary', 'X-Inertia');

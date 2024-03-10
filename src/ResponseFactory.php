@@ -20,6 +20,8 @@ class ResponseFactory
     /** @var string */
     protected $rootView = 'app';
 
+    protected $bundleConfig = 'default';
+
     /** @var array */
     protected $sharedProps = [];
 
@@ -29,6 +31,11 @@ class ResponseFactory
     public function setRootView(string $name): void
     {
         $this->rootView = $name;
+    }
+
+    public function setBundleConfig(string $bundleConfig): void
+    {
+        $this->bundleConfig = $bundleConfig;
     }
 
     /**
@@ -100,7 +107,8 @@ class ResponseFactory
             $component,
             array_merge($this->sharedProps, $props),
             $this->rootView,
-            $this->getVersion()
+            $this->getVersion(),
+            $this->bundleConfig
         );
     }
 

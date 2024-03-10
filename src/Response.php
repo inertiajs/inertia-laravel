@@ -21,6 +21,7 @@ class Response implements Responsable
 
     protected $component;
     protected $props;
+    protected $bundleConfig;
     protected $rootView;
     protected $version;
     protected $viewData = [];
@@ -28,12 +29,13 @@ class Response implements Responsable
     /**
      * @param array|Arrayable $props
      */
-    public function __construct(string $component, $props, string $rootView = 'app', string $version = '')
+    public function __construct(string $component, $props, string $rootView = 'app', string $version = '', $bundleConfig = 'default')
     {
         $this->component = $component;
         $this->props = $props instanceof Arrayable ? $props->toArray() : $props;
         $this->rootView = $rootView;
         $this->version = $version;
+        $this->bundleConfig = $bundleConfig;
     }
 
     /**
@@ -99,6 +101,7 @@ class Response implements Responsable
         $page = [
             'component' => $this->component,
             'props' => $props,
+            'bundleConfig' => $this->bundleConfig,
             'url' => $request->getBaseUrl().$request->getRequestUri(),
             'version' => $this->version,
         ];

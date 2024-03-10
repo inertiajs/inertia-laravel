@@ -42,6 +42,13 @@ trait PageObject
         return $this;
     }
 
+    public function bundleConfig(string $value): self
+    {
+        PHPUnit::assertSame($value, $this->bundleConfig, 'Unexpected Inertia ssr.');
+
+        return $this;
+    }
+
     public function toArray(): array
     {
         return [
@@ -49,6 +56,7 @@ trait PageObject
             'props' => $this->props,
             'url' => $this->url,
             'version' => $this->version,
+            'bundleConfig' => $this->bundleConfig,
         ];
     }
 }
