@@ -22,7 +22,7 @@ class FakeGateway implements Gateway
     {
         $this->times++;
 
-        if (! Config::get('inertia.ssr.enabled', false)) {
+        if (! Config::get('inertia.ssr.default.enabled', false)) {
             return null;
         }
 

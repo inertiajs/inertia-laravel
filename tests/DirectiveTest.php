@@ -92,7 +92,7 @@ class DirectiveTest extends TestCase
 
     public function test_inertia_directive_renders_the_root_element(): void
     {
-        Config::set(['inertia.ssr.enabled' => false]);
+        Config::set(['inertia.ssr.default.enabled' => false]);
 
         $html = '<div id="app" data-page="{&quot;component&quot;:&quot;Foo\/Bar&quot;,&quot;props&quot;:{&quot;foo&quot;:&quot;bar&quot;},&quot;url&quot;:&quot;\/test&quot;,&quot;version&quot;:&quot;&quot;}"></div>';
 
@@ -104,7 +104,7 @@ class DirectiveTest extends TestCase
 
     public function test_inertia_directive_renders_server_side_rendered_content_when_enabled(): void
     {
-        Config::set(['inertia.ssr.enabled' => true]);
+        Config::set(['inertia.ssr.default.enabled' => true]);
 
         $this->assertSame(
             '<p>This is some example SSR content</p>',
@@ -114,7 +114,7 @@ class DirectiveTest extends TestCase
 
     public function test_inertia_directive_can_use_a_different_root_element_id(): void
     {
-        Config::set(['inertia.ssr.enabled' => false]);
+        Config::set(['inertia.ssr.default.enabled' => false]);
 
         $html = '<div id="foo" data-page="{&quot;component&quot;:&quot;Foo\/Bar&quot;,&quot;props&quot;:{&quot;foo&quot;:&quot;bar&quot;},&quot;url&quot;:&quot;\/test&quot;,&quot;version&quot;:&quot;&quot;}"></div>';
 
@@ -125,14 +125,14 @@ class DirectiveTest extends TestCase
 
     public function test_inertia_head_directive_renders_nothing(): void
     {
-        Config::set(['inertia.ssr.enabled' => false]);
+        Config::set(['inertia.ssr.default.enabled' => false]);
 
         $this->assertEmpty($this->renderView('@inertiaHead', ['page' => self::EXAMPLE_PAGE_OBJECT]));
     }
 
     public function test_inertia_head_directive_renders_server_side_rendered_head_elements_when_enabled(): void
     {
-        Config::set(['inertia.ssr.enabled' => true]);
+        Config::set(['inertia.ssr.default.enabled' => true]);
 
         $this->assertSame(
             "<meta charset=\"UTF-8\" />\n<title inertia>Example SSR Title</title>\n",
@@ -142,7 +142,7 @@ class DirectiveTest extends TestCase
 
     public function test_the_server_side_rendering_request_is_dispatched_only_once_per_request(): void
     {
-        Config::set(['inertia.ssr.enabled' => true]);
+        Config::set(['inertia.ssr.default.enabled' => true]);
         $this->app->instance(Gateway::class, $gateway = new FakeGateway());
 
         $view = "<!DOCTYPE html>\n<html>\n<head>\n@inertiaHead\n</head>\n<body>\n@inertia\n</body>\n</html>";

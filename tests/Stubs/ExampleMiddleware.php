@@ -14,6 +14,8 @@ class ExampleMiddleware extends Middleware
      */
     protected $version;
 
+    protected $bundleConfig = 'default';
+
     /**
      * @var array|mixed
      */

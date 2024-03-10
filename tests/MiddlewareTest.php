@@ -218,6 +218,7 @@ class MiddlewareTest extends TestCase
     {
         $this->prepareMockEndpoint(null, [], new class() extends Middleware {
             protected $rootView = 'welcome';
+            protected $bundleConfig = 'default';
         });
 
         $response = $this->get('/');
@@ -231,6 +232,10 @@ class MiddlewareTest extends TestCase
             public function rootView(Request $request): string
             {
                 return 'welcome';
+            }
+            public function bundleConfig(): string
+            {
+                return 'default';
             }
         });
 
