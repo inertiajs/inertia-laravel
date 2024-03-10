@@ -129,6 +129,14 @@ class Middleware
     }
 
     /**
+     * Define if validation errors must return first error or all errors
+     */
+    public function returnOnlyFirstErrorMessage(): bool
+    {
+        return true;
+    }
+
+    /**
      * Resolves and prepares validation errors in such
      * a way that they are easier to use client-side.
      *
@@ -140,20 +148,26 @@ class Middleware
             return (object) [];
         }
 
-        return (object) collect($request->session()->get('errors')->getBags())->map(function ($bag) {
-            return (object) collect($bag->messages())->map(function ($errors) {
-                return $errors[0];
-            })->toArray();
-        })->pipe(function ($bags) use ($request) {
-            if ($bags->has('default') && $request->header('x-inertia-error-bag')) {
-                return [$request->header('x-inertia-error-bag') => $bags->get('default')];
-            }
+        return (object) collect($request->session()->get('errors')->getBags())
+            ->map(function ($bag) {
+                return (object) collect($bag->messages())
+                    ->when($this->returnOnlyFirstErrorMessage(), function ($collection) {
+                        return $collection->map(function ($errors) {
+                            return $errors[0];
+                        });
+                    })
+                    ->toArray();
+            })
+            ->pipe(function ($bags) use ($request) {
+                if ($bags->has('default') && $request->header('x-inertia-error-bag')) {
+                    return [$request->header('x-inertia-error-bag') => $bags->get('default')];
+                }
 
-            if ($bags->has('default')) {
-                return $bags->get('default');
-            }
+                if ($bags->has('default')) {
+                    return $bags->get('default');
+                }
 
-            return $bags->toArray();
-        });
+                return $bags->toArray();
+            });
     }
 }
