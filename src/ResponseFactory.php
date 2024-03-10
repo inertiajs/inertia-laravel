@@ -87,6 +87,11 @@ class ResponseFactory
         return new LazyProp($callback);
     }
 
+    public function defer(callable $callback): DeferProp
+    {
+        return new DeferProp($callback);
+    }
+
     /**
      * @param array|Arrayable $props
      */

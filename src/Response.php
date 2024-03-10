@@ -88,12 +88,17 @@ class Response implements Responsable
     public function toResponse($request)
     {
         $only = array_filter(explode(',', $request->header('X-Inertia-Partial-Data', '')));
+        $isPartial = ($only && $request->header('X-Inertia-Partial-Component') === $this->component);
 
-        $props = ($only && $request->header('X-Inertia-Partial-Component') === $this->component)
+        $props = $isPartial
             ? Arr::only($this->props, $only)
             : array_filter($this->props, static function ($prop) {
-                return ! ($prop instanceof LazyProp);
+                return ! ($prop instanceof LazyProp || $prop instanceof DeferProp);
             });
+
+        $deferProps = $isPartial ? [] : array_filter($this->props, static function ($prop) {
+            return $prop instanceof DeferProp;
+        });
 
         $props = $this->resolvePropertyInstances($props, $request);
 
@@ -103,6 +108,10 @@ class Response implements Responsable
             'url' => Str::start(Str::after($request->fullUrl(), $request->getSchemeAndHttpHost()), '/'),
             'version' => $this->version,
         ];
+
+        if (!empty($deferProps)) {
+            $page['deferProps'] = array_keys($deferProps);
+        }
 
         if ($request->header('X-Inertia')) {
             return new JsonResponse($page, 200, ['X-Inertia' => 'true']);
@@ -121,7 +130,7 @@ class Response implements Responsable
                 $value = App::call($value);
             }
 
-            if ($value instanceof LazyProp) {
+            if ($value instanceof LazyProp || $value instanceof DeferProp) {
                 $value = App::call($value);
             }
 
