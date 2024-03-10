@@ -14,7 +14,7 @@ class StartSsr extends Command
      *
      * @var string
      */
-    protected $signature = 'inertia:start-ssr {--runtime=node : The runtime to use (`node` or `bun`)}';
+    protected $signature = 'inertia:start-ssr {--runtime=node : The runtime to use (`node` or `bun`)} {--bundle=default : The bundle config}';
 
     /**
      * The console command description.
@@ -28,26 +28,24 @@ class StartSsr extends Command
      */
     public function handle(): int
     {
-        if (! config('inertia.ssr.enabled', true)) {
-            $this->error('Inertia SSR is not enabled. Enable it via the `inertia.ssr.enabled` config option.');
+        $bundleOption = $this->option('bundle');
+
+        if (! config("inertia.ssr.$bundleOption.enabled", true)) {
+            $this->error("Inertia SSR is not enabled. Enable it via the `inertia.ssr.$bundleOption.enabled` config option.");
 
             return self::FAILURE;
         }
 
-        $bundle = (new BundleDetector())->detect();
-        $configuredBundle = config('inertia.ssr.bundle');
+        $bundle = config("inertia.ssr.$bundleOption.bundle");
 
-        if ($bundle === null) {
+        if ($bundle === null || !file_exists($bundle)) {
             $this->error(
-                $configuredBundle
-                    ? 'Inertia SSR bundle not found at the configured path: "'.$configuredBundle.'"'
-                    : 'Inertia SSR bundle not found. Set the correct Inertia SSR bundle path in your `inertia.ssr.bundle` config.'
+                $bundle
+                    ? 'Inertia SSR bundle not found at the configured path: "'.$bundle.'"'
+                    : "Inertia SSR bundle not found. Set the correct Inertia SSR bundle path in your `inertia.ssr.$bundleOption.bundle` config."
             );
 
             return self::FAILURE;
-        } elseif ($configuredBundle && $bundle !== $configuredBundle) {
-            $this->warn('Inertia SSR bundle not found at the configured path: "'.$configuredBundle.'"');
-            $this->warn('Using a default bundle instead: "'.$bundle.'"');
         }
 
         $runtime = $this->option('runtime');
@@ -58,7 +56,7 @@ class StartSsr extends Command
             return self::INVALID;
         }
 
-        $this->callSilently('inertia:stop-ssr');
+        $this->callSilently('inertia:stop-ssr', ['--bundle' => $bundleOption]);
 
         $process = new Process([$runtime, $bundle]);
         $process->setTimeout(null);

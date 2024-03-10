@@ -31,9 +31,12 @@ class Assert implements Arrayable
     private $version;
 
     /** @var string */
+    private $bundleConfig;
+
+    /** @var string */
     private $path;
 
-    protected function __construct(string $component, array $props, string $url, string $version = null, string $path = null)
+    protected function __construct(string $component, array $props, string $url, string $version = null, string $path = null, $bundleConfig = 'default')
     {
         echo "\033[0;31mInertia's built-in 'Assert' library will be removed in a future version of inertia-laravel:\033[0m\n";
         echo "\033[0;31m - If you are seeing this error while using \$response->assertInertia(...), please upgrade to Laravel 8.32.0 or higher.\033[0m\n";
@@ -47,6 +50,7 @@ class Assert implements Arrayable
         $this->props = $props;
         $this->url = $url;
         $this->version = $version;
+        $this->bundleConfig = $bundleConfig;
     }
 
     protected function dotPath(string $key): string
@@ -83,10 +87,11 @@ class Assert implements Arrayable
             PHPUnit::assertArrayHasKey('props', $page);
             PHPUnit::assertArrayHasKey('url', $page);
             PHPUnit::assertArrayHasKey('version', $page);
+            PHPUnit::assertArrayHasKey('bundleConfig', $page);
         } catch (AssertionFailedError $e) {
             PHPUnit::fail('Not a valid Inertia response.');
         }
 
-        return new self($page['component'], $page['props'], $page['url'], $page['version']);
+        return new self($page['component'], $page['props'], $page['url'], $page['version'], $page['bundleConfig']);
     }
 }

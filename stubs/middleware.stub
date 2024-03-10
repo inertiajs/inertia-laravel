@@ -17,6 +17,13 @@ class {{ class }} extends Middleware
     protected $rootView = 'app';
 
     /**
+     * Determine which bundle config will be used
+     *
+     * @var string
+     */
+    protected $bundleConfig = 'default';
+
+    /**
      * Determines the current asset version.
      *
      * @see https://inertiajs.com/asset-versioning

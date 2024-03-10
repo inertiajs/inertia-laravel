@@ -19,6 +19,9 @@ class AssertableInertia extends AssertableJson
     /** @var string|null */
     private $version;
 
+    /** @var string */
+    private $bundleConfig;
+
     public static function fromTestResponse(TestResponse $response): self
     {
         try {
@@ -30,6 +33,7 @@ class AssertableInertia extends AssertableJson
             PHPUnit::assertArrayHasKey('props', $page);
             PHPUnit::assertArrayHasKey('url', $page);
             PHPUnit::assertArrayHasKey('version', $page);
+            PHPUnit::assertArrayHasKey('bundleConfig', $page);
         } catch (AssertionFailedError $e) {
             PHPUnit::fail('Not a valid Inertia response.');
         }
@@ -38,6 +42,7 @@ class AssertableInertia extends AssertableJson
         $instance->component = $page['component'];
         $instance->url = $page['url'];
         $instance->version = $page['version'];
+        $instance->bundleConfig = $page['bundleConfig'];
 
         return $instance;
     }
@@ -71,6 +76,13 @@ class AssertableInertia extends AssertableJson
         return $this;
     }
 
+    public function bundleConfig(string $value): self
+    {
+        PHPUnit::assertSame($value, $this->bundleConfig, 'Unexpected Inertia bundle config.');
+
+        return $this;
+    }
+
     public function toArray()
     {
         return [
@@ -78,6 +90,7 @@ class AssertableInertia extends AssertableJson
             'props' => $this->prop(),
             'url' => $this->url,
             'version' => $this->version,
+            'bundleConfig' => $this->bundleConfig,
         ];
     }
 }

@@ -28,6 +28,7 @@ class ControllerTest extends TestCase
             ],
             'url' => '/',
             'version' => '',
+            'bundleConfig' => 'default'
         ]);
     }
 }
