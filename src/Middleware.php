@@ -77,6 +77,7 @@ class Middleware
      */
     public function handle(Request $request, Closure $next)
     {
+        $request = $this->resolveRequestMethod($request);
         Inertia::version(function () use ($request) {
             return $this->version($request);
         });
@@ -155,5 +156,20 @@ class Middleware
 
             return $bags->toArray();
         });
+    }
+
+    /**
+     * Resolves and prepares the request methods, if they are being redirected.
+     *
+     * @param  Request  $request
+     * @return Request
+     */
+    public function resolveRequestMethod(Request $request)
+    {
+        if (! is_null($request->server('REDIRECT_REDIRECT_REQUEST_METHOD'))) {
+            $request->setMethod($request->server('REDIRECT_REDIRECT_REQUEST_METHOD'));
+        }
+
+        return $request;
     }
 }
