@@ -417,4 +417,16 @@ class ResponseTest extends TestCase
 
         $this->assertSame('/subpath/product/123', $page->url);
     }
+
+    public function test_the_query_string_of_the_page_url_is_not_urlencoded(): void
+    {
+        $request = Request::create('/product/123?q=hello/world', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $response = new Response('Product/Show', []);
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertSame('/product/123?q=hello/world', $page->url);
+    }
 }
