@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
 use GuzzleHttp\Promise\PromiseInterface;
+use Illuminate\Support\Stringable;
 use Illuminate\Support\Traits\Macroable;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Responsable;
@@ -100,7 +101,13 @@ class Response implements Responsable
         $page = [
             'component' => $this->component,
             'props' => $props,
-            'url' => Str::start(Str::after($request->fullUrl(), $request->getSchemeAndHttpHost()), '/'),
+            'url' => Str::of($request->url())
+                ->after($request->getSchemeAndHttpHost())
+                ->start('/')
+                ->when($request->getQueryString(), fn (Stringable $url, string $queryString) => $url
+                    ->append('?')
+                    ->append(urldecode($queryString)))
+                ->toString(),
             'version' => $this->version,
         ];
 
