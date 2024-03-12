@@ -378,4 +378,43 @@ class ResponseTest extends TestCase
 
         $this->assertSame('https://inertiajs.com/user/123', $page->url);
     }
+
+    public function test_the_page_url_is_prefixed_with_the_proxy_prefix(): void
+    {
+        if (version_compare(app()->version(), '7', '<')) {
+            $this->markTestSkipped('This test requires Laravel 7 or higher.');
+        }
+
+        Request::setTrustedProxies(['1.2.3.4'], Request::HEADER_X_FORWARDED_PREFIX);
+
+        $request = Request::create('/user/123', 'GET');
+        $request->server->set('REMOTE_ADDR', '1.2.3.4');
+        $request->headers->set('X_FORWARDED_PREFIX', '/sub/directory');
+
+        $user = ['name' => 'Jonathan'];
+        $response = new Response('User/Edit', ['user' => $user], 'app', '123');
+        $response = $response->toResponse($request);
+        $view = $response->getOriginalContent();
+        $page = $view->getData()['page'];
+
+        $this->assertInstanceOf(BaseResponse::class, $response);
+        $this->assertInstanceOf(View::class, $view);
+
+        $this->assertSame('/sub/directory/user/123', $page['url']);
+    }
+
+    public function test_the_page_url_doesnt_double_up(): void
+    {
+        $request = Request::create('/subpath/product/123', 'GET', [], [], [], [
+            'SCRIPT_FILENAME' => '/project/public/index.php',
+            'SCRIPT_NAME' => '/subpath/index.php',
+        ]);
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $response = new Response('Product/Show', []);
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertSame('/subpath/product/123', $page->url);
+    }
 }

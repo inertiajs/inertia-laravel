@@ -7,6 +7,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Str;
 use GuzzleHttp\Promise\PromiseInterface;
 use Illuminate\Support\Traits\Macroable;
 use Illuminate\Contracts\Support\Arrayable;
@@ -100,7 +101,7 @@ class Response implements Responsable
 
         $url = $this->urlResolver
             ? ($this->urlResolver)($request)
-            : $request->getBaseUrl() . $request->getRequestUri();
+            : Str::start(Str::after($request->fullUrl(), $request->getSchemeAndHttpHost()), '/');
 
         $page = [
             'component' => $this->component,
