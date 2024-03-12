@@ -101,13 +101,7 @@ class Response implements Responsable
         $page = [
             'component' => $this->component,
             'props' => $props,
-            'url' => Str::of($request->url())
-                ->after($request->getSchemeAndHttpHost())
-                ->start('/')
-                ->when($request->getQueryString(), fn (Stringable $url, string $queryString) => $url
-                    ->append('?')
-                    ->append(urldecode($queryString)))
-                ->toString(),
+            'url' => $this->url($request),
             'version' => $this->version,
         ];
 
@@ -157,5 +151,18 @@ class Response implements Responsable
         }
 
         return $props;
+    }
+
+    public function url(Request $request): string
+    {
+        $url = Str::after($request->url(), $request->getSchemeAndHttpHost());
+        $url = Str::start($url, '/');
+
+        $queryString = $request->getQueryString();
+        if ($queryString === null) {
+            return $url;
+        }
+
+        return $url.'?'.urldecode($queryString);
     }
 }
