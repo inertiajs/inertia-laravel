@@ -3,6 +3,8 @@
 namespace Inertia\Tests;
 
 use Closure;
+use Inertia\ClosureUrlResolver;
+use Inertia\UrlResolver;
 use LogicException;
 use Inertia\Inertia;
 use Inertia\Middleware;
@@ -247,11 +249,9 @@ class MiddlewareTest extends TestCase
                 return '';
             }
 
-            public function urlResolver(Request $request): ?callable
+            public function urlResolver(): UrlResolver
             {
-                return function (Request $request) {
-                    return 'https://inertiajs.com'.$request->getRequestUri();
-                };
+                return new ClosureUrlResolver(fn (Request $request) => '/my/custom/prefix'.$request->getRequestUri());
             }
         });
 
@@ -260,7 +260,7 @@ class MiddlewareTest extends TestCase
         ]);
         $response->assertOk();
         $response->assertJson([
-            'url' => 'https://inertiajs.com/',
+            'url' => '/my/custom/prefix/',
         ]);
     }
 

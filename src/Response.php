@@ -31,7 +31,13 @@ class Response implements Responsable
     /**
      * @param array|Arrayable $props
      */
-    public function __construct(string $component, $props, string $rootView = 'app', string $version = '', ?callable $urlResolver = null)
+    public function __construct(
+        string $component,
+        $props,
+        string $rootView = 'app',
+        string $version = '',
+        UrlResolver $urlResolver = new DefaultUrlResolver(),
+    )
     {
         $this->component = $component;
         $this->props = $props instanceof Arrayable ? $props->toArray() : $props;
@@ -100,11 +106,10 @@ class Response implements Responsable
 
         $props = $this->resolvePropertyInstances($props, $request);
 
-
         $page = [
             'component' => $this->component,
             'props' => $props,
-            'url' => $this->url($request),
+            'url' => $this->urlResolver->resolve($request),
             'version' => $this->version,
         ];
 
@@ -154,22 +159,5 @@ class Response implements Responsable
         }
 
         return $props;
-    }
-
-    protected function url(Request $request): string
-    {
-        if ($this->urlResolver) {
-            return ($this->urlResolver)($request);
-        }
-
-        $url = Str::after($request->url(), $request->getSchemeAndHttpHost());
-        $url = Str::start($url, '/');
-
-        $queryString = $request->getQueryString();
-        if ($queryString === null) {
-            return $url;
-        }
-
-        return $url.'?'.urldecode($queryString);
     }
 }

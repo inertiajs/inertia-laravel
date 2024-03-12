@@ -2,6 +2,7 @@
 
 namespace Inertia\Tests;
 
+use Inertia\ClosureUrlResolver;
 use Mockery;
 use Inertia\LazyProp;
 use Inertia\Response;
@@ -367,16 +368,14 @@ class ResponseTest extends TestCase
         $request = Request::create('/user/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
 
-        $urlResolver = function (Request $request) {
-            return 'https://inertiajs.com'.$request->getRequestUri();
-        };
+        $urlResolver = new ClosureUrlResolver(fn (Request $request) => '/my/custom/prefix'.$request->getRequestUri());
 
         $user = ['name' => 'Jonathan'];
         $response = new Response('User/Edit', ['user' => $user], 'app', '123', $urlResolver);
         $response = $response->toResponse($request);
         $page = $response->getData();
 
-        $this->assertSame('https://inertiajs.com/user/123', $page->url);
+        $this->assertSame('/my/custom/prefix/user/123', $page->url);
     }
 
     public function test_the_page_url_is_prefixed_with_the_proxy_prefix(): void

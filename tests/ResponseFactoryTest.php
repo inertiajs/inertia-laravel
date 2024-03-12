@@ -2,6 +2,7 @@
 
 namespace Inertia\Tests;
 
+use Inertia\ClosureUrlResolver;
 use Inertia\Inertia;
 use Inertia\LazyProp;
 use Inertia\ResponseFactory;
@@ -15,6 +16,7 @@ use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Session\NullSessionHandler;
 use Illuminate\Session\Store;
+use Mockery\Matcher\Closure;
 
 class ResponseFactoryTest extends TestCase
 {
@@ -188,9 +190,9 @@ class ResponseFactoryTest extends TestCase
     public function test_the_url_resolver_is_used_when_constructing_a_response(): void
     {
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
-            Inertia::setUrlResolver(function (\Illuminate\Http\Request $request) {
+            Inertia::setUrlResolver(new ClosureUrlResolver(function (\Illuminate\Http\Request $request) {
                 return 'https://inertiajs.com'.$request->getRequestUri();
-            });
+            }));
 
             return Inertia::render('User/Edit');
         });

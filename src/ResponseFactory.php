@@ -20,7 +20,7 @@ class ResponseFactory
     /** @var string */
     protected $rootView = 'app';
 
-    /** @var callable(\Illuminate\Http\Request):string|null */
+    /** @var UrlResolver|null */
     protected $urlResolver = null;
 
     /** @var array */
@@ -34,12 +34,14 @@ class ResponseFactory
         $this->rootView = $name;
     }
 
-    /**
-     * @param callable(\Illuminate\Http\Request):string|null $urlResolver
-     */
-    public function setUrlResolver(?callable $urlResolver): void
+    public function setUrlResolver(UrlResolver $urlResolver): void
     {
         $this->urlResolver = $urlResolver;
+    }
+
+    public function getUrlResolver(): UrlResolver
+    {
+        return $this->urlResolver ??= new DefaultUrlResolver();
     }
 
     /**
@@ -112,7 +114,7 @@ class ResponseFactory
             array_merge($this->sharedProps, $props),
             $this->rootView,
             $this->getVersion(),
-            $this->urlResolver
+            $this->getUrlResolver(),
         );
     }
 
