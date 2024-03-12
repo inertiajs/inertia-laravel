@@ -153,7 +153,7 @@ class Response implements Responsable
         return $props;
     }
 
-    public function url(Request $request): string
+    protected function url(Request $request): string
     {
         $url = Str::after($request->url(), $request->getSchemeAndHttpHost());
         $url = Str::start($url, '/');
