@@ -3,6 +3,7 @@
 namespace Inertia\Testing;
 
 use Closure;
+use Illuminate\Support\Arr;
 use Illuminate\Testing\Fluent\AssertableJson;
 
 class TestResponseMacros
@@ -34,6 +35,25 @@ class TestResponseMacros
             }
 
             return Assert::fromTestResponse($this)->toArray();
+        };
+    }
+
+    public function dumpInertia()
+    {
+        return function (string $key = null) {
+            if (class_exists(AssertableJson::class)) {
+                $data = AssertableInertia::fromTestResponse($this)->toArray();
+            } else {
+                $data = Assert::fromTestResponse($this)->toArray();
+            }
+
+            if (is_null($key)) {
+                dump($data);
+            } else {
+                dump(Arr::get($data, "props.{$key}"));
+            }
+
+            return $this;
         };
     }
 }
