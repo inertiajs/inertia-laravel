@@ -27,7 +27,8 @@
     "require": {
         "php": "^7.3|~8.0.0|~8.1.0|~8.2.0|~8.3.0",
         "ext-json": "*",
-        "laravel/framework": "^8.74|^9.0|^10.0|^11.0"
+        "laravel/framework": "^8.74|^9.0|^10.0|^11.0",
+        "symfony/console": "^5.3|^6.0|^7.0"
     },
     "require-dev": {
         "roave/security-advisories": "dev-master",
