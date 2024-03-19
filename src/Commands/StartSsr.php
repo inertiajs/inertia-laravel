@@ -5,8 +5,10 @@ namespace Inertia\Commands;
 use Inertia\Ssr\SsrException;
 use Illuminate\Console\Command;
 use Inertia\Ssr\BundleDetector;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Process\Process;
 
+#[AsCommand(name: 'inertia:start-ssr')]
 class StartSsr extends Command
 {
     /**
