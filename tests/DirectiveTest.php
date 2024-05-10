@@ -2,17 +2,18 @@
 
 namespace Inertia\Tests;
 
+use Throwable;
+use Mockery as m;
+use Inertia\Directive;
+use Inertia\Ssr\Gateway;
+use Illuminate\View\View;
+use Illuminate\View\Factory;
+use Inertia\Tests\Stubs\FakeGateway;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Config;
-use Illuminate\View\Compilers\BladeCompiler;
 use Illuminate\View\Engines\PhpEngine;
-use Illuminate\View\Factory;
-use Illuminate\View\View;
-use Inertia\Directive;
-use Inertia\Ssr\Gateway;
-use Inertia\Tests\Stubs\FakeGateway;
-use Mockery as m;
+use Illuminate\View\Compilers\BladeCompiler;
 
 class DirectiveTest extends TestCase
 {
@@ -81,7 +82,7 @@ class DirectiveTest extends TestCase
         try {
             $output = $view->render();
             @unlink($path);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             @unlink($path);
             throw $e;
         }
@@ -91,6 +92,8 @@ class DirectiveTest extends TestCase
 
     public function test_inertia_directive_renders_the_root_element(): void
     {
+        Config::set(['inertia.ssr.enabled' => false]);
+
         $html = '<div id="app" data-page="{&quot;component&quot;:&quot;Foo\/Bar&quot;,&quot;props&quot;:{&quot;foo&quot;:&quot;bar&quot;},&quot;url&quot;:&quot;\/test&quot;,&quot;version&quot;:&quot;&quot;}"></div>';
 
         $this->assertSame($html, $this->renderView('@inertia', ['page' => self::EXAMPLE_PAGE_OBJECT]));
@@ -111,6 +114,8 @@ class DirectiveTest extends TestCase
 
     public function test_inertia_directive_can_use_a_different_root_element_id(): void
     {
+        Config::set(['inertia.ssr.enabled' => false]);
+
         $html = '<div id="foo" data-page="{&quot;component&quot;:&quot;Foo\/Bar&quot;,&quot;props&quot;:{&quot;foo&quot;:&quot;bar&quot;},&quot;url&quot;:&quot;\/test&quot;,&quot;version&quot;:&quot;&quot;}"></div>';
 
         $this->assertSame($html, $this->renderView('@inertia(foo)', ['page' => self::EXAMPLE_PAGE_OBJECT]));
@@ -120,6 +125,8 @@ class DirectiveTest extends TestCase
 
     public function test_inertia_head_directive_renders_nothing(): void
     {
+        Config::set(['inertia.ssr.enabled' => false]);
+
         $this->assertEmpty($this->renderView('@inertiaHead', ['page' => self::EXAMPLE_PAGE_OBJECT]));
     }
 

@@ -2,17 +2,17 @@
 
 namespace Inertia;
 
-use Illuminate\Foundation\Testing\TestResponse as LegacyTestResponse;
-use Illuminate\Http\Request;
-use Illuminate\Routing\Router;
-use Illuminate\Support\ServiceProvider as BaseServiceProvider;
-use Illuminate\Testing\TestResponse;
-use Illuminate\View\FileViewFinder;
-use Inertia\Ssr\Gateway;
-use Inertia\Ssr\HttpGateway;
-use Inertia\Testing\TestResponseMacros;
 use LogicException;
+use Inertia\Ssr\Gateway;
 use ReflectionException;
+use Illuminate\Http\Request;
+use Inertia\Ssr\HttpGateway;
+use Illuminate\Routing\Router;
+use Illuminate\View\FileViewFinder;
+use Illuminate\Testing\TestResponse;
+use Inertia\Testing\TestResponseMacros;
+use Illuminate\Support\ServiceProvider as BaseServiceProvider;
+use Illuminate\Foundation\Testing\TestResponse as LegacyTestResponse;
 
 class ServiceProvider extends BaseServiceProvider
 {
@@ -64,7 +64,9 @@ class ServiceProvider extends BaseServiceProvider
         }
 
         $this->commands([
-            Console\CreateMiddleware::class,
+            Commands\CreateMiddleware::class,
+            Commands\StartSsr::class,
+            Commands\StopSsr::class,
         ]);
     }
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Inertia\Console;
+namespace Inertia\Commands;
 
 use Illuminate\Console\GeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
@@ -30,8 +30,6 @@ class CreateMiddleware extends GeneratorCommand
 
     /**
      * Get the stub file for the generator.
-     *
-     * @return string
      */
     protected function getStub(): string
     {
@@ -41,8 +39,7 @@ class CreateMiddleware extends GeneratorCommand
     /**
      * Get the default namespace for the class.
      *
-     * @param  string  $rootNamespace
-     * @return string
+     * @param string $rootNamespace
      */
     protected function getDefaultNamespace($rootNamespace): string
     {
@@ -51,8 +48,6 @@ class CreateMiddleware extends GeneratorCommand
 
     /**
      * Get the console command arguments.
-     *
-     * @return array
      */
     protected function getArguments(): array
     {
@@ -63,8 +58,6 @@ class CreateMiddleware extends GeneratorCommand
 
     /**
      * Get the console command options.
-     *
-     * @return array
      */
     protected function getOptions(): array
     {

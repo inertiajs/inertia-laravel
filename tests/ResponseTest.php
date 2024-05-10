@@ -2,19 +2,19 @@
 
 namespace Inertia\Tests;
 
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Http\Resources\Json\ResourceCollection;
-use Illuminate\Http\Response as BaseResponse;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Fluent;
-use Illuminate\View\View;
+use Mockery;
 use Inertia\LazyProp;
 use Inertia\Response;
+use Illuminate\View\View;
+use Illuminate\Http\Request;
+use Illuminate\Support\Fluent;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Collection;
 use Inertia\Tests\Stubs\FakeResource;
-use Mockery;
+use Illuminate\Http\Response as BaseResponse;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Resources\Json\ResourceCollection;
 
 class ResponseTest extends TestCase
 {
@@ -97,8 +97,7 @@ class ResponseTest extends TestCase
         $callable = static function () use ($users) {
             $page = new LengthAwarePaginator($users->take(2), $users->count(), 2);
 
-            return new class($page, JsonResource::class) extends ResourceCollection
-            {
+            return new class($page, JsonResource::class) extends ResourceCollection {
             };
         };
 
@@ -270,7 +269,7 @@ class ResponseTest extends TestCase
         $page = $response->getData();
 
         $this->assertSame([], $page->props->users);
-        $this->assertObjectNotHasAttribute('lazy', $page->props);
+        $this->assertFalse(property_exists($page->props, 'lazy'));
     }
 
     public function test_lazy_props_are_included_in_partial_reload(): void
@@ -288,7 +287,7 @@ class ResponseTest extends TestCase
         $response = $response->toResponse($request);
         $page = $response->getData();
 
-        $this->assertObjectNotHasAttribute('users', $page->props);
+        $this->assertFalse(property_exists($page->props, 'users'));
         $this->assertSame('A lazy value', $page->props->lazy);
     }
 
@@ -361,5 +360,44 @@ class ResponseTest extends TestCase
             ["\x00*\x00_invalid_key" => 'for object'],
             $page['props']['resource']
         );
+    }
+
+    public function test_the_page_url_is_prefixed_with_the_proxy_prefix(): void
+    {
+        if (version_compare(app()->version(), '7', '<')) {
+            $this->markTestSkipped('This test requires Laravel 7 or higher.');
+        }
+
+        Request::setTrustedProxies(['1.2.3.4'], Request::HEADER_X_FORWARDED_PREFIX);
+
+        $request = Request::create('/user/123', 'GET');
+        $request->server->set('REMOTE_ADDR', '1.2.3.4');
+        $request->headers->set('X_FORWARDED_PREFIX', '/sub/directory');
+
+        $user = ['name' => 'Jonathan'];
+        $response = new Response('User/Edit', ['user' => $user], 'app', '123');
+        $response = $response->toResponse($request);
+        $view = $response->getOriginalContent();
+        $page = $view->getData()['page'];
+
+        $this->assertInstanceOf(BaseResponse::class, $response);
+        $this->assertInstanceOf(View::class, $view);
+
+        $this->assertSame('/sub/directory/user/123', $page['url']);
+    }
+
+    public function test_the_page_url_doesnt_double_up(): void
+    {
+        $request = Request::create('/subpath/product/123', 'GET', [], [], [], [
+            'SCRIPT_FILENAME' => '/project/public/index.php',
+            'SCRIPT_NAME' => '/subpath/index.php',
+        ]);
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $response = new Response('Product/Show', []);
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertSame('/subpath/product/123', $page->url);
     }
 }

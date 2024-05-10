@@ -2,11 +2,11 @@
 
 namespace Inertia\Testing;
 
-use Illuminate\Testing\Fluent\AssertableJson;
-use Illuminate\Testing\TestResponse;
 use InvalidArgumentException;
+use Illuminate\Testing\TestResponse;
 use PHPUnit\Framework\Assert as PHPUnit;
 use PHPUnit\Framework\AssertionFailedError;
+use Illuminate\Testing\Fluent\AssertableJson;
 
 class AssertableInertia extends AssertableJson
 {
