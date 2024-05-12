@@ -282,24 +282,31 @@ class ResponseTest extends TestCase
         $request = Request::create('/user/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
         $request->headers->add(['X-Inertia-Partial-Component' => 'User/Edit']);
-        $request->headers->add(['X-Inertia-Partial-Data' => 'partial.nested']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'auth.user.name']);
 
-        $user = (object) ['name' => 'Jonathan'];
-        $partialLazyProp = new LazyProp(function () {
-            return [
-                'nested' => 'partial-data',
-            ];
-        });
+        $props = [
+            'auth' => new LazyProp(function () {
+                return [
+                    'user' => [
+                        'id' => 1,
+                        'name' => 'Jonathan Reinink',
+                        'email' => 'jonathan@example.com'
+                    ],
+                ];
+            }),
+            'shared' => [
+                'flash' => 'Value',
+            ]
+        ];
 
-        $response = new Response('User/Edit', ['user' => $user, 'partial' => $partialLazyProp], 'app', '123');
+        $response = new Response('User/Edit', $props, 'app', '123');
         $response = $response->toResponse($request);
         $page = $response->getData();
 
-        $props = get_object_vars($page->props);
-
-        $this->assertFalse(isset($props['user']));
-        $this->assertCount(1, $props);
-        $this->assertSame('partial-data', $page->props->partial->nested);
+        $this->assertFalse(isset($page->props->shared));
+        $this->assertSame('Jonathan Reinink', $page->props->auth->user->name);
+        $this->assertSame('jonathan@example.com', $page->props->auth->user->email);
+        $this->assertFalse(isset($page->props->auth->user->id));
     }
 
     public function test_nested_lazy_props_not_included_in_partial_reload_should_not_be_unpacked(): void
