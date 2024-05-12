@@ -119,9 +119,7 @@ class Response implements Responsable
         $props = [];
 
         foreach ($only as $key) {
-            [$path, $value] = $this->resolveNestedProperty($request, $this->props, $key);
-
-            Arr::set($props, $path, $value);
+            $this->resolveNestedProperty($props, $request, $this->props, $key, $key);
         }
 
         return $props;
@@ -130,26 +128,27 @@ class Response implements Responsable
     /**
      * Resolve nested partial property.
      */
-    public function resolveNestedProperty(Request $request, array $props, string $key, string $path = '')
+    public function resolveNestedProperty(array &$props, Request $request, array $data, string $key, string $path)
     {
-        $value = data_get($props, $key);
+        $value = data_get($data, $path);
 
         if(!$value) {
             return $this->resolveNestedProperty(
-                $request,
                 $props,
-                Str::beforeLast($key, '.'),
-                Str::after($key, '.')
+                $request,
+                $data,
+                $key,
+                Str::beforeLast($path, '.'),
             );
         }
 
         $value = $this->resolvePropertyInstance($request, $value, false);
 
         if(is_array($value) && $path) {
-            $value = Arr::only($value, $path);
+            $value = data_get($value, Str::after($key, $path . '.'));
         }
 
-        return [$key, $value];
+        Arr::set($props, $key, $value);
     }
 
     /**
@@ -172,9 +171,14 @@ class Response implements Responsable
     }
 
     /**
-     * Resolve a prop instance.
+     * Resolve a property instance.
+     *
+     * @param  Request  $request
+     * @param  mixed  $value
+     * @param  bool  $unpackNested
+     * @return mixed
      */
-    public function resolvePropertyInstance(Request $request, mixed $value, bool $unpackNested = true)
+    public function resolvePropertyInstance($request, $value, $unpackNested = true)
     {
         if ($value instanceof Closure) {
             $value = App::call($value);

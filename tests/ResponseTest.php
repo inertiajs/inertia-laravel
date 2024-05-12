@@ -282,7 +282,7 @@ class ResponseTest extends TestCase
         $request = Request::create('/user/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
         $request->headers->add(['X-Inertia-Partial-Component' => 'User/Edit']);
-        $request->headers->add(['X-Inertia-Partial-Data' => 'auth.user.name']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'auth.user.name,auth.user.email']);
 
         $props = [
             'auth' => new LazyProp(function () {
@@ -307,6 +307,28 @@ class ResponseTest extends TestCase
         $this->assertSame('Jonathan Reinink', $page->props->auth->user->name);
         $this->assertSame('jonathan@example.com', $page->props->auth->user->email);
         $this->assertFalse(isset($page->props->auth->user->id));
+    }
+
+    public function test_missing_props_are_null_on_nested_partial_reload(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'User/Edit']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'auth.user.email']);
+
+        $props = [
+            'auth' => [
+                'user' => [
+                    'name' => 'Jonathan Reinink',
+                ],
+            ],
+        ];
+
+        $response = new Response('User/Edit', $props, 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertNull($page->props->auth->user->email);
     }
 
     public function test_nested_lazy_props_not_included_in_partial_reload_should_not_be_unpacked(): void
