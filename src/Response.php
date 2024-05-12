@@ -90,7 +90,7 @@ class Response implements Responsable
         $only = array_filter(explode(',', $request->header('X-Inertia-Partial-Data', '')));
 
         $props = ($only && $request->header('X-Inertia-Partial-Component') === $this->component)
-            ? Arr::only($this->props, $only)
+            ? $this->resolveOnly($request, $only)
             : array_filter($this->props, static function ($prop) {
                 return ! ($prop instanceof LazyProp);
             });
@@ -112,34 +112,53 @@ class Response implements Responsable
     }
 
     /**
+     * Resolve partial props, including nested Lazy properties.
+     */
+    public function resolveOnly(Request $request, array $only): array
+    {
+        $props = [];
+
+        foreach ($only as $key) {
+            [$path, $value] = $this->resolveNestedProperty($request, $this->props, $key);
+
+            Arr::set($props, $path, $value);
+        }
+
+        return $props;
+    }
+
+    /**
+     * Resolve nested partial property.
+     */
+    public function resolveNestedProperty(Request $request, array $props, string $key, string $path = '')
+    {
+        $value = data_get($props, $key);
+
+        if(!$value) {
+            return $this->resolveNestedProperty(
+                $request,
+                $props,
+                Str::beforeLast($key, '.'),
+                Str::after($key, '.')
+            );
+        }
+
+        $value = $this->resolvePropertyInstance($request, $value, false);
+
+        if(is_array($value) && $path) {
+            $value = Arr::only($value, $path);
+        }
+
+        return [$key, $value];
+    }
+
+    /**
      * Resolve all necessary class instances in the given props.
      */
     public function resolvePropertyInstances(array $props, Request $request, bool $unpackDotProps = true): array
     {
         foreach ($props as $key => $value) {
-            if ($value instanceof Closure) {
-                $value = App::call($value);
-            }
-
-            if ($value instanceof LazyProp) {
-                $value = App::call($value);
-            }
-
-            if ($value instanceof PromiseInterface) {
-                $value = $value->wait();
-            }
-
-            if ($value instanceof ResourceResponse || $value instanceof JsonResource) {
-                $value = $value->toResponse($request)->getData(true);
-            }
-
-            if ($value instanceof Arrayable) {
-                $value = $value->toArray();
-            }
-
-            if (is_array($value)) {
-                $value = $this->resolvePropertyInstances($value, $request, false);
-            }
+            $value = $this->resolvePropertyInstance($request, $value);
 
             if ($unpackDotProps && str_contains($key, '.')) {
                 Arr::set($props, $key, $value);
@@ -150,5 +169,37 @@ class Response implements Responsable
         }
 
         return $props;
+    }
+
+    /**
+     * Resolve a prop instance.
+     */
+    public function resolvePropertyInstance(Request $request, mixed $value, bool $unpackNested = true)
+    {
+        if ($value instanceof Closure) {
+            $value = App::call($value);
+        }
+
+        if ($value instanceof LazyProp) {
+            $value = App::call($value);
+        }
+
+        if ($value instanceof PromiseInterface) {
+            $value = $value->wait();
+        }
+
+        if ($value instanceof ResourceResponse || $value instanceof JsonResource) {
+            $value = $value->toResponse($request)->getData(true);
+        }
+
+        if ($value instanceof Arrayable) {
+            $value = $value->toArray();
+        }
+
+        if (is_array($value) && $unpackNested) {
+            $value = $this->resolvePropertyInstances($value, $request, false);
+        }
+
+        return $value;
     }
 }
