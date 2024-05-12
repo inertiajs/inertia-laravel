@@ -2,6 +2,7 @@
 
 namespace Inertia\Tests;
 
+use Exception;
 use Mockery;
 use Inertia\LazyProp;
 use Inertia\Response;
@@ -253,6 +254,79 @@ class ResponseTest extends TestCase
         $this->assertSame('partial-data', $page->props->partial);
         $this->assertSame('/user/123', $page->url);
         $this->assertSame('123', $page->version);
+    }
+
+    public function test_nested_partial_props(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'User/Edit']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'partial.nested']);
+
+        $user = (object) ['name' => 'Jonathan'];
+        $partialProp = ['nested' => 'partial-data'];
+
+        $response = new Response('User/Edit', ['user' => $user, 'partial' => $partialProp], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $props = get_object_vars($page->props);
+
+        $this->assertFalse(isset($props['user']));
+        $this->assertCount(1, $props);
+        $this->assertSame('partial-data', $page->props->partial->nested);
+    }
+
+    public function test_nested_lazy_props_are_included_in_partial_reload(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'User/Edit']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'partial.nested']);
+
+        $user = (object) ['name' => 'Jonathan'];
+        $partialLazyProp = new LazyProp(function () {
+            return [
+                'nested' => 'partial-data',
+            ];
+        });
+
+        $response = new Response('User/Edit', ['user' => $user, 'partial' => $partialLazyProp], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $props = get_object_vars($page->props);
+
+        $this->assertFalse(isset($props['user']));
+        $this->assertCount(1, $props);
+        $this->assertSame('partial-data', $page->props->partial->nested);
+    }
+
+    public function test_nested_lazy_props_not_included_in_partial_reload_should_not_be_unpacked(): void
+    {
+        $request = Request::create('/users', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'Users']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'lazy.valid']);
+
+        $validProp = new LazyProp(function () {
+            return 'A lazy value';
+        });
+
+        $invalidProp = new LazyProp(function () {
+            throw new Exception;
+        });
+
+        $lazyProp = new LazyProp(function () use ($validProp, $invalidProp) {
+            return ['valid' => $validProp, 'invalid' => $invalidProp];
+        });
+
+        $response = new Response('Users', ['lazy' => $lazyProp], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertFalse(isset($page->props->lazy->invalid));
+        $this->assertSame('A lazy value', $page->props->lazy->valid);
     }
 
     public function test_lazy_props_are_not_included_by_default(): void
