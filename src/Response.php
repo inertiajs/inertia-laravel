@@ -90,7 +90,6 @@ class Response implements Responsable
     {
         $props = $this->resolveProperties($request, $this->props);
 
-
         $page = [
             'component' => $this->component,
             'props' => $props,
@@ -105,6 +104,9 @@ class Response implements Responsable
         return ResponseFactory::view($this->rootView, $this->viewData + ['page' => $page]);
     }
 
+    /**
+     * Resolve properties.
+     */
     public function resolveProperties(Request $request, array $props): array
     {
         $isPartial = $request->header(Header::PARTIAL_COMPONENT) === $this->component;
@@ -126,6 +128,9 @@ class Response implements Responsable
         return $props;
     }
 
+    /**
+     * Resolve `only` partial request.
+     */
     public function resolveOnly(Request $request, array $props): array
     {
         $only = array_filter(explode(',', $request->header(Header::PARTIAL_ONLY, '')));
@@ -139,6 +144,9 @@ class Response implements Responsable
         return $value;
     }
 
+    /**
+     * Resolve all arrayables properties into an array.
+     */
     public function resolveArrayableProperties(array $props, Request $request, bool $unpackDotProps = true): array
     {
         foreach ($props as $key => $value) {
