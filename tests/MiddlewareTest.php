@@ -239,10 +239,39 @@ class MiddlewareTest extends TestCase
         $response->assertViewIs('welcome');
     }
 
-    private function prepareMockEndpoint($version = null, $shared = [], $middleware = null): \Illuminate\Routing\Route
+    public function test_middleware_can_set_persisted_properties(): void
+    {
+        $shared = [
+            'shared' => [
+                'flash' => 'The user has been updated.'
+            ]
+        ];
+
+        $this->prepareMockEndpoint(null, $shared, null, ['shared']);
+
+        $response = $this->get('/', [
+            'X-Inertia' => 'true',
+            'X-Inertia-Partial-Component' => 'User/Edit',
+            'X-Inertia-Partial-Data' => 'user'
+        ]);
+
+        $response->assertOk();
+        $response->assertJson([
+            'props' => [
+                'shared' => [
+                    'flash' => 'The user has been updated.'
+                ],
+                'user' => [
+                    'name' => 'Jonathan',
+                ]
+            ]
+        ]);
+    }
+
+    private function prepareMockEndpoint($version = null, $shared = [], $middleware = null, $persisted = []): \Illuminate\Routing\Route
     {
         if (is_null($middleware)) {
-            $middleware = new ExampleMiddleware($version, $shared);
+            $middleware = new ExampleMiddleware($version, $shared, $persisted);
         }
 
         return Route::middleware(StartSession::class)->get('/', function (Request $request) use ($middleware) {
