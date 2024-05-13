@@ -13,6 +13,7 @@ use Illuminate\Testing\TestResponse;
 use Inertia\Testing\TestResponseMacros;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use Illuminate\Foundation\Testing\TestResponse as LegacyTestResponse;
+use Inertia\Support\Header;
 
 class ServiceProvider extends BaseServiceProvider
 {
@@ -73,7 +74,7 @@ class ServiceProvider extends BaseServiceProvider
     protected function registerRequestMacro(): void
     {
         Request::macro('inertia', function () {
-            return (bool) $this->header('X-Inertia');
+            return (bool) $this->header(Header::INERTIA);
         });
     }
 
