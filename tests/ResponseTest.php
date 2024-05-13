@@ -2,6 +2,7 @@
 
 namespace Inertia\Tests;
 
+use Exception;
 use Mockery;
 use Inertia\LazyProp;
 use Inertia\Response;
@@ -253,6 +254,40 @@ class ResponseTest extends TestCase
         $this->assertSame('partial-data', $page->props->partial);
         $this->assertSame('/user/123', $page->url);
         $this->assertSame('123', $page->version);
+    }
+
+    public function test_nested_partial_props(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'User/Edit']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'auth.user,auth.refresh_token']);
+
+        $props = [
+            'auth' => [
+                'user' => new LazyProp(function () {
+                    return [
+                        'name' => 'Jonathan Reinink',
+                        'email' => 'jonathan@example.com',
+                    ];
+                }),
+                'refresh_token' => 'value',
+                'token' => 'value',
+            ],
+            'shared' => [
+                'flash' => 'Value',
+            ]
+        ];
+
+        $response = new Response('User/Edit', $props);
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertFalse(isset($page->props->shared));
+        $this->assertFalse(isset($page->props->auth->token));
+        $this->assertSame('Jonathan Reinink', $page->props->auth->user->name);
+        $this->assertSame('jonathan@example.com', $page->props->auth->user->email);
+        $this->assertSame('value', $page->props->auth->refresh_token);
     }
 
     public function test_lazy_props_are_not_included_by_default(): void

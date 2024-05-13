@@ -5,6 +5,7 @@ namespace Inertia;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
+use Inertia\Support\Header;
 use Symfony\Component\HttpFoundation\Response;
 
 class Middleware
@@ -85,13 +86,13 @@ class Middleware
         Inertia::setRootView($this->rootView($request));
 
         $response = $next($request);
-        $response->headers->set('Vary', 'X-Inertia');
+        $response->headers->set('Vary', Header::INERTIA);
 
-        if (! $request->header('X-Inertia')) {
+        if (! $request->header(Header::INERTIA)) {
             return $response;
         }
 
-        if ($request->method() === 'GET' && $request->header('X-Inertia-Version', '') !== Inertia::getVersion()) {
+        if ($request->method() === 'GET' && $request->header(Header::VERSION, '') !== Inertia::getVersion()) {
             $response = $this->onVersionChange($request, $response);
         }
 
@@ -145,8 +146,8 @@ class Middleware
                 return $errors[0];
             })->toArray();
         })->pipe(function ($bags) use ($request) {
-            if ($bags->has('default') && $request->header('x-inertia-error-bag')) {
-                return [$request->header('x-inertia-error-bag') => $bags->get('default')];
+            if ($bags->has('default') && $request->header(Header::ERROR_BAG)) {
+                return [$request->header(Header::ERROR_BAG) => $bags->get('default')];
             }
 
             if ($bags->has('default')) {
