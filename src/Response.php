@@ -129,22 +129,6 @@ class Response implements Responsable
     }
 
     /**
-     * Resolve the `only` partial request props.
-     */
-    public function resolveOnly(Request $request, array $props): array
-    {
-        $only = array_filter(explode(',', $request->header(Header::PARTIAL_ONLY, '')));
-
-        $value = [];
-
-        foreach($only as $key) {
-            Arr::set($value, $key, data_get($props, $key));
-        }
-
-        return $value;
-    }
-
-    /**
      * Resolve all arrayables properties into an array.
      */
     public function resolveArrayableProperties(array $props, Request $request, bool $unpackDotProps = true): array
@@ -167,6 +151,22 @@ class Response implements Responsable
         }
 
         return $props;
+    }
+
+    /**
+     * Resolve the `only` partial request props.
+     */
+    public function resolveOnly(Request $request, array $props): array
+    {
+        $only = array_filter(explode(',', $request->header(Header::PARTIAL_ONLY, '')));
+
+        $value = [];
+
+        foreach($only as $key) {
+            Arr::set($value, $key, data_get($props, $key));
+        }
+
+        return $value;
     }
 
     /**
