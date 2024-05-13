@@ -105,7 +105,7 @@ class Response implements Responsable
     }
 
     /**
-     * Resolve properties.
+     * Resolve the properites for the response.
      */
     public function resolveProperties(Request $request, array $props): array
     {
@@ -129,7 +129,7 @@ class Response implements Responsable
     }
 
     /**
-     * Resolve `only` partial request.
+     * Resolve the `only` partial request props.
      */
     public function resolveOnly(Request $request, array $props): array
     {
