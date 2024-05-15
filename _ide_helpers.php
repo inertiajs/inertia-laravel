@@ -33,6 +33,18 @@ namespace Illuminate\Foundation\Testing {
 namespace Illuminate\Support\Facades {
 
     /**
+     * @see \Inertia\ServiceProvider
+     *
+     * @method static bool inertia()
+     */
+    class Request
+    {
+        //
+    }
+
+    /**
+     * @see \Inertia\ServiceProvider
+     *
      * @method static self inertia(string $uri, string $component, array $props = [])
      */
     class Route
@@ -41,9 +53,24 @@ namespace Illuminate\Support\Facades {
     }
 }
 
+namespace Illuminate\Http {
+
+    /**
+     * @see \Inertia\ServiceProvider
+     *
+     * @method bool inertia()
+     */
+    class Request
+    {
+        //
+    }
+}
+
 namespace Illuminate\Routing {
 
     /**
+     * @see \Inertia\ServiceProvider
+     *
      * @method self inertia(string $uri, string $component, array $props = [])
      */
     class Router
