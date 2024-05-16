@@ -1,6 +1,11 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v1.0.0...1.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v1.1.0...1.x)
+
+## [v1.1.0](https://github.com/inertiajs/inertia-laravel/compare/v1.0.0...v1.1.0) - 2024-05-16
+
+* Support dot notation in partial requests by [@lepikhinb](https://github.com/lepikhinb) in https://github.com/inertiajs/inertia-laravel/pull/620
+* [1.x] Add `$request->inertia()` IDE helper by [@ycs77](https://github.com/ycs77) in https://github.com/inertiajs/inertia-laravel/pull/625
 
 ## [v1.0.0](https://github.com/inertiajs/inertia-laravel/compare/v0.6.11...v1.0.0) - 2024-03-08
 
