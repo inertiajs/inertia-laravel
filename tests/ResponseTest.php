@@ -256,6 +256,29 @@ class ResponseTest extends TestCase
         $this->assertSame('123', $page->version);
     }
 
+    public function test_exclude_props_from_partial_response(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'User/Edit']);
+        $request->headers->add(['X-Inertia-Partial-Except' => 'user']);
+
+        $user = (object) ['name' => 'Jonathan'];
+        $response = new Response('User/Edit', ['user' => $user, 'partial' => 'partial-data'], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $props = get_object_vars($page->props);
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertSame('User/Edit', $page->component);
+        $this->assertFalse(isset($props['user']));
+        $this->assertCount(1, $props);
+        $this->assertSame('partial-data', $page->props->partial);
+        $this->assertSame('/user/123', $page->url);
+        $this->assertSame('123', $page->version);
+    }
+
     public function test_nested_partial_props(): void
     {
         $request = Request::create('/user/123', 'GET');
@@ -275,8 +298,8 @@ class ResponseTest extends TestCase
                 'token' => 'value',
             ],
             'shared' => [
-                'flash' => 'Value',
-            ]
+                'flash' => 'value',
+            ],
         ];
 
         $response = new Response('User/Edit', $props);
@@ -287,6 +310,38 @@ class ResponseTest extends TestCase
         $this->assertFalse(isset($page->props->auth->token));
         $this->assertSame('Jonathan Reinink', $page->props->auth->user->name);
         $this->assertSame('jonathan@example.com', $page->props->auth->user->email);
+        $this->assertSame('value', $page->props->auth->refresh_token);
+    }
+
+    public function test_exclude_nested_props_from_partial_response(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'User/Edit']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'auth']);
+        $request->headers->add(['X-Inertia-Partial-Except' => 'auth.user']);
+
+        $props = [
+            'auth' => [
+                'user' => new LazyProp(function () {
+                    return [
+                        'name' => 'Jonathan Reinink',
+                        'email' => 'jonathan@example.com',
+                    ];
+                }),
+                'refresh_token' => 'value',
+            ],
+            'shared' => [
+                'flash' => 'value',
+            ],
+        ];
+
+        $response = new Response('User/Edit', $props);
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertFalse(isset($page->props->auth->user));
+        $this->assertFalse(isset($page->props->shared));
         $this->assertSame('value', $page->props->auth->refresh_token);
     }
 
