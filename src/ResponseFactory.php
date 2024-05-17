@@ -24,6 +24,9 @@ class ResponseFactory
     /** @var array */
     protected $sharedProps = [];
 
+    /** @var array */
+    protected $persisted = [];
+
     /** @var Closure|string|null */
     protected $version;
 
@@ -67,6 +70,30 @@ class ResponseFactory
     }
 
     /**
+     * @param string|array|Arrayable $props
+     */
+    public function persist($props): void
+    {
+        if (is_array($props)) {
+            $this->persisted = array_merge($this->persisted, $props);
+        } elseif ($props instanceof Arrayable) {
+            $this->persisted = array_merge($this->persisted, $props->toArray());
+        } else {
+            $this->persisted[] = $props;
+        }
+    }
+
+    public function getPersisted(): array
+    {
+        return $this->persisted;
+    }
+
+    public function flushPersisted(): void
+    {
+        $this->persisted = [];
+    }
+
+    /**
      * @param Closure|string|null $version
      */
     public function version($version): void
@@ -101,7 +128,8 @@ class ResponseFactory
             $component,
             array_merge($this->sharedProps, $props),
             $this->rootView,
-            $this->getVersion()
+            $this->getVersion(),
+            $this->persisted
         );
     }
 
