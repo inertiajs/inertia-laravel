@@ -113,7 +113,7 @@ class Response implements Responsable
     {
         $isPartial = $request->header(Header::PARTIAL_COMPONENT) === $this->component;
 
-        if(!$isPartial) {
+        if(! $isPartial) {
             $props = array_filter($this->props, static function ($prop) {
                 return ! ($prop instanceof LazyProp);
             });
@@ -123,6 +123,10 @@ class Response implements Responsable
 
         if($isPartial && $request->hasHeader(Header::PARTIAL_ONLY)) {
             $props = $this->resolveOnly($request, $props);
+        }
+
+        if($isPartial && $request->hasHeader(Header::PARTIAL_EXCEPT)) {
+            $props = $this->resolveExcept($request, $props);
         }
 
         $props = $this->resolvePropertyInstances($props, $request);
@@ -172,6 +176,18 @@ class Response implements Responsable
         }
 
         return $value;
+    }
+
+    /**
+     * Resolve the `except` partial request props.
+     */
+    public function resolveExcept(Request $request, array $props): array
+    {
+        $except = array_filter(explode(',', $request->header(Header::PARTIAL_EXCEPT, '')));
+
+        Arr::forget($props, $except);
+
+        return $props;
     }
 
     /**
