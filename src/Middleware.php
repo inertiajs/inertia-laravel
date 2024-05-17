@@ -20,6 +20,8 @@ class Middleware
     protected $rootView = 'app';
 
     /**
+     * The properties that should always be included on Inertia responses, regardless of "only" or "except" requests.
+     *
      * @var array
      */
     protected $persisted = [];
