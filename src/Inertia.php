@@ -18,6 +18,9 @@ use Illuminate\Support\Facades\Facade;
  * @method static void mixin(object $mixin, bool $replace = true)
  * @method static bool hasMacro(string $name)
  * @method static void flushMacros()
+ * @method static void persist(string|array|\Illuminate\Contracts\Support\Arrayable $props)
+ * @method static array getPersisted()
+ * @method static void flushPersisted()
  *
  * @see \Inertia\ResponseFactory
  */

@@ -23,6 +23,7 @@ class Response implements Responsable
 
     protected $component;
     protected $props;
+    protected $persisted;
     protected $rootView;
     protected $version;
     protected $viewData = [];
@@ -30,10 +31,11 @@ class Response implements Responsable
     /**
      * @param array|Arrayable $props
      */
-    public function __construct(string $component, $props, string $rootView = 'app', string $version = '')
+    public function __construct(string $component, array $props, string $rootView = 'app', string $version = '', array $persisted = [])
     {
         $this->component = $component;
         $this->props = $props instanceof Arrayable ? $props->toArray() : $props;
+        $this->persisted = $persisted;
         $this->rootView = $rootView;
         $this->version = $version;
     }
@@ -158,7 +160,10 @@ class Response implements Responsable
      */
     public function resolveOnly(Request $request, array $props): array
     {
-        $only = array_filter(explode(',', $request->header(Header::PARTIAL_ONLY, '')));
+        $only = array_merge(
+            array_filter(explode(',', $request->header(Header::PARTIAL_ONLY, ''))),
+            $this->persisted
+        );
 
         $value = [];
 

@@ -326,6 +326,40 @@ class ResponseTest extends TestCase
         $this->assertSame('A lazy value', $page->props->lazy);
     }
 
+    public function test_persist_props_on_partial_reload(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'User/Edit']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'data']);
+
+        $props = [
+            'auth' => [
+                'user' => new LazyProp(function () {
+                    return [
+                        'name' => 'Jonathan Reinink',
+                        'email' => 'jonathan@example.com',
+                    ];
+                }),
+                'token' => 'value',
+            ],
+            'data' => [
+                'name' => 'Taylor Otwell',
+                'email' => 'taylor@example.com',
+            ]
+        ];
+
+        $response = new Response('User/Edit', $props, 'app', '123', ['auth.user']);
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertFalse(isset($page->props->auth->token));
+        $this->assertSame('Jonathan Reinink', $page->props->auth->user->name);
+        $this->assertSame('jonathan@example.com', $page->props->auth->user->email);
+        $this->assertSame('Taylor Otwell', $page->props->data->name);
+        $this->assertSame('taylor@example.com', $page->props->data->email);
+    }
+
     public function test_top_level_dot_props_get_unpacked(): void
     {
         $props = [

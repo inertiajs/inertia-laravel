@@ -150,6 +150,22 @@ class ResponseFactoryTest extends TestCase
         $this->assertSame([], Inertia::getShared());
     }
 
+    public function test_can_persist_properties(): void
+    {
+        Inertia::persist('auth.user');
+        $this->assertSame(['auth.user'], Inertia::getPersisted());
+        Inertia::persist(['posts']);
+        $this->assertSame(['auth.user', 'posts'], Inertia::getPersisted());
+    }
+
+    public function test_can_flush_persisted_data(): void
+    {
+        Inertia::persist('auth.user');
+        $this->assertSame(['auth.user'], Inertia::getPersisted());
+        Inertia::flushPersisted();
+        $this->assertSame([], Inertia::getPersisted());
+    }
+
     public function test_can_create_lazy_prop(): void
     {
         $factory = new ResponseFactory();

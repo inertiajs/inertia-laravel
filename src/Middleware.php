@@ -20,6 +20,13 @@ class Middleware
     protected $rootView = 'app';
 
     /**
+     * The properties that should always be included on Inertia responses, regardless of "only" or "except" requests.
+     *
+     * @var array
+     */
+    protected $persisted = [];
+
+    /**
      * Determines the current asset version.
      *
      * @see https://inertiajs.com/asset-versioning
@@ -83,6 +90,7 @@ class Middleware
         });
 
         Inertia::share($this->share($request));
+        Inertia::persist($this->persisted);
         Inertia::setRootView($this->rootView($request));
 
         $response = $next($request);

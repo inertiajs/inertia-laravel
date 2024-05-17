@@ -19,10 +19,16 @@ class ExampleMiddleware extends Middleware
      */
     protected $shared = [];
 
-    public function __construct($version = null, $shared = [])
+    /**
+     * @var array
+     */
+    protected $persisted = [];
+
+    public function __construct($version = null, $shared = [], $persisted = [])
     {
         $this->version = $version;
         $this->shared = $shared;
+        $this->persisted = $persisted;
     }
 
     /**
