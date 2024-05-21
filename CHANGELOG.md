@@ -1,6 +1,12 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v1.1.0...1.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v1.2.0...1.x)
+
+## [v1.2.0](https://github.com/inertiajs/inertia-laravel/compare/v1.1.0...v1.2.0) - 2024-05-17
+
+* [1.x] Make commands lazy by [@timacdonald](https://github.com/timacdonald) in https://github.com/inertiajs/inertia-laravel/pull/601
+* [1.x] Persistent properties by [@lepikhinb](https://github.com/lepikhinb) in https://github.com/inertiajs/inertia-laravel/pull/621
+* [1.x] Exclude properties from partial responses by [@lepikhinb](https://github.com/lepikhinb) in https://github.com/inertiajs/inertia-laravel/pull/622
 
 ## [v1.1.0](https://github.com/inertiajs/inertia-laravel/compare/v1.0.0...v1.1.0) - 2024-05-16
 
