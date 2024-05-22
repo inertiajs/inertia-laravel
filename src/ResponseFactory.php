@@ -5,6 +5,7 @@ namespace Inertia;
 use Closure;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Traits\Macroable;
 use Illuminate\Contracts\Support\Arrayable;
@@ -29,6 +30,13 @@ class ResponseFactory
 
     /** @var Closure|string|null */
     protected $version;
+
+    public function __construct()
+    {
+        $configuredRootView = Config::get('inertia.root_view', 'app');
+
+        $this->setRootView($configuredRootView);
+    }
 
     public function setRootView(string $name): void
     {
