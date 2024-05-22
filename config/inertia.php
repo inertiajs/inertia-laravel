@@ -4,7 +4,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Server Side Rendering
+    | Default Root View
     |--------------------------------------------------------------------------
     |
     | This options configures which view should be set as default root view.
