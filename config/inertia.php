@@ -7,6 +7,19 @@ return [
     | Server Side Rendering
     |--------------------------------------------------------------------------
     |
+    | This options configures which view should be set as default root view.
+    | By default is program is set to look for `resources/views/app.blade.php`.
+    | Can be changed on using `Inertia::setRootView()` method anytime.
+    |
+    */
+
+    'root_view' => 'app',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Server Side Rendering
+    |--------------------------------------------------------------------------
+    |
     | These options configures if and how Inertia uses Server Side Rendering
     | to pre-render the initial visits made to your application's pages.
     |
