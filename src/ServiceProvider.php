@@ -19,13 +19,13 @@ class ServiceProvider extends BaseServiceProvider
 {
     public function register(): void
     {
-        $this->app->singleton(ResponseFactory::class);
-        $this->app->bind(Gateway::class, HttpGateway::class);
-
         $this->mergeConfigFrom(
             __DIR__.'/../config/inertia.php',
             'inertia'
         );
+
+        $this->app->singleton(ResponseFactory::class);
+        $this->app->bind(Gateway::class, HttpGateway::class);
 
         $this->registerBladeDirectives();
         $this->registerRequestMacro();
