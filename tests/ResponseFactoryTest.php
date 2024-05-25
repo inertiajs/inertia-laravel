@@ -2,20 +2,20 @@
 
 namespace Inertia\Tests;
 
-use Inertia\Inertia;
-use Inertia\LazyProp;
-use Inertia\ResponseFactory;
-use Illuminate\Http\Response;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Request;
-use Inertia\Tests\Stubs\ExampleMiddleware;
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request as HttpRequest;
+use Illuminate\Http\Response;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Session\NullSessionHandler;
 use Illuminate\Session\Store;
+use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Route;
 use Inertia\AlwaysProp;
+use Inertia\Inertia;
+use Inertia\LazyProp;
+use Inertia\ResponseFactory;
+use Inertia\Tests\Stubs\ExampleMiddleware;
 
 class ResponseFactoryTest extends TestCase
 {
@@ -176,7 +176,8 @@ class ResponseFactoryTest extends TestCase
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
             Inertia::share('foo', 'bar');
 
-            return Inertia::render('User/Edit', new class() implements Arrayable {
+            return Inertia::render('User/Edit', new class() implements Arrayable
+            {
                 public function toArray()
                 {
                     return [

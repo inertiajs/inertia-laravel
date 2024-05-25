@@ -36,11 +36,10 @@ trait Has
     }
 
     /**
-     * @param mixed $value
-     *
+     * @param  mixed  $value
      * @return $this
      */
-    public function has(string $key, $value = null, Closure $scope = null): self
+    public function has(string $key, $value = null, ?Closure $scope = null): self
     {
         PHPUnit::assertTrue(
             Arr::has($this->prop(), $key),
@@ -108,7 +107,7 @@ trait Has
         return $this->missing($key);
     }
 
-    abstract protected function prop(string $key = null);
+    abstract protected function prop(?string $key = null);
 
     abstract protected function dotPath(string $key): string;
 

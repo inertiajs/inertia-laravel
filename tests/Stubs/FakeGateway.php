@@ -2,9 +2,9 @@
 
 namespace Inertia\Tests\Stubs;
 
+use Illuminate\Support\Facades\Config;
 use Inertia\Ssr\Gateway;
 use Inertia\Ssr\Response;
-use Illuminate\Support\Facades\Config;
 
 class FakeGateway implements Gateway
 {

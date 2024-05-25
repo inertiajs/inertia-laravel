@@ -6,14 +6,14 @@
 
 ## [v1.2.0](https://github.com/inertiajs/inertia-laravel/compare/v1.1.0...v1.2.0) - 2024-05-17
 
-* [1.x] Make commands lazy by [@timacdonald](https://github.com/timacdonald) in https://github.com/inertiajs/inertia-laravel/pull/601
-* [1.x] Persistent properties by [@lepikhinb](https://github.com/lepikhinb) in https://github.com/inertiajs/inertia-laravel/pull/621
-* [1.x] Exclude properties from partial responses by [@lepikhinb](https://github.com/lepikhinb) in https://github.com/inertiajs/inertia-laravel/pull/622
+- Make commands lazy by [@timacdonald](https://github.com/timacdonald) in https://github.com/inertiajs/inertia-laravel/pull/601
+- Persistent properties by [@lepikhinb](https://github.com/lepikhinb) in https://github.com/inertiajs/inertia-laravel/pull/621
+- Exclude properties from partial responses by [@lepikhinb](https://github.com/lepikhinb) in https://github.com/inertiajs/inertia-laravel/pull/622
 
 ## [v1.1.0](https://github.com/inertiajs/inertia-laravel/compare/v1.0.0...v1.1.0) - 2024-05-16
 
-* Support dot notation in partial requests by [@lepikhinb](https://github.com/lepikhinb) in https://github.com/inertiajs/inertia-laravel/pull/620
-* [1.x] Add `$request->inertia()` IDE helper by [@ycs77](https://github.com/ycs77) in https://github.com/inertiajs/inertia-laravel/pull/625
+- Support dot notation in partial requests by [@lepikhinb](https://github.com/lepikhinb) in https://github.com/inertiajs/inertia-laravel/pull/620
+- Add `$request->inertia()` IDE helper by [@ycs77](https://github.com/ycs77) in https://github.com/inertiajs/inertia-laravel/pull/625
 
 ## [v1.0.0](https://github.com/inertiajs/inertia-laravel/compare/v0.6.11...v1.0.0) - 2024-03-08
 

@@ -2,20 +2,20 @@
 
 namespace Inertia\Tests;
 
-use Mockery;
-use Inertia\LazyProp;
-use Inertia\Response;
-use Illuminate\View\View;
-use Illuminate\Http\Request;
-use Illuminate\Support\Fluent;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Collection;
-use Inertia\Tests\Stubs\FakeResource;
-use Illuminate\Http\Response as BaseResponse;
-use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
+use Illuminate\Http\Response as BaseResponse;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Fluent;
+use Illuminate\View\View;
 use Inertia\AlwaysProp;
+use Inertia\LazyProp;
+use Inertia\Response;
+use Inertia\Tests\Stubs\FakeResource;
+use Mockery;
 
 class ResponseTest extends TestCase
 {
@@ -98,7 +98,8 @@ class ResponseTest extends TestCase
         $callable = static function () use ($users) {
             $page = new LengthAwarePaginator($users->take(2), $users->count(), 2);
 
-            return new class($page, JsonResource::class) extends ResourceCollection {
+            return new class($page, JsonResource::class) extends ResourceCollection
+            {
             };
         };
 
@@ -152,7 +153,9 @@ class ResponseTest extends TestCase
 
             // nested array with ResourceCollection to resolve
             return [
-                'users' => new class($page, JsonResource::class) extends ResourceCollection {},
+                'users' => new class($page, JsonResource::class) extends ResourceCollection
+                {
+                },
             ];
         };
 
@@ -400,9 +403,9 @@ class ResponseTest extends TestCase
             ],
             'errors' => new AlwaysProp(function () {
                 return [
-                    'name' => 'The email field is required.'
+                    'name' => 'The email field is required.',
                 ];
-            })
+            }),
         ];
 
         $response = new Response('User/Edit', $props, 'app', '123');

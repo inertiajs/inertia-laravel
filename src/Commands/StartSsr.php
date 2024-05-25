@@ -2,9 +2,9 @@
 
 namespace Inertia\Commands;
 
-use Inertia\Ssr\SsrException;
 use Illuminate\Console\Command;
 use Inertia\Ssr\BundleDetector;
+use Inertia\Ssr\SsrException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Process\Process;
 

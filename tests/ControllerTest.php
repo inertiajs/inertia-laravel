@@ -2,10 +2,10 @@
 
 namespace Inertia\Tests;
 
-use Inertia\Controller;
-use Illuminate\Support\Facades\Route;
-use Inertia\Tests\Stubs\ExampleMiddleware;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Route;
+use Inertia\Controller;
+use Inertia\Tests\Stubs\ExampleMiddleware;
 
 class ControllerTest extends TestCase
 {
