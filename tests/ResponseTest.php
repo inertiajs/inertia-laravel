@@ -2,7 +2,6 @@
 
 namespace Inertia\Tests;
 
-use Exception;
 use Mockery;
 use Inertia\LazyProp;
 use Inertia\Response;
@@ -16,6 +15,7 @@ use Illuminate\Http\Response as BaseResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
+use Inertia\AlwaysProp;
 
 class ResponseTest extends TestCase
 {
@@ -381,7 +381,7 @@ class ResponseTest extends TestCase
         $this->assertSame('A lazy value', $page->props->lazy);
     }
 
-    public function test_persist_props_on_partial_reload(): void
+    public function test_always_props_are_included_on_partial_reload(): void
     {
         $request = Request::create('/user/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
@@ -389,30 +389,29 @@ class ResponseTest extends TestCase
         $request->headers->add(['X-Inertia-Partial-Data' => 'data']);
 
         $props = [
-            'auth' => [
-                'user' => new LazyProp(function () {
-                    return [
-                        'name' => 'Jonathan Reinink',
-                        'email' => 'jonathan@example.com',
-                    ];
-                }),
-                'token' => 'value',
-            ],
+            'user' => new LazyProp(function () {
+                return [
+                    'name' => 'Jonathan Reinink',
+                    'email' => 'jonathan@example.com',
+                ];
+            }),
             'data' => [
                 'name' => 'Taylor Otwell',
-                'email' => 'taylor@example.com',
-            ]
+            ],
+            'errors' => new AlwaysProp(function () {
+                return [
+                    'name' => 'The email field is required.'
+                ];
+            })
         ];
 
-        $response = new Response('User/Edit', $props, 'app', '123', ['auth.user']);
+        $response = new Response('User/Edit', $props, 'app', '123');
         $response = $response->toResponse($request);
         $page = $response->getData();
 
-        $this->assertFalse(isset($page->props->auth->token));
-        $this->assertSame('Jonathan Reinink', $page->props->auth->user->name);
-        $this->assertSame('jonathan@example.com', $page->props->auth->user->email);
+        $this->assertSame('The email field is required.', $page->props->errors->name);
         $this->assertSame('Taylor Otwell', $page->props->data->name);
-        $this->assertSame('taylor@example.com', $page->props->data->email);
+        $this->assertFalse(isset($page->props->user));
     }
 
     public function test_top_level_dot_props_get_unpacked(): void
