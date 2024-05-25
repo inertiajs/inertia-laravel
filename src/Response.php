@@ -23,7 +23,6 @@ class Response implements Responsable
 
     protected $component;
     protected $props;
-    protected $persisted;
     protected $rootView;
     protected $version;
     protected $viewData = [];
@@ -31,11 +30,10 @@ class Response implements Responsable
     /**
      * @param array|Arrayable $props
      */
-    public function __construct(string $component, array $props, string $rootView = 'app', string $version = '', array $persisted = [])
+    public function __construct(string $component, array $props, string $rootView = 'app', string $version = '')
     {
         $this->component = $component;
         $this->props = $props instanceof Arrayable ? $props->toArray() : $props;
-        $this->persisted = $persisted;
         $this->rootView = $rootView;
         $this->version = $version;
     }
@@ -129,6 +127,8 @@ class Response implements Responsable
             $props = $this->resolveExcept($request, $props);
         }
 
+        $props = $this->resolveAlways($props);
+
         $props = $this->resolvePropertyInstances($props, $request);
 
         return $props;
@@ -164,10 +164,7 @@ class Response implements Responsable
      */
     public function resolveOnly(Request $request, array $props): array
     {
-        $only = array_merge(
-            array_filter(explode(',', $request->header(Header::PARTIAL_ONLY, ''))),
-            $this->persisted
-        );
+        $only = array_filter(explode(',', $request->header(Header::PARTIAL_ONLY, '')));
 
         $value = [];
 
@@ -191,6 +188,21 @@ class Response implements Responsable
     }
 
     /**
+     * Resolve `always` properties that should always be included on all visits, regardless of "only" or "except" requests.
+     */
+    public function resolveAlways(array $props): array
+    {
+        $always = array_filter($this->props, static function ($prop) {
+            return $prop instanceof AlwaysProp;
+        });
+
+        return array_merge(
+            $always,
+            $props
+        );
+    }
+
+    /**
      * Resolve all necessary class instances in the given props.
      */
     public function resolvePropertyInstances(array $props, Request $request): array
@@ -201,6 +213,10 @@ class Response implements Responsable
             }
 
             if ($value instanceof LazyProp) {
+                $value = App::call($value);
+            }
+
+            if ($value instanceof AlwaysProp) {
                 $value = App::call($value);
             }
 

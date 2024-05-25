@@ -2,6 +2,8 @@
 
 ## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v1.2.0...1.x)
 
+- Add "always" props using new `Inertia::always()` wrapper ([#627](https://github.com/inertiajs/inertia-laravel/pull/627))
+
 ## [v1.2.0](https://github.com/inertiajs/inertia-laravel/compare/v1.1.0...v1.2.0) - 2024-05-17
 
 * [1.x] Make commands lazy by [@timacdonald](https://github.com/timacdonald) in https://github.com/inertiajs/inertia-laravel/pull/601
