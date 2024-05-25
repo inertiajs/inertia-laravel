@@ -1,0 +1,34 @@
+<?php
+
+namespace Inertia\Tests;
+
+use Illuminate\Http\Request;
+use Inertia\AlwaysProp;
+
+class AlwaysPropTest extends TestCase
+{
+    public function test_can_invoke(): void
+    {
+        $alwaysProp = new AlwaysProp(function () {
+            return 'An always value';
+        });
+
+        $this->assertSame('An always value', $alwaysProp());
+    }
+
+    public function test_can_accept_scalar_values(): void
+    {
+        $alwaysProp = new AlwaysProp('An always value');
+
+        $this->assertSame('An always value', $alwaysProp());
+    }
+
+    public function test_can_resolve_bindings_when_invoked(): void
+    {
+        $alwaysProp = new AlwaysProp(function (Request $request) {
+            return $request;
+        });
+
+        $this->assertInstanceOf(Request::class, $alwaysProp());
+    }
+}
