@@ -88,9 +88,12 @@ class ResponseFactory
         return new LazyProp($callback);
     }
 
-    public function always(callable $callback): AlwaysProp
+    /**
+     * @param mixed $value
+     */
+    public function always($value): AlwaysProp
     {
-        return new AlwaysProp($callback);
+        return new AlwaysProp($value);
     }
 
     /**

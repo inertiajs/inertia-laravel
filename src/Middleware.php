@@ -53,9 +53,7 @@ class Middleware
     public function share(Request $request)
     {
         return [
-            'errors' => new AlwaysProp(function () use ($request) {
-                return $this->resolveValidationErrors($request);
-            }),
+            'errors' => Inertia::always($this->resolveValidationErrors($request)),
         ];
     }
 

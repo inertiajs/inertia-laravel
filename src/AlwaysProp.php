@@ -2,19 +2,21 @@
 
 namespace Inertia;
 
-use Illuminate\Support\Facades\App;
-
 class AlwaysProp
 {
-    protected $callback;
+    /** @var mixed */
+    protected $value;
 
-    public function __construct(callable $callback)
+    /**
+     * @param mixed $value
+     */
+    public function __construct($value)
     {
-        $this->callback = $callback;
+        $this->value = $value;
     }
 
     public function __invoke()
     {
-        return App::call($this->callback);
+        return value($this->value);
     }
 }
