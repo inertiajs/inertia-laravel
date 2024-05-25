@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static void version(\Closure|string|null $version)
  * @method static string getVersion()
  * @method static \Inertia\LazyProp lazy(callable $callback)
- * @method static \Inertia\AlwaysProp always(callable $callback)
+ * @method static \Inertia\AlwaysProp always(mixed $value)
  * @method static \Inertia\Response render(string $component, array|\Illuminate\Contracts\Support\Arrayable $props = [])
  * @method static \Symfony\Component\HttpFoundation\Response location(string|\Symfony\Component\HttpFoundation\RedirectResponse $url)
  * @method static void macro(string $name, object|callable $macro)
