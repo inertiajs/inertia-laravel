@@ -23,6 +23,19 @@ class AlwaysPropTest extends TestCase
         $this->assertSame('An always value', $alwaysProp());
     }
 
+    public function test_can_accept_callables(): void
+    {
+        $callable = new class {
+            public function __invoke() {
+                return 'An always value';
+            }
+        };
+
+        $alwaysProp = new AlwaysProp($callable);
+
+        $this->assertSame('An always value', $alwaysProp());
+    }
+
     public function test_can_resolve_bindings_when_invoked(): void
     {
         $alwaysProp = new AlwaysProp(function (Request $request) {

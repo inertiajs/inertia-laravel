@@ -2,7 +2,6 @@
 
 namespace Inertia;
 
-use Closure;
 use Illuminate\Support\Facades\App;
 
 class AlwaysProp
@@ -20,6 +19,6 @@ class AlwaysProp
 
     public function __invoke()
     {
-        return $this->value instanceof Closure ? App::call($this->value) : $this->value;
+        return is_callable($this->value) ? App::call($this->value) : $this->value;
     }
 }
