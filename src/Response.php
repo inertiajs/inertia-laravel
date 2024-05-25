@@ -3,18 +3,18 @@
 namespace Inertia;
 
 use Closure;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Str;
 use GuzzleHttp\Promise\PromiseInterface;
-use Illuminate\Support\Traits\Macroable;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Responsable;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceResponse;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Response as ResponseFactory;
+use Illuminate\Support\Str;
+use Illuminate\Support\Traits\Macroable;
 use Inertia\Support\Header;
 
 class Response implements Responsable
@@ -22,13 +22,17 @@ class Response implements Responsable
     use Macroable;
 
     protected $component;
+
     protected $props;
+
     protected $rootView;
+
     protected $version;
+
     protected $viewData = [];
 
     /**
-     * @param array|Arrayable $props
+     * @param  array|Arrayable  $props
      */
     public function __construct(string $component, array $props, string $rootView = 'app', string $version = '')
     {
@@ -39,9 +43,8 @@ class Response implements Responsable
     }
 
     /**
-     * @param string|array $key
-     * @param mixed        $value
-     *
+     * @param  string|array  $key
+     * @param  mixed  $value
      * @return $this
      */
     public function with($key, $value = null): self
@@ -56,9 +59,8 @@ class Response implements Responsable
     }
 
     /**
-     * @param string|array $key
-     * @param mixed        $value
-     *
+     * @param  string|array  $key
+     * @param  mixed  $value
      * @return $this
      */
     public function withViewData($key, $value = null): self
@@ -82,8 +84,7 @@ class Response implements Responsable
     /**
      * Create an HTTP response that represents the object.
      *
-     * @param \Illuminate\Http\Request $request
-     *
+     * @param  \Illuminate\Http\Request  $request
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function toResponse($request)
@@ -111,7 +112,7 @@ class Response implements Responsable
     {
         $isPartial = $request->header(Header::PARTIAL_COMPONENT) === $this->component;
 
-        if(! $isPartial) {
+        if (! $isPartial) {
             $props = array_filter($this->props, static function ($prop) {
                 return ! ($prop instanceof LazyProp);
             });
@@ -119,11 +120,11 @@ class Response implements Responsable
 
         $props = $this->resolveArrayableProperties($props, $request);
 
-        if($isPartial && $request->hasHeader(Header::PARTIAL_ONLY)) {
+        if ($isPartial && $request->hasHeader(Header::PARTIAL_ONLY)) {
             $props = $this->resolveOnly($request, $props);
         }
 
-        if($isPartial && $request->hasHeader(Header::PARTIAL_EXCEPT)) {
+        if ($isPartial && $request->hasHeader(Header::PARTIAL_EXCEPT)) {
             $props = $this->resolveExcept($request, $props);
         }
 
@@ -168,7 +169,7 @@ class Response implements Responsable
 
         $value = [];
 
-        foreach($only as $key) {
+        foreach ($only as $key) {
             Arr::set($value, $key, data_get($props, $key));
         }
 

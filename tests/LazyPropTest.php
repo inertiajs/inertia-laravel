@@ -2,8 +2,8 @@
 
 namespace Inertia\Tests;
 
-use Inertia\LazyProp;
 use Illuminate\Http\Request;
+use Inertia\LazyProp;
 
 class LazyPropTest extends TestCase
 {

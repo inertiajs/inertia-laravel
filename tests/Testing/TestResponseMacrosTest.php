@@ -2,9 +2,9 @@
 
 namespace Inertia\Tests\Testing;
 
+use Illuminate\Testing\Fluent\AssertableJson;
 use Inertia\Inertia;
 use Inertia\Tests\TestCase;
-use Illuminate\Testing\Fluent\AssertableJson;
 
 class TestResponseMacrosTest extends TestCase
 {

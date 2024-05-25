@@ -3,16 +3,16 @@
 namespace Inertia;
 
 use Closure;
+use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Request;
-use Illuminate\Support\Traits\Macroable;
-use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response as BaseResponse;
+use Illuminate\Support\Traits\Macroable;
 use Inertia\Support\Header;
-use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirect;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class ResponseFactory
 {
@@ -33,8 +33,8 @@ class ResponseFactory
     }
 
     /**
-     * @param string|array|Arrayable $key
-     * @param mixed                  $value
+     * @param  string|array|Arrayable  $key
+     * @param  mixed  $value
      */
     public function share($key, $value = null): void
     {
@@ -48,11 +48,10 @@ class ResponseFactory
     }
 
     /**
-     * @param mixed $default
-     *
+     * @param  mixed  $default
      * @return mixed
      */
-    public function getShared(string $key = null, $default = null)
+    public function getShared(?string $key = null, $default = null)
     {
         if ($key) {
             return Arr::get($this->sharedProps, $key, $default);
@@ -67,7 +66,7 @@ class ResponseFactory
     }
 
     /**
-     * @param Closure|string|null $version
+     * @param  Closure|string|null  $version
      */
     public function version($version): void
     {
@@ -89,7 +88,7 @@ class ResponseFactory
     }
 
     /**
-     * @param mixed $value
+     * @param  mixed  $value
      */
     public function always($value): AlwaysProp
     {
@@ -97,7 +96,7 @@ class ResponseFactory
     }
 
     /**
-     * @param array|Arrayable $props
+     * @param  array|Arrayable  $props
      */
     public function render(string $component, $props = []): Response
     {
@@ -114,7 +113,7 @@ class ResponseFactory
     }
 
     /**
-     * @param string|SymfonyRedirect $url
+     * @param  string|SymfonyRedirect  $url
      */
     public function location($url): SymfonyResponse
     {

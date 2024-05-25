@@ -10,7 +10,7 @@ class AlwaysProp
     protected $value;
 
     /**
-     * @param mixed $value
+     * @param  mixed  $value
      */
     public function __construct($value)
     {
