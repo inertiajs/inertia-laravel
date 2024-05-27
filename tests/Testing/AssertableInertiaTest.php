@@ -8,8 +8,7 @@ use PHPUnit\Framework\AssertionFailedError;
 
 class AssertableInertiaTest extends TestCase
 {
-    /** @test */
-    public function the_view_is_served_by_inertia(): void
+    public function test_the_view_is_served_by_inertia(): void
     {
         $response = $this->makeMockRequest(
             Inertia::render('foo')
@@ -18,8 +17,7 @@ class AssertableInertiaTest extends TestCase
         $response->assertInertia();
     }
 
-    /** @test */
-    public function the_view_is_not_served_by_inertia(): void
+    public function test_the_view_is_not_served_by_inertia(): void
     {
         $response = $this->makeMockRequest(view('welcome'));
         $response->assertOk(); // Make sure we can render the built-in Orchestra 'welcome' view..
@@ -30,8 +28,7 @@ class AssertableInertiaTest extends TestCase
         $response->assertInertia();
     }
 
-    /** @test */
-    public function the_component_matches(): void
+    public function test_the_component_matches(): void
     {
         $response = $this->makeMockRequest(
             Inertia::render('foo')
@@ -42,8 +39,7 @@ class AssertableInertiaTest extends TestCase
         });
     }
 
-    /** @test */
-    public function the_component_does_not_match(): void
+    public function test_the_component_does_not_match(): void
     {
         $response = $this->makeMockRequest(
             Inertia::render('foo')
@@ -57,8 +53,7 @@ class AssertableInertiaTest extends TestCase
         });
     }
 
-    /** @test */
-    public function the_component_exists_on_the_filesystem(): void
+    public function test_the_component_exists_on_the_filesystem(): void
     {
         $response = $this->makeMockRequest(
             Inertia::render('Stubs/ExamplePage')
@@ -70,8 +65,7 @@ class AssertableInertiaTest extends TestCase
         });
     }
 
-    /** @test */
-    public function the_component_does_not_exist_on_the_filesystem(): void
+    public function test_the_component_does_not_exist_on_the_filesystem(): void
     {
         $response = $this->makeMockRequest(
             Inertia::render('foo')
@@ -86,8 +80,7 @@ class AssertableInertiaTest extends TestCase
         });
     }
 
-    /** @test */
-    public function it_can_force_enable_the_component_file_existence(): void
+    public function test_it_can_force_enable_the_component_file_existence(): void
     {
         $response = $this->makeMockRequest(
             Inertia::render('foo')
@@ -102,8 +95,7 @@ class AssertableInertiaTest extends TestCase
         });
     }
 
-    /** @test */
-    public function it_can_force_disable_the_component_file_existence_check(): void
+    public function test_it_can_force_disable_the_component_file_existence_check(): void
     {
         $response = $this->makeMockRequest(
             Inertia::render('foo')
@@ -116,8 +108,7 @@ class AssertableInertiaTest extends TestCase
         });
     }
 
-    /** @test */
-    public function the_component_does_not_exist_on_the_filesystem_when_it_does_not_exist_relative_to_any_of_the_given_paths(): void
+    public function test_the_component_does_not_exist_on_the_filesystem_when_it_does_not_exist_relative_to_any_of_the_given_paths(): void
     {
         $response = $this->makeMockRequest(
             Inertia::render('fixtures/ExamplePage')
@@ -133,8 +124,7 @@ class AssertableInertiaTest extends TestCase
         });
     }
 
-    /** @test */
-    public function the_component_does_not_exist_on_the_filesystem_when_it_does_not_have_one_of_the_configured_extensions(): void
+    public function test_the_component_does_not_exist_on_the_filesystem_when_it_does_not_have_one_of_the_configured_extensions(): void
     {
         $response = $this->makeMockRequest(
             Inertia::render('fixtures/ExamplePage')
@@ -150,8 +140,7 @@ class AssertableInertiaTest extends TestCase
         });
     }
 
-    /** @test */
-    public function the_page_url_matches(): void
+    public function test_the_page_url_matches(): void
     {
         $response = $this->makeMockRequest(
             Inertia::render('foo')
@@ -162,8 +151,7 @@ class AssertableInertiaTest extends TestCase
         });
     }
 
-    /** @test */
-    public function the_page_url_does_not_match(): void
+    public function test_the_page_url_does_not_match(): void
     {
         $response = $this->makeMockRequest(
             Inertia::render('foo')
@@ -177,8 +165,7 @@ class AssertableInertiaTest extends TestCase
         });
     }
 
-    /** @test */
-    public function the_asset_version_matches(): void
+    public function test_the_asset_version_matches(): void
     {
         Inertia::version('example-version');
 
@@ -191,8 +178,7 @@ class AssertableInertiaTest extends TestCase
         });
     }
 
-    /** @test */
-    public function the_asset_version_does_not_match(): void
+    public function test_the_asset_version_does_not_match(): void
     {
         Inertia::version('example-version');
 
