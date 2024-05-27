@@ -209,7 +209,7 @@ class ResponseFactoryTest extends TestCase
             Inertia::strictModels();
 
             return Inertia::render('User/Edit', [
-                'user' => new class(['name' => 'John']) extends User {
+                'user' => new class(['name' => 'John', 'email' => 'john@doe.com']) extends User {
                     protected $fillable = [
                         'name',
                     ];
@@ -220,24 +220,62 @@ class ResponseFactoryTest extends TestCase
         $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
     }
 
-    public function test_strict_models_mode_checks_for_json_resources()
+    public function test_strict_models_mode_allows_models_with_hidden_serialization_rules()
     {
-        $this->expectException(StrictPropertiesException::class);
-        $this->expectExceptionMessage('Prop "user" is shared without serialization rules.');
-
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
             Inertia::strictModels();
 
             return Inertia::render('User/Edit', [
-                'user' => new class(['name' => 'John']) extends User {
+                'user' => new class(['name' => 'John', 'email' => 'john@doe.com']) extends User {
                     protected $fillable = [
                         'name',
+                        'email',
                     ];
+
+                    protected $hidden = ['email'];
                 },
             ]);
         });
 
-        $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
+        $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Edit',
+            'props' => [
+                'user' => [
+                    'name' => 'John',
+                ],
+            ],
+        ]);
+    }
+
+    public function test_strict_models_mode_allows_models_with_visible_serialization_rules()
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            Inertia::strictModels();
+
+            return Inertia::render('User/Edit', [
+                'user' => new class(['name' => 'John', 'email' => 'john@doe.com']) extends User {
+                    protected $fillable = [
+                        'name',
+                        'email',
+                    ];
+
+                    protected $visible = ['name'];
+                },
+            ]);
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Edit',
+            'props' => [
+                'user' => [
+                    'name' => 'John',
+                ],
+            ],
+        ]);
     }
 
     public function test_strict_models_allows_wrapping_in_json_resources()
