@@ -6,6 +6,7 @@ use Closure;
 use GuzzleHttp\Promise\PromiseInterface;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Responsable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Response as ResponseFactory;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
+use Inertia\Exceptions\StrictPropertiesException;
 use Inertia\Support\Header;
 
 class Response implements Responsable
@@ -31,15 +33,24 @@ class Response implements Responsable
 
     protected $viewData = [];
 
+    protected $strictModels = false;
+
+
     /**
      * @param  array|Arrayable  $props
      */
-    public function __construct(string $component, array $props, string $rootView = 'app', string $version = '')
-    {
+    public function __construct(
+        string $component,
+        array $props,
+        string $rootView = 'app',
+        string $version = '',
+        bool $strictModels = false
+    ) {
         $this->component = $component;
         $this->props = $props instanceof Arrayable ? $props->toArray() : $props;
         $this->rootView = $rootView;
         $this->version = $version;
+        $this->strictModels = $strictModels;
     }
 
     /**
@@ -142,6 +153,10 @@ class Response implements Responsable
     {
         foreach ($props as $key => $value) {
             if ($value instanceof Arrayable) {
+                if ($this->strictModels) {
+                    $this->checkStrictModel($key, $value);
+                }
+
                 $value = $value->toArray();
             }
 
@@ -225,6 +240,10 @@ class Response implements Responsable
                 $value = $value->wait();
             }
 
+            if ($this->strictModels) {
+                $this->checkStrictModel($key, $value);
+            }
+
             if ($value instanceof ResourceResponse || $value instanceof JsonResource) {
                 $value = $value->toResponse($request)->getData(true);
             }
@@ -237,5 +256,16 @@ class Response implements Responsable
         }
 
         return $props;
+    }
+
+    protected function checkStrictModel($key, $prop): void
+    {
+        if (! ($prop instanceof Model)) {
+            return;
+        }
+
+        if (empty($prop->getVisible()) && empty($prop->getHidden())) {
+            throw StrictPropertiesException::for($key);
+        }
     }
 }

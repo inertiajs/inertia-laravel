@@ -27,6 +27,8 @@ class ResponseFactory
     /** @var Closure|string|null */
     protected $version;
 
+    protected $strictModels = false;
+
     public function setRootView(string $name): void
     {
         $this->rootView = $name;
@@ -108,7 +110,8 @@ class ResponseFactory
             $component,
             array_merge($this->sharedProps, $props),
             $this->rootView,
-            $this->getVersion()
+            $this->getVersion(),
+            $this->strictModels,
         );
     }
 
@@ -122,5 +125,10 @@ class ResponseFactory
         }
 
         return $url instanceof SymfonyRedirect ? $url : Redirect::away($url);
+    }
+
+    public function strictModels(bool $enabled = true): void
+    {
+        $this->strictModels = $enabled;
     }
 }
