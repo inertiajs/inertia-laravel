@@ -1,6 +1,6 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v1.2.0...1.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v1.2.0...2.x)
 
 - Drop support for Laravel 8 and 9 ([#629](https://github.com/inertiajs/inertia-laravel/pull/629))
 - Add "always" props using new `Inertia::always()` wrapper ([#627](https://github.com/inertiajs/inertia-laravel/pull/627))
