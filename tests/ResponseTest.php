@@ -217,14 +217,18 @@ class ResponseTest extends TestCase
         $request->headers->add(['X-Inertia' => 'true']);
 
         $data = AsArrayable::make([
-            'user' => fn () => [
-                'full_name' => 'Victor Gutt',
-                'organizations' => [
-                    fn () => AsArrayable::make([
-                        'name' => 'Transl.me',
-                    ]),
-                ],
-            ],
+            'user' => function () {
+                return [
+                    'full_name' => 'Victor Gutt',
+                    'organizations' => [
+                        function () {
+                            return AsArrayable::make([
+                                'name' => 'Transl.me',
+                            ]);
+                        },
+                    ],
+                ];
+            },
         ]);
 
         $response = new Response('Auth/Index', ['data' => $data], 'app', '123');
