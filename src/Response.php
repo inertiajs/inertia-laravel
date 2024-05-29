@@ -119,7 +119,7 @@ class Response implements Responsable
             });
         }
 
-        $props = $this->resolveArrayableProperties($props, $request);
+        $props = $this->resolvePropertyInstances($props, $request);
 
         if($isPartial && $request->hasHeader(Header::PARTIAL_ONLY)) {
             $props = $this->resolveOnly($request, $props);
@@ -127,33 +127,6 @@ class Response implements Responsable
 
         if($isPartial && $request->hasHeader(Header::PARTIAL_EXCEPT)) {
             $props = $this->resolveExcept($request, $props);
-        }
-
-        $props = $this->resolvePropertyInstances($props, $request);
-
-        return $props;
-    }
-
-    /**
-     * Resolve all arrayables properties into an array.
-     */
-    public function resolveArrayableProperties(array $props, Request $request, bool $unpackDotProps = true): array
-    {
-        foreach ($props as $key => $value) {
-            if ($value instanceof Arrayable) {
-                $value = $value->toArray();
-            }
-
-            if (is_array($value)) {
-                $value = $this->resolveArrayableProperties($value, $request, false);
-            }
-
-            if ($unpackDotProps && str_contains($key, '.')) {
-                Arr::set($props, $key, $value);
-                unset($props[$key]);
-            } else {
-                $props[$key] = $value;
-            }
         }
 
         return $props;
@@ -193,7 +166,7 @@ class Response implements Responsable
     /**
      * Resolve all necessary class instances in the given props.
      */
-    public function resolvePropertyInstances(array $props, Request $request): array
+    public function resolvePropertyInstances(array $props, Request $request, bool $unpackDotProps = true): array
     {
         foreach ($props as $key => $value) {
             if ($value instanceof Closure) {
@@ -212,11 +185,20 @@ class Response implements Responsable
                 $value = $value->toResponse($request)->getData(true);
             }
 
-            if (is_array($value)) {
-                $value = $this->resolvePropertyInstances($value, $request);
+            if ($value instanceof Arrayable) {
+                $value = $value->toArray();
             }
 
-            $props[$key] = $value;
+            if (is_array($value)) {
+                $value = $this->resolvePropertyInstances($value, $request, false);
+            }
+
+            if ($unpackDotProps && str_contains($key, '.')) {
+                Arr::set($props, $key, $value);
+                unset($props[$key]);
+            } else {
+                $props[$key] = $value;
+            }
         }
 
         return $props;

@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Fluent;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;
+use Inertia\Tests\Stubs\AsArrayable;
 use Inertia\Tests\Stubs\FakeResource;
 use Illuminate\Http\Response as BaseResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -207,6 +208,34 @@ class ResponseTest extends TestCase
         $this->assertSame('User/Edit', $page->component);
         $this->assertSame('Jonathan', $page->props->user->name);
         $this->assertSame('/user/123', $page->url);
+        $this->assertSame('123', $page->version);
+    }
+
+    public function test_nested_arrayable_prop_response(): void
+    {
+        $request = Request::create('/auth', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $data = AsArrayable::make([
+            'user' => fn () => [
+                'full_name' => 'Victor Gutt',
+                'organizations' => [
+                    fn () => AsArrayable::make([
+                        'name' => 'Transl.me',
+                    ]),
+                ],
+            ],
+        ]);
+
+        $response = new Response('Auth/Index', ['data' => $data], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertSame('Auth/Index', $page->component);
+        $this->assertSame('Victor Gutt', $page->props->data->user->full_name);
+        $this->assertSame('Transl.me', $page->props->data->user->organizations[0]->name);
+        $this->assertSame('/auth', $page->url);
         $this->assertSame('123', $page->version);
     }
 
