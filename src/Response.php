@@ -91,13 +91,9 @@ class Response implements Responsable
     public function toResponse($request)
     {
         $props = $this->resolveProperties($request, $this->props);
+        $url = $this->resolveUrl($request, $props);
 
-        $page = [
-            'component' => $this->component,
-            'props' => $props,
-            'url' => Str::start(Str::after($request->fullUrl(), $request->getSchemeAndHttpHost()), '/'),
-            'version' => $this->version,
-        ];
+        $page = $this->resolvePage($request, $props, $url);
 
         if ($request->header(Header::INERTIA)) {
             return new JsonResponse($page, 200, [Header::INERTIA => 'true']);
@@ -132,6 +128,27 @@ class Response implements Responsable
         $props = $this->resolvePropertyInstances($props, $request);
 
         return $props;
+    }
+
+    /**
+     * Resolve the URL for the response.
+     */
+    public function resolveUrl(Request $request, array $props): string
+    {
+        return Str::start(Str::after($request->fullUrl(), $request->getSchemeAndHttpHost()), '/');
+    }
+
+    /**
+     * Resolve the page for the response.
+     */
+    public function resolvePage(Request $request, array $props, string $url): array
+    {
+        return [
+            'component' => $this->component,
+            'props' => $props,
+            'url' => $url,
+            'version' => $this->version,
+        ];
     }
 
     /**
