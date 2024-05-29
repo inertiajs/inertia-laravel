@@ -124,13 +124,13 @@ class ResponseFactory
             $props = $props->toArray();
         }
 
-        return new Response(
-            $component,
-            array_merge($this->sharedProps, $props),
-            $this->rootView,
-            $this->getVersion(),
-            $this->persisted
-        );
+        return app(Response::class, [
+            'component' => $component,
+            'props' => array_merge($this->sharedProps, $props),
+            'rootView' => $this->rootView,
+            'version' => $this->getVersion(),
+            'persisted' => $this->persisted
+        ]);
     }
 
     /**

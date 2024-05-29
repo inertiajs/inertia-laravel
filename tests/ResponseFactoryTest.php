@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Request;
 use Inertia\Tests\Stubs\ExampleMiddleware;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request as HttpRequest;
+use Inertia\Response as InertiaResponse;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Session\NullSessionHandler;
 use Illuminate\Session\Store;
@@ -199,5 +200,32 @@ class ResponseFactoryTest extends TestCase
                 'foo' => 'bar',
             ],
         ]);
+    }
+
+    public function test_it_allows_the_response_to_be_resolved_from_container(): void
+    {
+        app()->bind(InertiaResponse::class, function (): InertiaResponse {
+            return new class ('', []) extends InertiaResponse {
+                public function resolveUrl(HttpRequest $request, array $props): string
+                {
+                    $requestedFrom = $request->header('x-requested-from');
+                    $parsedRequestedFrom = parse_url($requestedFrom);
+
+                    return "{$parsedRequestedFrom['path']}#{$parsedRequestedFrom['fragment']}";
+                }
+            };
+        });
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            return Inertia::render('User/Edit');
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', [
+            'X-Inertia' => 'true',
+            'X-Requested-From' => 'https://example.com/abc/123#value',
+        ]);
+
+        $response->assertSuccessful();
+        $response->assertJson(['url' => '/abc/123#value']);
     }
 }
