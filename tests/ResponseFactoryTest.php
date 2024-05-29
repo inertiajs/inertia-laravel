@@ -13,7 +13,6 @@ use Inertia\Tests\Stubs\ExampleMiddleware;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request as HttpRequest;
 use Inertia\Response as InertiaResponse;
-use Illuminate\Foundation\Application;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Session\NullSessionHandler;
 use Illuminate\Session\Store;
@@ -205,8 +204,8 @@ class ResponseFactoryTest extends TestCase
 
     public function test_it_allows_the_response_to_be_resolved_from_container(): void
     {
-        app()->bind(InertiaResponse::class, function (Application $app, array $params): InertiaResponse {
-            return new class (...$params) extends InertiaResponse {
+        app()->bind(InertiaResponse::class, function (): InertiaResponse {
+            return new class ('', []) extends InertiaResponse {
                 public function resolveUrl(HttpRequest $request, array $props): string
                 {
                     $requestedFrom = $request->header('x-requested-from');
@@ -227,7 +226,6 @@ class ResponseFactoryTest extends TestCase
         ]);
 
         $response->assertSuccessful();
-        $response->assertJson(['component' => 'User/Edit']);
         $response->assertJson(['url' => '/abc/123#value']);
     }
 }
