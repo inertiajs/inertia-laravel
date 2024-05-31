@@ -196,6 +196,30 @@ class MiddlewareTest extends TestCase
         ]);
     }
 
+    public function test_middleware_can_share_props_with_dot_notation(): void
+    {
+        $this->prepareMockEndpoint(null, [
+            'auth.permissions.is_admin' => true,
+            'user.verified' => true,
+        ]);
+
+        $response = $this->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertJson([
+            'props' => [
+                'user' => [
+                    'name' => 'Jonathan',
+                    'verified' => true,
+                ],
+                'auth' => [
+                    'permissions' => [
+                        'is_admin' => true,
+                    ],
+                ],
+            ],
+        ]);
+    }
+
     public function test_validation_errors_are_scoped_to_error_bag_header(): void
     {
         Session::put('errors', (new ViewErrorBag())->put('default', new MessageBag([

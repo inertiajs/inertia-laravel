@@ -137,7 +137,7 @@ class Response implements Responsable
     /**
      * Resolve all arrayables properties into an array.
      */
-    public function resolveArrayableProperties(array $props, Request $request, bool $unpackDotProps = true): array
+    public function resolveArrayableProperties(array $props, Request $request): array
     {
         foreach ($props as $key => $value) {
             if ($value instanceof Arrayable) {
@@ -145,15 +145,10 @@ class Response implements Responsable
             }
 
             if (is_array($value)) {
-                $value = $this->resolveArrayableProperties($value, $request, false);
+                $value = $this->resolveArrayableProperties($value, $request);
             }
 
-            if ($unpackDotProps && str_contains($key, '.')) {
-                Arr::set($props, $key, $value);
-                unset($props[$key]);
-            } else {
-                $props[$key] = $value;
-            }
+            $props[$key] = $value;
         }
 
         return $props;
@@ -193,7 +188,7 @@ class Response implements Responsable
     /**
      * Resolve all necessary class instances in the given props.
      */
-    public function resolvePropertyInstances(array $props, Request $request): array
+    public function resolvePropertyInstances(array $props, Request $request, $topLevelProp = true): array
     {
         foreach ($props as $key => $value) {
             if ($value instanceof Closure) {
@@ -213,10 +208,17 @@ class Response implements Responsable
             }
 
             if (is_array($value)) {
-                $value = $this->resolvePropertyInstances($value, $request);
+                $value = $this->resolvePropertyInstances($value, $request, false);
             }
 
-            $props[$key] = $value;
+            if ($topLevelProp && str_contains($key, '.')) {
+                Arr::set($props, $key, $value);
+                unset($props[$key]);
+            } else if ($topLevelProp && is_array($props[$key])) {
+                $props[$key] = array_merge($props[$key], $value);
+            } else {
+                $props[$key] = $value;
+            }
         }
 
         return $props;
