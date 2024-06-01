@@ -151,6 +151,8 @@ class Response implements Responsable
             if ($unpackDotProps && str_contains($key, '.')) {
                 Arr::set($props, $key, $value);
                 unset($props[$key]);
+            } elseif ($unpackDotProps && is_array($props[$key])) {
+                $props[$key] = array_merge($props[$key], $value);
             } else {
                 $props[$key] = $value;
             }

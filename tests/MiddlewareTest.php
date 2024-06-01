@@ -214,6 +214,78 @@ class MiddlewareTest extends TestCase
         $this->withoutExceptionHandling()->get('/', ['X-Inertia-Error-Bag' => 'example']);
     }
 
+    public function test_middleware_can_share_props_with_dot_notation(): void
+    {
+        $this->prepareMockEndpoint(null, [
+            'auth.permissions.is_admin' => true,
+            'user.verified' => true,
+        ]);
+
+        $response = $this->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertJson([
+            'props' => [
+                'user' => [
+                    'name' => 'Jonathan',
+                    'verified' => true,
+                ],
+                'auth' => [
+                    'permissions' => [
+                        'is_admin' => true,
+                    ],
+                ],
+            ],
+        ]);
+    }
+
+    public function test_include_shared_props_in_partial_response(): void
+    {
+        $this->prepareMockEndpoint(null, [
+            'auth.permissions.is_admin' => true,
+            'user.verified' => true,
+        ]);
+
+        $response = $this->get('/', [
+            'X-Inertia' => 'true',
+            'X-Inertia-Partial-Component' => 'User/Edit',
+            'X-Inertia-Partial-Data' => 'auth',
+        ]);
+
+        $response->assertJson([
+            'props' => [
+                'auth' => [
+                    'permissions' => [
+                        'is_admin' => true,
+                    ],
+                ],
+            ],
+        ]);
+    }
+
+    public function test_exclude_shared_props_from_partial_response(): void
+    {
+        $this->prepareMockEndpoint(null, [
+            'auth.permissions.is_admin' => true,
+            'user.verified' => true,
+        ]);
+
+        $response = $this->get('/', [
+            'X-Inertia' => 'true',
+            'X-Inertia-Partial-Component' => 'User/Edit',
+            'X-Inertia-Partial-Data' => 'user',
+            'X-Inertia-Partial-Except' => 'user.verified',
+        ]);
+
+        $response->assertJson([
+            'props' => [
+                'user' => [
+                    'name' => 'Jonathan',
+                ],
+            ],
+        ]);
+    }
+
+
     public function test_middleware_can_change_the_root_view_via_a_property(): void
     {
         $this->prepareMockEndpoint(null, [], new class() extends Middleware {
