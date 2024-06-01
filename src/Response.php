@@ -226,7 +226,9 @@ class Response implements Responsable
             }
 
             if ($value instanceof ResourceResponse || $value instanceof JsonResource) {
-                $value = $value->toResponse($request)->getData(true);
+                $value = tap($value, static function ($value) {
+                    $value->withoutWrapping();
+                })->toResponse($request)->getData(true);
             }
 
             if (is_array($value)) {

@@ -14,6 +14,7 @@ use Illuminate\View\View;
 use Inertia\AlwaysProp;
 use Inertia\LazyProp;
 use Inertia\Response;
+use Inertia\Tests\Stubs\FakeNestedResource;
 use Inertia\Tests\Stubs\FakeResource;
 use Mockery;
 
@@ -80,6 +81,24 @@ class ResponseTest extends TestCase
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertSame('User/Edit', $page->component);
         $this->assertSame('Jonathan', $page->props->user->name);
+        $this->assertSame('/user/123', $page->url);
+        $this->assertSame('123', $page->version);
+    }
+
+    public function test_nested_resource_response(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $resource = new FakeNestedResource(['name' => 'Jonathan']);
+
+        $response = new Response('User/Edit', ['user' => $resource], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertSame('User/Edit', $page->component);
+        $this->assertSame('Jonathan', $page->props->user->nested->name);
         $this->assertSame('/user/123', $page->url);
         $this->assertSame('123', $page->version);
     }
@@ -195,7 +214,7 @@ class ResponseTest extends TestCase
         });
     }
 
-    public function test_arrayable_prop_response(): void
+    public function test_arrayable_prop_resource_response(): void
     {
         $request = Request::create('/user/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
@@ -209,6 +228,24 @@ class ResponseTest extends TestCase
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertSame('User/Edit', $page->component);
         $this->assertSame('Jonathan', $page->props->user->name);
+        $this->assertSame('/user/123', $page->url);
+        $this->assertSame('123', $page->version);
+    }
+
+    public function test_arrayable_prop_nested_resource_response(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $resource = FakeNestedResource::make(['name' => 'Jonathan']);
+
+        $response = new Response('User/Edit', ['user' => $resource], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertSame('User/Edit', $page->component);
+        $this->assertSame('Jonathan', $page->props->user->nested->name);
         $this->assertSame('/user/123', $page->url);
         $this->assertSame('123', $page->version);
     }
@@ -471,7 +508,7 @@ class ResponseTest extends TestCase
         $this->assertFalse(array_key_exists('can', $auth));
     }
 
-    public function test_responsable_with_invalid_key(): void
+    public function test_responsable_resource_with_invalid_key(): void
     {
         $request = Request::create('/user/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
@@ -485,6 +522,23 @@ class ResponseTest extends TestCase
         $this->assertSame(
             ["\x00*\x00_invalid_key" => 'for object'],
             $page['props']['resource']
+        );
+    }
+
+    public function test_responsable_nested_resource_with_invalid_key(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $resource = new FakeNestedResource(["\x00*\x00_invalid_key" => 'for object']);
+
+        $response = new Response('User/Edit', ['resource' => $resource], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData(true);
+
+        $this->assertSame(
+            ["\x00*\x00_invalid_key" => 'for object'],
+            $page['props']['resource']['nested']
         );
     }
 
