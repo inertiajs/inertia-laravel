@@ -239,6 +239,77 @@ class MiddlewareTest extends TestCase
         $response->assertViewIs('welcome');
     }
 
+    public function test_middleware_can_share_props_with_dot_notation(): void
+    {
+        $this->prepareMockEndpoint(null, [
+            'auth.permissions.is_admin' => true,
+            'user.verified' => true,
+        ]);
+
+        $response = $this->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertJson([
+            'props' => [
+                'user' => [
+                    'name' => 'Jonathan',
+                    'verified' => true,
+                ],
+                'auth' => [
+                    'permissions' => [
+                        'is_admin' => true,
+                    ],
+                ],
+            ],
+        ]);
+    }
+
+    public function test_include_shared_props_in_partial_response(): void
+    {
+        $this->prepareMockEndpoint(null, [
+            'auth.permissions.is_admin' => true,
+            'user.verified' => true,
+        ]);
+
+        $response = $this->get('/', [
+            'X-Inertia' => 'true',
+            'X-Inertia-Partial-Component' => 'User/Edit',
+            'X-Inertia-Partial-Data' => 'auth',
+        ]);
+
+        $response->assertJson([
+            'props' => [
+                'auth' => [
+                    'permissions' => [
+                        'is_admin' => true,
+                    ],
+                ],
+            ],
+        ]);
+    }
+
+    public function test_exclude_shared_props_from_partial_response(): void
+    {
+        $this->prepareMockEndpoint(null, [
+            'auth.permissions.is_admin' => true,
+            'user.verified' => true,
+        ]);
+
+        $response = $this->get('/', [
+            'X-Inertia' => 'true',
+            'X-Inertia-Partial-Component' => 'User/Edit',
+            'X-Inertia-Partial-Data' => 'user',
+            'X-Inertia-Partial-Except' => 'user.verified',
+        ]);
+
+        $response->assertJson([
+            'props' => [
+                'user' => [
+                    'name' => 'Jonathan',
+                ],
+            ],
+        ]);
+    }
+
     public function test_middleware_can_set_persisted_properties(): void
     {
         $shared = [
