@@ -524,4 +524,16 @@ class ResponseTest extends TestCase
 
         $this->assertSame('/subpath/product/123', $page->url);
     }
+
+    public function test_array_doubling(): void
+    {
+        $request = Request::create('/years', 'GET');
+
+        $response = new Response('Years', ['years' => [2022, 2023, 2024]], 'app', '123');
+        $response = $response->toResponse($request);
+        $view = $response->getOriginalContent();
+        $page = $view->getData()['page'];
+
+        $this->assertSame([2022, 2023, 2024], $page['props']['years']);
+    }
 }
