@@ -139,6 +139,8 @@ class Response implements Responsable
      */
     public function resolveArrayableProperties(array $props, Request $request, bool $unpackDotProps = true): array
     {
+        $dotProps = [];
+
         foreach ($props as $key => $value) {
             if ($value instanceof Arrayable) {
                 $value = $value->toArray();
@@ -148,14 +150,16 @@ class Response implements Responsable
                 $value = $this->resolveArrayableProperties($value, $request, false);
             }
 
-            if ($unpackDotProps && str_contains($key, '.')) {
-                Arr::set($props, $key, $value);
-                unset($props[$key]);
-            } elseif ($unpackDotProps && is_array($props[$key])) {
-                $props[$key] = array_merge($props[$key], $value);
-            } else {
-                $props[$key] = $value;
+            $props[$key] = $value;
+
+            if($unpackDotProps && str_contains($key, '.')) {
+                $dotProps[] = $key;
             }
+        }
+
+        foreach ($dotProps as $key) {
+            Arr::set($props, $key, $props[$key]);
+            unset($props[$key]);
         }
 
         return $props;

@@ -536,4 +536,16 @@ class ResponseTest extends TestCase
 
         $this->assertSame([2022, 2023, 2024], $page['props']['years']);
     }
+
+    public function test_mixed_array_shape(): void
+    {
+        $request = Request::create('/years', 'GET');
+
+        $response = new Response('Years', ['years' => [2022, 2023, 'exclude' => [2024, 2025]]], 'app', '123');
+        $response = $response->toResponse($request);
+        $view = $response->getOriginalContent();
+        $page = $view->getData()['page'];
+
+        $this->assertSame([2022, 2023, 'exclude' => [2024, 2025]], $page['props']['years']);
+    }
 }
