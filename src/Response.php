@@ -218,6 +218,10 @@ class Response implements Responsable
                 $value = $value->toResponse($request)->getData(true);
             }
 
+            if($value instanceof Arrayable) {
+                $value = $value->toArray();
+            }
+
             if (is_array($value)) {
                 $value = $this->resolvePropertyInstances($value, $request);
             }

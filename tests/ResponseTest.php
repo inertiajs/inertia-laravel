@@ -2,7 +2,6 @@
 
 namespace Inertia\Tests;
 
-use Exception;
 use Mockery;
 use Inertia\LazyProp;
 use Inertia\Response;
@@ -16,6 +15,7 @@ use Illuminate\Http\Response as BaseResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
+use Inertia\Tests\Stubs\AsArrayable;
 
 class ResponseTest extends TestCase
 {
@@ -206,6 +206,38 @@ class ResponseTest extends TestCase
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertSame('User/Edit', $page->component);
         $this->assertSame('Jonathan', $page->props->user->name);
+        $this->assertSame('/user/123', $page->url);
+        $this->assertSame('123', $page->version);
+    }
+
+    public function test_nested_arrayable_prop_response(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $data = AsArrayable::make([
+            'user' => function () {
+                return [
+                    'name' => 'Taylor Otwell',
+                    'organizations' => [
+                        function () {
+                            return AsArrayable::make([
+                                'name' => 'Laravel',
+                            ]);
+                        },
+                    ],
+                ];
+            },
+        ]);
+
+        $response = new Response('User/Edit', ['data' => $data], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertSame('User/Edit', $page->component);
+        $this->assertSame('Taylor Otwell', $page->props->data->user->name);
+        $this->assertSame('Laravel', $page->props->data->user->organizations[0]->name);
         $this->assertSame('/user/123', $page->url);
         $this->assertSame('123', $page->version);
     }
