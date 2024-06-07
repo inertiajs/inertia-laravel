@@ -10,12 +10,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Fluent;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;
+use Inertia\Tests\Stubs\AsArrayable;
 use Inertia\Tests\Stubs\FakeResource;
 use Illuminate\Http\Response as BaseResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
-use Inertia\Tests\Stubs\AsArrayable;
 
 class ResponseTest extends TestCase
 {
@@ -433,7 +433,7 @@ class ResponseTest extends TestCase
             'data' => [
                 'name' => 'Taylor Otwell',
                 'email' => 'taylor@example.com',
-            ]
+            ],
         ];
 
         $response = new Response('User/Edit', $props, 'app', '123', ['auth.user']);
@@ -579,5 +579,49 @@ class ResponseTest extends TestCase
         $page = $view->getData()['page'];
 
         $this->assertSame([2022, 2023, 'exclude' => [2024, 2025]], $page['props']['years']);
+    }
+
+    public function test_dot_notation_props_are_merged_with_shared_props(): void
+    {
+        $request = Request::create('/test', 'GET');
+
+        $response = new Response('Test', [
+            'auth' => ['user' => ['name' => 'Jonathan']],
+            'auth.user.is_super' => true,
+        ], 'app', '123');
+        $response = $response->toResponse($request);
+        $view = $response->getOriginalContent();
+        $page = $view->getData()['page'];
+
+        $this->assertSame([
+            'auth' => [
+                'user' => [
+                    'name' => 'Jonathan',
+                    'is_super' => true,
+                ],
+            ],
+        ], $page['props']);
+    }
+
+    public function test_dot_notation_props_are_merged_with_lazy_shared_props(): void
+    {
+        $request = Request::create('/test', 'GET');
+
+        $response = new Response('Test', [
+            'auth' => fn () => ['user' => ['name' => 'Jonathan']],
+            'auth.user.is_super' => true,
+        ], 'app', '123');
+        $response = $response->toResponse($request);
+        $view = $response->getOriginalContent();
+        $page = $view->getData()['page'];
+
+        $this->assertSame([
+            'auth' => [
+                'user' => [
+                    'name' => 'Jonathan',
+                    'is_super' => true,
+                ],
+            ],
+        ], $page['props']);
     }
 }
