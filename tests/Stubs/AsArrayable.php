@@ -16,9 +16,9 @@ class AsArrayable implements Arrayable {
         $this->data = $data;
     }
 
-    public static function make(array $data): static
+    public static function make(array $data): self
     {
-        return new static($data);
+        return new self($data);
     }
 
     /**
