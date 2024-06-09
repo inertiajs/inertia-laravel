@@ -608,7 +608,9 @@ class ResponseTest extends TestCase
         $request = Request::create('/test', 'GET');
 
         $response = new Response('Test', [
-            'auth' => fn () => ['user' => ['name' => 'Jonathan']],
+            'auth' => function () {
+                return ['user' => ['name' => 'Jonathan']];
+            },
             'auth.user.is_super' => true,
         ], 'app', '123');
 
