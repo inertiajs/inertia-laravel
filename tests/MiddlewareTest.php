@@ -285,7 +285,6 @@ class MiddlewareTest extends TestCase
         ]);
     }
 
-
     public function test_middleware_can_change_the_root_view_via_a_property(): void
     {
         $this->prepareMockEndpoint(null, [], new class() extends Middleware {

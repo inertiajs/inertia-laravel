@@ -611,6 +611,7 @@ class ResponseTest extends TestCase
             'auth' => fn () => ['user' => ['name' => 'Jonathan']],
             'auth.user.is_super' => true,
         ], 'app', '123');
+
         $response = $response->toResponse($request);
         $view = $response->getOriginalContent();
         $page = $view->getData()['page'];

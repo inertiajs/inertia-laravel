@@ -119,89 +119,67 @@ class Response implements Responsable
             });
         }
 
-        $props = $this->resolveArrayableProperties($props, $request);
+        // Dot-notated props should be resolved last to ensure that
+        // they are correctly merged with callable props.
+        uksort($props, function ($key) {
+            return str_contains($key, '.');
+        });
 
-        if($isPartial && $request->hasHeader(Header::PARTIAL_ONLY)) {
-            $props = $this->resolveOnly($request, $props);
-        }
+        $only = $this->getOnly($request, $isPartial);
+        $except = $this->getExcept($request, $isPartial);
 
-        if($isPartial && $request->hasHeader(Header::PARTIAL_EXCEPT)) {
-            $props = $this->resolveExcept($request, $props);
-        }
-
-        $props = $this->resolvePropertyInstances($props, $request);
-
-        return $props;
-    }
-
-    /**
-     * Resolve all arrayables properties into an array.
-     */
-    public function resolveArrayableProperties(array $props, Request $request, bool $unpackDotProps = true): array
-    {
-        $dotProps = [];
-
-        foreach ($props as $key => $value) {
-            if ($value instanceof Arrayable) {
-                $value = $value->toArray();
-            }
-
-            if (is_array($value)) {
-                $value = $this->resolveArrayableProperties($value, $request, false);
-            }
-
-            $props[$key] = $value;
-
-            if($unpackDotProps && str_contains($key, '.')) {
-                $dotProps[] = $key;
-            }
-        }
-
-        foreach ($dotProps as $key) {
-            Arr::set($props, $key, $props[$key]);
-            unset($props[$key]);
-        }
+        $props = $this->resolvePropertyInstances($props, $request, $only, $except);
 
         return $props;
     }
 
     /**
-     * Resolve the `only` partial request props.
+     * Get the `only` partial props.
      */
-    public function resolveOnly(Request $request, array $props): array
+    public function getOnly(Request $request, bool $isPartial): array
     {
-        $only = array_merge(
+        if(! $isPartial) {
+            return [];
+        }
+
+        return array_merge(
             array_filter(explode(',', $request->header(Header::PARTIAL_ONLY, ''))),
             $this->persisted
         );
-
-        $value = [];
-
-        foreach($only as $key) {
-            Arr::set($value, $key, data_get($props, $key));
-        }
-
-        return $value;
     }
 
     /**
-     * Resolve the `except` partial request props.
+     * Get the `except` partial props.
      */
-    public function resolveExcept(Request $request, array $props): array
+    public function getExcept(Request $request, bool $isPartial): array
     {
-        $except = array_filter(explode(',', $request->header(Header::PARTIAL_EXCEPT, '')));
+        if(! $isPartial) {
+            return [];
+        }
 
-        Arr::forget($props, $except);
-
-        return $props;
+        return array_filter(explode(',', $request->header(Header::PARTIAL_EXCEPT, '')));
     }
 
     /**
      * Resolve all necessary class instances in the given props.
      */
-    public function resolvePropertyInstances(array $props, Request $request): array
+    public function resolvePropertyInstances(array $props, Request $request, array $only, array $except, bool $unpackDotProps = true, string $parentKey = ''): array
     {
         foreach ($props as $key => $value) {
+            $prop = $parentKey ? implode('.', [$parentKey, $key]) : $key;
+
+            if($only && ! $this->isPropIncluded($only, $prop)) {
+                unset($props[$key]);
+
+                continue;
+            }
+
+            if($except && $this->isPropExcluded($except, $prop)) {
+                unset($props[$key]);
+
+                continue;
+            }
+
             if ($value instanceof Closure) {
                 $value = App::call($value);
             }
@@ -218,17 +196,50 @@ class Response implements Responsable
                 $value = $value->toResponse($request)->getData(true);
             }
 
-            if($value instanceof Arrayable) {
+            if ($value instanceof Arrayable) {
                 $value = $value->toArray();
             }
 
             if (is_array($value)) {
-                $value = $this->resolvePropertyInstances($value, $request);
+                $value = $this->resolvePropertyInstances($value, $request, $only, $except, false, $prop);
             }
 
-            $props[$key] = $value;
+            if ($unpackDotProps && str_contains($key, '.')) {
+                Arr::set($props, $key, $value);
+                unset($props[$key]);
+            } else {
+                $props[$key] = $value;
+            }
         }
 
         return $props;
+    }
+
+    /**
+     * Determine whether a prop should be included in the partial response.
+     */
+    public function isPropIncluded(array $only, string $prop): bool
+    {
+        foreach($only as $key) {
+            if(Str::startsWith($key, $prop) || Str::startsWith($prop, $key)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Determine whether a prop should be excluded from the partial response.
+     */
+    public function isPropExcluded(array $except, string $prop): bool
+    {
+        foreach($except as $key) {
+            if(Str::startsWith($prop, $key)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
