@@ -2,6 +2,7 @@
 
 namespace Inertia\Tests;
 
+use Exception;
 use Mockery;
 use Inertia\LazyProp;
 use Inertia\Response;
@@ -366,6 +367,35 @@ class ResponseTest extends TestCase
             'shared' => [
                 'flash' => 'value',
             ],
+        ];
+
+        $response = new Response('User/Edit', $props);
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertFalse(isset($page->props->auth->user));
+        $this->assertFalse(isset($page->props->shared));
+        $this->assertSame('value', $page->props->auth->refresh_token);
+    }
+
+    public function test_excluded_lazy_props_are_not_evaluated(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'User/Edit']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'auth']);
+        $request->headers->add(['X-Inertia-Partial-Except' => 'auth.user']);
+
+        $props = [
+            'auth' => [
+                'user' => function () {
+                    throw new Exception();
+                },
+                'refresh_token' => 'value',
+            ],
+            'shared' => function () {
+                throw new Exception();
+            }
         ];
 
         $response = new Response('User/Edit', $props);
