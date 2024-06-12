@@ -2,8 +2,8 @@
 
 namespace Inertia\Tests;
 
-use Exception;
 use Mockery;
+use Exception;
 use Inertia\LazyProp;
 use Inertia\Response;
 use Illuminate\View\View;
@@ -395,7 +395,7 @@ class ResponseTest extends TestCase
             ],
             'shared' => function () {
                 throw new Exception();
-            }
+            },
         ];
 
         $response = new Response('User/Edit', $props);
@@ -644,6 +644,28 @@ class ResponseTest extends TestCase
             'auth.user.is_super' => true,
         ], 'app', '123');
 
+        $response = $response->toResponse($request);
+        $view = $response->getOriginalContent();
+        $page = $view->getData()['page'];
+
+        $this->assertSame([
+            'auth' => [
+                'user' => [
+                    'name' => 'Jonathan',
+                    'is_super' => true,
+                ],
+            ],
+        ], $page['props']);
+    }
+
+    public function test_dot_notation_props_are_merged_with_other_dot_notation_props(): void
+    {
+        $request = Request::create('/test', 'GET');
+
+        $response = new Response('Test', [
+            'auth.user' => ['name' => 'Jonathan'],
+            'auth.user.is_super' => true,
+        ], 'app', '123');
         $response = $response->toResponse($request);
         $view = $response->getOriginalContent();
         $page = $view->getData()['page'];
