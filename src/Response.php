@@ -3,19 +3,19 @@
 namespace Inertia;
 
 use Closure;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
+use Inertia\Support\Header;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Str;
 use GuzzleHttp\Promise\PromiseInterface;
 use Illuminate\Support\Traits\Macroable;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceResponse;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Response as ResponseFactory;
-use Inertia\Support\Header;
 
 class Response implements Responsable
 {
@@ -23,7 +23,6 @@ class Response implements Responsable
 
     protected $component;
     protected $props;
-    protected $persisted;
     protected $rootView;
     protected $version;
     protected $viewData = [];
@@ -31,18 +30,16 @@ class Response implements Responsable
     /**
      * @param array|Arrayable $props
      */
-    public function __construct(string $component, array $props, string $rootView = 'app', string $version = '', array $persisted = [])
+    public function __construct(string $component, array $props, string $rootView = 'app', string $version = '')
     {
         $this->component = $component;
         $this->props = $props instanceof Arrayable ? $props->toArray() : $props;
-        $this->persisted = $persisted;
         $this->rootView = $rootView;
         $this->version = $version;
     }
 
     /**
      * @param string|array $key
-     * @param mixed        $value
      *
      * @return $this
      */
@@ -59,7 +56,6 @@ class Response implements Responsable
 
     /**
      * @param string|array $key
-     * @param mixed        $value
      *
      * @return $this
      */
@@ -84,16 +80,22 @@ class Response implements Responsable
     /**
      * Create an HTTP response that represents the object.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param Request $request
      *
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function toResponse($request)
     {
-        $props = $this->resolveProperties($request, $this->props);
-        $url = $this->resolveUrl($request, $props);
+        $props = $this->resolvePartialProps($request, $this->props);
+        $props = $this->resolveAlwaysProps($props);
+        $props = $this->evaluateProps($props, $request);
 
-        $page = $this->resolvePage($request, $props, $url);
+        $page = [
+            'component' => $this->component,
+            'props' => $props,
+            'url' => Str::start(Str::after($request->fullUrl(), $request->getSchemeAndHttpHost()), '/'),
+            'version' => $this->version,
+        ];
 
         if ($request->header(Header::INERTIA)) {
             return new JsonResponse($page, 200, [Header::INERTIA => 'true']);
@@ -103,114 +105,47 @@ class Response implements Responsable
     }
 
     /**
-     * Resolve the properites for the response.
+     * Resolve the `only` and `except` partial request props.
      */
-    public function resolveProperties(Request $request, array $props): array
+    public function resolvePartialProps(Request $request, array $props): array
     {
         $isPartial = $request->header(Header::PARTIAL_COMPONENT) === $this->component;
 
-        if(! $isPartial) {
-            $props = array_filter($this->props, static function ($prop) {
+        if (! $isPartial) {
+            return array_filter($props, static function ($prop) {
                 return ! ($prop instanceof LazyProp);
             });
         }
 
-        $props = $this->resolveArrayableProperties($props, $request);
-
-        if($isPartial && $request->hasHeader(Header::PARTIAL_ONLY)) {
-            $props = $this->resolveOnly($request, $props);
-        }
-
-        if($isPartial && $request->hasHeader(Header::PARTIAL_EXCEPT)) {
-            $props = $this->resolveExcept($request, $props);
-        }
-
-        $props = $this->resolvePropertyInstances($props, $request);
-
-        return $props;
-    }
-
-    /**
-     * Resolve the URL for the response.
-     */
-    public function resolveUrl(Request $request, array $props): string
-    {
-        return Str::start(Str::after($request->fullUrl(), $request->getSchemeAndHttpHost()), '/');
-    }
-
-    /**
-     * Resolve the page for the response.
-     */
-    public function resolvePage(Request $request, array $props, string $url): array
-    {
-        return [
-            'component' => $this->component,
-            'props' => $props,
-            'url' => $url,
-            'version' => $this->version,
-        ];
-    }
-
-    /**
-     * Resolve all arrayables properties into an array.
-     */
-    public function resolveArrayableProperties(array $props, Request $request, bool $unpackDotProps = true): array
-    {
-        foreach ($props as $key => $value) {
-            if ($value instanceof Arrayable) {
-                $value = $value->toArray();
-            }
-
-            if (is_array($value)) {
-                $value = $this->resolveArrayableProperties($value, $request, false);
-            }
-
-            if ($unpackDotProps && str_contains($key, '.')) {
-                Arr::set($props, $key, $value);
-                unset($props[$key]);
-            } else {
-                $props[$key] = $value;
-            }
-        }
-
-        return $props;
-    }
-
-    /**
-     * Resolve the `only` partial request props.
-     */
-    public function resolveOnly(Request $request, array $props): array
-    {
-        $only = array_merge(
-            array_filter(explode(',', $request->header(Header::PARTIAL_ONLY, ''))),
-            $this->persisted
-        );
-
-        $value = [];
-
-        foreach($only as $key) {
-            Arr::set($value, $key, data_get($props, $key));
-        }
-
-        return $value;
-    }
-
-    /**
-     * Resolve the `except` partial request props.
-     */
-    public function resolveExcept(Request $request, array $props): array
-    {
+        $only = array_filter(explode(',', $request->header(Header::PARTIAL_ONLY, '')));
         $except = array_filter(explode(',', $request->header(Header::PARTIAL_EXCEPT, '')));
 
-        Arr::forget($props, $except);
+        $props = $only ? Arr::only($props, $only) : $props;
+
+        if ($except) {
+            Arr::forget($props, $except);
+        }
 
         return $props;
+    }
+
+    /**
+     * Resolve `always` properties that should always be included on all visits,
+     * regardless of "only" or "except" requests.
+     */
+    public function resolveAlwaysProps(array $props): array
+    {
+        $always = array_filter($this->props, static function ($prop) {
+            return $prop instanceof AlwaysProp;
+        });
+
+        return array_merge($always, $props);
     }
 
     /**
      * Resolve all necessary class instances in the given props.
      */
-    public function resolvePropertyInstances(array $props, Request $request): array
+    public function evaluateProps(array $props, Request $request, bool $unpackDotProps = true): array
     {
         foreach ($props as $key => $value) {
             if ($value instanceof Closure) {
@@ -218,6 +153,10 @@ class Response implements Responsable
             }
 
             if ($value instanceof LazyProp) {
+                $value = App::call($value);
+            }
+
+            if ($value instanceof AlwaysProp) {
                 $value = App::call($value);
             }
 
@@ -229,11 +168,20 @@ class Response implements Responsable
                 $value = $value->toResponse($request)->getData(true);
             }
 
-            if (is_array($value)) {
-                $value = $this->resolvePropertyInstances($value, $request);
+            if ($value instanceof Arrayable) {
+                $value = $value->toArray();
             }
 
-            $props[$key] = $value;
+            if (is_array($value)) {
+                $value = $this->evaluateProps($value, $request, false);
+            }
+
+            if ($unpackDotProps && str_contains($key, '.')) {
+                Arr::set($props, $key, $value);
+                unset($props[$key]);
+            } else {
+                $props[$key] = $value;
+            }
         }
 
         return $props;

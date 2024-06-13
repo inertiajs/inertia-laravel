@@ -1,17 +1,24 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v1.2.0...1.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v1.3.0...1.x)
+
+- Nothing yet!
+
+## [v1.3.0](https://github.com/inertiajs/inertia-laravel/compare/v1.2.0...v1.3.0) - 2024-06-12
+
+- Add "always" props using new `Inertia::always()` wrapper ([#627](https://github.com/inertiajs/inertia-laravel/pull/627))
+- Revert dot-notation support in partial reloads ([#641](https://github.com/inertiajs/inertia-laravel/pull/641))
 
 ## [v1.2.0](https://github.com/inertiajs/inertia-laravel/compare/v1.1.0...v1.2.0) - 2024-05-17
 
-* [1.x] Make commands lazy by [@timacdonald](https://github.com/timacdonald) in https://github.com/inertiajs/inertia-laravel/pull/601
-* [1.x] Persistent properties by [@lepikhinb](https://github.com/lepikhinb) in https://github.com/inertiajs/inertia-laravel/pull/621
-* [1.x] Exclude properties from partial responses by [@lepikhinb](https://github.com/lepikhinb) in https://github.com/inertiajs/inertia-laravel/pull/622
+- Make commands lazy ([#601](https://github.com/inertiajs/inertia-laravel/pull/601))
+- Add persistent properties ([#621](https://github.com/inertiajs/inertia-laravel/pull/621))
+- Exclude `except` props from partial reloads ([#622](https://github.com/inertiajs/inertia-laravel/pull/622))
 
 ## [v1.1.0](https://github.com/inertiajs/inertia-laravel/compare/v1.0.0...v1.1.0) - 2024-05-16
 
-* Support dot notation in partial requests by [@lepikhinb](https://github.com/lepikhinb) in https://github.com/inertiajs/inertia-laravel/pull/620
-* [1.x] Add `$request->inertia()` IDE helper by [@ycs77](https://github.com/ycs77) in https://github.com/inertiajs/inertia-laravel/pull/625
+- Support dot notation in partial requests ([#620](https://github.com/inertiajs/inertia-laravel/pull/620))
+- Add `$request->inertia()` IDE helper ([#625](https://github.com/inertiajs/inertia-laravel/pull/625))
 
 ## [v1.0.0](https://github.com/inertiajs/inertia-laravel/compare/v0.6.11...v1.0.0) - 2024-03-08
 

@@ -4,18 +4,19 @@ namespace Inertia\Tests;
 
 use Inertia\Inertia;
 use Inertia\LazyProp;
+use Inertia\AlwaysProp;
 use Inertia\ResponseFactory;
 use Illuminate\Http\Response;
+use Illuminate\Session\Store;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Session\NullSessionHandler;
 use Inertia\Tests\Stubs\ExampleMiddleware;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request as HttpRequest;
 use Inertia\Response as InertiaResponse;
 use Illuminate\Session\Middleware\StartSession;
-use Illuminate\Session\NullSessionHandler;
-use Illuminate\Session\Store;
 
 class ResponseFactoryTest extends TestCase
 {
@@ -91,8 +92,8 @@ class ResponseFactoryTest extends TestCase
     public function test_location_response_for_non_inertia_requests_using_redirect_response_with_existing_session_and_request_properties(): void
     {
         $redirect = new RedirectResponse('https://inertiajs.com');
-        $redirect->setSession($session = new Store('test', new NullSessionHandler));
-        $redirect->setRequest($request = new HttpRequest);
+        $redirect->setSession($session = new Store('test', new NullSessionHandler()));
+        $redirect->setRequest($request = new HttpRequest());
         $response = (new ResponseFactory())->location($redirect);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
@@ -151,22 +152,6 @@ class ResponseFactoryTest extends TestCase
         $this->assertSame([], Inertia::getShared());
     }
 
-    public function test_can_persist_properties(): void
-    {
-        Inertia::persist('auth.user');
-        $this->assertSame(['auth.user'], Inertia::getPersisted());
-        Inertia::persist(['posts']);
-        $this->assertSame(['auth.user', 'posts'], Inertia::getPersisted());
-    }
-
-    public function test_can_flush_persisted_data(): void
-    {
-        Inertia::persist('auth.user');
-        $this->assertSame(['auth.user'], Inertia::getPersisted());
-        Inertia::flushPersisted();
-        $this->assertSame([], Inertia::getPersisted());
-    }
-
     public function test_can_create_lazy_prop(): void
     {
         $factory = new ResponseFactory();
@@ -175,6 +160,16 @@ class ResponseFactoryTest extends TestCase
         });
 
         $this->assertInstanceOf(LazyProp::class, $lazyProp);
+    }
+
+    public function test_can_create_always_prop(): void
+    {
+        $factory = new ResponseFactory();
+        $alwaysProp = $factory->always(function () {
+            return 'An always value';
+        });
+
+        $this->assertInstanceOf(AlwaysProp::class, $alwaysProp);
     }
 
     public function test_will_accept_arrayabe_props()

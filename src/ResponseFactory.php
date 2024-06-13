@@ -4,13 +4,13 @@ namespace Inertia;
 
 use Closure;
 use Illuminate\Support\Arr;
+use Inertia\Support\Header;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Traits\Macroable;
 use Illuminate\Contracts\Support\Arrayable;
-use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Response as BaseResponse;
-use Inertia\Support\Header;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirect;
 
@@ -24,9 +24,6 @@ class ResponseFactory
     /** @var array */
     protected $sharedProps = [];
 
-    /** @var array */
-    protected $persisted = [];
-
     /** @var Closure|string|null */
     protected $version;
 
@@ -37,7 +34,6 @@ class ResponseFactory
 
     /**
      * @param string|array|Arrayable $key
-     * @param mixed                  $value
      */
     public function share($key, $value = null): void
     {
@@ -50,11 +46,6 @@ class ResponseFactory
         }
     }
 
-    /**
-     * @param mixed $default
-     *
-     * @return mixed
-     */
     public function getShared(string $key = null, $default = null)
     {
         if ($key) {
@@ -67,30 +58,6 @@ class ResponseFactory
     public function flushShared(): void
     {
         $this->sharedProps = [];
-    }
-
-    /**
-     * @param string|array|Arrayable $props
-     */
-    public function persist($props): void
-    {
-        if (is_array($props)) {
-            $this->persisted = array_merge($this->persisted, $props);
-        } elseif ($props instanceof Arrayable) {
-            $this->persisted = array_merge($this->persisted, $props->toArray());
-        } else {
-            $this->persisted[] = $props;
-        }
-    }
-
-    public function getPersisted(): array
-    {
-        return $this->persisted;
-    }
-
-    public function flushPersisted(): void
-    {
-        $this->persisted = [];
     }
 
     /**
@@ -115,6 +82,11 @@ class ResponseFactory
         return new LazyProp($callback);
     }
 
+    public function always($value): AlwaysProp
+    {
+        return new AlwaysProp($value);
+    }
+
     /**
      * @param array|Arrayable $props
      */
@@ -124,13 +96,12 @@ class ResponseFactory
             $props = $props->toArray();
         }
 
-        return app(Response::class, [
-            'component' => $component,
-            'props' => array_merge($this->sharedProps, $props),
-            'rootView' => $this->rootView,
-            'version' => $this->getVersion(),
-            'persisted' => $this->persisted
-        ]);
+        return new Response(
+            $component,
+            array_merge($this->sharedProps, $props),
+            $this->rootView,
+            $this->getVersion()
+        );
     }
 
     /**
