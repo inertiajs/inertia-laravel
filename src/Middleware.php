@@ -47,10 +47,8 @@ class Middleware
      * Defines the props that are shared by default.
      *
      * @see https://inertiajs.com/shared-data
-     *
-     * @return array
      */
-    public function share(Request $request)
+    public function share(Request $request): array
     {
         return [
             'errors' => Inertia::always($this->resolveValidationErrors($request)),
@@ -61,20 +59,16 @@ class Middleware
      * Sets the root template that's loaded on the first page visit.
      *
      * @see https://inertiajs.com/server-side-setup#root-template
-     *
-     * @return string
      */
-    public function rootView(Request $request)
+    public function rootView(Request $request): string
     {
         return $this->rootView;
     }
 
     /**
      * Handle the incoming request.
-     *
-     * @return Response
      */
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): Response
     {
         Inertia::version(function () use ($request) {
             return $this->version($request);
@@ -130,10 +124,8 @@ class Middleware
     /**
      * Resolves and prepares validation errors in such
      * a way that they are easier to use client-side.
-     *
-     * @return object
      */
-    public function resolveValidationErrors(Request $request)
+    public function resolveValidationErrors(Request $request): object
     {
         if (! $request->hasSession() || ! $request->session()->has('errors')) {
             return (object) [];
