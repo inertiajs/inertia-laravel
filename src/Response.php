@@ -80,7 +80,7 @@ class Response implements Responsable
     /**
      * Create an HTTP response that represents the object.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param Request $request
      *
      * @return \Symfony\Component\HttpFoundation\Response
      */
@@ -139,10 +139,7 @@ class Response implements Responsable
             return $prop instanceof AlwaysProp;
         });
 
-        return array_merge(
-            $always,
-            $props
-        );
+        return array_merge($always, $props);
     }
 
     /**
