@@ -3,19 +3,19 @@
 namespace Inertia;
 
 use Closure;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
+use Inertia\Support\Header;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Str;
 use GuzzleHttp\Promise\PromiseInterface;
 use Illuminate\Support\Traits\Macroable;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceResponse;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Response as ResponseFactory;
-use Inertia\Support\Header;
 
 class Response implements Responsable
 {
@@ -40,7 +40,6 @@ class Response implements Responsable
 
     /**
      * @param string|array $key
-     * @param mixed        $value
      *
      * @return $this
      */
@@ -57,7 +56,6 @@ class Response implements Responsable
 
     /**
      * @param string|array $key
-     * @param mixed        $value
      *
      * @return $this
      */
@@ -111,7 +109,7 @@ class Response implements Responsable
     {
         $isPartial = $request->header(Header::PARTIAL_COMPONENT) === $this->component;
 
-        if(! $isPartial) {
+        if (! $isPartial) {
             $props = array_filter($this->props, static function ($prop) {
                 return ! ($prop instanceof LazyProp);
             });
@@ -119,11 +117,11 @@ class Response implements Responsable
 
         $props = $this->resolveArrayableProperties($props, $request);
 
-        if($isPartial && $request->hasHeader(Header::PARTIAL_ONLY)) {
+        if ($isPartial && $request->hasHeader(Header::PARTIAL_ONLY)) {
             $props = $this->resolveOnly($request, $props);
         }
 
-        if($isPartial && $request->hasHeader(Header::PARTIAL_EXCEPT)) {
+        if ($isPartial && $request->hasHeader(Header::PARTIAL_EXCEPT)) {
             $props = $this->resolveExcept($request, $props);
         }
 
@@ -168,7 +166,7 @@ class Response implements Responsable
 
         $value = [];
 
-        foreach($only as $key) {
+        foreach ($only as $key) {
             Arr::set($value, $key, data_get($props, $key));
         }
 

@@ -5,6 +5,7 @@ namespace Inertia;
 use LogicException;
 use Inertia\Ssr\Gateway;
 use ReflectionException;
+use Inertia\Support\Header;
 use Illuminate\Http\Request;
 use Inertia\Ssr\HttpGateway;
 use Illuminate\Routing\Router;
@@ -13,7 +14,6 @@ use Illuminate\Testing\TestResponse;
 use Inertia\Testing\TestResponseMacros;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use Illuminate\Foundation\Testing\TestResponse as LegacyTestResponse;
-use Inertia\Support\Header;
 
 class ServiceProvider extends BaseServiceProvider
 {

@@ -6,12 +6,8 @@ use Illuminate\Support\Facades\App;
 
 class AlwaysProp
 {
-    /** @var mixed */
     protected $value;
 
-    /**
-     * @param mixed $value
-     */
     public function __construct($value)
     {
         $this->value = $value;

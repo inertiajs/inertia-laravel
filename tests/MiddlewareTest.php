@@ -4,6 +4,7 @@ namespace Inertia\Tests;
 
 use LogicException;
 use Inertia\Inertia;
+use Inertia\AlwaysProp;
 use Inertia\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\MessageBag;
@@ -12,7 +13,6 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use Inertia\Tests\Stubs\ExampleMiddleware;
 use Illuminate\Session\Middleware\StartSession;
-use Inertia\AlwaysProp;
 
 class MiddlewareTest extends TestCase
 {

@@ -9,9 +9,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ExampleMiddleware extends Middleware
 {
-    /**
-     * @var mixed
-     */
     protected $version;
 
     /**

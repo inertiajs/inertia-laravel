@@ -5,6 +5,7 @@ namespace Inertia\Tests;
 use Mockery;
 use Inertia\LazyProp;
 use Inertia\Response;
+use Inertia\AlwaysProp;
 use Illuminate\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Fluent;
@@ -15,7 +16,6 @@ use Illuminate\Http\Response as BaseResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
-use Inertia\AlwaysProp;
 
 class ResponseTest extends TestCase
 {
@@ -400,9 +400,9 @@ class ResponseTest extends TestCase
             ],
             'errors' => new AlwaysProp(function () {
                 return [
-                    'name' => 'The email field is required.'
+                    'name' => 'The email field is required.',
                 ];
-            })
+            }),
         ];
 
         $response = new Response('User/Edit', $props, 'app', '123');

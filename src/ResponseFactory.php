@@ -4,13 +4,13 @@ namespace Inertia;
 
 use Closure;
 use Illuminate\Support\Arr;
+use Inertia\Support\Header;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Traits\Macroable;
 use Illuminate\Contracts\Support\Arrayable;
-use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Response as BaseResponse;
-use Inertia\Support\Header;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirect;
 
@@ -34,7 +34,6 @@ class ResponseFactory
 
     /**
      * @param string|array|Arrayable $key
-     * @param mixed                  $value
      */
     public function share($key, $value = null): void
     {
@@ -47,11 +46,6 @@ class ResponseFactory
         }
     }
 
-    /**
-     * @param mixed $default
-     *
-     * @return mixed
-     */
     public function getShared(string $key = null, $default = null)
     {
         if ($key) {
@@ -88,9 +82,6 @@ class ResponseFactory
         return new LazyProp($callback);
     }
 
-    /**
-     * @param mixed $value
-     */
     public function always($value): AlwaysProp
     {
         return new AlwaysProp($value);
