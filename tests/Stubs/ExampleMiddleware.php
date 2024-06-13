@@ -9,9 +9,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ExampleMiddleware extends Middleware
 {
-    /**
-     * @var mixed
-     */
     protected $version;
 
     /**
@@ -19,16 +16,10 @@ class ExampleMiddleware extends Middleware
      */
     protected $shared = [];
 
-    /**
-     * @var array
-     */
-    protected $persisted = [];
-
-    public function __construct($version = null, $shared = [], $persisted = [])
+    public function __construct($version = null, $shared = [])
     {
         $this->version = $version;
         $this->shared = $shared;
-        $this->persisted = $persisted;
     }
 
     /**

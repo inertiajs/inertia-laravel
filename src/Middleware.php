@@ -3,9 +3,9 @@
 namespace Inertia;
 
 use Closure;
+use Inertia\Support\Header;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
-use Inertia\Support\Header;
 use Symfony\Component\HttpFoundation\Response;
 
 class Middleware
@@ -18,13 +18,6 @@ class Middleware
      * @var string
      */
     protected $rootView = 'app';
-
-    /**
-     * The properties that should always be included on Inertia responses, regardless of "only" or "except" requests.
-     *
-     * @var array
-     */
-    protected $persisted = [];
 
     /**
      * Determines the current asset version.
@@ -60,9 +53,7 @@ class Middleware
     public function share(Request $request)
     {
         return [
-            'errors' => function () use ($request) {
-                return $this->resolveValidationErrors($request);
-            },
+            'errors' => Inertia::always($this->resolveValidationErrors($request)),
         ];
     }
 
@@ -90,7 +81,6 @@ class Middleware
         });
 
         Inertia::share($this->share($request));
-        Inertia::persist($this->persisted);
         Inertia::setRootView($this->rootView($request));
 
         $response = $next($request);
