@@ -213,7 +213,7 @@ class ResponseTest extends TestCase
 
     public function test_nested_arrayable_prop_response(): void
     {
-        $request = Request::create('/auth', 'GET');
+        $request = Request::create('/user/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
 
         $data = AsArrayable::make([
@@ -231,15 +231,15 @@ class ResponseTest extends TestCase
             },
         ]);
 
-        $response = new Response('Auth/Index', ['data' => $data], 'app', '123');
+        $response = new Response('User/Edit', ['data' => $data], 'app', '123');
         $response = $response->toResponse($request);
         $page = $response->getData();
 
         $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertSame('Auth/Index', $page->component);
+        $this->assertSame('User/Edit', $page->component);
         $this->assertSame('Victor Gutt', $page->props->data->user->full_name);
         $this->assertSame('Transl.me', $page->props->data->user->organizations[0]->name);
-        $this->assertSame('/auth', $page->url);
+        $this->assertSame('/user/123', $page->url);
         $this->assertSame('123', $page->version);
     }
 
