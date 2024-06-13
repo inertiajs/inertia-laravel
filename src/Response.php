@@ -111,9 +111,9 @@ class Response implements Responsable
     {
         $isPartial = $request->header(Header::PARTIAL_COMPONENT) === $this->component;
 
-        if (!$isPartial) {
+        if (! $isPartial) {
             return array_filter($props, static function ($prop) {
-                return !($prop instanceof LazyProp);
+                return ! ($prop instanceof LazyProp);
             });
         }
 
