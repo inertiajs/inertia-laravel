@@ -82,9 +82,17 @@ class ResponseFactory
         return (string) $version;
     }
 
+    /**
+     * @deprecated Use `optional` instead.
+     */
     public function lazy(callable $callback): LazyProp
     {
         return new LazyProp($callback);
+    }
+
+    public function optional(callable $callback): OptionalProp
+    {
+        return new OptionalProp($callback);
     }
 
     public function defer(callable $callback, string $group = 'default'): DeferProp
