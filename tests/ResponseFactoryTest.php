@@ -12,8 +12,10 @@ use Illuminate\Session\Store;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\AlwaysProp;
+use Inertia\DeferProp;
 use Inertia\Inertia;
 use Inertia\LazyProp;
+use Inertia\OptionalProp;
 use Inertia\ResponseFactory;
 use Inertia\Tests\Stubs\ExampleMiddleware;
 
@@ -159,6 +161,26 @@ class ResponseFactoryTest extends TestCase
         });
 
         $this->assertInstanceOf(LazyProp::class, $lazyProp);
+    }
+
+    public function test_can_create_deferred_prop(): void
+    {
+        $factory = new ResponseFactory();
+        $deferredProp = $factory->defer(function () {
+            return 'A deferred value';
+        });
+
+        $this->assertInstanceOf(DeferProp::class, $deferredProp);
+    }
+
+    public function test_can_create_optional_prop(): void
+    {
+        $factory = new ResponseFactory();
+        $optionalProp = $factory->optional(function () {
+            return 'An optional value';
+        });
+
+        $this->assertInstanceOf(OptionalProp::class, $optionalProp);
     }
 
     public function test_can_create_always_prop(): void

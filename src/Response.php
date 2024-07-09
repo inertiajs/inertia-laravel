@@ -114,7 +114,7 @@ class Response implements Responsable
 
         if (! $isPartial) {
             $props = array_filter($this->props, static function ($prop) {
-                return ! ($prop instanceof LazyProp) && ! ($prop instanceof DeferProp);
+                return ! ($prop instanceof OptionalProp) && ! ($prop instanceof LazyProp) && ! ($prop instanceof DeferProp);
             });
         }
 
@@ -228,7 +228,7 @@ class Response implements Responsable
                 $value = App::call($value);
             }
 
-            if ($value instanceof LazyProp) {
+            if ($value instanceof LazyProp || $value instanceof OptionalProp || $value instanceof DeferProp) {
                 $value = App::call($value);
             }
 
