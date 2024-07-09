@@ -87,6 +87,11 @@ class ResponseFactory
         return new LazyProp($callback);
     }
 
+    public function defer(callable $callback, string $group = 'default'): DeferProp
+    {
+        return new DeferProp($callback, $group);
+    }
+
     /**
      * @param  mixed  $value
      */

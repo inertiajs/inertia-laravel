@@ -114,7 +114,7 @@ class Response implements Responsable
 
         if (! $isPartial) {
             $props = array_filter($this->props, static function ($prop) {
-                return ! ($prop instanceof LazyProp);
+                return ! ($prop instanceof LazyProp) && ! ($prop instanceof DeferProp);
             });
         }
 
@@ -131,6 +131,21 @@ class Response implements Responsable
         $props = $this->resolveAlways($props);
 
         $props = $this->resolvePropertyInstances($props, $request);
+
+        if (! $isPartial) {
+            $deferredProps = collect($this->props)->filter(function ($prop) {
+                return $prop instanceof DeferProp;
+            })->map(function ($prop, $key) {
+                return [
+                    'key' => $key,
+                    'group' => $prop->group(),
+                ];
+            })->groupBy('group')->map->pluck('key');
+
+            if ($deferredProps->isNotEmpty()) {
+                $props['deferred'] = $deferredProps->toArray();
+            }
+        }
 
         return $props;
     }
