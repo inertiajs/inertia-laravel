@@ -95,7 +95,7 @@ class Response implements Responsable
             'component' => $this->component,
             'props' => $props,
             'url' => Str::start(Str::after($request->fullUrl(), $request->getSchemeAndHttpHost()), '/'),
-            'version' => $this->version,
+            'meta' => $this->resolveMeta($request),
         ];
 
         if ($request->header(Header::INERTIA)) {
@@ -110,7 +110,7 @@ class Response implements Responsable
      */
     public function resolveProperties(Request $request, array $props): array
     {
-        $isPartial = $request->header(Header::PARTIAL_COMPONENT) === $this->component;
+        $isPartial = $this->isPartial($request);
 
         if (! $isPartial) {
             $props = array_filter($this->props, static function ($prop) {
@@ -131,21 +131,6 @@ class Response implements Responsable
         $props = $this->resolveAlways($props);
 
         $props = $this->resolvePropertyInstances($props, $request);
-
-        if (! $isPartial) {
-            $deferredProps = collect($this->props)->filter(function ($prop) {
-                return $prop instanceof DeferProp;
-            })->map(function ($prop, $key) {
-                return [
-                    'key' => $key,
-                    'group' => $prop->group(),
-                ];
-            })->groupBy('group')->map->pluck('key');
-
-            if ($deferredProps->isNotEmpty()) {
-                $props['deferred'] = $deferredProps->toArray();
-            }
-        }
 
         return $props;
     }
@@ -252,5 +237,47 @@ class Response implements Responsable
         }
 
         return $props;
+    }
+
+    /**
+     * Resolve the meta data for the response.
+     */
+    public function resolveMeta(Request $request): array
+    {
+        $meta = [
+            'assetVersion' => $this->version,
+        ];
+
+        if ($this->isPartial($request)) {
+            return $meta;
+        }
+
+        $deferredProps = collect($this->props)
+            ->filter(function ($prop) {
+                return $prop instanceof DeferProp;
+            })
+            ->map(function ($prop, $key) {
+                return [
+                    'key' => $key,
+                    'group' => $prop->group(),
+                ];
+            })
+            ->groupBy('group')
+            ->map
+            ->pluck('key');
+
+        if ($deferredProps->isNotEmpty()) {
+            $meta['deferredProps'] = $deferredProps->toArray();
+        }
+
+        return $meta;
+    }
+
+    /**
+     * Determine if the request is a partial request.
+     */
+    public function isPartial(Request $request): bool
+    {
+        return $request->header(Header::PARTIAL_COMPONENT) === $this->component;
     }
 }

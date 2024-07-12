@@ -29,7 +29,8 @@ class AssertableInertia extends AssertableJson
             PHPUnit::assertArrayHasKey('component', $page);
             PHPUnit::assertArrayHasKey('props', $page);
             PHPUnit::assertArrayHasKey('url', $page);
-            PHPUnit::assertArrayHasKey('version', $page);
+            PHPUnit::assertArrayHasKey('meta', $page);
+            PHPUnit::assertArrayHasKey('assetVersion', $page['meta']);
         } catch (AssertionFailedError $e) {
             PHPUnit::fail('Not a valid Inertia response.');
         }
@@ -37,7 +38,7 @@ class AssertableInertia extends AssertableJson
         $instance = static::fromArray($page['props']);
         $instance->component = $page['component'];
         $instance->url = $page['url'];
-        $instance->version = $page['version'];
+        $instance->version = $page['meta']['assetVersion'];
 
         return $instance;
     }
