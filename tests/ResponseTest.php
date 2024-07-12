@@ -45,8 +45,8 @@ class ResponseTest extends TestCase
         $this->assertSame('User/Edit', $page['component']);
         $this->assertSame('Jonathan', $page['props']['user']['name']);
         $this->assertSame('/user/123', $page['url']);
-        $this->assertSame('123', $page['version']);
-        $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;user&quot;:{&quot;name&quot;:&quot;Jonathan&quot;}},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;}"></div>', $view->render());
+        $this->assertSame('123', $page['meta']['assetVersion']);
+        $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;user&quot;:{&quot;name&quot;:&quot;Jonathan&quot;}},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;meta&quot;:{&quot;assetVersion&quot;:&quot;123&quot;}}"></div>', $view->render());
     }
 
     public function test_xhr_response(): void
@@ -63,7 +63,7 @@ class ResponseTest extends TestCase
         $this->assertSame('User/Edit', $page->component);
         $this->assertSame('Jonathan', $page->props->user->name);
         $this->assertSame('/user/123', $page->url);
-        $this->assertSame('123', $page->version);
+        $this->assertSame('123', $page->meta->assetVersion);
     }
 
     public function test_resource_response(): void
@@ -81,7 +81,7 @@ class ResponseTest extends TestCase
         $this->assertSame('User/Edit', $page->component);
         $this->assertSame('Jonathan', $page->props->user->name);
         $this->assertSame('/user/123', $page->url);
-        $this->assertSame('123', $page->version);
+        $this->assertSame('123', $page->meta->assetVersion);
     }
 
     public function test_lazy_resource_response(): void
@@ -129,7 +129,7 @@ class ResponseTest extends TestCase
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertSame('User/Index', $page->component);
         $this->assertSame('/users?page=1', $page->url);
-        $this->assertSame('123', $page->version);
+        $this->assertSame('123', $page->meta->assetVersion);
         tap($page->props->users, function ($users) use ($expected) {
             $this->assertSame(json_encode($expected['data']), json_encode($users->data));
             $this->assertSame(json_encode($expected['links']), json_encode($users->links));
@@ -187,7 +187,7 @@ class ResponseTest extends TestCase
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertSame('User/Index', $page->component);
         $this->assertSame('/users?page=1', $page->url);
-        $this->assertSame('123', $page->version);
+        $this->assertSame('123', $page->meta->assetVersion);
         tap($page->props->something->users, function ($users) use ($expected) {
             $this->assertSame(json_encode($expected['users']['data']), json_encode($users->data));
             $this->assertSame(json_encode($expected['users']['links']), json_encode($users->links));
@@ -210,7 +210,7 @@ class ResponseTest extends TestCase
         $this->assertSame('User/Edit', $page->component);
         $this->assertSame('Jonathan', $page->props->user->name);
         $this->assertSame('/user/123', $page->url);
-        $this->assertSame('123', $page->version);
+        $this->assertSame('123', $page->meta->assetVersion);
     }
 
     public function test_promise_props_are_resolved(): void
@@ -233,7 +233,7 @@ class ResponseTest extends TestCase
         $this->assertSame('User/Edit', $page->component);
         $this->assertSame('Jonathan', $page->props->user->name);
         $this->assertSame('/user/123', $page->url);
-        $this->assertSame('123', $page->version);
+        $this->assertSame('123', $page->meta->assetVersion);
     }
 
     public function test_xhr_partial_response(): void
@@ -256,7 +256,7 @@ class ResponseTest extends TestCase
         $this->assertCount(1, $props);
         $this->assertSame('partial-data', $page->props->partial);
         $this->assertSame('/user/123', $page->url);
-        $this->assertSame('123', $page->version);
+        $this->assertSame('123', $page->meta->assetVersion);
     }
 
     public function test_exclude_props_from_partial_response(): void
@@ -279,7 +279,7 @@ class ResponseTest extends TestCase
         $this->assertCount(1, $props);
         $this->assertSame('partial-data', $page->props->partial);
         $this->assertSame('/user/123', $page->url);
-        $this->assertSame('123', $page->version);
+        $this->assertSame('123', $page->meta->assetVersion);
     }
 
     public function test_nested_partial_props(): void
