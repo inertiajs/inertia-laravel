@@ -209,15 +209,16 @@ class Response implements Responsable
     public function resolvePropertyInstances(array $props, Request $request): array
     {
         foreach ($props as $key => $value) {
-            if ($value instanceof Closure) {
-                $value = App::call($value);
-            }
+            $resolveViaApp = collect([
+                Closure::class,
+                LazyProp::class,
+                OptionalProp::class,
+                DeferProp::class,
+                AlwaysProp::class,
+                WhenVisible::class,
+            ])->first(fn ($class) => $value instanceof $class);
 
-            if ($value instanceof LazyProp || $value instanceof OptionalProp || $value instanceof DeferProp) {
-                $value = App::call($value);
-            }
-
-            if ($value instanceof AlwaysProp) {
+            if ($resolveViaApp) {
                 $value = App::call($value);
             }
 
