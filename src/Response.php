@@ -114,7 +114,7 @@ class Response implements Responsable
 
         if (! $isPartial) {
             $props = array_filter($this->props, static function ($prop) {
-                return ! ($prop instanceof OptionalProp) && ! ($prop instanceof LazyProp) && ! ($prop instanceof DeferProp);
+                return ! ($prop instanceof IgnoreFirstLoad);
             });
         }
 

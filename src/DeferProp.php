@@ -4,7 +4,7 @@ namespace Inertia;
 
 use Illuminate\Support\Facades\App;
 
-class DeferProp
+class DeferProp implements IgnoreFirstLoad
 {
     protected $callback;
 
