@@ -4,7 +4,7 @@ namespace Inertia;
 
 use Illuminate\Support\Facades\App;
 
-class OptionalProp
+class OptionalProp implements IgnoreFirstLoad
 {
     protected $callback;
 
