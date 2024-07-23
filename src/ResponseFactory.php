@@ -27,6 +27,8 @@ class ResponseFactory
     /** @var Closure|string|null */
     protected $version;
 
+    protected $clearHistory = false;
+
     public function setRootView(string $name): void
     {
         $this->rootView = $name;
@@ -82,6 +84,11 @@ class ResponseFactory
         return (string) $version;
     }
 
+    public function clearHistory(): void
+    {
+        $this->clearHistory = true;
+    }
+
     /**
      * @deprecated Use `optional` instead.
      */
@@ -121,7 +128,8 @@ class ResponseFactory
             $component,
             array_merge($this->sharedProps, $props),
             $this->rootView,
-            $this->getVersion()
+            $this->getVersion(),
+            $this->clearHistory
         );
     }
 

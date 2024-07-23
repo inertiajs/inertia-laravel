@@ -29,17 +29,20 @@ class Response implements Responsable
 
     protected $version;
 
+    protected $clearHistory;
+
     protected $viewData = [];
 
     /**
      * @param  array|Arrayable  $props
      */
-    public function __construct(string $component, array $props, string $rootView = 'app', string $version = '')
+    public function __construct(string $component, array $props, string $rootView = 'app', string $version = '', bool $clearHistory = false)
     {
         $this->component = $component;
         $this->props = $props instanceof Arrayable ? $props->toArray() : $props;
         $this->rootView = $rootView;
         $this->version = $version;
+        $this->clearHistory = $clearHistory;
     }
 
     /**
@@ -247,6 +250,7 @@ class Response implements Responsable
     {
         $meta = [
             'assetVersion' => $this->version,
+            'clearHistory' => $this->clearHistory,
         ];
 
         if ($this->isPartial($request)) {

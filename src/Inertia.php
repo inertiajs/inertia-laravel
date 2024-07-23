@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static void setRootView(string $name)
  * @method static void share(string|array|\Illuminate\Contracts\Support\Arrayable $key, mixed $value = null)
  * @method static mixed getShared(string|null $key = null, mixed $default = null)
+ * @method static void clearHistory()
  * @method static void flushShared()
  * @method static void version(\Closure|string|null $version)
  * @method static string getVersion()
