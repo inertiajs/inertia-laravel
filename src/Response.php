@@ -115,9 +115,9 @@ class Response implements Responsable
     {
         $isPartial = $this->isPartial($request);
 
-        if (! $isPartial) {
+        if (!$isPartial) {
             $props = array_filter($this->props, static function ($prop) {
-                return ! ($prop instanceof IgnoreFirstLoad);
+                return !($prop instanceof IgnoreFirstLoad);
             });
         }
 
@@ -218,6 +218,7 @@ class Response implements Responsable
                 OptionalProp::class,
                 DeferProp::class,
                 AlwaysProp::class,
+                MergeProp::class,
                 WhenVisible::class,
             ])->first(fn ($class) => $value instanceof $class);
 
@@ -248,13 +249,34 @@ class Response implements Responsable
      */
     public function resolveMeta(Request $request): array
     {
-        $meta = [
+        return array_merge([
             'assetVersion' => $this->version,
             'clearHistory' => $this->clearHistory,
-        ];
+        ], $this->resolveMergeProps($request), $this->resolveDeferredProps($request));
+    }
 
+    public function resolveMergeProps(Request $request): array
+    {
+        $resetProps = collect(explode(',', $request->header(Header::RESET, '')));
+        $mergeProps = collect($this->props)
+            ->filter(function ($prop) {
+                return $prop instanceof Mergeable;
+            })
+            ->filter(function ($prop) {
+                return $prop->shouldMerge();
+            })
+            ->filter(function ($prop, $key) use ($resetProps) {
+                return !$resetProps->contains($key);
+            })
+            ->keys();
+
+        return $mergeProps->isNotEmpty() ? ['mergeProps' => $mergeProps->toArray()] : [];
+    }
+
+    public function resolveDeferredProps(Request $request): array
+    {
         if ($this->isPartial($request)) {
-            return $meta;
+            return [];
         }
 
         $deferredProps = collect($this->props)
@@ -271,11 +293,7 @@ class Response implements Responsable
             ->map
             ->pluck('key');
 
-        if ($deferredProps->isNotEmpty()) {
-            $meta['deferredProps'] = $deferredProps->toArray();
-        }
-
-        return $meta;
+        return $deferredProps->isNotEmpty() ? ['deferredProps' => $deferredProps->toArray()] : [];
     }
 
     /**

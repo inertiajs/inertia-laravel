@@ -17,4 +17,6 @@ class Header
     public const PARTIAL_ONLY = 'X-Inertia-Partial-Data';
 
     public const PARTIAL_EXCEPT = 'X-Inertia-Partial-Except';
+
+    public const RESET = 'X-Inertia-Reset';
 }
