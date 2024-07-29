@@ -110,6 +110,14 @@ class ResponseFactory
     /**
      * @param  mixed  $value
      */
+    public function merge($value): MergeProp
+    {
+        return new MergeProp($value);
+    }
+
+    /**
+     * @param  mixed  $value
+     */
     public function always($value): AlwaysProp
     {
         return new AlwaysProp($value);

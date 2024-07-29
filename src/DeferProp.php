@@ -4,11 +4,15 @@ namespace Inertia;
 
 use Illuminate\Support\Facades\App;
 
-class DeferProp implements IgnoreFirstLoad
+class DeferProp implements IgnoreFirstLoad, Mergeable
 {
+    use MergesProps;
+
     protected $callback;
 
     protected $group;
+
+    protected $merge = false;
 
     public function __construct(callable $callback, ?string $group = null)
     {
