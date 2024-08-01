@@ -64,4 +64,12 @@ return [
 
     ],
 
+    'eager_prefetch' => [
+
+        'strategy' => null,
+
+        'chunks' => 3,
+
+    ],
+
 ];

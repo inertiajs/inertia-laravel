@@ -3,6 +3,7 @@
 namespace Inertia;
 
 use Illuminate\Foundation\Testing\TestResponse as LegacyTestResponse;
+use Illuminate\Foundation\Vite;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
@@ -39,6 +40,13 @@ class ServiceProvider extends BaseServiceProvider
                 $app['config']->get('inertia.testing.page_extensions')
             );
         });
+
+        if (config('inertia.eager_prefetch.strategy', false)) {
+            $this->app->singleton(Vite::class, fn () => (new ViteEagerPrefetch())->usePrefetchStrategy(
+                config('inertia.eager_prefetch.strategy'),
+                config('inertia.eager_prefetch.chunks')
+            ));
+        }
     }
 
     public function boot(): void
