@@ -32,11 +32,11 @@ class Middleware
             return hash('xxh128', config('app.asset_url'));
         }
 
-        if (file_exists($manifest = public_path('mix-manifest.json'))) {
+        if (file_exists($manifest = public_path('build/manifest.json'))) {
             return hash_file('xxh128', $manifest);
         }
 
-        if (file_exists($manifest = public_path('build/manifest.json'))) {
+        if (file_exists($manifest = public_path('mix-manifest.json'))) {
             return hash_file('xxh128', $manifest);
         }
 
