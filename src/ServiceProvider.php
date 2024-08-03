@@ -13,7 +13,6 @@ use Illuminate\View\FileViewFinder;
 use Illuminate\Testing\TestResponse;
 use Inertia\Testing\TestResponseMacros;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
-use Illuminate\Foundation\Testing\TestResponse as LegacyTestResponse;
 
 class ServiceProvider extends BaseServiceProvider
 {
@@ -94,13 +93,6 @@ class ServiceProvider extends BaseServiceProvider
     {
         if (class_exists(TestResponse::class)) {
             TestResponse::mixin(new TestResponseMacros());
-
-            return;
-        }
-
-        // Laravel <= 6.0
-        if (class_exists(LegacyTestResponse::class)) {
-            LegacyTestResponse::mixin(new TestResponseMacros());
 
             return;
         }
