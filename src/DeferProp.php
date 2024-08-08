@@ -12,8 +12,6 @@ class DeferProp implements IgnoreFirstLoad, Mergeable
 
     protected $group;
 
-    protected $merge = false;
-
     public function __construct(callable $callback, ?string $group = null)
     {
         $this->callback = $callback;
