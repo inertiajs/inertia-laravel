@@ -5,16 +5,16 @@ namespace Inertia;
 
 trait MergesProps
 {
-    protected $merge = false;
+    protected bool $merge = false;
 
-    public function merge()
+    public function merge(): static
     {
         $this->merge = true;
 
         return $this;
     }
 
-    public function shouldMerge()
+    public function shouldMerge(): bool
     {
         return $this->merge;
     }
