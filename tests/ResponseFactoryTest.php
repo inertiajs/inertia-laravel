@@ -117,7 +117,7 @@ class ResponseFactoryTest extends TestCase
 
         $response = $this->withoutExceptionHandling()->get('/', [
             'X-Inertia' => 'true',
-            'X-Inertia-Version' => 'b19a24ee5c287f42ee1d465dab77ab37',
+            'X-Inertia-Version' => 'f445bd0a2c393a5af14fc677f59980a9',
         ]);
 
         $response->assertSuccessful();
