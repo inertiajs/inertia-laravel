@@ -29,15 +29,15 @@ class Middleware
     public function version(Request $request)
     {
         if (config('app.asset_url')) {
-            return md5(config('app.asset_url'));
+            return hash('xxh128', config('app.asset_url'));
         }
 
         if (file_exists($manifest = public_path('mix-manifest.json'))) {
-            return md5_file($manifest);
+            return hash_file('xxh128', $manifest);
         }
 
         if (file_exists($manifest = public_path('build/manifest.json'))) {
-            return md5_file($manifest);
+            return hash_file('xxh128', $manifest);
         }
 
         return null;
