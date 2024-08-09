@@ -109,7 +109,7 @@ class ResponseFactoryTest extends TestCase
             $this->assertSame('', Inertia::getVersion());
 
             Inertia::version(function () {
-                return md5('Inertia');
+                return hash('xxh128', 'Inertia');
             });
 
             return Inertia::render('User/Edit');
