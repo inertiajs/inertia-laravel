@@ -7,6 +7,7 @@
 /.gitignore export-ignore
 /.github export-ignore
 /.php-cs-fixer.dist.php export-ignore
+/_ide_helpers.php export-ignore
 /phpunit.xml.dist export-ignore
 /tests export-ignore
 /CHANGELOG.md export-ignore
