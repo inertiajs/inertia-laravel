@@ -458,6 +458,18 @@ class ResponseTest extends TestCase
         $this->assertSame('/subpath/product/123', $page->url);
     }
 
+    public function test_the_page_url_is_not_encoded(): void
+    {
+        $request = Request::create('/product/123', 'GET', ['value' => 'te/st']);
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $response = new Response('Product/Show', []);
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertSame('/product/123?value=te/st', $page->url);
+    }
+
     public function test_prop_as_basic_array(): void
     {
         $request = Request::create('/years', 'GET');
