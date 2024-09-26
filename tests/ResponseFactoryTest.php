@@ -143,6 +143,24 @@ class ResponseFactoryTest extends TestCase
         ]);
     }
 
+
+    /**
+     * @test
+     */
+    public function test_can_respond_with_a_response_or_json_based_on_accept_header()
+    {
+        Route::get('/', function () {
+            return $this->response('Component', ['props' => ['foo' => 'bar']]);
+        });
+
+        $response = $this->get('/', ['Accept' => 'application/json']);
+        $response->assertJson(['props' => ['foo' => 'bar']]);
+        
+
+        $response = $this->get('/');
+        $response->assertSee('Component');
+    }
+
     public function test_can_flush_shared_data(): void
     {
         Inertia::share('foo', 'bar');

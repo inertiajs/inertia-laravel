@@ -121,6 +121,7 @@ class ResponseFactory
         return $this->render($component, $props);
     }
 
+
     /**
      * @param string|SymfonyRedirect $url
      */
