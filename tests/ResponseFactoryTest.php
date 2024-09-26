@@ -16,6 +16,7 @@ use Inertia\Tests\Stubs\ExampleMiddleware;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Session\Middleware\StartSession;
+use Inertia\Testing\AssertableInertia as Assert;
 
 class ResponseFactoryTest extends TestCase
 {
@@ -150,15 +151,15 @@ class ResponseFactoryTest extends TestCase
     public function test_can_respond_with_a_response_or_json_based_on_accept_header()
     {
         Route::get('/', function () {
-            return $this->response('Component', ['props' => ['foo' => 'bar']]);
+            return Inertia::response('User/Edit', ['props' => ['foo' => 'bar']]);
         });
 
         $response = $this->get('/', ['Accept' => 'application/json']);
         $response->assertJson(['props' => ['foo' => 'bar']]);
-        
 
-        $response = $this->get('/');
-        $response->assertSee('Component');
+        // Without the Accept header, it defaults to Inertia Component
+        $this->get('/')->assertInertia(fn (Assert $page) => $page
+                ->component('User/Edit'));
     }
 
     public function test_can_flush_shared_data(): void
