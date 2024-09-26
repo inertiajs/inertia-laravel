@@ -104,6 +104,23 @@ class ResponseFactory
         );
     }
 
+
+    /**
+     * @param array|Arrayable $props
+     * @param array $customProps
+     * @return JsonResponse|Response
+     */
+    public function response($component, $props = [], $customProps = []) 
+    {
+        $props = array_merge($props, $customProps);
+
+        if (request()->header('Accept') === 'application/json') {
+            return response()->json($props);
+        }
+
+        return $this->render($component, $props);
+    }
+
     /**
      * @param string|SymfonyRedirect $url
      */
