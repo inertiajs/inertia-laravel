@@ -2,6 +2,7 @@
 
 namespace Inertia;
 
+use Carbon\CarbonInterval;
 use Closure;
 use GuzzleHttp\Promise\PromiseInterface;
 use Illuminate\Contracts\Support\Arrayable;
@@ -31,18 +32,23 @@ class Response implements Responsable
 
     protected $clearHistory;
 
+    protected $encryptHistory;
+
     protected $viewData = [];
+
+    protected $cacheFor = [];
 
     /**
      * @param  array|Arrayable  $props
      */
-    public function __construct(string $component, array $props, string $rootView = 'app', string $version = '', bool $clearHistory = false)
+    public function __construct(string $component, array $props, string $rootView = 'app', string $version = '', bool $clearHistory = false, bool $encryptHistory = false)
     {
         $this->component = $component;
         $this->props = $props instanceof Arrayable ? $props->toArray() : $props;
         $this->rootView = $rootView;
         $this->version = $version;
         $this->clearHistory = $clearHistory;
+        $this->encryptHistory = $encryptHistory;
     }
 
     /**
@@ -84,6 +90,13 @@ class Response implements Responsable
         return $this;
     }
 
+    public function cache(string|array $cacheFor): self
+    {
+        $this->cacheFor = is_array($cacheFor) ? $cacheFor : [$cacheFor];
+
+        return $this;
+    }
+
     /**
      * Create an HTTP response that represents the object.
      *
@@ -94,12 +107,19 @@ class Response implements Responsable
     {
         $props = $this->resolveProperties($request, $this->props);
 
-        $page = [
-            'component' => $this->component,
-            'props' => $props,
-            'url' => Str::start(Str::after($request->fullUrl(), $request->getSchemeAndHttpHost()), '/'),
-            'meta' => $this->resolveMeta($request),
-        ];
+        $page = array_merge(
+            [
+                'component' => $this->component,
+                'props' => $props,
+                'url' => Str::start(Str::after($request->fullUrl(), $request->getSchemeAndHttpHost()), '/'),
+                'version' => $this->version,
+                'clearHistory' => $this->clearHistory,
+                'encryptHistory' => $this->encryptHistory,
+            ],
+            $this->resolveMergeProps($request),
+            $this->resolveDeferredProps($request),
+            $this->resolveCacheDirections($request),
+        );
 
         if ($request->header(Header::INERTIA)) {
             return new JsonResponse($page, 200, [Header::INERTIA => 'true']);
@@ -220,7 +240,7 @@ class Response implements Responsable
                 AlwaysProp::class,
                 MergeProp::class,
                 WhenVisible::class,
-            ])->first(fn ($class) => $value instanceof $class);
+            ])->first(fn($class) => $value instanceof $class);
 
             if ($resolveViaApp) {
                 $value = App::call($value);
@@ -245,14 +265,23 @@ class Response implements Responsable
     }
 
     /**
-     * Resolve the meta data for the response.
+     * Resolve the cache directions for the response.
      */
-    public function resolveMeta(Request $request): array
+    public function resolveCacheDirections(Request $request): array
     {
-        return array_merge([
-            'assetVersion' => $this->version,
-            'clearHistory' => $this->clearHistory,
-        ], $this->resolveMergeProps($request), $this->resolveDeferredProps($request));
+        if (count($this->cacheFor) === 0) {
+            return [];
+        }
+
+        return [
+            'cache' => collect($this->cacheFor)->map(function ($value) {
+                if ($value instanceof CarbonInterval) {
+                    return $value->totalSeconds;
+                }
+
+                return intval($value);
+            }),
+        ];
     }
 
     public function resolveMergeProps(Request $request): array

@@ -29,6 +29,13 @@ class ResponseFactory
 
     protected $clearHistory = false;
 
+    protected $encryptHistory = false;
+
+    public function __construct()
+    {
+        $this->encryptHistory = config('inertia.history.encrypt', false);
+    }
+
     public function setRootView(string $name): void
     {
         $this->rootView = $name;
@@ -89,6 +96,11 @@ class ResponseFactory
         $this->clearHistory = true;
     }
 
+    public function encryptHistory($encrypt = true): void
+    {
+        $this->encryptHistory = $encrypt;
+    }
+
     /**
      * @deprecated Use `optional` instead.
      */
@@ -137,7 +149,8 @@ class ResponseFactory
             array_merge($this->sharedProps, $props),
             $this->rootView,
             $this->getVersion(),
-            $this->clearHistory
+            $this->clearHistory,
+            $this->encryptHistory
         );
     }
 
