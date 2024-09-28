@@ -158,8 +158,9 @@ class ResponseFactoryTest extends TestCase
         $response->assertJson(['props' => ['foo' => 'bar']]);
 
         // Without the Accept header, it defaults to Inertia Component
-        $this->get('/')->assertInertia(fn (Assert $page) => 
-        $page->component('User/Edit'));
+        $this->get('/')->assertInertia(function (Assert $page) {
+            $page->component('User/Edit');
+        }); 
     }
 
     public function test_can_flush_shared_data(): void
