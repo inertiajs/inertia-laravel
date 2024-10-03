@@ -27,9 +27,9 @@ class ControllerTest extends TestCase
                 'errors' => (object) [],
             ],
             'url' => '/',
-            'meta' => [
-                'assetVersion' => '',
-            ]
+            'version' => '',
+            'clearHistory' => false,
+            'encryptHistory' => false,
         ]);
     }
 }
