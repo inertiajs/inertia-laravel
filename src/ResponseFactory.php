@@ -29,12 +29,7 @@ class ResponseFactory
 
     protected $clearHistory = false;
 
-    protected $encryptHistory = false;
-
-    public function __construct()
-    {
-        $this->encryptHistory = config('inertia.history.encrypt', false);
-    }
+    protected $encryptHistory;
 
     public function setRootView(string $name): void
     {
@@ -150,7 +145,7 @@ class ResponseFactory
             $this->rootView,
             $this->getVersion(),
             $this->clearHistory,
-            $this->encryptHistory
+            $this->encryptHistory ?? config('inertia.history.encrypt', false),
         );
     }
 
