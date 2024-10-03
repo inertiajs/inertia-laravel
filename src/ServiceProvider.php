@@ -24,7 +24,7 @@ class ServiceProvider extends BaseServiceProvider
         $this->app->bind(Gateway::class, HttpGateway::class);
 
         $this->mergeConfigFrom(
-            __DIR__.'/../config/inertia.php',
+            __DIR__ . '/../config/inertia.php',
             'inertia'
         );
 
@@ -40,13 +40,6 @@ class ServiceProvider extends BaseServiceProvider
                 $app['config']->get('inertia.testing.page_extensions')
             );
         });
-
-        if (config('inertia.eager_prefetch.strategy', false)) {
-            $this->app->singleton(Vite::class, fn () => (new ViteEagerPrefetch())->usePrefetchStrategy(
-                config('inertia.eager_prefetch.strategy'),
-                config('inertia.eager_prefetch.chunks')
-            ));
-        }
     }
 
     public function boot(): void
@@ -54,7 +47,7 @@ class ServiceProvider extends BaseServiceProvider
         $this->registerConsoleCommands();
 
         $this->publishes([
-            __DIR__.'/../config/inertia.php' => config_path('inertia.php'),
+            __DIR__ . '/../config/inertia.php' => config_path('inertia.php'),
         ]);
     }
 
@@ -89,7 +82,7 @@ class ServiceProvider extends BaseServiceProvider
     protected function registerRouterMacro(): void
     {
         Router::macro('inertia', function ($uri, $component, $props = []) {
-            return $this->match(['GET', 'HEAD'], $uri, '\\'.Controller::class)
+            return $this->match(['GET', 'HEAD'], $uri, '\\' . Controller::class)
                 ->defaults('component', $component)
                 ->defaults('props', $props);
         });

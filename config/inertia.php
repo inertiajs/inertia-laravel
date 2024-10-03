@@ -64,14 +64,6 @@ return [
 
     ],
 
-    'eager_prefetch' => [
-
-        'strategy' => null,
-
-        'chunks' => 3,
-
-    ],
-
     'history' => [
 
         'encrypt' => false,
