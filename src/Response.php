@@ -239,7 +239,6 @@ class Response implements Responsable
                 DeferProp::class,
                 AlwaysProp::class,
                 MergeProp::class,
-                WhenVisible::class,
             ])->first(fn($class) => $value instanceof $class);
 
             if ($resolveViaApp) {
