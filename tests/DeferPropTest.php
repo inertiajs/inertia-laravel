@@ -10,10 +10,10 @@ class DeferPropTest extends TestCase
     public function test_can_invoke(): void
     {
         $deferProp = new DeferProp(function () {
-            return 'A lazy value';
+            return 'A deferred value';
         });
 
-        $this->assertSame('A lazy value', $deferProp());
+        $this->assertSame('A deferred value', $deferProp());
     }
 
     public function test_can_resolve_bindings_when_invoked(): void
