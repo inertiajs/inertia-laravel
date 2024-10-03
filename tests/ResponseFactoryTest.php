@@ -15,6 +15,7 @@ use Inertia\AlwaysProp;
 use Inertia\DeferProp;
 use Inertia\Inertia;
 use Inertia\LazyProp;
+use Inertia\MergeProp;
 use Inertia\OptionalProp;
 use Inertia\ResponseFactory;
 use Inertia\Tests\Stubs\ExampleMiddleware;
@@ -169,6 +170,26 @@ class ResponseFactoryTest extends TestCase
         $deferredProp = $factory->defer(function () {
             return 'A deferred value';
         });
+
+        $this->assertInstanceOf(DeferProp::class, $deferredProp);
+    }
+
+    public function test_can_create_merged_prop(): void
+    {
+        $factory = new ResponseFactory();
+        $mergedProp = $factory->merge(function () {
+            return 'A merged value';
+        });
+
+        $this->assertInstanceOf(MergeProp::class, $mergedProp);
+    }
+
+    public function test_can_create_deferred_and_merged_prop(): void
+    {
+        $factory = new ResponseFactory();
+        $deferredProp = $factory->defer(function () {
+            return 'A deferred + merged value';
+        })->merge();
 
         $this->assertInstanceOf(DeferProp::class, $deferredProp);
     }
