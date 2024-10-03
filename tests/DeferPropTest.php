@@ -11,9 +11,10 @@ class DeferPropTest extends TestCase
     {
         $deferProp = new DeferProp(function () {
             return 'A deferred value';
-        });
+        }, 'default');
 
         $this->assertSame('A deferred value', $deferProp());
+        $this->assertSame('default', $deferProp->group());
     }
 
     public function test_can_invoke_and_merge(): void
