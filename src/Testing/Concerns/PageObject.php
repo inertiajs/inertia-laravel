@@ -49,6 +49,8 @@ trait PageObject
             'props' => $this->props,
             'url' => $this->url,
             'version' => $this->version,
+            'encryptHistory' => $this->encryptHistory,
+            'clearHistory' => $this->clearHistory,
         ];
     }
 }

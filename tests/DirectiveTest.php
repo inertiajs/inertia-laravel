@@ -30,7 +30,7 @@ class DirectiveTest extends TestCase
     /**
      * Example Page Objects.
      */
-    protected const EXAMPLE_PAGE_OBJECT = ['component' => 'Foo/Bar', 'props' => ['foo' => 'bar'], 'url' => '/test', 'version' => ''];
+    protected const EXAMPLE_PAGE_OBJECT = ['component' => 'Foo/Bar', 'props' => ['foo' => 'bar'], 'url' => '/test', 'version' => '', 'encryptHistory' => false, 'clearHistory' => false];
 
     public function setUp(): void
     {
@@ -39,7 +39,7 @@ class DirectiveTest extends TestCase
         $this->app->bind(Gateway::class, FakeGateway::class);
         $this->filesystem = m::mock(Filesystem::class);
 
-        $this->compiler = new BladeCompiler($this->filesystem, __DIR__.'/cache/views');
+        $this->compiler = new BladeCompiler($this->filesystem, __DIR__ . '/cache/views');
         $this->compiler->directive('inertia', [Directive::class, 'compile']);
         $this->compiler->directive('inertiaHead', [Directive::class, 'compileHead']);
     }
@@ -94,7 +94,7 @@ class DirectiveTest extends TestCase
     {
         Config::set(['inertia.ssr.enabled' => false]);
 
-        $html = '<div id="app" data-page="{&quot;component&quot;:&quot;Foo\/Bar&quot;,&quot;props&quot;:{&quot;foo&quot;:&quot;bar&quot;},&quot;url&quot;:&quot;\/test&quot;,&quot;version&quot;:&quot;&quot;}"></div>';
+        $html = '<div id="app" data-page="{&quot;component&quot;:&quot;Foo\/Bar&quot;,&quot;props&quot;:{&quot;foo&quot;:&quot;bar&quot;},&quot;url&quot;:&quot;\/test&quot;,&quot;version&quot;:&quot;&quot;,&quot;encryptHistory&quot;:false,&quot;clearHistory&quot;:false}"></div>';
 
         $this->assertSame($html, $this->renderView('@inertia', ['page' => self::EXAMPLE_PAGE_OBJECT]));
         $this->assertSame($html, $this->renderView('@inertia()', ['page' => self::EXAMPLE_PAGE_OBJECT]));
@@ -116,7 +116,7 @@ class DirectiveTest extends TestCase
     {
         Config::set(['inertia.ssr.enabled' => false]);
 
-        $html = '<div id="foo" data-page="{&quot;component&quot;:&quot;Foo\/Bar&quot;,&quot;props&quot;:{&quot;foo&quot;:&quot;bar&quot;},&quot;url&quot;:&quot;\/test&quot;,&quot;version&quot;:&quot;&quot;}"></div>';
+        $html = '<div id="foo" data-page="{&quot;component&quot;:&quot;Foo\/Bar&quot;,&quot;props&quot;:{&quot;foo&quot;:&quot;bar&quot;},&quot;url&quot;:&quot;\/test&quot;,&quot;version&quot;:&quot;&quot;,&quot;encryptHistory&quot;:false,&quot;clearHistory&quot;:false}"></div>';
 
         $this->assertSame($html, $this->renderView('@inertia(foo)', ['page' => self::EXAMPLE_PAGE_OBJECT]));
         $this->assertSame($html, $this->renderView("@inertia('foo')", ['page' => self::EXAMPLE_PAGE_OBJECT]));

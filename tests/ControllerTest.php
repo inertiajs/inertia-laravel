@@ -28,8 +28,8 @@ class ControllerTest extends TestCase
             ],
             'url' => '/',
             'version' => '',
-            'clearHistory' => false,
             'encryptHistory' => false,
+            'clearHistory' => false,
         ]);
     }
 }
