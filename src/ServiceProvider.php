@@ -3,7 +3,6 @@
 namespace Inertia;
 
 use Illuminate\Foundation\Testing\TestResponse as LegacyTestResponse;
-use Illuminate\Foundation\Vite;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
@@ -32,6 +31,7 @@ class ServiceProvider extends BaseServiceProvider
         $this->registerRequestMacro();
         $this->registerRouterMacro();
         $this->registerTestingMacros();
+        $this->registerMiddleware();
 
         $this->app->bind('inertia.testing.view-finder', function ($app) {
             return new FileViewFinder(
@@ -107,5 +107,13 @@ class ServiceProvider extends BaseServiceProvider
         }
 
         throw new LogicException('Could not detect TestResponse class.');
+    }
+
+    protected function registerMiddleware(): void
+    {
+        $this->app['router']->aliasMiddleware(
+            'inertia.encrypt',
+            EncryptHistoryMiddleware::class
+        );
     }
 }
