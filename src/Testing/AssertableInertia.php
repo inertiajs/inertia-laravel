@@ -19,6 +19,12 @@ class AssertableInertia extends AssertableJson
     /** @var string|null */
     private $version;
 
+    /** @var bool */
+    private $encryptHistory;
+
+    /** @var bool */
+    private $clearHistory;
+
     public static function fromTestResponse(TestResponse $response): self
     {
         try {
@@ -40,6 +46,8 @@ class AssertableInertia extends AssertableJson
         $instance->component = $page['component'];
         $instance->url = $page['url'];
         $instance->version = $page['version'];
+        $instance->encryptHistory = $page['encryptHistory'];
+        $instance->clearHistory = $page['clearHistory'];
 
         return $instance;
     }
@@ -80,6 +88,8 @@ class AssertableInertia extends AssertableJson
             'props' => $this->prop(),
             'url' => $this->url,
             'version' => $this->version,
+            'encryptHistory' => $this->encryptHistory,
+            'clearHistory' => $this->clearHistory,
         ];
     }
 }
