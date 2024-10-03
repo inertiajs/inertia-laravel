@@ -5,6 +5,7 @@ namespace Inertia\Tests;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Route;
+use Inertia\EncryptHistoryMiddleware;
 use Inertia\Inertia;
 use Inertia\Tests\Stubs\ExampleMiddleware;
 
@@ -33,6 +34,40 @@ class HistoryTest extends TestCase
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
             Inertia::encryptHistory();
 
+            return Inertia::render('User/Edit');
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', [
+            'X-Inertia' => 'true',
+        ]);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Edit',
+            'encryptHistory' => true,
+        ]);
+    }
+
+    public function test_the_history_can_be_encrypted_via_middleware(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class, EncryptHistoryMiddleware::class])->get('/', function () {
+            return Inertia::render('User/Edit');
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', [
+            'X-Inertia' => 'true',
+        ]);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Edit',
+            'encryptHistory' => true,
+        ]);
+    }
+
+    public function test_the_history_can_be_encrypted_via_middleware_alias(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class, 'inertia.encrypt'])->get('/', function () {
             return Inertia::render('User/Edit');
         });
 
