@@ -172,6 +172,18 @@ class ResponseFactoryTest extends TestCase
         });
 
         $this->assertInstanceOf(DeferProp::class, $deferredProp);
+        $this->assertSame($deferredProp->group(), 'default');
+    }
+
+    public function test_can_create_deferred_prop_with_custom_group(): void
+    {
+        $factory = new ResponseFactory();
+        $deferredProp = $factory->defer(function () {
+            return 'A deferred value';
+        }, 'foo');
+
+        $this->assertInstanceOf(DeferProp::class, $deferredProp);
+        $this->assertSame($deferredProp->group(), 'foo');
     }
 
     public function test_can_create_merged_prop(): void
