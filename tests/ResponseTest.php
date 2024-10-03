@@ -80,6 +80,9 @@ class ResponseTest extends TestCase
         $this->assertSame('Jonathan', $page['props']['user']['name']);
         $this->assertSame('/user/123', $page['url']);
         $this->assertSame('123', $page['version']);
+        $this->assertSame([
+            'default' => ['foo'],
+        ], $page['deferredProps']);
         $this->assertFalse($page['clearHistory']);
         $this->assertFalse($page['encryptHistory']);
         $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;user&quot;:{&quot;name&quot;:&quot;Jonathan&quot;}},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;,&quot;clearHistory&quot;:false,&quot;encryptHistory&quot;:false,&quot;deferredProps&quot;:{&quot;default&quot;:[&quot;foo&quot;]}}"></div>', $view->render());
@@ -118,6 +121,10 @@ class ResponseTest extends TestCase
         $this->assertSame('Jonathan', $page['props']['user']['name']);
         $this->assertSame('/user/123', $page['url']);
         $this->assertSame('123', $page['version']);
+        $this->assertSame([
+            'default' => ['foo', 'bar'],
+            'custom' => ['baz'],
+        ], $page['deferredProps']);
         $this->assertFalse($page['clearHistory']);
         $this->assertFalse($page['encryptHistory']);
         $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;user&quot;:{&quot;name&quot;:&quot;Jonathan&quot;}},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;,&quot;clearHistory&quot;:false,&quot;encryptHistory&quot;:false,&quot;deferredProps&quot;:{&quot;default&quot;:[&quot;foo&quot;,&quot;bar&quot;],&quot;custom&quot;:[&quot;baz&quot;]}}"></div>', $view->render());
@@ -149,6 +156,10 @@ class ResponseTest extends TestCase
         $this->assertSame('Jonathan', $page['props']['user']['name']);
         $this->assertSame('/user/123', $page['url']);
         $this->assertSame('123', $page['version']);
+        $this->assertSame([
+            'foo',
+            'bar',
+        ], $page['mergeProps']);
         $this->assertFalse($page['clearHistory']);
         $this->assertFalse($page['encryptHistory']);
         $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;user&quot;:{&quot;name&quot;:&quot;Jonathan&quot;},&quot;foo&quot;:&quot;foo value&quot;,&quot;bar&quot;:&quot;bar value&quot;},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;,&quot;clearHistory&quot;:false,&quot;encryptHistory&quot;:false,&quot;mergeProps&quot;:[&quot;foo&quot;,&quot;bar&quot;]}"></div>', $view->render());
@@ -182,6 +193,13 @@ class ResponseTest extends TestCase
         $this->assertSame('Jonathan', $page['props']['user']['name']);
         $this->assertSame('/user/123', $page['url']);
         $this->assertSame('123', $page['version']);
+        $this->assertSame([
+            'default' => ['foo'],
+        ], $page['deferredProps']);
+        $this->assertSame([
+            'foo',
+            'bar',
+        ], $page['mergeProps']);
         $this->assertFalse($page['clearHistory']);
         $this->assertFalse($page['encryptHistory']);
         $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;user&quot;:{&quot;name&quot;:&quot;Jonathan&quot;},&quot;bar&quot;:&quot;bar value&quot;},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;,&quot;clearHistory&quot;:false,&quot;encryptHistory&quot;:false,&quot;mergeProps&quot;:[&quot;foo&quot;,&quot;bar&quot;],&quot;deferredProps&quot;:{&quot;default&quot;:[&quot;foo&quot;]}}"></div>', $view->render());
