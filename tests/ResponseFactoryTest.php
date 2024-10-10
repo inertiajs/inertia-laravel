@@ -146,6 +146,66 @@ class ResponseFactoryTest extends TestCase
         ]);
     }
 
+    public function test_dot_props_are_merged_from_shared(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            Inertia::share('auth.user', [
+                'name' => 'Jonathan',
+            ]);
+
+            return Inertia::render('User/Edit', [
+                'auth.user.can.create_group' => false,
+            ]);
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Edit',
+            'props' => [
+                'auth' => [
+                    'user' => [
+                        'name' => 'Jonathan',
+                        'can' => [
+                            'create_group' => false,
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+    }
+
+    public function test_dot_props_with_callbacks_are_merged_from_shared(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            Inertia::share('auth.user', fn () => [
+                'name' => 'Jonathan',
+            ]);
+
+            return Inertia::render('User/Edit', [
+                'auth.user.can.create_group' => false,
+            ]);
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Edit',
+            'props' => [
+                'auth' => [
+                    'user' => [
+                        'name' => 'Jonathan',
+                        'can' => [
+                            'create_group' => false,
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+    }
+
     public function test_can_flush_shared_data(): void
     {
         Inertia::share('foo', 'bar');

@@ -172,6 +172,10 @@ class Response implements Responsable
                 $value = $this->resolveArrayableProperties($value, $request, false);
             }
 
+            if ($value instanceof Closure) {
+                $value = $value();
+            }
+
             if ($unpackDotProps && str_contains($key, '.')) {
                 Arr::set($props, $key, $value);
                 unset($props[$key]);
