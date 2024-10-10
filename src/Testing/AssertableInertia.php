@@ -2,11 +2,11 @@
 
 namespace Inertia\Testing;
 
-use InvalidArgumentException;
+use Illuminate\Testing\Fluent\AssertableJson;
 use Illuminate\Testing\TestResponse;
+use InvalidArgumentException;
 use PHPUnit\Framework\Assert as PHPUnit;
 use PHPUnit\Framework\AssertionFailedError;
-use Illuminate\Testing\Fluent\AssertableJson;
 
 class AssertableInertia extends AssertableJson
 {
@@ -19,6 +19,12 @@ class AssertableInertia extends AssertableJson
     /** @var string|null */
     private $version;
 
+    /** @var bool */
+    private $encryptHistory;
+
+    /** @var bool */
+    private $clearHistory;
+
     public static function fromTestResponse(TestResponse $response): self
     {
         try {
@@ -30,6 +36,8 @@ class AssertableInertia extends AssertableJson
             PHPUnit::assertArrayHasKey('props', $page);
             PHPUnit::assertArrayHasKey('url', $page);
             PHPUnit::assertArrayHasKey('version', $page);
+            PHPUnit::assertArrayHasKey('encryptHistory', $page);
+            PHPUnit::assertArrayHasKey('clearHistory', $page);
         } catch (AssertionFailedError $e) {
             PHPUnit::fail('Not a valid Inertia response.');
         }
@@ -38,11 +46,13 @@ class AssertableInertia extends AssertableJson
         $instance->component = $page['component'];
         $instance->url = $page['url'];
         $instance->version = $page['version'];
+        $instance->encryptHistory = $page['encryptHistory'];
+        $instance->clearHistory = $page['clearHistory'];
 
         return $instance;
     }
 
-    public function component(string $value = null, $shouldExist = null): self
+    public function component(?string $value = null, $shouldExist = null): self
     {
         PHPUnit::assertSame($value, $this->component, 'Unexpected Inertia page component.');
 
@@ -78,6 +88,8 @@ class AssertableInertia extends AssertableJson
             'props' => $this->prop(),
             'url' => $this->url,
             'version' => $this->version,
+            'encryptHistory' => $this->encryptHistory,
+            'clearHistory' => $this->clearHistory,
         ];
     }
 }

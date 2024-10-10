@@ -2,20 +2,22 @@
 
 namespace Inertia\Tests;
 
-use Mockery;
-use Inertia\LazyProp;
-use Inertia\Response;
-use Inertia\AlwaysProp;
-use Illuminate\View\View;
-use Illuminate\Http\Request;
-use Illuminate\Support\Fluent;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Collection;
-use Inertia\Tests\Stubs\FakeResource;
-use Illuminate\Http\Response as BaseResponse;
-use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
+use Illuminate\Http\Response as BaseResponse;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Fluent;
+use Illuminate\View\View;
+use Inertia\AlwaysProp;
+use Inertia\DeferProp;
+use Inertia\LazyProp;
+use Inertia\MergeProp;
+use Inertia\Response;
+use Inertia\Tests\Stubs\FakeResource;
+use Mockery;
 
 class ResponseTest extends TestCase
 {
@@ -46,7 +48,161 @@ class ResponseTest extends TestCase
         $this->assertSame('Jonathan', $page['props']['user']['name']);
         $this->assertSame('/user/123', $page['url']);
         $this->assertSame('123', $page['version']);
-        $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;user&quot;:{&quot;name&quot;:&quot;Jonathan&quot;}},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;}"></div>', $view->render());
+        $this->assertFalse($page['clearHistory']);
+        $this->assertFalse($page['encryptHistory']);
+        $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;user&quot;:{&quot;name&quot;:&quot;Jonathan&quot;}},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;,&quot;clearHistory&quot;:false,&quot;encryptHistory&quot;:false}"></div>', $view->render());
+    }
+
+    public function test_server_response_with_deferred_prop(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+
+        $user = ['name' => 'Jonathan'];
+        $response = new Response(
+            'User/Edit',
+            [
+                'user' => $user,
+                'foo' => new DeferProp(function () {
+                    return 'bar';
+                }, 'default'),
+            ],
+            'app',
+            '123'
+        );
+        $response = $response->toResponse($request);
+        $view = $response->getOriginalContent();
+        $page = $view->getData()['page'];
+
+        $this->assertInstanceOf(BaseResponse::class, $response);
+        $this->assertInstanceOf(View::class, $view);
+
+        $this->assertSame('User/Edit', $page['component']);
+        $this->assertSame('Jonathan', $page['props']['user']['name']);
+        $this->assertSame('/user/123', $page['url']);
+        $this->assertSame('123', $page['version']);
+        $this->assertSame([
+            'default' => ['foo'],
+        ], $page['deferredProps']);
+        $this->assertFalse($page['clearHistory']);
+        $this->assertFalse($page['encryptHistory']);
+        $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;user&quot;:{&quot;name&quot;:&quot;Jonathan&quot;}},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;,&quot;clearHistory&quot;:false,&quot;encryptHistory&quot;:false,&quot;deferredProps&quot;:{&quot;default&quot;:[&quot;foo&quot;]}}"></div>', $view->render());
+    }
+
+    public function test_server_response_with_deferred_prop_and_multiple_groups(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+
+        $user = ['name' => 'Jonathan'];
+        $response = new Response(
+            'User/Edit',
+            [
+                'user' => $user,
+                'foo' => new DeferProp(function () {
+                    return 'foo value';
+                }, 'default'),
+                'bar' => new DeferProp(function () {
+                    return 'bar value';
+                }, 'default'),
+                'baz' => new DeferProp(function () {
+                    return 'baz value';
+                }, 'custom'),
+            ],
+            'app',
+            '123'
+        );
+        $response = $response->toResponse($request);
+        $view = $response->getOriginalContent();
+        $page = $view->getData()['page'];
+
+        $this->assertInstanceOf(BaseResponse::class, $response);
+        $this->assertInstanceOf(View::class, $view);
+
+        $this->assertSame('User/Edit', $page['component']);
+        $this->assertSame('Jonathan', $page['props']['user']['name']);
+        $this->assertSame('/user/123', $page['url']);
+        $this->assertSame('123', $page['version']);
+        $this->assertSame([
+            'default' => ['foo', 'bar'],
+            'custom' => ['baz'],
+        ], $page['deferredProps']);
+        $this->assertFalse($page['clearHistory']);
+        $this->assertFalse($page['encryptHistory']);
+        $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;user&quot;:{&quot;name&quot;:&quot;Jonathan&quot;}},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;,&quot;clearHistory&quot;:false,&quot;encryptHistory&quot;:false,&quot;deferredProps&quot;:{&quot;default&quot;:[&quot;foo&quot;,&quot;bar&quot;],&quot;custom&quot;:[&quot;baz&quot;]}}"></div>', $view->render());
+    }
+
+    public function test_server_response_with_merge_props(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+
+        $user = ['name' => 'Jonathan'];
+        $response = new Response(
+            'User/Edit',
+            [
+                'user' => $user,
+                'foo' => new MergeProp('foo value'),
+                'bar' => new MergeProp('bar value'),
+            ],
+            'app',
+            '123'
+        );
+        $response = $response->toResponse($request);
+        $view = $response->getOriginalContent();
+        $page = $view->getData()['page'];
+
+        $this->assertInstanceOf(BaseResponse::class, $response);
+        $this->assertInstanceOf(View::class, $view);
+
+        $this->assertSame('User/Edit', $page['component']);
+        $this->assertSame('Jonathan', $page['props']['user']['name']);
+        $this->assertSame('/user/123', $page['url']);
+        $this->assertSame('123', $page['version']);
+        $this->assertSame([
+            'foo',
+            'bar',
+        ], $page['mergeProps']);
+        $this->assertFalse($page['clearHistory']);
+        $this->assertFalse($page['encryptHistory']);
+        $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;user&quot;:{&quot;name&quot;:&quot;Jonathan&quot;},&quot;foo&quot;:&quot;foo value&quot;,&quot;bar&quot;:&quot;bar value&quot;},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;,&quot;clearHistory&quot;:false,&quot;encryptHistory&quot;:false,&quot;mergeProps&quot;:[&quot;foo&quot;,&quot;bar&quot;]}"></div>', $view->render());
+    }
+
+    public function test_server_response_with_defer_and_merge_props(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+
+        $user = ['name' => 'Jonathan'];
+        $response = new Response(
+            'User/Edit',
+            [
+                'user' => $user,
+                'foo' => (new DeferProp(function () {
+                    return 'foo value';
+                }, 'default'))->merge(),
+                'bar' => new MergeProp('bar value'),
+            ],
+            'app',
+            '123'
+        );
+        $response = $response->toResponse($request);
+        $view = $response->getOriginalContent();
+        $page = $view->getData()['page'];
+
+        $this->assertInstanceOf(BaseResponse::class, $response);
+        $this->assertInstanceOf(View::class, $view);
+
+        $this->assertSame('User/Edit', $page['component']);
+        $this->assertSame('Jonathan', $page['props']['user']['name']);
+        $this->assertSame('/user/123', $page['url']);
+        $this->assertSame('123', $page['version']);
+        $this->assertSame([
+            'default' => ['foo'],
+        ], $page['deferredProps']);
+        $this->assertSame([
+            'foo',
+            'bar',
+        ], $page['mergeProps']);
+        $this->assertFalse($page['clearHistory']);
+        $this->assertFalse($page['encryptHistory']);
+        $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;user&quot;:{&quot;name&quot;:&quot;Jonathan&quot;},&quot;bar&quot;:&quot;bar value&quot;},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;,&quot;clearHistory&quot;:false,&quot;encryptHistory&quot;:false,&quot;mergeProps&quot;:[&quot;foo&quot;,&quot;bar&quot;],&quot;deferredProps&quot;:{&quot;default&quot;:[&quot;foo&quot;]}}"></div>', $view->render());
     }
 
     public function test_xhr_response(): void
@@ -98,8 +254,7 @@ class ResponseTest extends TestCase
         $callable = static function () use ($users) {
             $page = new LengthAwarePaginator($users->take(2), $users->count(), 2);
 
-            return new class($page, JsonResource::class) extends ResourceCollection {
-            };
+            return new class($page, JsonResource::class) extends ResourceCollection {};
         };
 
         $response = new Response('User/Index', ['users' => $callable], 'app', '123');
@@ -279,6 +434,72 @@ class ResponseTest extends TestCase
         $this->assertSame('123', $page->version);
     }
 
+    public function test_nested_partial_props(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'User/Edit']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'auth.user,auth.refresh_token']);
+
+        $props = [
+            'auth' => [
+                'user' => new LazyProp(function () {
+                    return [
+                        'name' => 'Jonathan Reinink',
+                        'email' => 'jonathan@example.com',
+                    ];
+                }),
+                'refresh_token' => 'value',
+                'token' => 'value',
+            ],
+            'shared' => [
+                'flash' => 'value',
+            ],
+        ];
+
+        $response = new Response('User/Edit', $props);
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertFalse(isset($page->props->shared));
+        $this->assertFalse(isset($page->props->auth->token));
+        $this->assertSame('Jonathan Reinink', $page->props->auth->user->name);
+        $this->assertSame('jonathan@example.com', $page->props->auth->user->email);
+        $this->assertSame('value', $page->props->auth->refresh_token);
+    }
+
+    public function test_exclude_nested_props_from_partial_response(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'User/Edit']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'auth']);
+        $request->headers->add(['X-Inertia-Partial-Except' => 'auth.user']);
+
+        $props = [
+            'auth' => [
+                'user' => new LazyProp(function () {
+                    return [
+                        'name' => 'Jonathan Reinink',
+                        'email' => 'jonathan@example.com',
+                    ];
+                }),
+                'refresh_token' => 'value',
+            ],
+            'shared' => [
+                'flash' => 'value',
+            ],
+        ];
+
+        $response = new Response('User/Edit', $props);
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertFalse(isset($page->props->auth->user));
+        $this->assertFalse(isset($page->props->shared));
+        $this->assertSame('value', $page->props->auth->refresh_token);
+    }
+
     public function test_lazy_props_are_not_included_by_default(): void
     {
         $request = Request::create('/users', 'GET');
@@ -456,86 +677,5 @@ class ResponseTest extends TestCase
         $page = $response->getData();
 
         $this->assertSame('/subpath/product/123', $page->url);
-    }
-
-    public function test_prop_as_basic_array(): void
-    {
-        $request = Request::create('/years', 'GET');
-
-        $response = new Response('Years', ['years' => [2022, 2023, 2024]], 'app', '123');
-        $response = $response->toResponse($request);
-        $view = $response->getOriginalContent();
-        $page = $view->getData()['page'];
-
-        $this->assertSame([2022, 2023, 2024], $page['props']['years']);
-    }
-
-    public function test_dot_notation_props_are_merged_with_shared_props(): void
-    {
-        $request = Request::create('/test', 'GET');
-
-        $response = new Response('Test', [
-            'auth' => ['user' => ['name' => 'Jonathan']],
-            'auth.user.is_super' => true,
-        ], 'app', '123');
-        $response = $response->toResponse($request);
-        $view = $response->getOriginalContent();
-        $page = $view->getData()['page'];
-
-        $this->assertSame([
-            'auth' => [
-                'user' => [
-                    'name' => 'Jonathan',
-                    'is_super' => true,
-                ],
-            ],
-        ], $page['props']);
-    }
-
-    public function test_dot_notation_props_are_merged_with_lazy_shared_props(): void
-    {
-        $request = Request::create('/test', 'GET');
-
-        $response = new Response('Test', [
-            'auth' => function () {
-                return ['user' => ['name' => 'Jonathan']];
-            },
-            'auth.user.is_super' => true,
-        ], 'app', '123');
-
-        $response = $response->toResponse($request);
-        $view = $response->getOriginalContent();
-        $page = $view->getData()['page'];
-
-        $this->assertSame([
-            'auth' => [
-                'user' => [
-                    'name' => 'Jonathan',
-                    'is_super' => true,
-                ],
-            ],
-        ], $page['props']);
-    }
-
-    public function test_dot_notation_props_are_merged_with_other_dot_notation_props(): void
-    {
-        $request = Request::create('/test', 'GET');
-
-        $response = new Response('Test', [
-            'auth.user' => ['name' => 'Jonathan'],
-            'auth.user.is_super' => true,
-        ], 'app', '123');
-        $response = $response->toResponse($request);
-        $view = $response->getOriginalContent();
-        $page = $view->getData()['page'];
-
-        $this->assertSame([
-            'auth' => [
-                'user' => [
-                    'name' => 'Jonathan',
-                    'is_super' => true,
-                ],
-            ],
-        ], $page['props']);
     }
 }

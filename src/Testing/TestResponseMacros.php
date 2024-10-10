@@ -8,7 +8,7 @@ class TestResponseMacros
 {
     public function assertInertia()
     {
-        return function (Closure $callback = null) {
+        return function (?Closure $callback = null) {
             $assert = AssertableInertia::fromTestResponse($this);
 
             if (is_null($callback)) {

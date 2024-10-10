@@ -3,8 +3,8 @@
 namespace Inertia\Commands;
 
 use Illuminate\Console\GeneratorCommand;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Input\InputOption;
 
 #[AsCommand(name: 'inertia:middleware')]
 class CreateMiddleware extends GeneratorCommand
@@ -41,7 +41,7 @@ class CreateMiddleware extends GeneratorCommand
     /**
      * Get the default namespace for the class.
      *
-     * @param string $rootNamespace
+     * @param  string  $rootNamespace
      */
     protected function getDefaultNamespace($rootNamespace): string
     {

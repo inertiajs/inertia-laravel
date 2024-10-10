@@ -2,8 +2,8 @@
 
 namespace Inertia\Tests;
 
-use Inertia\AlwaysProp;
 use Illuminate\Http\Request;
+use Inertia\AlwaysProp;
 
 class AlwaysPropTest extends TestCase
 {
@@ -25,7 +25,8 @@ class AlwaysPropTest extends TestCase
 
     public function test_can_accept_callables(): void
     {
-        $callable = new class() {
+        $callable = new class
+        {
             public function __invoke()
             {
                 return 'An always value';

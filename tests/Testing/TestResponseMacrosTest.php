@@ -2,14 +2,13 @@
 
 namespace Inertia\Tests\Testing;
 
+use Illuminate\Testing\Fluent\AssertableJson;
 use Inertia\Inertia;
 use Inertia\Tests\TestCase;
-use Illuminate\Testing\Fluent\AssertableJson;
 
 class TestResponseMacrosTest extends TestCase
 {
-    /** @test */
-    public function it_can_make_inertia_assertions(): void
+    public function test_it_can_make_inertia_assertions(): void
     {
         $response = $this->makeMockRequest(
             Inertia::render('foo')
@@ -24,8 +23,7 @@ class TestResponseMacrosTest extends TestCase
         $this->assertTrue($success);
     }
 
-    /** @test */
-    public function it_preserves_the_ability_to_continue_chaining_laravel_test_response_calls(): void
+    public function test_it_preserves_the_ability_to_continue_chaining_laravel_test_response_calls(): void
     {
         $response = $this->makeMockRequest(
             Inertia::render('foo')
@@ -37,8 +35,7 @@ class TestResponseMacrosTest extends TestCase
         );
     }
 
-    /** @test */
-    public function it_can_retrieve_the_inertia_page(): void
+    public function test_it_can_retrieve_the_inertia_page(): void
     {
         $response = $this->makeMockRequest(
             Inertia::render('foo', ['bar' => 'baz'])
@@ -49,6 +46,8 @@ class TestResponseMacrosTest extends TestCase
             $this->assertSame(['bar' => 'baz'], $page['props']);
             $this->assertSame('/example-url', $page['url']);
             $this->assertSame('', $page['version']);
+            $this->assertFalse($page['encryptHistory']);
+            $this->assertFalse($page['clearHistory']);
         });
     }
 }

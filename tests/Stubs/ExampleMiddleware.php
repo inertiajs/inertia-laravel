@@ -2,13 +2,16 @@
 
 namespace Inertia\Tests\Stubs;
 
-use LogicException;
-use Inertia\Middleware;
 use Illuminate\Http\Request;
+use Inertia\Middleware;
+use LogicException;
 use Symfony\Component\HttpFoundation\Response;
 
 class ExampleMiddleware extends Middleware
 {
+    /**
+     * @var mixed
+     */
     protected $version;
 
     /**

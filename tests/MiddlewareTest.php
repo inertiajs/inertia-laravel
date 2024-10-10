@@ -2,17 +2,17 @@
 
 namespace Inertia\Tests;
 
-use LogicException;
-use Inertia\Inertia;
-use Inertia\AlwaysProp;
-use Inertia\Middleware;
 use Illuminate\Http\Request;
-use Illuminate\Support\MessageBag;
-use Illuminate\Support\ViewErrorBag;
+use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\MessageBag;
+use Illuminate\Support\ViewErrorBag;
+use Inertia\AlwaysProp;
+use Inertia\Inertia;
+use Inertia\Middleware;
 use Inertia\Tests\Stubs\ExampleMiddleware;
-use Illuminate\Session\Middleware\StartSession;
+use LogicException;
 
 class MiddlewareTest extends TestCase
 {
@@ -216,7 +216,8 @@ class MiddlewareTest extends TestCase
 
     public function test_middleware_can_change_the_root_view_via_a_property(): void
     {
-        $this->prepareMockEndpoint(null, [], new class() extends Middleware {
+        $this->prepareMockEndpoint(null, [], new class() extends Middleware
+        {
             protected $rootView = 'welcome';
         });
 
@@ -227,7 +228,8 @@ class MiddlewareTest extends TestCase
 
     public function test_middleware_can_change_the_root_view_by_overriding_the_rootview_method(): void
     {
-        $this->prepareMockEndpoint(null, [], new class() extends Middleware {
+        $this->prepareMockEndpoint(null, [], new class() extends Middleware
+        {
             public function rootView(Request $request): string
             {
                 return 'welcome';

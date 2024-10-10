@@ -4,8 +4,10 @@ namespace Inertia;
 
 use Illuminate\Support\Facades\App;
 
-class AlwaysProp
+class MergeProp implements Mergeable
 {
+    use MergesProps;
+
     /** @var mixed */
     protected $value;
 
@@ -15,6 +17,7 @@ class AlwaysProp
     public function __construct($value)
     {
         $this->value = $value;
+        $this->merge = true;
     }
 
     public function __invoke()

@@ -2,18 +2,18 @@
 
 namespace Inertia;
 
-use LogicException;
-use Inertia\Ssr\Gateway;
-use ReflectionException;
-use Inertia\Support\Header;
-use Illuminate\Http\Request;
-use Inertia\Ssr\HttpGateway;
-use Illuminate\Routing\Router;
-use Illuminate\View\FileViewFinder;
-use Illuminate\Testing\TestResponse;
-use Inertia\Testing\TestResponseMacros;
-use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use Illuminate\Foundation\Testing\TestResponse as LegacyTestResponse;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Router;
+use Illuminate\Support\ServiceProvider as BaseServiceProvider;
+use Illuminate\Testing\TestResponse;
+use Illuminate\View\FileViewFinder;
+use Inertia\Ssr\Gateway;
+use Inertia\Ssr\HttpGateway;
+use Inertia\Support\Header;
+use Inertia\Testing\TestResponseMacros;
+use LogicException;
+use ReflectionException;
 
 class ServiceProvider extends BaseServiceProvider
 {
@@ -23,7 +23,7 @@ class ServiceProvider extends BaseServiceProvider
         $this->app->bind(Gateway::class, HttpGateway::class);
 
         $this->mergeConfigFrom(
-            __DIR__.'/../config/inertia.php',
+            __DIR__ . '/../config/inertia.php',
             'inertia'
         );
 
@@ -31,6 +31,7 @@ class ServiceProvider extends BaseServiceProvider
         $this->registerRequestMacro();
         $this->registerRouterMacro();
         $this->registerTestingMacros();
+        $this->registerMiddleware();
 
         $this->app->bind('inertia.testing.view-finder', function ($app) {
             return new FileViewFinder(
@@ -46,7 +47,7 @@ class ServiceProvider extends BaseServiceProvider
         $this->registerConsoleCommands();
 
         $this->publishes([
-            __DIR__.'/../config/inertia.php' => config_path('inertia.php'),
+            __DIR__ . '/../config/inertia.php' => config_path('inertia.php'),
         ]);
     }
 
@@ -81,7 +82,7 @@ class ServiceProvider extends BaseServiceProvider
     protected function registerRouterMacro(): void
     {
         Router::macro('inertia', function ($uri, $component, $props = []) {
-            return $this->match(['GET', 'HEAD'], $uri, '\\'.Controller::class)
+            return $this->match(['GET', 'HEAD'], $uri, '\\' . Controller::class)
                 ->defaults('component', $component)
                 ->defaults('props', $props);
         });
@@ -106,5 +107,13 @@ class ServiceProvider extends BaseServiceProvider
         }
 
         throw new LogicException('Could not detect TestResponse class.');
+    }
+
+    protected function registerMiddleware(): void
+    {
+        $this->app['router']->aliasMiddleware(
+            'inertia.encrypt',
+            EncryptHistoryMiddleware::class
+        );
     }
 }

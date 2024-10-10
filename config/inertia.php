@@ -64,4 +64,10 @@ return [
 
     ],
 
+    'history' => [
+
+        'encrypt' => false,
+
+    ],
+
 ];

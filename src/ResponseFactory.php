@@ -3,16 +3,16 @@
 namespace Inertia;
 
 use Closure;
-use Illuminate\Support\Arr;
-use Inertia\Support\Header;
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Request;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Traits\Macroable;
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response as BaseResponse;
-use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
+use Illuminate\Support\Traits\Macroable;
+use Inertia\Support\Header;
 use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirect;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class ResponseFactory
 {
@@ -27,13 +27,18 @@ class ResponseFactory
     /** @var Closure|string|null */
     protected $version;
 
+    protected $clearHistory = false;
+
+    protected $encryptHistory;
+
     public function setRootView(string $name): void
     {
         $this->rootView = $name;
     }
 
     /**
-     * @param string|array|Arrayable $key
+     * @param  string|array|Arrayable  $key
+     * @param  mixed  $value
      */
     public function share($key, $value = null): void
     {
@@ -46,7 +51,11 @@ class ResponseFactory
         }
     }
 
-    public function getShared(string $key = null, $default = null)
+    /**
+     * @param  mixed  $default
+     * @return mixed
+     */
+    public function getShared(?string $key = null, $default = null)
     {
         if ($key) {
             return Arr::get($this->sharedProps, $key, $default);
@@ -61,7 +70,7 @@ class ResponseFactory
     }
 
     /**
-     * @param Closure|string|null $version
+     * @param  Closure|string|null  $version
      */
     public function version($version): void
     {
@@ -77,18 +86,52 @@ class ResponseFactory
         return (string) $version;
     }
 
+    public function clearHistory(): void
+    {
+        $this->clearHistory = true;
+    }
+
+    public function encryptHistory($encrypt = true): void
+    {
+        $this->encryptHistory = $encrypt;
+    }
+
+    /**
+     * @deprecated Use `optional` instead.
+     */
     public function lazy(callable $callback): LazyProp
     {
         return new LazyProp($callback);
     }
 
+    public function optional(callable $callback): OptionalProp
+    {
+        return new OptionalProp($callback);
+    }
+
+    public function defer(callable $callback, string $group = 'default'): DeferProp
+    {
+        return new DeferProp($callback, $group);
+    }
+
+    /**
+     * @param  mixed  $value
+     */
+    public function merge($value): MergeProp
+    {
+        return new MergeProp($value);
+    }
+
+    /**
+     * @param  mixed  $value
+     */
     public function always($value): AlwaysProp
     {
         return new AlwaysProp($value);
     }
 
     /**
-     * @param array|Arrayable $props
+     * @param  array|Arrayable  $props
      */
     public function render(string $component, $props = []): Response
     {
@@ -100,12 +143,14 @@ class ResponseFactory
             $component,
             array_merge($this->sharedProps, $props),
             $this->rootView,
-            $this->getVersion()
+            $this->getVersion(),
+            $this->clearHistory,
+            $this->encryptHistory ?? config('inertia.history.encrypt', false),
         );
     }
 
     /**
-     * @param string|SymfonyRedirect $url
+     * @param  string|SymfonyRedirect  $url
      */
     public function location($url): SymfonyResponse
     {
