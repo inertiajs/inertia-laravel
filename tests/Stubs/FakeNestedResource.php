@@ -4,7 +4,7 @@ namespace Inertia\Tests\Stubs;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class FakeResource extends JsonResource
+class FakeNestedResource extends JsonResource
 {
     /**
      * The data that will be used.
@@ -26,6 +26,8 @@ class FakeResource extends JsonResource
      */
     public function toArray($request): array
     {
-        return $this->data;
+        return [
+            'nested' => new FakeResource($this->data),
+        ];
     }
 }
