@@ -39,7 +39,7 @@ class DirectiveTest extends TestCase
         $this->app->bind(Gateway::class, FakeGateway::class);
         $this->filesystem = m::mock(Filesystem::class);
 
-        $this->compiler = new BladeCompiler($this->filesystem, __DIR__ . '/cache/views');
+        $this->compiler = new BladeCompiler($this->filesystem, __DIR__.'/cache/views');
         $this->compiler->directive('inertia', [Directive::class, 'compile']);
         $this->compiler->directive('inertiaHead', [Directive::class, 'compileHead']);
     }
@@ -65,7 +65,7 @@ class DirectiveTest extends TestCase
         // Next, we'll 'render' out compiled view.
         $view = new View(
             m::mock(Factory::class),
-            new PhpEngine(new Filesystem()),
+            new PhpEngine(new Filesystem),
             'fake-view',
             $path,
             $data
@@ -143,7 +143,7 @@ class DirectiveTest extends TestCase
     public function test_the_server_side_rendering_request_is_dispatched_only_once_per_request(): void
     {
         Config::set(['inertia.ssr.enabled' => true]);
-        $this->app->instance(Gateway::class, $gateway = new FakeGateway());
+        $this->app->instance(Gateway::class, $gateway = new FakeGateway);
 
         $view = "<!DOCTYPE html>\n<html>\n<head>\n@inertiaHead\n</head>\n<body>\n@inertia\n</body>\n</html>";
         $expected = "<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\" />\n<title inertia>Example SSR Title</title>\n</head>\n<body>\n<p>This is some example SSR content</p></body>\n</html>";

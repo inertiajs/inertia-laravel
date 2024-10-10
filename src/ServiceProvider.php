@@ -23,7 +23,7 @@ class ServiceProvider extends BaseServiceProvider
         $this->app->bind(Gateway::class, HttpGateway::class);
 
         $this->mergeConfigFrom(
-            __DIR__ . '/../config/inertia.php',
+            __DIR__.'/../config/inertia.php',
             'inertia'
         );
 
@@ -47,7 +47,7 @@ class ServiceProvider extends BaseServiceProvider
         $this->registerConsoleCommands();
 
         $this->publishes([
-            __DIR__ . '/../config/inertia.php' => config_path('inertia.php'),
+            __DIR__.'/../config/inertia.php' => config_path('inertia.php'),
         ]);
     }
 
@@ -82,7 +82,7 @@ class ServiceProvider extends BaseServiceProvider
     protected function registerRouterMacro(): void
     {
         Router::macro('inertia', function ($uri, $component, $props = []) {
-            return $this->match(['GET', 'HEAD'], $uri, '\\' . Controller::class)
+            return $this->match(['GET', 'HEAD'], $uri, '\\'.Controller::class)
                 ->defaults('component', $component)
                 ->defaults('props', $props);
         });
@@ -94,14 +94,14 @@ class ServiceProvider extends BaseServiceProvider
     protected function registerTestingMacros(): void
     {
         if (class_exists(TestResponse::class)) {
-            TestResponse::mixin(new TestResponseMacros());
+            TestResponse::mixin(new TestResponseMacros);
 
             return;
         }
 
         // Laravel <= 6.0
         if (class_exists(LegacyTestResponse::class)) {
-            LegacyTestResponse::mixin(new TestResponseMacros());
+            LegacyTestResponse::mixin(new TestResponseMacros);
 
             return;
         }

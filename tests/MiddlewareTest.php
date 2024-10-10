@@ -145,7 +145,7 @@ class MiddlewareTest extends TestCase
 
     public function test_validation_errors_are_returned_in_the_correct_format(): void
     {
-        Session::put('errors', (new ViewErrorBag())->put('default', new MessageBag([
+        Session::put('errors', (new ViewErrorBag)->put('default', new MessageBag([
             'name' => 'The name field is required.',
             'email' => 'Not a valid email address.',
         ])));
@@ -163,7 +163,7 @@ class MiddlewareTest extends TestCase
 
     public function test_validation_errors_with_named_error_bags_are_scoped(): void
     {
-        Session::put('errors', (new ViewErrorBag())->put('example', new MessageBag([
+        Session::put('errors', (new ViewErrorBag)->put('example', new MessageBag([
             'name' => 'The name field is required.',
             'email' => 'Not a valid email address.',
         ])));
@@ -181,7 +181,7 @@ class MiddlewareTest extends TestCase
 
     public function test_default_validation_errors_can_be_overwritten(): void
     {
-        Session::put('errors', (new ViewErrorBag())->put('example', new MessageBag([
+        Session::put('errors', (new ViewErrorBag)->put('example', new MessageBag([
             'name' => 'The name field is required.',
             'email' => 'Not a valid email address.',
         ])));
@@ -198,7 +198,7 @@ class MiddlewareTest extends TestCase
 
     public function test_validation_errors_are_scoped_to_error_bag_header(): void
     {
-        Session::put('errors', (new ViewErrorBag())->put('default', new MessageBag([
+        Session::put('errors', (new ViewErrorBag)->put('default', new MessageBag([
             'name' => 'The name field is required.',
             'email' => 'Not a valid email address.',
         ])));
@@ -216,7 +216,7 @@ class MiddlewareTest extends TestCase
 
     public function test_middleware_can_change_the_root_view_via_a_property(): void
     {
-        $this->prepareMockEndpoint(null, [], new class() extends Middleware
+        $this->prepareMockEndpoint(null, [], new class extends Middleware
         {
             protected $rootView = 'welcome';
         });
@@ -228,7 +228,7 @@ class MiddlewareTest extends TestCase
 
     public function test_middleware_can_change_the_root_view_by_overriding_the_rootview_method(): void
     {
-        $this->prepareMockEndpoint(null, [], new class() extends Middleware
+        $this->prepareMockEndpoint(null, [], new class extends Middleware
         {
             public function rootView(Request $request): string
             {

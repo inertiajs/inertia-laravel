@@ -135,9 +135,9 @@ class Response implements Responsable
     {
         $isPartial = $this->isPartial($request);
 
-        if (!$isPartial) {
+        if (! $isPartial) {
             $props = array_filter($this->props, static function ($prop) {
-                return !($prop instanceof IgnoreFirstLoad);
+                return ! ($prop instanceof IgnoreFirstLoad);
             });
         }
 
@@ -239,7 +239,7 @@ class Response implements Responsable
                 DeferProp::class,
                 AlwaysProp::class,
                 MergeProp::class,
-            ])->first(fn($class) => $value instanceof $class);
+            ])->first(fn ($class) => $value instanceof $class);
 
             if ($resolveViaApp) {
                 $value = App::call($value);
@@ -294,7 +294,7 @@ class Response implements Responsable
                 return $prop->shouldMerge();
             })
             ->filter(function ($prop, $key) use ($resetProps) {
-                return !$resetProps->contains($key);
+                return ! $resetProps->contains($key);
             })
             ->keys();
 
