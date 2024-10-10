@@ -434,6 +434,72 @@ class ResponseTest extends TestCase
         $this->assertSame('123', $page->version);
     }
 
+    public function test_nested_partial_props(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'User/Edit']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'auth.user,auth.refresh_token']);
+
+        $props = [
+            'auth' => [
+                'user' => new LazyProp(function () {
+                    return [
+                        'name' => 'Jonathan Reinink',
+                        'email' => 'jonathan@example.com',
+                    ];
+                }),
+                'refresh_token' => 'value',
+                'token' => 'value',
+            ],
+            'shared' => [
+                'flash' => 'value',
+            ],
+        ];
+
+        $response = new Response('User/Edit', $props);
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertFalse(isset($page->props->shared));
+        $this->assertFalse(isset($page->props->auth->token));
+        $this->assertSame('Jonathan Reinink', $page->props->auth->user->name);
+        $this->assertSame('jonathan@example.com', $page->props->auth->user->email);
+        $this->assertSame('value', $page->props->auth->refresh_token);
+    }
+
+    public function test_exclude_nested_props_from_partial_response(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'User/Edit']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'auth']);
+        $request->headers->add(['X-Inertia-Partial-Except' => 'auth.user']);
+
+        $props = [
+            'auth' => [
+                'user' => new LazyProp(function () {
+                    return [
+                        'name' => 'Jonathan Reinink',
+                        'email' => 'jonathan@example.com',
+                    ];
+                }),
+                'refresh_token' => 'value',
+            ],
+            'shared' => [
+                'flash' => 'value',
+            ],
+        ];
+
+        $response = new Response('User/Edit', $props);
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertFalse(isset($page->props->auth->user));
+        $this->assertFalse(isset($page->props->shared));
+        $this->assertSame('value', $page->props->auth->refresh_token);
+    }
+
     public function test_lazy_props_are_not_included_by_default(): void
     {
         $request = Request::create('/users', 'GET');
@@ -611,86 +677,5 @@ class ResponseTest extends TestCase
         $page = $response->getData();
 
         $this->assertSame('/subpath/product/123', $page->url);
-    }
-
-    public function test_prop_as_basic_array(): void
-    {
-        $request = Request::create('/years', 'GET');
-
-        $response = new Response('Years', ['years' => [2022, 2023, 2024]], 'app', '123');
-        $response = $response->toResponse($request);
-        $view = $response->getOriginalContent();
-        $page = $view->getData()['page'];
-
-        $this->assertSame([2022, 2023, 2024], $page['props']['years']);
-    }
-
-    public function test_dot_notation_props_are_merged_with_shared_props(): void
-    {
-        $request = Request::create('/test', 'GET');
-
-        $response = new Response('Test', [
-            'auth' => ['user' => ['name' => 'Jonathan']],
-            'auth.user.is_super' => true,
-        ], 'app', '123');
-        $response = $response->toResponse($request);
-        $view = $response->getOriginalContent();
-        $page = $view->getData()['page'];
-
-        $this->assertSame([
-            'auth' => [
-                'user' => [
-                    'name' => 'Jonathan',
-                    'is_super' => true,
-                ],
-            ],
-        ], $page['props']);
-    }
-
-    public function test_dot_notation_props_are_merged_with_lazy_shared_props(): void
-    {
-        $request = Request::create('/test', 'GET');
-
-        $response = new Response('Test', [
-            'auth' => function () {
-                return ['user' => ['name' => 'Jonathan']];
-            },
-            'auth.user.is_super' => true,
-        ], 'app', '123');
-
-        $response = $response->toResponse($request);
-        $view = $response->getOriginalContent();
-        $page = $view->getData()['page'];
-
-        $this->assertSame([
-            'auth' => [
-                'user' => [
-                    'name' => 'Jonathan',
-                    'is_super' => true,
-                ],
-            ],
-        ], $page['props']);
-    }
-
-    public function test_dot_notation_props_are_merged_with_other_dot_notation_props(): void
-    {
-        $request = Request::create('/test', 'GET');
-
-        $response = new Response('Test', [
-            'auth.user' => ['name' => 'Jonathan'],
-            'auth.user.is_super' => true,
-        ], 'app', '123');
-        $response = $response->toResponse($request);
-        $view = $response->getOriginalContent();
-        $page = $view->getData()['page'];
-
-        $this->assertSame([
-            'auth' => [
-                'user' => [
-                    'name' => 'Jonathan',
-                    'is_super' => true,
-                ],
-            ],
-        ], $page['props']);
     }
 }

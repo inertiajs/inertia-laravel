@@ -2,8 +2,8 @@
 
 namespace Inertia\Tests;
 
-use Inertia\AlwaysProp;
 use Illuminate\Http\Request;
+use Inertia\AlwaysProp;
 
 class AlwaysPropTest extends TestCase
 {

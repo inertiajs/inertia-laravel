@@ -54,7 +54,6 @@ class Response implements Responsable
     /**
      * @param  string|array  $key
      * @param  mixed  $value
-     *
      * @return $this
      */
     public function with($key, $value = null): self
@@ -71,7 +70,6 @@ class Response implements Responsable
     /**
      * @param  string|array  $key
      * @param  mixed  $value
-     *
      * @return $this
      */
     public function withViewData($key, $value = null): self
@@ -103,14 +101,11 @@ class Response implements Responsable
      * Create an HTTP response that represents the object.
      *
      * @param  \Illuminate\Http\Request  $request
-     *
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function toResponse($request)
     {
-        $props = $this->resolvePartialProps($request, $this->props);
-        $props = $this->resolveAlwaysProps($props);
-        $props = $this->evaluateProps($props, $request);
+        $props = $this->resolveProperties($request, $this->props);
 
         $page = array_merge(
             [
@@ -134,9 +129,9 @@ class Response implements Responsable
     }
 
     /**
-     * Resolve the `only` and `except` partial request props.
+     * Resolve the properites for the response.
      */
-    public function resolvePartialProps(Request $request, array $props): array
+    public function resolveProperties(Request $request, array $props): array
     {
         $isPartial = $this->isPartial($request);
 
@@ -194,34 +189,47 @@ class Response implements Responsable
     public function resolveOnly(Request $request, array $props): array
     {
         $only = array_filter(explode(',', $request->header(Header::PARTIAL_ONLY, '')));
-        $except = array_filter(explode(',', $request->header(Header::PARTIAL_EXCEPT, '')));
 
-        $props = $only ? Arr::only($props, $only) : $props;
+        $value = [];
 
         foreach ($only as $key) {
             Arr::set($value, $key, data_get($props, $key));
         }
 
+        return $value;
+    }
+
+    /**
+     * Resolve the `except` partial request props.
+     */
+    public function resolveExcept(Request $request, array $props): array
+    {
+        $except = array_filter(explode(',', $request->header(Header::PARTIAL_EXCEPT, '')));
+
+        Arr::forget($props, $except);
+
         return $props;
     }
 
     /**
-     * Resolve `always` properties that should always be included on all visits,
-     * regardless of "only" or "except" requests.
+     * Resolve `always` properties that should always be included on all visits, regardless of "only" or "except" requests.
      */
-    public function resolveAlwaysProps(array $props): array
+    public function resolveAlways(array $props): array
     {
         $always = array_filter($this->props, static function ($prop) {
             return $prop instanceof AlwaysProp;
         });
 
-        return array_merge($always, $props);
+        return array_merge(
+            $always,
+            $props
+        );
     }
 
     /**
      * Resolve all necessary class instances in the given props.
      */
-    public function evaluateProps(array $props, Request $request, bool $unpackDotProps = true): array
+    public function resolvePropertyInstances(array $props, Request $request): array
     {
         foreach ($props as $key => $value) {
             $resolveViaApp = collect([
@@ -245,20 +253,11 @@ class Response implements Responsable
                 $value = $value->toResponse($request)->getData(true);
             }
 
-            if ($value instanceof Arrayable) {
-                $value = $value->toArray();
-            }
-
             if (is_array($value)) {
-                $value = $this->evaluateProps($value, $request, false);
+                $value = $this->resolvePropertyInstances($value, $request);
             }
 
-            if ($unpackDotProps && str_contains($key, '.')) {
-                Arr::set($props, $key, $value);
-                unset($props[$key]);
-            } else {
-                $props[$key] = $value;
-            }
+            $props[$key] = $value;
         }
 
         return $props;

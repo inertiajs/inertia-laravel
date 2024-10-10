@@ -1,14 +1,9 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v1.3.0...2.x)
-
-- Nothing yet!
-
-## [v1.3.0](https://github.com/inertiajs/inertia-laravel/compare/v1.2.0...v1.3.0) - 2024-06-12
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v1.2.0...2.x)
 
 - Drop support for Laravel 8 and 9 ([#629](https://github.com/inertiajs/inertia-laravel/pull/629))
 - Add "always" props using new `Inertia::always()` wrapper ([#627](https://github.com/inertiajs/inertia-laravel/pull/627))
-- Revert dot-notation support in partial reloads ([#641](https://github.com/inertiajs/inertia-laravel/pull/641))
 
 ## [v1.2.0](https://github.com/inertiajs/inertia-laravel/compare/v1.1.0...v1.2.0) - 2024-05-17
 

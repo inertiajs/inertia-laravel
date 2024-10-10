@@ -5,7 +5,6 @@ namespace Inertia;
 use Closure;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Arr;
-use Inertia\Support\Header;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Request;

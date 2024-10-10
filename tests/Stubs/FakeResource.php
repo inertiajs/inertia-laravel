@@ -18,7 +18,7 @@ class FakeResource extends JsonResource
      *
      * @var string|null
      */
-    public static $wrap;
+    public static $wrap = null;
 
     public function __construct(array $resource)
     {

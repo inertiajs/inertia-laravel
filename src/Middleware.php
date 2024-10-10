@@ -3,9 +3,9 @@
 namespace Inertia;
 
 use Closure;
-use Inertia\Support\Header;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
+use Inertia\Support\Header;
 use Symfony\Component\HttpFoundation\Response;
 
 class Middleware
