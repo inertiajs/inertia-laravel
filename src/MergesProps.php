@@ -2,7 +2,6 @@
 
 namespace Inertia;
 
-
 trait MergesProps
 {
     protected bool $merge = false;

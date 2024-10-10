@@ -24,7 +24,7 @@ class ResponseFactoryTest extends TestCase
 {
     public function test_can_macro(): void
     {
-        $factory = new ResponseFactory();
+        $factory = new ResponseFactory;
         $factory->macro('foo', function () {
             return 'bar';
         });
@@ -38,7 +38,7 @@ class ResponseFactoryTest extends TestCase
             return true;
         });
 
-        $response = (new ResponseFactory())->location('https://inertiajs.com');
+        $response = (new ResponseFactory)->location('https://inertiajs.com');
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertEquals(Response::HTTP_CONFLICT, $response->getStatusCode());
@@ -51,7 +51,7 @@ class ResponseFactoryTest extends TestCase
             return false;
         });
 
-        $response = (new ResponseFactory())->location('https://inertiajs.com');
+        $response = (new ResponseFactory)->location('https://inertiajs.com');
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertEquals(Response::HTTP_FOUND, $response->getStatusCode());
@@ -65,7 +65,7 @@ class ResponseFactoryTest extends TestCase
         });
 
         $redirect = new RedirectResponse('https://inertiajs.com');
-        $response = (new ResponseFactory())->location($redirect);
+        $response = (new ResponseFactory)->location($redirect);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertEquals(409, $response->getStatusCode());
@@ -75,7 +75,7 @@ class ResponseFactoryTest extends TestCase
     public function test_location_response_for_non_inertia_requests_using_redirect_response(): void
     {
         $redirect = new RedirectResponse('https://inertiajs.com');
-        $response = (new ResponseFactory())->location($redirect);
+        $response = (new ResponseFactory)->location($redirect);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertEquals(Response::HTTP_FOUND, $response->getStatusCode());
@@ -84,7 +84,7 @@ class ResponseFactoryTest extends TestCase
 
     public function test_location_redirects_are_not_modified(): void
     {
-        $response = (new ResponseFactory())->location('/foo');
+        $response = (new ResponseFactory)->location('/foo');
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertEquals(Response::HTTP_FOUND, $response->getStatusCode());
@@ -96,7 +96,7 @@ class ResponseFactoryTest extends TestCase
         $redirect = new RedirectResponse('https://inertiajs.com');
         $redirect->setSession($session = new Store('test', new NullSessionHandler));
         $redirect->setRequest($request = new HttpRequest);
-        $response = (new ResponseFactory())->location($redirect);
+        $response = (new ResponseFactory)->location($redirect);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertEquals(Response::HTTP_FOUND, $response->getStatusCode());
@@ -156,7 +156,7 @@ class ResponseFactoryTest extends TestCase
 
     public function test_can_create_lazy_prop(): void
     {
-        $factory = new ResponseFactory();
+        $factory = new ResponseFactory;
         $lazyProp = $factory->lazy(function () {
             return 'A lazy value';
         });
@@ -166,7 +166,7 @@ class ResponseFactoryTest extends TestCase
 
     public function test_can_create_deferred_prop(): void
     {
-        $factory = new ResponseFactory();
+        $factory = new ResponseFactory;
         $deferredProp = $factory->defer(function () {
             return 'A deferred value';
         });
@@ -177,7 +177,7 @@ class ResponseFactoryTest extends TestCase
 
     public function test_can_create_deferred_prop_with_custom_group(): void
     {
-        $factory = new ResponseFactory();
+        $factory = new ResponseFactory;
         $deferredProp = $factory->defer(function () {
             return 'A deferred value';
         }, 'foo');
@@ -188,7 +188,7 @@ class ResponseFactoryTest extends TestCase
 
     public function test_can_create_merged_prop(): void
     {
-        $factory = new ResponseFactory();
+        $factory = new ResponseFactory;
         $mergedProp = $factory->merge(function () {
             return 'A merged value';
         });
@@ -198,7 +198,7 @@ class ResponseFactoryTest extends TestCase
 
     public function test_can_create_deferred_and_merged_prop(): void
     {
-        $factory = new ResponseFactory();
+        $factory = new ResponseFactory;
         $deferredProp = $factory->defer(function () {
             return 'A deferred + merged value';
         })->merge();
@@ -208,7 +208,7 @@ class ResponseFactoryTest extends TestCase
 
     public function test_can_create_optional_prop(): void
     {
-        $factory = new ResponseFactory();
+        $factory = new ResponseFactory;
         $optionalProp = $factory->optional(function () {
             return 'An optional value';
         });
@@ -218,7 +218,7 @@ class ResponseFactoryTest extends TestCase
 
     public function test_can_create_always_prop(): void
     {
-        $factory = new ResponseFactory();
+        $factory = new ResponseFactory;
         $alwaysProp = $factory->always(function () {
             return 'An always value';
         });
@@ -231,7 +231,7 @@ class ResponseFactoryTest extends TestCase
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
             Inertia::share('foo', 'bar');
 
-            return Inertia::render('User/Edit', new class() implements Arrayable
+            return Inertia::render('User/Edit', new class implements Arrayable
             {
                 public function toArray()
                 {
