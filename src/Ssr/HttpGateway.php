@@ -19,8 +19,10 @@ class HttpGateway implements Gateway
     public function dispatch(array $page): ?Response
     {
         if ($this->vite->isRunningHot()) {
+            // todo: maybe ask laravel to make Vite::hotAsset() public
+            // $url = $this->vite->hotAsset('render');
             $url = file_get_contents($this->vite->hotFile()).'/render';
-        } elseif (config('inertia.ssr.enabled', true) || (new BundleDetector)->detect()) {
+        } elseif (config('inertia.ssr.enabled', true) && (new BundleDetector)->detect()) {
             $url = str_replace('/render', '', config('inertia.ssr.url', 'http://127.0.0.1:13714')).'/render';
         } else {
             return null;
