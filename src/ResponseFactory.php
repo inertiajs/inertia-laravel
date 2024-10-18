@@ -88,7 +88,7 @@ class ResponseFactory
 
     public function clearHistory(): void
     {
-        $this->clearHistory = true;
+        session(['inertia.clear_history' => true]);
     }
 
     public function encryptHistory($encrypt = true): void
@@ -144,7 +144,6 @@ class ResponseFactory
             array_merge($this->sharedProps, $props),
             $this->rootView,
             $this->getVersion(),
-            $this->clearHistory,
             $this->encryptHistory ?? config('inertia.history.encrypt', false),
         );
     }

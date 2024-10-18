@@ -41,13 +41,13 @@ class Response implements Responsable
     /**
      * @param  array|Arrayable  $props
      */
-    public function __construct(string $component, array $props, string $rootView = 'app', string $version = '', bool $clearHistory = false, bool $encryptHistory = false)
+    public function __construct(string $component, array $props, string $rootView = 'app', string $version = '', bool $encryptHistory = false)
     {
         $this->component = $component;
         $this->props = $props instanceof Arrayable ? $props->toArray() : $props;
         $this->rootView = $rootView;
         $this->version = $version;
-        $this->clearHistory = $clearHistory;
+        $this->clearHistory = session()->pull('inertia.clear_history', false);
         $this->encryptHistory = $encryptHistory;
     }
 
