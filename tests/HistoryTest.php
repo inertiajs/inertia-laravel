@@ -140,4 +140,26 @@ class HistoryTest extends TestCase
             'clearHistory' => true,
         ]);
     }
+
+    public function test_the_history_can_be_cleared_when_redirecting(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            Inertia::clearHistory();
+
+            return redirect('/users');
+        });
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/users', function () {
+            return Inertia::render('User/Edit');
+        });
+
+        $this->followingRedirects();
+
+        $response = $this->withoutExceptionHandling()->get('/', [
+            'X-Inertia' => 'true',
+        ]);
+
+        $response->assertSuccessful();
+        $response->assertContent('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;errors&quot;:{}},&quot;url&quot;:&quot;\/users&quot;,&quot;version&quot;:&quot;&quot;,&quot;clearHistory&quot;:true,&quot;encryptHistory&quot;:false}"></div>');
+    }
 }
