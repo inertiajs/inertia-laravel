@@ -306,7 +306,7 @@ class Response implements Responsable
 
         $mergeProps = $mergeProps
             ->filter(function ($prop) {
-                return $prop->shouldMerge();
+                return $prop->shouldMerge() AND !$prop->shouldDeepMerge();
             })
             ->filter(function ($prop, $key) use ($resetProps) {
                 return ! $resetProps->contains($key);
