@@ -293,6 +293,9 @@ class Response implements Responsable
         $mergeProps = collect($this->props)
             ->filter(function ($prop) {
                 return $prop instanceof Mergeable;
+            })
+            ->filter(function ($prop) {
+                return $prop->shouldMerge();
             });
 
         $deepMergeProps = $mergeProps
@@ -306,7 +309,7 @@ class Response implements Responsable
 
         $mergeProps = $mergeProps
             ->filter(function ($prop) {
-                return $prop->shouldMerge() AND !$prop->shouldDeepMerge();
+                return !$prop->shouldDeepMerge();
             })
             ->filter(function ($prop, $key) use ($resetProps) {
                 return ! $resetProps->contains($key);

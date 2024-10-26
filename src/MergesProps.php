@@ -22,9 +22,10 @@ trait MergesProps
 
     public function deepMerge(): static
     {
+
         $this->deepMerge = true;
 
-        return $this;
+        return $this->merge();
     }
 
     public function shouldDeepMerge(): bool
