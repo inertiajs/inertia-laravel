@@ -293,7 +293,18 @@ class Response implements Responsable
         $mergeProps = collect($this->props)
             ->filter(function ($prop) {
                 return $prop instanceof Mergeable;
+            });
+
+        $deepMergeProps = $mergeProps
+            ->filter(function ($prop) {
+                return $prop->shouldDeepMerge();
             })
+            ->filter(function ($prop, $key) use ($resetProps) {
+                return ! $resetProps->contains($key);
+            })
+            ->keys();
+
+        $mergeProps = $mergeProps
             ->filter(function ($prop) {
                 return $prop->shouldMerge();
             })
@@ -302,7 +313,10 @@ class Response implements Responsable
             })
             ->keys();
 
-        return $mergeProps->isNotEmpty() ? ['mergeProps' => $mergeProps->toArray()] : [];
+        return $mergeProps->isNotEmpty() ? [
+            'mergeProps' => $mergeProps->toArray(),
+            'deepMergeProps' => $deepMergeProps->toArray()
+        ] : [];
     }
 
     public function resolveDeferredProps(Request $request): array

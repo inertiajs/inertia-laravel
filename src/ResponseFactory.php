@@ -125,6 +125,14 @@ class ResponseFactory
     /**
      * @param  mixed  $value
      */
+    public function deepMerge($value): MergeProp
+    {
+        return (new MergeProp($value))->deepMerge();
+    }
+
+    /**
+     * @param  mixed  $value
+     */
     public function always($value): AlwaysProp
     {
         return new AlwaysProp($value);

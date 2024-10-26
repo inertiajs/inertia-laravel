@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Inertia\DeferProp defer(callable $callback, string $group = 'default')
  * @method static \Inertia\AlwaysProp always(mixed $value)
  * @method static \Inertia\MergeProp merge(mixed $value)
+ * @method static \Inertia\MergeProp deepMerge(mixed $value)
  * @method static \Inertia\Response render(string $component, array|\Illuminate\Contracts\Support\Arrayable $props = [])
  * @method static \Symfony\Component\HttpFoundation\Response location(string|\Symfony\Component\HttpFoundation\RedirectResponse $url)
  * @method static void macro(string $name, object|callable $macro)

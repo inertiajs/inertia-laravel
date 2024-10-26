@@ -6,6 +6,8 @@ trait MergesProps
 {
     protected bool $merge = false;
 
+    protected bool $deepMerge = false;
+
     public function merge(): static
     {
         $this->merge = true;
@@ -16,5 +18,17 @@ trait MergesProps
     public function shouldMerge(): bool
     {
         return $this->merge;
+    }
+
+    public function deepMerge(): static
+    {
+        $this->deepMerge = true;
+
+        return $this;
+    }
+
+    public function shouldDeepMerge(): bool
+    {
+        return $this->deepMerge;
     }
 }
