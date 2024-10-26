@@ -316,10 +316,11 @@ class Response implements Responsable
             })
             ->keys();
 
-        return $mergeProps->isNotEmpty() ? [
-            'mergeProps' => $mergeProps->toArray(),
-            'deepMergeProps' => $deepMergeProps->toArray()
-        ] : [];
+        $props = [];
+        if ($mergeProps->isNotEmpty()) $props['mergeProps'] = $mergeProps->toArray();
+        if ($deepMergeProps->isNotEmpty()) $props['deepMergeProps'] = $deepMergeProps->toArray();
+
+        return $props;
     }
 
     public function resolveDeferredProps(Request $request): array
