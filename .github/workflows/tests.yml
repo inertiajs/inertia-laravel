@@ -58,6 +58,7 @@ jobs:
           timeout_minutes: 5
           max_attempts: 5
           command: |
+            composer require orchestra/testbench:^9.0 --dev --${{ matrix.stability }} --no-update --no-interaction
             composer require phpunit/phpunit:^10.4 --dev --${{ matrix.stability }} --no-update --no-interaction
         if: matrix.php >= 8.2 && matrix.stability == 'prefer-lowest' && matrix.laravel >= 11
 
