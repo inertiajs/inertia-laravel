@@ -187,7 +187,7 @@ class Response implements Responsable
             }
 
             if ($value instanceof Closure) {
-                $value = $value();
+                $value = App::call($value);
             }
 
             if ($unpackDotProps && str_contains($key, '.')) {
