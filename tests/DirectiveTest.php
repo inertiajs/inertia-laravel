@@ -32,7 +32,7 @@ class DirectiveTest extends TestCase
      */
     protected const EXAMPLE_PAGE_OBJECT = ['component' => 'Foo/Bar', 'props' => ['foo' => 'bar'], 'url' => '/test', 'version' => '', 'encryptHistory' => false, 'clearHistory' => false];
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
