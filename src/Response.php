@@ -133,27 +133,41 @@ class Response implements Responsable
      */
     public function resolveProperties(Request $request, array $props): array
     {
-        $isPartial = $this->isPartial($request);
+        $props = $this->resolvePartialProperties($props, $request);
+        $props = $this->resolveArrayableProperties($props, $request);
+        $props = $this->resolveAlways($props);
+        $props = $this->resolvePropertyInstances($props, $request);
 
-        if (! $isPartial) {
-            $props = array_filter($this->props, static function ($prop) {
+        return $props;
+    }
+
+    /**
+     * Resolve the `only` and `except` partial request props.
+     */
+    public function resolvePartialProperties(array $props, Request $request): array
+    {
+        if (! $this->isPartial($request)) {
+            return array_filter($this->props, static function ($prop) {
                 return ! ($prop instanceof IgnoreFirstLoad);
             });
         }
 
-        $props = $this->resolveArrayableProperties($props, $request);
+        $only = array_filter(explode(',', $request->header(Header::PARTIAL_ONLY, '')));
+        $except = array_filter(explode(',', $request->header(Header::PARTIAL_EXCEPT, '')));
 
-        if ($isPartial && $request->hasHeader(Header::PARTIAL_ONLY)) {
-            $props = $this->resolveOnly($request, $props);
+        if (count($only)) {
+            $newProps = [];
+
+            foreach ($only as $key) {
+                Arr::set($newProps, $key, Arr::get($props, $key));
+            }
+
+            $props = $newProps;
         }
 
-        if ($isPartial && $request->hasHeader(Header::PARTIAL_EXCEPT)) {
-            $props = $this->resolveExcept($request, $props);
+        if ($except) {
+            Arr::forget($props, $except);
         }
-
-        $props = $this->resolveAlways($props);
-
-        $props = $this->resolvePropertyInstances($props, $request);
 
         return $props;
     }
@@ -173,7 +187,7 @@ class Response implements Responsable
             }
 
             if ($value instanceof Closure) {
-                $value = $value();
+                $value = App::call($value);
             }
 
             if ($unpackDotProps && str_contains($key, '.')) {
