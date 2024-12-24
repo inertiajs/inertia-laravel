@@ -3,6 +3,7 @@
 namespace Inertia\Testing;
 
 use Closure;
+use Illuminate\Support\Arr;
 
 class TestResponseMacros
 {
@@ -26,5 +27,13 @@ class TestResponseMacros
         return function () {
             return AssertableInertia::fromTestResponse($this)->toArray();
         };
+    }
+
+    public function inertiaProps(?string $propName = null): mixed
+    {
+        return Arr::get(
+            $this->inertiaPage()['props'] ?? [],
+            $propName
+        );
     }
 }
