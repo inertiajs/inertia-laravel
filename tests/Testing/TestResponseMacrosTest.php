@@ -50,4 +50,23 @@ class TestResponseMacrosTest extends TestCase
             $this->assertFalse($page['clearHistory']);
         });
     }
+
+    public function test_it_can_retrieve_the_inertia_props(): void
+    {
+        $props = ['bar' => 'baz'];
+        $response = $this->makeMockRequest(
+            Inertia::render('foo', $props)
+        );
+
+        tap($response->inertiaProps(), fn (array $pageProps) => $this->assertSame($props, $pageProps));
+    }
+
+    public function test_it_can_retrieve_nested_inertia_prop_values_with_dot_notation(): void
+    {
+        $response = $this->makeMockRequest(
+            Inertia::render('foo', ['bar' => ['baz' => 'qux']])
+        );
+
+        tap($response->inertiaProps('bar.baz'), fn (mixed $value) => $this->assertSame('qux', $value));
+    }
 }
