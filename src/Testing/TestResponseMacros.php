@@ -29,11 +29,13 @@ class TestResponseMacros
         };
     }
 
-    public function inertiaProps(?string $propName = null): mixed
+    public function inertiaProps()
     {
-        return Arr::get(
-            $this->inertiaPage()['props'] ?? [],
-            $propName
-        );
+        return function (?string $propName = null) {
+            return Arr::get(
+                $this->inertiaPage()['props'] ?? [],
+                $propName
+            );
+        };
     }
 }
