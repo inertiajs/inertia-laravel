@@ -1,8 +1,14 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.0...2.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.1...2.x)
 
 - Nothing!
+
+## [v2.0.1](https://github.com/inertiajs/inertia-laravel/compare/v2.0.0...v2.0.1) - 2025-02-18
+
+- Allow Laravel 12.x.
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.0...v2.0.1
 
 ## [v2.0.0](https://github.com/inertiajs/inertia-laravel/compare/v1.2.0...2.0.0)
 
