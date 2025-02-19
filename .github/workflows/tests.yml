@@ -13,37 +13,50 @@ jobs:
       fail-fast: true
       matrix:
         php: [7.3, 7.4, "8.0", 8.1, 8.2, 8.3]
-        laravel: [8, 9, 10, 11]
+        laravel: [8, 9, 10, 11, 12]
         stability: ["prefer-lowest", "prefer-stable"]
         include:
           - php: 8.4
             laravel: 11
             stability: "prefer-stable"
+          - php: 8.4
+            laravel: 12
+            stability: "prefer-stable"
         exclude:
           - php: 7.3
+            laravel: 8 # Failed security advisory
+          - php: 7.3
             laravel: 9
           - php: 7.3
             laravel: 10
           - php: 7.3
             laravel: 11
+          - php: 7.3
+            laravel: 12
           - php: 7.4
             laravel: 9
           - php: 7.4
             laravel: 10
           - php: 7.4
             laravel: 11
+          - php: 7.4
+            laravel: 12
           - php: '8.0'
             laravel: 9 # Failed security advisory
           - php: '8.0'
             laravel: 10
           - php: '8.0'
             laravel: 11
+          - php: '8.0'
+            laravel: 12
           - php: 8.1
             laravel: 6
           - php: 8.1
             laravel: 7
           - php: 8.1
             laravel: 11
+          - php: 8.1
+            laravel: 12
           - php: 8.2
             laravel: 6
           - php: 8.2
@@ -88,7 +101,7 @@ jobs:
           max_attempts: 5
           command: |
             composer require nesbot/carbon:^2.62.1 --dev --${{ matrix.stability }} --no-update --no-interaction
-        if: matrix.php >= 8.2 && matrix.stability == 'prefer-lowest'
+        if: matrix.php >= 8.2 && matrix.stability == 'prefer-lowest' && matrix.laravel < 12
 
       - name: Set Minimum PHP 8.2 Versions and Laravel > 11
         uses: nick-fields/retry@v3
@@ -96,7 +109,7 @@ jobs:
           timeout_minutes: 5
           max_attempts: 5
           command: |
-            composer require phpunit/phpunit:^10.4 --dev --${{ matrix.stability }} --no-update --no-interaction
+            composer require "phpunit/phpunit:^10.4|^11.5" --dev --${{ matrix.stability }} --no-update --no-interaction
         if: matrix.php >= 8.2 && matrix.stability == 'prefer-lowest' && matrix.laravel >= 11
 
       - name: Set Laravel version
