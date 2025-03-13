@@ -31,10 +31,15 @@ class ResponseFactory
 
     protected $encryptHistory;
 
+    /***
+     * @param string $name The name of the root view
+     * @return void
+     */
     public function setRootView(string $name): void
     {
         $this->rootView = $name;
     }
+
 
     /**
      * @param  string|array|Arrayable  $key
@@ -52,6 +57,7 @@ class ResponseFactory
     }
 
     /**
+     * @param string|null $key
      * @param  mixed  $default
      * @return mixed
      */
@@ -64,19 +70,27 @@ class ResponseFactory
         return $this->sharedProps;
     }
 
-    public function flushShared(): void
+
+    /**
+     * @return void
+     */
+    public function flushShared()
     {
         $this->sharedProps = [];
     }
 
     /**
      * @param  Closure|string|null  $version
+     * @return void
      */
     public function version($version): void
     {
         $this->version = $version;
     }
 
+    /**
+     * @return string
+     */
     public function getVersion(): string
     {
         $version = $this->version instanceof Closure
@@ -86,11 +100,18 @@ class ResponseFactory
         return (string) $version;
     }
 
+    /**
+     * @return void
+     */
     public function clearHistory(): void
     {
         session(['inertia.clear_history' => true]);
     }
 
+    /**
+     * @param bool $encrypt
+     * @return void
+     */
     public function encryptHistory($encrypt = true): void
     {
         $this->encryptHistory = $encrypt;
@@ -104,11 +125,21 @@ class ResponseFactory
         return new LazyProp($callback);
     }
 
+    /**
+     * @param callable $callback
+     * @return OptionalProp
+     */
     public function optional(callable $callback): OptionalProp
     {
         return new OptionalProp($callback);
     }
 
+    /**
+     *
+     * @param callable $callback
+     * @param string $group
+     * @return DeferProp
+     */
     public function defer(callable $callback, string $group = 'default'): DeferProp
     {
         return new DeferProp($callback, $group);
@@ -116,6 +147,7 @@ class ResponseFactory
 
     /**
      * @param  mixed  $value
+     * @return MergeProp
      */
     public function merge($value): MergeProp
     {
@@ -123,7 +155,8 @@ class ResponseFactory
     }
 
     /**
-     * @param  mixed  $value
+     * @param mixed $value
+     * @return AlwaysProp
      */
     public function always($value): AlwaysProp
     {
@@ -131,7 +164,9 @@ class ResponseFactory
     }
 
     /**
-     * @param  array|Arrayable  $props
+     * @param string $component
+     * @param array|Arrayable $props
+     * @return Response
      */
     public function render(string $component, $props = []): Response
     {
@@ -150,6 +185,7 @@ class ResponseFactory
 
     /**
      * @param  string|SymfonyRedirect  $url
+     * @return SymfonyResponse
      */
     public function location($url): SymfonyResponse
     {
