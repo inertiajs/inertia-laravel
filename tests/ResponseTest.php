@@ -315,6 +315,54 @@ class ResponseTest extends TestCase
         $this->assertSame('123', $page->version);
     }
 
+    public function test_lazy_callable_resource_response(): void
+    {
+        $request = Request::create('/users', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $response = new Response('User/Index', [
+            'users' => fn () => [['name' => 'Jonathan']],
+            'organizations' => fn () => [['name' => 'Inertia']],
+        ], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertSame('User/Index', $page->component);
+        $this->assertSame('/users', $page->url);
+        $this->assertSame('123', $page->version);
+        tap($page->props->users, function ($users) {
+            $this->assertSame(json_encode([['name' => 'Jonathan']]), json_encode($users));
+        });
+        tap($page->props->organizations, function ($organizations) {
+            $this->assertSame(json_encode([['name' => 'Inertia']]), json_encode($organizations));
+        });
+    }
+
+    public function test_lazy_callable_resource_partial_response(): void
+    {
+        $request = Request::create('/users', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'users']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'User/Index']);
+
+        $response = new Response('User/Index', [
+            'users' => fn () => [['name' => 'Jonathan']],
+            'organizations' => fn () => [['name' => 'Inertia']],
+        ], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertSame('User/Index', $page->component);
+        $this->assertSame('/users', $page->url);
+        $this->assertSame('123', $page->version);
+        $this->assertFalse(property_exists($page->props, 'organizations'));
+        tap($page->props->users, function ($users) {
+            $this->assertSame(json_encode([['name' => 'Jonathan']]), json_encode($users));
+        });
+    }
+
     public function test_lazy_resource_response(): void
     {
         $request = Request::create('/users', 'GET', ['page' => 1]);

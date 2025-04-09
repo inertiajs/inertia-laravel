@@ -1,9 +1,24 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v1.2.0...2.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.1...2.x)
 
+- Nothing!
+
+## [v2.0.1](https://github.com/inertiajs/inertia-laravel/compare/v2.0.0...v2.0.1) - 2025-02-18
+
+- Allow Laravel 12.x.
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.0...v2.0.1
+
+## [v2.0.0](https://github.com/inertiajs/inertia-laravel/compare/v1.2.0...2.0.0)
+
+- Add support for Inertia.js v2.0.0
+- Add `Inertia::defer()` to support deferred props
+- Add `Inertia::merge()` to support merging props on client
+- Add `Inertia::always()` for props that should always be included ([#627](https://github.com/inertiajs/inertia-laravel/pull/627))
+- Add `Inertia::clearHistory()` and `Inertia::encryptHistory()` methods, encryption config, and encryption middleware
+- Deprecated `Inertia::lazy()` in favor of `Inertia::optional()`
 - Drop support for Laravel 8 and 9 ([#629](https://github.com/inertiajs/inertia-laravel/pull/629))
-- Add "always" props using new `Inertia::always()` wrapper ([#627](https://github.com/inertiajs/inertia-laravel/pull/627))
 
 ## [v1.2.0](https://github.com/inertiajs/inertia-laravel/compare/v1.1.0...v1.2.0) - 2024-05-17
 

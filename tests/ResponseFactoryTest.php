@@ -176,6 +176,27 @@ class ResponseFactoryTest extends TestCase
         ]);
     }
 
+    public function test_shared_data_can_resolve_closure_arguments(): void
+    {
+        Inertia::share('query', fn (HttpRequest $request) => $request->query());
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            return Inertia::render('User/Edit');
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/?foo=bar', ['X-Inertia' => 'true']);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Edit',
+            'props' => [
+                'query' => [
+                    'foo' => 'bar',
+                ],
+            ],
+        ]);
+    }
+
     public function test_dot_props_with_callbacks_are_merged_from_shared(): void
     {
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
