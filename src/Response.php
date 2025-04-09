@@ -323,7 +323,7 @@ class Response implements Responsable
 
         $mergeProps = $mergeProps
             ->filter(function ($prop) {
-                return !$prop->shouldDeepMerge();
+                return ! $prop->shouldDeepMerge();
             })
             ->filter(function ($prop, $key) use ($resetProps) {
                 return ! $resetProps->contains($key);
@@ -331,8 +331,12 @@ class Response implements Responsable
             ->keys();
 
         $props = [];
-        if ($mergeProps->isNotEmpty()) $props['mergeProps'] = $mergeProps->toArray();
-        if ($deepMergeProps->isNotEmpty()) $props['deepMergeProps'] = $deepMergeProps->toArray();
+        if ($mergeProps->isNotEmpty()) {
+            $props['mergeProps'] = $mergeProps->toArray();
+        }
+        if ($deepMergeProps->isNotEmpty()) {
+            $props['deepMergeProps'] = $deepMergeProps->toArray();
+        }
 
         return $props;
     }
