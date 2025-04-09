@@ -31,7 +31,7 @@ class ServiceProviderTest extends TestCase
 
         $this->assertNotEmpty($routes->getRoutes());
 
-        $inertiaRoute = collect($routes->getRoutes())->first(fn($route) => $route->uri === '/');
+        $inertiaRoute = collect($routes->getRoutes())->first(fn ($route) => $route->uri === '/');
 
         $this->assertEquals($route, $inertiaRoute);
         $this->assertEquals(['GET', 'HEAD'], $inertiaRoute->methods);
