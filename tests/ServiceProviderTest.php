@@ -30,10 +30,13 @@ class ServiceProviderTest extends TestCase
         $routes = Route::getRoutes();
 
         $this->assertNotEmpty($routes->getRoutes());
-        $this->assertEquals($route, $routes->getRoutes()[0]);
-        $this->assertEquals(['GET', 'HEAD'], $route->methods);
-        $this->assertEquals('/', $route->uri);
-        $this->assertEquals(['uses' => '\Inertia\Controller@__invoke', 'controller' => '\Inertia\Controller'], $route->action);
-        $this->assertEquals(['component' => 'User/Edit', 'props' => ['user' => ['name' => 'Jonathan']]], $route->defaults);
+
+        $inertiaRoute = collect($routes->getRoutes())->first(fn($route) => $route->uri === '/');
+
+        $this->assertEquals($route, $inertiaRoute);
+        $this->assertEquals(['GET', 'HEAD'], $inertiaRoute->methods);
+        $this->assertEquals('/', $inertiaRoute->uri);
+        $this->assertEquals(['uses' => '\Inertia\Controller@__invoke', 'controller' => '\Inertia\Controller'], $inertiaRoute->action);
+        $this->assertEquals(['component' => 'User/Edit', 'props' => ['user' => ['name' => 'Jonathan']]], $inertiaRoute->defaults);
     }
 }
