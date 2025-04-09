@@ -15,17 +15,16 @@ trait MergesProps
         return $this;
     }
 
-    public function shouldMerge(): bool
-    {
-        return $this->merge;
-    }
-
     public function deepMerge(): static
     {
-
         $this->deepMerge = true;
 
         return $this->merge();
+    }
+
+    public function shouldMerge(): bool
+    {
+        return $this->merge;
     }
 
     public function shouldDeepMerge(): bool

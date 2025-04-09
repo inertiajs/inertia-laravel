@@ -305,40 +305,22 @@ class Response implements Responsable
     {
         $resetProps = collect(explode(',', $request->header(Header::RESET, '')));
         $mergeProps = collect($this->props)
-            ->filter(function ($prop) {
-                return $prop instanceof Mergeable;
-            })
-            ->filter(function ($prop) {
-                return $prop->shouldMerge();
-            });
+            ->filter(fn ($prop) => $prop instanceof Mergeable)
+            ->filter(fn ($prop) => $prop->shouldMerge())
+            ->filter(fn ($_, $key) => ! $resetProps->contains($key));
 
         $deepMergeProps = $mergeProps
-            ->filter(function ($prop) {
-                return $prop->shouldDeepMerge();
-            })
-            ->filter(function ($prop, $key) use ($resetProps) {
-                return ! $resetProps->contains($key);
-            })
+            ->filter(fn ($prop) => $prop->shouldDeepMerge())
             ->keys();
 
         $mergeProps = $mergeProps
-            ->filter(function ($prop) {
-                return ! $prop->shouldDeepMerge();
-            })
-            ->filter(function ($prop, $key) use ($resetProps) {
-                return ! $resetProps->contains($key);
-            })
+            ->filter(fn ($prop) => ! $prop->shouldDeepMerge())
             ->keys();
 
-        $props = [];
-        if ($mergeProps->isNotEmpty()) {
-            $props['mergeProps'] = $mergeProps->toArray();
-        }
-        if ($deepMergeProps->isNotEmpty()) {
-            $props['deepMergeProps'] = $deepMergeProps->toArray();
-        }
-
-        return $props;
+        return array_filter([
+            'mergeProps' => $mergeProps->toArray(),
+            'deepMergeProps' => $deepMergeProps->toArray(),
+        ], fn ($prop) => count($prop) > 0);
     }
 
     public function resolveDeferredProps(Request $request): array

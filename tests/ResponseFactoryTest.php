@@ -280,10 +280,9 @@ class ResponseFactoryTest extends TestCase
     public function test_can_create_deep_merged_prop(): void
     {
         $factory = new ResponseFactory;
-        $mergedProp = $factory->merge(function () {
+        $mergedProp = $factory->deepMerge(function () {
             return 'A merged value';
         });
-        $mergedProp->deepMerge();
 
         $this->assertInstanceOf(MergeProp::class, $mergedProp);
     }
