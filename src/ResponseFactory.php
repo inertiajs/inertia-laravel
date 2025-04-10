@@ -31,6 +31,10 @@ class ResponseFactory
 
     protected $encryptHistory;
 
+    /***
+     * @param string $name The name of the root view
+     * @return void
+     */
     public function setRootView(string $name): void
     {
         $this->rootView = $name;
@@ -64,7 +68,10 @@ class ResponseFactory
         return $this->sharedProps;
     }
 
-    public function flushShared(): void
+    /**
+     * @return void
+     */
+    public function flushShared()
     {
         $this->sharedProps = [];
     }
@@ -91,6 +98,9 @@ class ResponseFactory
         session(['inertia.clear_history' => true]);
     }
 
+    /**
+     * @param  bool  $encrypt
+     */
     public function encryptHistory($encrypt = true): void
     {
         $this->encryptHistory = $encrypt;
@@ -120,6 +130,14 @@ class ResponseFactory
     public function merge($value): MergeProp
     {
         return new MergeProp($value);
+    }
+
+    /**
+     * @param  mixed  $value
+     */
+    public function deepMerge($value): MergeProp
+    {
+        return (new MergeProp($value))->deepMerge();
     }
 
     /**

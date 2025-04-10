@@ -277,12 +277,32 @@ class ResponseFactoryTest extends TestCase
         $this->assertInstanceOf(MergeProp::class, $mergedProp);
     }
 
+    public function test_can_create_deep_merged_prop(): void
+    {
+        $factory = new ResponseFactory;
+        $mergedProp = $factory->deepMerge(function () {
+            return 'A merged value';
+        });
+
+        $this->assertInstanceOf(MergeProp::class, $mergedProp);
+    }
+
     public function test_can_create_deferred_and_merged_prop(): void
     {
         $factory = new ResponseFactory;
         $deferredProp = $factory->defer(function () {
             return 'A deferred + merged value';
         })->merge();
+
+        $this->assertInstanceOf(DeferProp::class, $deferredProp);
+    }
+
+    public function test_can_create_deferred_and_deep_merged_prop(): void
+    {
+        $factory = new ResponseFactory;
+        $deferredProp = $factory->defer(function () {
+            return 'A deferred + merged value';
+        })->deepMerge();
 
         $this->assertInstanceOf(DeferProp::class, $deferredProp);
     }
