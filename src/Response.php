@@ -176,16 +176,16 @@ class Response implements Responsable
     public function resolveArrayableProperties(array $props, Request $request, bool $unpackDotProps = true): array
     {
         foreach ($props as $key => $value) {
+            if ($value instanceof Closure) {
+                $value = App::call($value);
+            }
+
             if ($value instanceof Arrayable) {
                 $value = $value->toArray();
             }
 
             if (is_array($value)) {
                 $value = $this->resolveArrayableProperties($value, $request, false);
-            }
-
-            if ($value instanceof Closure) {
-                $value = App::call($value);
             }
 
             if ($unpackDotProps && str_contains($key, '.')) {
