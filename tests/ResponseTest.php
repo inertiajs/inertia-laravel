@@ -2,6 +2,7 @@
 
 namespace Inertia\Tests;
 
+use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -657,6 +658,31 @@ class ResponseTest extends TestCase
 
         $this->assertFalse(property_exists($page->props, 'users'));
         $this->assertSame('A lazy value', $page->props->lazy);
+    }
+
+    public function test_defer_arrayable_props_are_resolved_in_partial_reload(): void
+    {
+        $request = Request::create('/users', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'Users']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'defer']);
+
+        $deferProp = new DeferProp(function () {
+            return new class implements Arrayable
+            {
+                public function toArray()
+                {
+                    return ['foo' => 'bar'];
+                }
+            };
+        });
+
+        $response = new Response('Users', ['users' => [], 'defer' => $deferProp], 'app', '123');
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertFalse(property_exists($page->props, 'users'));
+        $this->assertEquals((object) ['foo' => 'bar'], $page->props->defer);
     }
 
     public function test_always_props_are_included_on_partial_reload(): void

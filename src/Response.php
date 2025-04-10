@@ -261,6 +261,10 @@ class Response implements Responsable
                 $value = App::call($value);
             }
 
+            if ($value instanceof Arrayable) {
+                $value = $value->toArray();
+            }
+
             if ($value instanceof PromiseInterface) {
                 $value = $value->wait();
             }
