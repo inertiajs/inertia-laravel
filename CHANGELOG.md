@@ -1,8 +1,35 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.1...2.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.2...2.x)
 
 - Nothing!
+
+## [v2.0.2](https://github.com/inertiajs/inertia-laravel/compare/v2.0.1...v2.0.2) - 2025-04-10
+
+### What's Changed
+
+* [2.x] Supports Laravel 12 by [@crynobone](https://github.com/crynobone) in https://github.com/inertiajs/inertia-laravel/pull/709
+* Add Inertia::deepMerge Method for Handling Complex Data Merges in Responses by [@HichemTab-tech](https://github.com/HichemTab-tech) in https://github.com/inertiajs/inertia-laravel/pull/679
+* Improve PHPDoc annotations for ResponseFactory class by [@mohammadrasoulasghari](https://github.com/mohammadrasoulasghari) in https://github.com/inertiajs/inertia-laravel/pull/723
+* fix props that extends Responsable after closures / lazy props by [@d8vjork](https://github.com/d8vjork) in https://github.com/inertiajs/inertia-laravel/pull/722
+* [2.x] Allow environment config for `ssr.enabled`, `ssr.url`, and `history.encrypt` by [@bram-pkg](https://github.com/bram-pkg) in https://github.com/inertiajs/inertia-laravel/pull/714
+* Replace `array_merge` with spread operator in `middleware.stub` by [@osbre](https://github.com/osbre) in https://github.com/inertiajs/inertia-laravel/pull/710
+* [2.x] Resolve Closure before checking if a prop implements the Arrayable contract by [@rodrigopedra](https://github.com/rodrigopedra) in https://github.com/inertiajs/inertia-laravel/pull/706
+* Handle SSR URLs with trailing slashes by [@simon-tma](https://github.com/simon-tma) in https://github.com/inertiajs/inertia-laravel/pull/705
+* [2.x] Call `toArray()` on `Arrayable` props resolved from the Container by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/696
+* [2.x] Replace md5 with xxhash by [@RobertBoes](https://github.com/RobertBoes) in https://github.com/inertiajs/inertia-laravel/pull/653
+
+### New Contributors
+
+* [@HichemTab-tech](https://github.com/HichemTab-tech) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/679
+* [@mohammadrasoulasghari](https://github.com/mohammadrasoulasghari) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/723
+* [@d8vjork](https://github.com/d8vjork) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/722
+* [@bram-pkg](https://github.com/bram-pkg) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/714
+* [@osbre](https://github.com/osbre) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/710
+* [@simon-tma](https://github.com/simon-tma) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/705
+* [@pascalbaljet](https://github.com/pascalbaljet) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/696
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.1...v2.0.2
 
 ## [v2.0.1](https://github.com/inertiajs/inertia-laravel/compare/v2.0.0...v2.0.1) - 2025-02-18
 
