@@ -16,7 +16,7 @@ class HttpGateway implements Gateway
             return null;
         }
 
-        $url = str_replace('/render', '', rtrim(config('inertia.ssr.url', 'http://127.0.0.1:13714'), '/')) . '/render';
+        $url = str_replace('/render', '', rtrim(config('inertia.ssr.url', 'http://127.0.0.1:13714'), '/')).'/render';
 
         try {
             $response = Http::post($url, $page)->throw()->json();
