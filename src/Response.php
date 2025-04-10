@@ -257,7 +257,7 @@ class Response implements Responsable
                 DeferProp::class,
                 AlwaysProp::class,
                 MergeProp::class,
-            ])->first(fn ($class) => $value instanceof $class);
+            ])->first(fn($class) => $value instanceof $class);
 
             if ($resolveViaApp) {
                 $value = App::call($value);
@@ -267,12 +267,12 @@ class Response implements Responsable
                 $value = $value->wait();
             }
 
-            if ($value instanceof ResourceResponse || $value instanceof JsonResource) {
-                $value = $value->toResponse($request)->getData(true);
-            }
-
             if ($value instanceof Responsable) {
-                $value = $value->toResponse($request)->getData(true);
+                $_response = $value->toResponse($request);
+
+                if (method_exists($_response, 'getData')) {
+                    $value = $_response->getData(true);
+                }
             }
 
             if (is_array($value)) {
@@ -309,22 +309,22 @@ class Response implements Responsable
     {
         $resetProps = collect(explode(',', $request->header(Header::RESET, '')));
         $mergeProps = collect($this->props)
-            ->filter(fn ($prop) => $prop instanceof Mergeable)
-            ->filter(fn ($prop) => $prop->shouldMerge())
-            ->filter(fn ($_, $key) => ! $resetProps->contains($key));
+            ->filter(fn($prop) => $prop instanceof Mergeable)
+            ->filter(fn($prop) => $prop->shouldMerge())
+            ->filter(fn($_, $key) => ! $resetProps->contains($key));
 
         $deepMergeProps = $mergeProps
-            ->filter(fn ($prop) => $prop->shouldDeepMerge())
+            ->filter(fn($prop) => $prop->shouldDeepMerge())
             ->keys();
 
         $mergeProps = $mergeProps
-            ->filter(fn ($prop) => ! $prop->shouldDeepMerge())
+            ->filter(fn($prop) => ! $prop->shouldDeepMerge())
             ->keys();
 
         return array_filter([
             'mergeProps' => $mergeProps->toArray(),
             'deepMergeProps' => $deepMergeProps->toArray(),
-        ], fn ($prop) => count($prop) > 0);
+        ], fn($prop) => count($prop) > 0);
     }
 
     public function resolveDeferredProps(Request $request): array
