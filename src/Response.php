@@ -9,8 +9,6 @@ use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Http\Resources\Json\ResourceResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Response as ResponseFactory;
@@ -257,7 +255,7 @@ class Response implements Responsable
                 DeferProp::class,
                 AlwaysProp::class,
                 MergeProp::class,
-            ])->first(fn($class) => $value instanceof $class);
+            ])->first(fn ($class) => $value instanceof $class);
 
             if ($resolveViaApp) {
                 $value = App::call($value);
@@ -309,22 +307,22 @@ class Response implements Responsable
     {
         $resetProps = collect(explode(',', $request->header(Header::RESET, '')));
         $mergeProps = collect($this->props)
-            ->filter(fn($prop) => $prop instanceof Mergeable)
-            ->filter(fn($prop) => $prop->shouldMerge())
-            ->filter(fn($_, $key) => ! $resetProps->contains($key));
+            ->filter(fn ($prop) => $prop instanceof Mergeable)
+            ->filter(fn ($prop) => $prop->shouldMerge())
+            ->filter(fn ($_, $key) => ! $resetProps->contains($key));
 
         $deepMergeProps = $mergeProps
-            ->filter(fn($prop) => $prop->shouldDeepMerge())
+            ->filter(fn ($prop) => $prop->shouldDeepMerge())
             ->keys();
 
         $mergeProps = $mergeProps
-            ->filter(fn($prop) => ! $prop->shouldDeepMerge())
+            ->filter(fn ($prop) => ! $prop->shouldDeepMerge())
             ->keys();
 
         return array_filter([
             'mergeProps' => $mergeProps->toArray(),
             'deepMergeProps' => $deepMergeProps->toArray(),
-        ], fn($prop) => count($prop) > 0);
+        ], fn ($prop) => count($prop) > 0);
     }
 
     public function resolveDeferredProps(Request $request): array
