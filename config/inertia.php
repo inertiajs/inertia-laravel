@@ -66,7 +66,7 @@ return [
 
     'history' => [
 
-        'encrypt' => false,
+        'encrypt' => (bool) env('INERTIA_ENCRYPT_HISTORY', false),
 
     ],
 
