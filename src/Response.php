@@ -305,18 +305,22 @@ class Response implements Responsable
     {
         $resetProps = collect(explode(',', $request->header(Header::RESET, '')));
         $mergeProps = collect($this->props)
-            ->filter(function ($prop) {
-                return $prop instanceof Mergeable;
-            })
-            ->filter(function ($prop) {
-                return $prop->shouldMerge();
-            })
-            ->filter(function ($prop, $key) use ($resetProps) {
-                return ! $resetProps->contains($key);
-            })
+            ->filter(fn ($prop) => $prop instanceof Mergeable)
+            ->filter(fn ($prop) => $prop->shouldMerge())
+            ->filter(fn ($_, $key) => ! $resetProps->contains($key));
+
+        $deepMergeProps = $mergeProps
+            ->filter(fn ($prop) => $prop->shouldDeepMerge())
             ->keys();
 
-        return $mergeProps->isNotEmpty() ? ['mergeProps' => $mergeProps->toArray()] : [];
+        $mergeProps = $mergeProps
+            ->filter(fn ($prop) => ! $prop->shouldDeepMerge())
+            ->keys();
+
+        return array_filter([
+            'mergeProps' => $mergeProps->toArray(),
+            'deepMergeProps' => $deepMergeProps->toArray(),
+        ], fn ($prop) => count($prop) > 0);
     }
 
     public function resolveDeferredProps(Request $request): array
