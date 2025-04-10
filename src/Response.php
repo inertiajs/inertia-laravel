@@ -271,6 +271,10 @@ class Response implements Responsable
                 $value = $value->toResponse($request)->getData(true);
             }
 
+            if ($value instanceof Responsable) {
+                $value = $value->toResponse($request)->getData(true);
+            }
+
             if (is_array($value)) {
                 $value = $this->resolvePropertyInstances($value, $request);
             }
