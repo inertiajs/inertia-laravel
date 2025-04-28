@@ -109,7 +109,7 @@ class Response implements Responsable
             [
                 'component' => $this->component,
                 'props' => $props,
-                'url' => Str::start(Str::after($request->fullUrl(), $request->getSchemeAndHttpHost()), '/'),
+                'url' => $this->getRequestUrl($request),
                 'version' => $this->version,
                 'clearHistory' => $this->clearHistory,
                 'encryptHistory' => $this->encryptHistory,
@@ -358,5 +358,22 @@ class Response implements Responsable
     public function isPartial(Request $request): bool
     {
         return $request->header(Header::PARTIAL_COMPONENT) === $this->component;
+    }
+
+    /**
+     * Get the request URL with proper handling of proxy prefixes and trailing slashes.
+     */
+    protected function getRequestUrl(Request $request): string
+    {
+        $uri = $request->getRequestUri();
+        
+        // Handle X-Forwarded-Prefix header for proxy setups
+        if ($prefix = $request->header('X_FORWARDED_PREFIX')) {
+            if (!str_starts_with($uri, $prefix)) {
+                $uri = $prefix . $uri;
+            }
+        }
+        
+        return $uri;
     }
 }

@@ -827,4 +827,72 @@ class ResponseTest extends TestCase
 
         $this->assertSame('/subpath/product/123', $page->url);
     }
+    
+    public function test_trailing_slashes_in_url_are_preserved(): void
+    {
+        // Test with trailing slash in the URL
+        $request = Request::create('/categories/', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        
+        $response = new Response('Category/Index', []);
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+        
+        $this->assertSame('/categories/', $page->url);
+        
+        // Test with trailing slash and query parameters
+        $request = Request::create('/categories/?page=1&sort=name', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        
+        $response = new Response('Category/Index', []);
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+        
+        $this->assertSame('/categories/?page=1&sort=name', $page->url);
+        
+        // Test with trailing slash and proxy prefix
+        $request = Request::create('/categories/', 'GET');
+        $request->headers->set('X_FORWARDED_PREFIX', '/admin');
+        $request->headers->add(['X-Inertia' => 'true']);
+        
+        $response = new Response('Category/Index', []);
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+        
+        $this->assertSame('/admin/categories/', $page->url);
+    }
+    
+    public function test_non_trailing_slashes_in_url_work_correctly(): void
+    {
+        // Test with non-trailing slash in the URL
+        $request = Request::create('/categories', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        
+        $response = new Response('Category/Index', []);
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+        
+        $this->assertSame('/categories', $page->url);
+        
+        // Test with non-trailing slash and query parameters
+        $request = Request::create('/categories?page=1&sort=name', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        
+        $response = new Response('Category/Index', []);
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+        
+        $this->assertSame('/categories?page=1&sort=name', $page->url);
+        
+        // Test with non-trailing slash and proxy prefix
+        $request = Request::create('/categories', 'GET');
+        $request->headers->set('X_FORWARDED_PREFIX', '/admin');
+        $request->headers->add(['X-Inertia' => 'true']);
+        
+        $response = new Response('Category/Index', []);
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+        
+        $this->assertSame('/admin/categories', $page->url);
+    }
 }
