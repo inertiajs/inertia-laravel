@@ -365,15 +365,24 @@ class Response implements Responsable
      */
     protected function getRequestUrl(Request $request): string
     {
-        $uri = $request->getRequestUri();
+        // Get the original request URI which should already contain any base path
+        $originalUri = $request->getRequestUri();
         
         // Handle X-Forwarded-Prefix header for proxy setups
         if ($prefix = $request->header('X_FORWARDED_PREFIX')) {
-            if (!str_starts_with($uri, $prefix)) {
-                $uri = $prefix . $uri;
+            // Only add the prefix if it's not already at the start of the URI
+            if (!str_starts_with($originalUri, $prefix)) {
+                $originalUri = $prefix . $originalUri;
             }
         }
         
-        return $uri;
+        // Decode the query string portion for better readability
+        if (str_contains($originalUri, '?')) {
+            list($path, $query) = explode('?', $originalUri, 2);
+            $query = urldecode($query);
+            return $path . '?' . $query;
+        }
+        
+        return $originalUri;
     }
 }

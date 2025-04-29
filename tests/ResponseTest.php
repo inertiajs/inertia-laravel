@@ -32,6 +32,18 @@ class ResponseTest extends TestCase
         $this->assertEquals('bar', $response->foo());
     }
 
+public function test_the_page_url_is_not_encoded(): void
+    {
+        $request = Request::create('/product/123', 'GET', ['value' => 'te/st']);
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $response = new Response('Product/Show', []);
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertSame('/product/123?value=te/st', $page->url);
+    }
+
     public function test_server_response(): void
     {
         $request = Request::create('/user/123', 'GET');
@@ -894,5 +906,45 @@ class ResponseTest extends TestCase
         $page = $response->getData();
         
         $this->assertSame('/admin/categories', $page->url);
+    }
+    
+    public function test_url_with_slashes_in_query_params(): void
+    {
+        // Test with forward slashes in query parameters
+        $request = Request::create('/product/123?value=te/st', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        
+        $response = new Response('Product/Show', []);
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+        
+        // Forward slashes should be preserved, not encoded as %2F
+        $this->assertSame('/product/123?value=te/st', $page->url);
+    }
+    
+    public function test_url_with_ampersands_in_query_params(): void
+    {
+        // Test normal query parameters with & as separator
+        $request = Request::create('/families?search=jonathan&amy=test', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        
+        $response = new Response('Family/Index', []);
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+        
+        // Check that the URL contains both parameters properly separated by &
+        $this->assertStringContainsString('search=jonathan', $page->url);
+        $this->assertStringContainsString('amy=test', $page->url);
+        
+        // Test encoded ampersand within a parameter value
+        $request = Request::create('/families?search=jonathan%26amy', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        
+        $response = new Response('Family/Index', []);
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+        
+        // The & should be decoded in the parameter value
+        $this->assertSame('/families?search=jonathan&amy', $page->url);
     }
 }
