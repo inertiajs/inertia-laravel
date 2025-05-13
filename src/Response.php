@@ -319,6 +319,15 @@ class Response implements Responsable
             ->filter(fn ($prop) => $prop->shouldDeepMerge())
             ->keys();
 
+        $mergeStrategies = $mergeProps
+            ->map(function ($prop, $key) {
+                return collect($prop->mergeStrategies())
+                    ->map(fn ($strategy) => $key.".".$strategy)
+                    ->toArray();
+            })
+            ->flatten()
+            ->values();
+
         $mergeProps = $mergeProps
             ->filter(fn ($prop) => ! $prop->shouldDeepMerge())
             ->keys();
@@ -326,6 +335,7 @@ class Response implements Responsable
         return array_filter([
             'mergeProps' => $mergeProps->toArray(),
             'deepMergeProps' => $deepMergeProps->toArray(),
+            'mergeStrategies' => $mergeStrategies->toArray(),
         ], fn ($prop) => count($prop) > 0);
     }
 

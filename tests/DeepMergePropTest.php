@@ -27,4 +27,11 @@ class DeepMergePropTest extends TestCase
 
         $this->assertInstanceOf(Request::class, $mergeProp());
     }
+
+    public function test_can_use_single_string_as_merge_strategy(): void
+    {
+        $mergeProp = (new MergeProp(['key' => 'value'], ['key']))->deepMerge();
+
+        $this->assertEquals(['key'], $mergeProp->mergeStrategies());
+    }
 }
