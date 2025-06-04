@@ -109,7 +109,7 @@ class Response implements Responsable
             [
                 'component' => $this->component,
                 'props' => $props,
-                'url' => Str::start(Str::after($request->fullUrl(), $request->getSchemeAndHttpHost()), '/'),
+                'url' => $this->getUrl($request),
                 'version' => $this->version,
                 'clearHistory' => $this->clearHistory,
                 'encryptHistory' => $this->encryptHistory,
@@ -358,5 +358,30 @@ class Response implements Responsable
     public function isPartial(Request $request): bool
     {
         return $request->header(Header::PARTIAL_COMPONENT) === $this->component;
+    }
+
+    /**
+     * Get the URL from the request (without the scheme and host) while preserving the trailing slash if it exists.
+     */
+    protected function getUrl(Request $request): string
+    {
+        $url = Str::start(Str::after($request->fullUrl(), $request->getSchemeAndHttpHost()), '/');
+
+        $rawUri = Str::before($request->getRequestUri(), '?');
+
+        return Str::endsWith($rawUri, '/') ? $this->finishUrlWithTrailingSlash($url) : $url;
+    }
+
+    /**
+     * Ensure the URL has a trailing slash before the query string (if it exists).
+     */
+    protected function finishUrlWithTrailingSlash(string $url): string
+    {
+        // Make sure the relative URL ends with a trailing slash and re-append the query string if it exists.
+        $urlWithoutQueryWithTrailingSlash = Str::finish(Str::before($url, '?'), '/');
+
+        return str_contains($url, '?')
+            ? $urlWithoutQueryWithTrailingSlash.'?'.Str::after($url, '?')
+            : $urlWithoutQueryWithTrailingSlash;
     }
 }

@@ -827,4 +827,52 @@ class ResponseTest extends TestCase
 
         $this->assertSame('/subpath/product/123', $page->url);
     }
+
+    public function test_trailing_slashes_in_a_url_are_preserved(): void
+    {
+        $request = Request::create('/users/', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $response = new Response('User/Index', []);
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertSame('/users/', $page->url);
+    }
+
+    public function test_trailing_slashes_in_a_url_with_query_parameters_are_preserved(): void
+    {
+        $request = Request::create('/users/?page=1&sort=name', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $response = new Response('User/Index', []);
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertSame('/users/?page=1&sort=name', $page->url);
+    }
+
+    public function test_a_url_without_trailing_slash_is_resolved_correctly(): void
+    {
+        $request = Request::create('/users', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $response = new Response('User/Index', []);
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertSame('/users', $page->url);
+    }
+
+    public function test_a_url_without_trailing_slash_and_query_parameters_is_resolved_correctly(): void
+    {
+        $request = Request::create('/users?page=1&sort=name', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $response = new Response('User/Index', []);
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertSame('/users?page=1&sort=name', $page->url);
+    }
 }
