@@ -109,7 +109,7 @@ class Response implements Responsable
             [
                 'component' => $this->component,
                 'props' => $props,
-                'url' => $this->getRequestUrl($request),
+                'url' => $this->getUrl($request),
                 'version' => $this->version,
                 'clearHistory' => $this->clearHistory,
                 'encryptHistory' => $this->encryptHistory,
@@ -361,28 +361,27 @@ class Response implements Responsable
     }
 
     /**
-     * Get the request URL with proper handling of proxy prefixes and trailing slashes.
+     * Get the URL from the request (without the scheme and host) while preserving the trailing slash if it exists.
      */
-    protected function getRequestUrl(Request $request): string
+    protected function getUrl(Request $request): string
     {
-        // Get the original request URI which should already contain any base path
-        $originalUri = $request->getRequestUri();
-        
-        // Handle X-Forwarded-Prefix header for proxy setups
-        if ($prefix = $request->header('X_FORWARDED_PREFIX')) {
-            // Only add the prefix if it's not already at the start of the URI
-            if (!str_starts_with($originalUri, $prefix)) {
-                $originalUri = $prefix . $originalUri;
-            }
-        }
-        
-        // Decode the query string portion for better readability
-        if (str_contains($originalUri, '?')) {
-            list($path, $query) = explode('?', $originalUri, 2);
-            $query = urldecode($query);
-            return $path . '?' . $query;
-        }
-        
-        return $originalUri;
+        $url = Str::start(Str::after($request->fullUrl(), $request->getSchemeAndHttpHost()), '/');
+
+        $rawUri = Str::before($request->getRequestUri(), '?');
+
+        return Str::endsWith($rawUri, '/') ? $this->finishUrlWithTrailingSlash($url) : $url;
+    }
+
+    /**
+     * Ensure the URL has a trailing slash before the query string (if it exists).
+     */
+    protected function finishUrlWithTrailingSlash(string $url): string
+    {
+        // Make sure the relative URL ends with a trailing slash and re-append the query string if it exists.
+        $urlWithoutQueryWithTrailingSlash = Str::finish(Str::before($url, '?'), '/');
+
+        return str_contains($url, '?')
+            ? $urlWithoutQueryWithTrailingSlash.'?'.Str::after($url, '?')
+            : $urlWithoutQueryWithTrailingSlash;
     }
 }
