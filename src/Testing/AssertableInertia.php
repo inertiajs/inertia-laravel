@@ -3,7 +3,6 @@
 namespace Inertia\Testing;
 
 use Closure;
-use Illuminate\Foundation\Application;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Illuminate\Testing\TestResponse;
 use InvalidArgumentException;
@@ -83,27 +82,58 @@ class AssertableInertia extends AssertableJson
         return $this;
     }
 
-    public function partial(array|string $key, ?Closure $callback = null, ?Application $app = null): self
+    public function reload(?Closure $callback = null, array|string|null $only = null, array|string|null $except = null): self
     {
-        $partialRequest = new PartialRequest(
-            is_array($key) ? implode(',', $key) : $key,
+        if (is_array($only)) {
+            $only = implode(',', $only);
+        }
+
+        if (is_array($except)) {
+            $except = implode(',', $except);
+        }
+
+        $reloadRequest = new ReloadRequest(
             $this->url,
             $this->component,
             $this->version,
-            $app ?? app()
+            $only,
+            $except,
         );
 
-        $assertable = static::fromTestResponse($partialRequest());
+        $assertable = AssertableInertia::fromTestResponse($reloadRequest());
+
+        // Make sure we get the same data as the original request.
         $assertable->component($this->component);
         $assertable->url($this->url);
         $assertable->version($this->version);
-        $assertable->hasAll(is_array($key) ? $key : explode(',', $key));
 
         if ($callback) {
             $callback($assertable);
         }
 
         return $this;
+    }
+
+    public function reloadOnly(array|string $only, ?Closure $callback = null): self
+    {
+        return $this->reload(only: $only, callback: function (AssertableInertia $assertable) use ($only, $callback) {
+            $assertable->hasAll(explode(',', $only));
+
+            if ($callback) {
+                $callback($assertable);
+            }
+        });
+    }
+
+    public function reloadExcept(array|string $except, ?Closure $callback = null): self
+    {
+        return $this->reload(except: $except, callback: function (AssertableInertia $assertable) use ($except, $callback) {
+            $assertable->missingAll(explode(',', $except));
+
+            if ($callback) {
+                $callback($assertable);
+            }
+        });
     }
 
     public function toArray()
