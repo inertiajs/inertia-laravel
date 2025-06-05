@@ -96,7 +96,7 @@ class ResponseFactory
         return (string) $version;
     }
 
-    public function resolveUrlUsing(?Closure $urlResolver): void
+    public function resolveUrlUsing(?Closure $urlResolver = null): void
     {
         $this->urlResolver = $urlResolver;
     }
