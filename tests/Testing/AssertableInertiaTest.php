@@ -193,4 +193,24 @@ class AssertableInertiaTest extends TestCase
             $inertia->version('different-version');
         });
     }
+
+    public function test_lazy_props_can_be_evaluated(): void
+    {
+        $response = $this->makeMockRequest(
+            Inertia::render('foo', [
+                'foo' => 'bar',
+                'lazy' => Inertia::lazy(fn () => 'baz'),
+            ])
+        );
+
+        $response->assertInertia(function ($inertia) {
+            $inertia->where('foo', 'bar');
+            $inertia->missing('lazy');
+
+            $inertia->partial('lazy', function ($inertia) {
+                $inertia->where('lazy', 'baz');
+                $inertia->missing('foo');
+            });
+        });
+    }
 }
