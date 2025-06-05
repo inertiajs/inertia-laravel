@@ -127,6 +127,30 @@ class ResponseFactoryTest extends TestCase
         $response->assertJson(['component' => 'User/Edit']);
     }
 
+    public function test_the_url_can_be_resolved_with_a_custom_resolver()
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            Inertia::resolveUrlUsing(function ($request, ResponseFactory $otherDependency) {
+                $this->assertInstanceOf(HttpRequest::class, $request);
+                $this->assertInstanceOf(ResponseFactory::class, $otherDependency);
+
+                return '/my-custom-url';
+            });
+
+            return Inertia::render('User/Edit');
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', [
+            'X-Inertia' => 'true',
+        ]);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Edit',
+            'url' => '/my-custom-url',
+        ]);
+    }
+
     public function test_shared_data_can_be_shared_from_anywhere(): void
     {
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {

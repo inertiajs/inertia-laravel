@@ -36,17 +36,26 @@ class Response implements Responsable
 
     protected $cacheFor = [];
 
+    protected ?Closure $urlResolver = null;
+
     /**
      * @param  array|Arrayable  $props
      */
-    public function __construct(string $component, array $props, string $rootView = 'app', string $version = '', bool $encryptHistory = false)
-    {
+    public function __construct(
+        string $component,
+        array $props,
+        string $rootView = 'app',
+        string $version = '',
+        bool $encryptHistory = false,
+        ?Closure $urlResolver = null
+    ) {
         $this->component = $component;
         $this->props = $props instanceof Arrayable ? $props->toArray() : $props;
         $this->rootView = $rootView;
         $this->version = $version;
         $this->clearHistory = session()->pull('inertia.clear_history', false);
         $this->encryptHistory = $encryptHistory;
+        $this->urlResolver = $urlResolver;
     }
 
     /**
@@ -365,6 +374,10 @@ class Response implements Responsable
      */
     protected function getUrl(Request $request): string
     {
+        if ($this->urlResolver) {
+            return App::call($this->urlResolver, ['request' => $request]);
+        }
+
         $url = Str::start(Str::after($request->fullUrl(), $request->getSchemeAndHttpHost()), '/');
 
         $rawUri = Str::before($request->getRequestUri(), '?');
