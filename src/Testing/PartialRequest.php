@@ -16,8 +16,7 @@ class PartialRequest
         protected string $component,
         protected string $version,
         protected Application $app
-    ) {
-    }
+    ) {}
 
     public function __invoke(): TestResponse
     {
