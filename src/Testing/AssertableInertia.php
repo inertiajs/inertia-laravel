@@ -2,6 +2,8 @@
 
 namespace Inertia\Testing;
 
+use Closure;
+use Illuminate\Foundation\Application;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Illuminate\Testing\TestResponse;
 use InvalidArgumentException;
@@ -77,6 +79,29 @@ class AssertableInertia extends AssertableJson
     public function version(string $value): self
     {
         PHPUnit::assertSame($value, $this->version, 'Unexpected Inertia asset version.');
+
+        return $this;
+    }
+
+    public function partial(array|string $key, ?Closure $callback = null, ?Application $app = null): self
+    {
+        $partialRequest = new PartialRequest(
+            is_array($key) ? implode(',', $key) : $key,
+            $this->url,
+            $this->component,
+            $this->version,
+            $app ?? app()
+        );
+
+        $assertable = static::fromTestResponse($partialRequest());
+        $assertable->component($this->component);
+        $assertable->url($this->url);
+        $assertable->version($this->version);
+        $assertable->hasAll(is_array($key) ? $key : explode(',', $key));
+
+        if ($callback) {
+            $callback($assertable);
+        }
 
         return $this;
     }
