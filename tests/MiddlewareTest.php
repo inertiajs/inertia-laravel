@@ -2,6 +2,7 @@
 
 namespace Inertia\Tests;
 
+use Illuminate\Filesystem\Filesystem;
 use Illuminate\Http\Request;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
@@ -13,9 +14,16 @@ use Inertia\Inertia;
 use Inertia\Middleware;
 use Inertia\Tests\Stubs\ExampleMiddleware;
 use LogicException;
+use PHPUnit\Framework\Attributes\After;
 
 class MiddlewareTest extends TestCase
 {
+    #[After]
+    public function cleanupPublicFolder(): void
+    {
+        (new Filesystem)->cleanDirectory(public_path());
+    }
+
     public function test_no_response_value_by_default_means_automatically_redirecting_back_for_inertia_requests(): void
     {
         $fooCalled = false;
@@ -239,6 +247,49 @@ class MiddlewareTest extends TestCase
         $response = $this->get('/');
         $response->assertOk();
         $response->assertViewIs('welcome');
+    }
+
+    public function test_determine_the_version_by_a_hash_of_the_asset_url(): void
+    {
+        config(['app.asset_url' => $url = 'https://example.com/assets']);
+
+        $this->prepareMockEndpoint(middleware: new Middleware);
+
+        $response = $this->get('/');
+        $response->assertOk();
+        $response->assertViewHas('page.version', hash('xxh128', $url));
+    }
+
+    public function test_determine_the_version_by_a_hash_of_the_vite_manifest(): void
+    {
+        $filesystem = new Filesystem;
+        $filesystem->ensureDirectoryExists(public_path('build'));
+        $filesystem->put(
+            public_path('build/manifest.json'),
+            $contents = json_encode(['vite' => true])
+        );
+
+        $this->prepareMockEndpoint(middleware: new Middleware);
+
+        $response = $this->get('/');
+        $response->assertOk();
+        $response->assertViewHas('page.version', hash('xxh128', $contents));
+    }
+
+    public function test_determine_the_version_by_a_hash_of_the_mix_manifest(): void
+    {
+        $filesystem = new Filesystem;
+        $filesystem->ensureDirectoryExists(public_path());
+        $filesystem->put(
+            public_path('mix-manifest.json'),
+            $contents = json_encode(['mix' => true])
+        );
+
+        $this->prepareMockEndpoint(middleware: new Middleware);
+
+        $response = $this->get('/');
+        $response->assertOk();
+        $response->assertViewHas('page.version', hash('xxh128', $contents));
     }
 
     private function prepareMockEndpoint($version = null, $shared = [], $middleware = null): \Illuminate\Routing\Route
