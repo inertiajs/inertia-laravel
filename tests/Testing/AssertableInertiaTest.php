@@ -3,6 +3,7 @@
 namespace Inertia\Tests\Testing;
 
 use Inertia\Inertia;
+use Inertia\Testing\AssertableInertia;
 use Inertia\Tests\TestCase;
 use PHPUnit\Framework\AssertionFailedError;
 
@@ -194,23 +195,85 @@ class AssertableInertiaTest extends TestCase
         });
     }
 
+    public function test_reloading_a_visit(): void
+    {
+        $foo = 0;
+
+        $response = $this->makeMockRequest(function () use (&$foo) {
+            return Inertia::render('foo', [
+                'foo' => $foo++,
+            ]);
+        });
+
+        $called = false;
+
+        $response->assertInertia(function ($inertia) use (&$called) {
+            $inertia->where('foo', 0);
+
+            $inertia->reload(function ($inertia) use (&$called) {
+                $inertia->where('foo', 1);
+                $called = true;
+            });
+        });
+
+        $this->assertTrue($called);
+    }
+
     public function test_lazy_props_can_be_evaluated(): void
     {
         $response = $this->makeMockRequest(
             Inertia::render('foo', [
                 'foo' => 'bar',
-                'lazy' => Inertia::lazy(fn () => 'baz'),
+                'lazy1' => Inertia::lazy(fn () => 'baz'),
+                'lazy2' => Inertia::lazy(fn () => 'qux'),
             ])
         );
 
-        $response->assertInertia(function ($inertia) {
-            $inertia->where('foo', 'bar');
-            $inertia->missing('lazy');
+        $called = false;
 
-            $inertia->partial('lazy', function ($inertia) {
-                $inertia->where('lazy', 'baz');
+        $response->assertInertia(function ($inertia) use (&$called) {
+            $inertia->where('foo', 'bar');
+            $inertia->missing('lazy1');
+            $inertia->missing('lazy2');
+
+            $result = $inertia->reloadOnly('lazy1', function ($inertia) use (&$called) {
                 $inertia->missing('foo');
+                $inertia->where('lazy1', 'baz');
+                $inertia->missing('lazy2');
+                $called = true;
+            });
+
+            $this->assertSame($result, $inertia);
+        });
+
+        $this->assertTrue($called);
+    }
+
+    public function test_lazy_props_can_be_evaluated_with_except(): void
+    {
+        $response = $this->makeMockRequest(
+            Inertia::render('foo', [
+                'foo' => 'bar',
+                'lazy1' => Inertia::lazy(fn () => 'baz'),
+                'lazy2' => Inertia::lazy(fn () => 'qux'),
+            ])
+        );
+
+        $called = false;
+
+        $response->assertInertia(function (AssertableInertia $inertia) use (&$called) {
+            $inertia->where('foo', 'bar');
+            $inertia->missing('lazy1');
+            $inertia->missing('lazy2');
+
+            $inertia->reloadExcept('lazy1', function ($inertia) use (&$called) {
+                $inertia->where('foo', 'bar');
+                $inertia->missing('lazy1');
+                $inertia->where('lazy2', 'qux');
+                $called = true;
             });
         });
+
+        $this->assertTrue($called);
     }
 }
