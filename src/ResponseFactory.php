@@ -31,6 +31,9 @@ class ResponseFactory
 
     protected $encryptHistory;
 
+    /** @var Closure|null */
+    protected $urlResolver;
+
     /***
      * @param string $name The name of the root view
      * @return void
@@ -91,6 +94,11 @@ class ResponseFactory
             : $this->version;
 
         return (string) $version;
+    }
+
+    public function resolveUrlUsing(?Closure $urlResolver): void
+    {
+        $this->urlResolver = $urlResolver;
     }
 
     public function clearHistory(): void
@@ -163,6 +171,7 @@ class ResponseFactory
             $this->rootView,
             $this->getVersion(),
             $this->encryptHistory ?? config('inertia.history.encrypt', false),
+            $this->urlResolver,
         );
     }
 
