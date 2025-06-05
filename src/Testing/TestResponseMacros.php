@@ -32,10 +32,7 @@ class TestResponseMacros
     public function inertiaProps()
     {
         return function (?string $propName = null) {
-            return Arr::get(
-                $this->inertiaPage()['props'] ?? [],
-                $propName
-            );
+            return Arr::get($this->inertiaPage()['props'], $propName);
         };
     }
 }
