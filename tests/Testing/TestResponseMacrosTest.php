@@ -58,15 +58,22 @@ class TestResponseMacrosTest extends TestCase
             Inertia::render('foo', $props)
         );
 
-        tap($response->inertiaProps(), fn (array $pageProps) => $this->assertSame($props, $pageProps));
+        $this->assertSame($props, $response->inertiaProps());
     }
 
     public function test_it_can_retrieve_nested_inertia_prop_values_with_dot_notation(): void
     {
         $response = $this->makeMockRequest(
-            Inertia::render('foo', ['bar' => ['baz' => 'qux']])
+            Inertia::render('foo', [
+                'bar' => ['baz' => 'qux'],
+                'users' => [
+                    ['name' => 'John'],
+                    ['name' => 'Jane'],
+                ],
+            ])
         );
 
-        tap($response->inertiaProps('bar.baz'), fn (mixed $value) => $this->assertSame('qux', $value));
+        $this->assertSame('qux', $response->inertiaProps('bar.baz'));
+        $this->assertSame('John', $response->inertiaProps('users.0.name'));
     }
 }
