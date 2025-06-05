@@ -2,7 +2,6 @@
 
 namespace Inertia;
 
-use Illuminate\Foundation\Testing\TestResponse as LegacyTestResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
@@ -95,13 +94,6 @@ class ServiceProvider extends BaseServiceProvider
     {
         if (class_exists(TestResponse::class)) {
             TestResponse::mixin(new TestResponseMacros);
-
-            return;
-        }
-
-        // Laravel <= 6.0
-        if (class_exists(LegacyTestResponse::class)) {
-            LegacyTestResponse::mixin(new TestResponseMacros);
 
             return;
         }
