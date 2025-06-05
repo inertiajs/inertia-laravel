@@ -5,6 +5,7 @@ namespace Inertia\Testing;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Testing\Concerns\MakesHttpRequests;
 use Illuminate\Testing\TestResponse;
+use Inertia\Support\Header;
 
 class PartialRequest
 {
@@ -21,9 +22,9 @@ class PartialRequest
     public function __invoke(): TestResponse
     {
         return $this->get($this->url, [
-            'X-Inertia-Partial-Data' => $this->props,
-            'X-Inertia-Partial-Component' => $this->component,
-            'X-Inertia-Version' => $this->version,
+            Header::PARTIAL_ONLY => $this->props,
+            Header::PARTIAL_COMPONENT => $this->component,
+            Header::VERSION => $this->version,
         ]);
     }
 }
