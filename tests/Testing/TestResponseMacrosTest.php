@@ -3,6 +3,7 @@
 namespace Inertia\Tests\Testing;
 
 use Illuminate\Testing\Fluent\AssertableJson;
+use Illuminate\Testing\TestResponse;
 use Inertia\Inertia;
 use Inertia\Tests\TestCase;
 
@@ -30,7 +31,7 @@ class TestResponseMacrosTest extends TestCase
         );
 
         $this->assertInstanceOf(
-            $this->getTestResponseClass(),
+            TestResponse::class,
             $response->assertInertia()
         );
     }
