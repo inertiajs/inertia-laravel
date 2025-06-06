@@ -8,7 +8,7 @@ use PHPUnit\Framework\Assert as PHPUnit;
 
 trait PageObject
 {
-    public function component(string $value = null, $shouldExist = null): self
+    public function component(?string $value = null, $shouldExist = null): self
     {
         PHPUnit::assertSame($value, $this->component, 'Unexpected Inertia page component.');
 
@@ -23,7 +23,7 @@ trait PageObject
         return $this;
     }
 
-    protected function prop(string $key = null)
+    protected function prop(?string $key = null)
     {
         return Arr::get($this->props, $key);
     }

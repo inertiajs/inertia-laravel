@@ -95,6 +95,8 @@ class Response implements Responsable
             'props' => $props,
             'url' => Str::start(Str::after($request->fullUrl(), $request->getSchemeAndHttpHost()), '/'),
             'version' => $this->version,
+            'encryptHistory' => false,
+            'clearHistory' => false,
         ];
 
         if ($request->header(Header::INERTIA)) {

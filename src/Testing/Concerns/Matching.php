@@ -68,7 +68,7 @@ trait Matching
 
     abstract protected function dotPath(string $key): string;
 
-    abstract protected function prop(string $key = null);
+    abstract protected function prop(?string $key = null);
 
-    abstract public function has(string $key, $value = null, Closure $scope = null);
+    abstract public function has(string $key, $value = null, ?Closure $scope = null);
 }

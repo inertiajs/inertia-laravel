@@ -42,7 +42,7 @@ class AssertableInertia extends AssertableJson
         return $instance;
     }
 
-    public function component(string $value = null, $shouldExist = null): self
+    public function component(?string $value = null, $shouldExist = null): self
     {
         PHPUnit::assertSame($value, $this->component, 'Unexpected Inertia page component.');
 

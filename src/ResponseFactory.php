@@ -46,7 +46,7 @@ class ResponseFactory
         }
     }
 
-    public function getShared(string $key = null, $default = null)
+    public function getShared(?string $key = null, $default = null)
     {
         if ($key) {
             return Arr::get($this->sharedProps, $key, $default);

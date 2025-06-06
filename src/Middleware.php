@@ -6,6 +6,7 @@ use Closure;
 use Inertia\Support\Header;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
+use Inertia\Support\LaravelVapor;
 use Symfony\Component\HttpFoundation\Response;
 
 class Middleware
@@ -28,7 +29,7 @@ class Middleware
      */
     public function version(Request $request)
     {
-        if (config('app.asset_url')) {
+        if (LaravelVapor::detect()) {
             return md5(config('app.asset_url'));
         }
 

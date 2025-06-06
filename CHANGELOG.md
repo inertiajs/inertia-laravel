@@ -1,8 +1,17 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v1.3.0...1.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v1.3.2...1.x)
 
 - Nothing yet!
+
+## [v1.3.2](https://github.com/inertiajs/inertia-laravel/compare/v1.3.1...v1.3.2) - 2024-12-05
+
+- [1.x] Fix PHP 8.4 deprecations ([#691](https://github.com/inertiajs/inertia-laravel/pull/691))
+- [1.x] Ensure Inertia Response generate also compatible with Inertia.js 2 ([#692](https://github.com/inertiajs/inertia-laravel/pull/692))
+
+## [v1.3.1](https://github.com/inertiajs/inertia-laravel/compare/v1.3.0...v1.3.1) - 2024-11-14
+
+- [1.x] Supports PHP 8.4 by [@crynobone](https://github.com/crynobone) in https://github.com/inertiajs/inertia-laravel/pull/683
 
 ## [v1.3.0](https://github.com/inertiajs/inertia-laravel/compare/v1.2.0...v1.3.0) - 2024-06-12
 

@@ -8,36 +8,55 @@ on:
 
 jobs:
   tests:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: true
       matrix:
         php: [7.3, 7.4, "8.0", 8.1, 8.2, 8.3]
-        laravel: [8, 9, 10, 11]
+        laravel: [8, 9, 10, 11, 12]
         stability: ["prefer-lowest", "prefer-stable"]
+        include:
+          - php: 8.4
+            laravel: 11
+            stability: "prefer-stable"
+          - php: 8.4
+            laravel: 12
+            stability: "prefer-stable"
         exclude:
           - php: 7.3
+            laravel: 8 # Failed security advisory
+          - php: 7.3
             laravel: 9
           - php: 7.3
             laravel: 10
           - php: 7.3
             laravel: 11
+          - php: 7.3
+            laravel: 12
           - php: 7.4
             laravel: 9
           - php: 7.4
             laravel: 10
           - php: 7.4
             laravel: 11
+          - php: 7.4
+            laravel: 12
+          - php: '8.0'
+            laravel: 9 # Failed security advisory
           - php: '8.0'
             laravel: 10
           - php: '8.0'
             laravel: 11
+          - php: '8.0'
+            laravel: 12
           - php: 8.1
             laravel: 6
           - php: 8.1
             laravel: 7
           - php: 8.1
             laravel: 11
+          - php: 8.1
+            laravel: 12
           - php: 8.2
             laravel: 6
           - php: 8.2
@@ -54,7 +73,7 @@ jobs:
     name: PHP ${{ matrix.php }} - Laravel ${{ matrix.laravel }} (w/ ${{ matrix.stability }})
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -66,7 +85,7 @@ jobs:
           coverage: none
 
       - name: Set Minimum PHP 8.1 Versions
-        uses: nick-invision/retry@v1
+        uses: nick-fields/retry@v3
         with:
           timeout_minutes: 5
           max_attempts: 5
@@ -76,32 +95,32 @@ jobs:
         if: matrix.php >= 8.1 && matrix.stability == 'prefer-lowest'
 
       - name: Set Minimum PHP 8.2 Versions
-        uses: nick-invision/retry@v1
+        uses: nick-fields/retry@v3
         with:
           timeout_minutes: 5
           max_attempts: 5
           command: |
             composer require nesbot/carbon:^2.62.1 --dev --${{ matrix.stability }} --no-update --no-interaction
-        if: matrix.php >= 8.2 && matrix.stability == 'prefer-lowest'
+        if: matrix.php >= 8.2 && matrix.stability == 'prefer-lowest' && matrix.laravel < 12
 
       - name: Set Minimum PHP 8.2 Versions and Laravel > 11
-        uses: nick-invision/retry@v1
+        uses: nick-fields/retry@v3
         with:
           timeout_minutes: 5
           max_attempts: 5
           command: |
-            composer require phpunit/phpunit:^10.4 --dev --${{ matrix.stability }} --no-update --no-interaction
+            composer require "phpunit/phpunit:^10.4|^11.5" --dev --${{ matrix.stability }} --no-update --no-interaction
         if: matrix.php >= 8.2 && matrix.stability == 'prefer-lowest' && matrix.laravel >= 11
 
       - name: Set Laravel version
-        uses: nick-invision/retry@v1
+        uses: nick-fields/retry@v3
         with:
           timeout_minutes: 5
           max_attempts: 5
           command: composer require "laravel/framework=^${{ matrix.laravel }}" --no-interaction --no-update
 
       - name: Install dependencies
-        uses: nick-invision/retry@v1
+        uses: nick-fields/retry@v3
         with:
           timeout_minutes: 5
           max_attempts: 5
