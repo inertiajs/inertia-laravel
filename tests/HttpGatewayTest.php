@@ -53,10 +53,10 @@ class HttpGatewayTest extends TestCase
         Vite::shouldReceive('isRunningHot')->andReturn(false);
 
         Http::fake([
-            $this->gateway->getHttpUrl() => json_encode([
+            $this->gateway->getHttpUrl() => Http::response(json_encode([
                 'head' => ['<title>SSR Test</title>', '<style></style>'],
                 'body' => '<div id="app">SSR Response</div>',
-            ]),
+            ])),
         ]);
 
         $this->assertNotNull(
@@ -78,10 +78,10 @@ class HttpGatewayTest extends TestCase
         Vite::shouldReceive('asset')->with('render')->andReturn($viteUrl = 'http://localhost:3000/some-url');
 
         Http::fake([
-            $viteUrl => json_encode([
+            $viteUrl => Http::response(json_encode([
                 'head' => ['<title>SSR Test</title>', '<style></style>'],
                 'body' => '<div id="app">SSR Response</div>',
-            ]),
+            ])),
         ]);
 
         $this->assertNotNull(
@@ -118,7 +118,7 @@ class HttpGatewayTest extends TestCase
         Vite::shouldReceive('isRunningHot')->andReturn(false);
 
         Http::fake([
-            $this->gateway->getHttpUrl() => 'invalid json',
+            $this->gateway->getHttpUrl() => Http::response('invalid json'),
         ]);
 
         $this->assertNull($this->gateway->dispatch(['page' => self::EXAMPLE_PAGE_OBJECT]));
