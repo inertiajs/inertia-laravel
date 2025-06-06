@@ -30,8 +30,6 @@ class DirectiveTest extends TestCase
     /**
      * Example Page Objects.
      */
-    protected const EXAMPLE_PAGE_OBJECT = ['component' => 'Foo/Bar', 'props' => ['foo' => 'bar'], 'url' => '/test', 'version' => '', 'encryptHistory' => false, 'clearHistory' => false];
-
     protected function setUp(): void
     {
         parent::setUp();
