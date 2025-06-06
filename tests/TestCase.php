@@ -2,12 +2,10 @@
 
 namespace Inertia\Tests;
 
-use Illuminate\Foundation\Testing\TestResponse as LegacyTestResponse;
 use Illuminate\Support\Facades\View;
 use Illuminate\Testing\TestResponse;
 use Inertia\Inertia;
 use Inertia\ServiceProvider;
-use LogicException;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 abstract class TestCase extends Orchestra
@@ -30,26 +28,7 @@ abstract class TestCase extends Orchestra
         config()->set('inertia.testing.page_paths', [realpath(__DIR__)]);
     }
 
-    /**
-     * @throws LogicException
-     */
-    protected function getTestResponseClass(): string
-    {
-        // Laravel >= 7.0
-        if (class_exists(TestResponse::class)) {
-            return TestResponse::class;
-        }
-
-        // Laravel <= 6.0
-        if (class_exists(LegacyTestResponse::class)) {
-            return LegacyTestResponse::class;
-        }
-
-        throw new LogicException('Could not detect TestResponse class.');
-    }
-
-    /** @returns TestResponse|LegacyTestResponse */
-    protected function makeMockRequest($view)
+    protected function makeMockRequest($view): TestResponse
     {
         app('router')->get('/example-url', function () use ($view) {
             return $view;
