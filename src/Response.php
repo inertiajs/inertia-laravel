@@ -9,8 +9,6 @@ use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Http\Resources\Json\ResourceResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Response as ResponseFactory;
@@ -111,7 +109,7 @@ class Response implements Responsable
             [
                 'component' => $this->component,
                 'props' => $props,
-                'url' => Str::start(Str::after($request->fullUrl(), $request->getSchemeAndHttpHost()), '/'),
+                'url' => $this->getUrl($request),
                 'version' => $this->version,
                 'clearHistory' => $this->clearHistory,
                 'encryptHistory' => $this->encryptHistory,
@@ -178,16 +176,16 @@ class Response implements Responsable
     public function resolveArrayableProperties(array $props, Request $request, bool $unpackDotProps = true): array
     {
         foreach ($props as $key => $value) {
+            if ($value instanceof Closure) {
+                $value = App::call($value);
+            }
+
             if ($value instanceof Arrayable) {
                 $value = $value->toArray();
             }
 
             if (is_array($value)) {
                 $value = $this->resolveArrayableProperties($value, $request, false);
-            }
-
-            if ($value instanceof Closure) {
-                $value = App::call($value);
             }
 
             if ($unpackDotProps && str_contains($key, '.')) {
@@ -263,12 +261,20 @@ class Response implements Responsable
                 $value = App::call($value);
             }
 
+            if ($value instanceof Arrayable) {
+                $value = $value->toArray();
+            }
+
             if ($value instanceof PromiseInterface) {
                 $value = $value->wait();
             }
 
-            if ($value instanceof ResourceResponse || $value instanceof JsonResource) {
-                $value = $value->toResponse($request)->getData(true);
+            if ($value instanceof Responsable) {
+                $_response = $value->toResponse($request);
+
+                if (method_exists($_response, 'getData')) {
+                    $value = $_response->getData(true);
+                }
             }
 
             if (is_array($value)) {
@@ -305,18 +311,22 @@ class Response implements Responsable
     {
         $resetProps = collect(explode(',', $request->header(Header::RESET, '')));
         $mergeProps = collect($this->props)
-            ->filter(function ($prop) {
-                return $prop instanceof Mergeable;
-            })
-            ->filter(function ($prop) {
-                return $prop->shouldMerge();
-            })
-            ->filter(function ($prop, $key) use ($resetProps) {
-                return ! $resetProps->contains($key);
-            })
+            ->filter(fn ($prop) => $prop instanceof Mergeable)
+            ->filter(fn ($prop) => $prop->shouldMerge())
+            ->filter(fn ($_, $key) => ! $resetProps->contains($key));
+
+        $deepMergeProps = $mergeProps
+            ->filter(fn ($prop) => $prop->shouldDeepMerge())
             ->keys();
 
-        return $mergeProps->isNotEmpty() ? ['mergeProps' => $mergeProps->toArray()] : [];
+        $mergeProps = $mergeProps
+            ->filter(fn ($prop) => ! $prop->shouldDeepMerge())
+            ->keys();
+
+        return array_filter([
+            'mergeProps' => $mergeProps->toArray(),
+            'deepMergeProps' => $deepMergeProps->toArray(),
+        ], fn ($prop) => count($prop) > 0);
     }
 
     public function resolveDeferredProps(Request $request): array
@@ -348,5 +358,30 @@ class Response implements Responsable
     public function isPartial(Request $request): bool
     {
         return $request->header(Header::PARTIAL_COMPONENT) === $this->component;
+    }
+
+    /**
+     * Get the URL from the request (without the scheme and host) while preserving the trailing slash if it exists.
+     */
+    protected function getUrl(Request $request): string
+    {
+        $url = Str::start(Str::after($request->fullUrl(), $request->getSchemeAndHttpHost()), '/');
+
+        $rawUri = Str::before($request->getRequestUri(), '?');
+
+        return Str::endsWith($rawUri, '/') ? $this->finishUrlWithTrailingSlash($url) : $url;
+    }
+
+    /**
+     * Ensure the URL has a trailing slash before the query string (if it exists).
+     */
+    protected function finishUrlWithTrailingSlash(string $url): string
+    {
+        // Make sure the relative URL ends with a trailing slash and re-append the query string if it exists.
+        $urlWithoutQueryWithTrailingSlash = Str::finish(Str::before($url, '?'), '/');
+
+        return str_contains($url, '?')
+            ? $urlWithoutQueryWithTrailingSlash.'?'.Str::after($url, '?')
+            : $urlWithoutQueryWithTrailingSlash;
     }
 }

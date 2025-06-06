@@ -8,7 +8,7 @@ on:
 
 jobs:
   tests:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: true
       matrix:
@@ -43,7 +43,6 @@ jobs:
           timeout_minutes: 5
           max_attempts: 5
           command: |
-            composer require phpunit/phpunit:^9.5.8 --dev --${{ matrix.stability }} --no-update --no-interaction
             composer require vlucas/phpdotenv:^5.3.1 --${{ matrix.stability }} --no-update --no-interaction
         if: matrix.php >= 8.1 && matrix.stability == 'prefer-lowest'
 
@@ -63,7 +62,6 @@ jobs:
           max_attempts: 5
           command: |
             composer require "orchestra/testbench:^9.2|^10.0" --dev --${{ matrix.stability }} --no-update --no-interaction
-            composer require "phpunit/phpunit:^10.4|^11.5" --dev --${{ matrix.stability }} --no-update --no-interaction
         if: matrix.php >= 8.2 && matrix.stability == 'prefer-lowest' && matrix.laravel >= 11
 
       - name: Set Laravel version

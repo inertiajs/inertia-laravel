@@ -112,7 +112,7 @@ class ResponseFactoryTest extends TestCase
             $this->assertSame('', Inertia::getVersion());
 
             Inertia::version(function () {
-                return md5('Inertia');
+                return hash('xxh128', 'Inertia');
             });
 
             return Inertia::render('User/Edit');
@@ -120,7 +120,7 @@ class ResponseFactoryTest extends TestCase
 
         $response = $this->withoutExceptionHandling()->get('/', [
             'X-Inertia' => 'true',
-            'X-Inertia-Version' => 'b19a24ee5c287f42ee1d465dab77ab37',
+            'X-Inertia-Version' => 'f445bd0a2c393a5af14fc677f59980a9',
         ]);
 
         $response->assertSuccessful();
@@ -277,12 +277,32 @@ class ResponseFactoryTest extends TestCase
         $this->assertInstanceOf(MergeProp::class, $mergedProp);
     }
 
+    public function test_can_create_deep_merged_prop(): void
+    {
+        $factory = new ResponseFactory;
+        $mergedProp = $factory->deepMerge(function () {
+            return 'A merged value';
+        });
+
+        $this->assertInstanceOf(MergeProp::class, $mergedProp);
+    }
+
     public function test_can_create_deferred_and_merged_prop(): void
     {
         $factory = new ResponseFactory;
         $deferredProp = $factory->defer(function () {
             return 'A deferred + merged value';
         })->merge();
+
+        $this->assertInstanceOf(DeferProp::class, $deferredProp);
+    }
+
+    public function test_can_create_deferred_and_deep_merged_prop(): void
+    {
+        $factory = new ResponseFactory;
+        $deferredProp = $factory->defer(function () {
+            return 'A deferred + merged value';
+        })->deepMerge();
 
         $this->assertInstanceOf(DeferProp::class, $deferredProp);
     }

@@ -3,6 +3,7 @@
 namespace Inertia\Tests\Testing;
 
 use Illuminate\Testing\Fluent\AssertableJson;
+use Illuminate\Testing\TestResponse;
 use Inertia\Inertia;
 use Inertia\Tests\TestCase;
 
@@ -30,7 +31,7 @@ class TestResponseMacrosTest extends TestCase
         );
 
         $this->assertInstanceOf(
-            $this->getTestResponseClass(),
+            TestResponse::class,
             $response->assertInertia()
         );
     }
@@ -49,5 +50,31 @@ class TestResponseMacrosTest extends TestCase
             $this->assertFalse($page['encryptHistory']);
             $this->assertFalse($page['clearHistory']);
         });
+    }
+
+    public function test_it_can_retrieve_the_inertia_props(): void
+    {
+        $props = ['bar' => 'baz'];
+        $response = $this->makeMockRequest(
+            Inertia::render('foo', $props)
+        );
+
+        $this->assertSame($props, $response->inertiaProps());
+    }
+
+    public function test_it_can_retrieve_nested_inertia_prop_values_with_dot_notation(): void
+    {
+        $response = $this->makeMockRequest(
+            Inertia::render('foo', [
+                'bar' => ['baz' => 'qux'],
+                'users' => [
+                    ['name' => 'John'],
+                    ['name' => 'Jane'],
+                ],
+            ])
+        );
+
+        $this->assertSame('qux', $response->inertiaProps('bar.baz'));
+        $this->assertSame('John', $response->inertiaProps('users.0.name'));
     }
 }
