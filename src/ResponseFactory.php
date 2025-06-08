@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class ResponseFactory
 {
+    use DeepMergesSharedProps;
     use Macroable;
 
     /** @var string */
@@ -46,13 +47,13 @@ class ResponseFactory
      */
     public function share($key, $value = null): void
     {
-        if (is_array($key)) {
-            $this->sharedProps = array_merge($this->sharedProps, $key);
-        } elseif ($key instanceof Arrayable) {
-            $this->sharedProps = array_merge($this->sharedProps, $key->toArray());
-        } else {
-            Arr::set($this->sharedProps, $key, $value);
-        }
+        $value = match (true) {
+            is_string($key) => [$key => $value],
+            is_array($key) => $key,
+            $key instanceof Arrayable => $value->toArray(),
+        };
+
+        $this->sharedProps = $this->deepMergeSharedProps($value, $this->sharedProps);
     }
 
     /**
@@ -159,7 +160,7 @@ class ResponseFactory
 
         return new Response(
             $component,
-            array_merge($this->sharedProps, $props),
+            $this->deepMergeSharedProps($props, $this->sharedProps),
             $this->rootView,
             $this->getVersion(),
             $this->encryptHistory ?? config('inertia.history.encrypt', false),

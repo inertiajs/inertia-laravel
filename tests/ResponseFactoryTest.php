@@ -146,6 +146,36 @@ class ResponseFactoryTest extends TestCase
         ]);
     }
 
+    public function test_shared_data_can_be_merged(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            Inertia::share('auth.user.can.access_user_management', true);
+            Inertia::share('auth.user.can.delete_user', false);
+
+            return Inertia::render('User/Show', [
+                'auth.user.can' => ['edit_user' => false],
+            ]);
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Show',
+            'props' => [
+                'auth' => [
+                    'user' => [
+                        'can' => [
+                            'access_user_management' => true,
+                            'delete_user' => false,
+                            'edit_user' => false,
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+    }
+
     public function test_dot_props_are_merged_from_shared(): void
     {
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
