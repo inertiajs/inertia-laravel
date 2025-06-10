@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static void setRootView(string $name)
  * @method static void share(string|array|\Illuminate\Contracts\Support\Arrayable $key, mixed $value = null)
  * @method static mixed getShared(string|null $key = null, mixed $default = null)
+ * @method static self setSharedPropMerger(MergeStrategy $mergeStrategy)
  * @method static void clearHistory()
  * @method static void encryptHistory($encrypt = true)
  * @method static void flushShared()

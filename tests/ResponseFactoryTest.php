@@ -12,6 +12,7 @@ use Illuminate\Session\Store;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\AlwaysProp;
+use Inertia\DeepMergeStrategy;
 use Inertia\DeferProp;
 use Inertia\Inertia;
 use Inertia\LazyProp;
@@ -146,36 +147,6 @@ class ResponseFactoryTest extends TestCase
         ]);
     }
 
-    public function test_shared_data_can_be_merged(): void
-    {
-        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
-            Inertia::share('auth.user.can.access_user_management', true);
-            Inertia::share('auth.user.can.delete_user', false);
-
-            return Inertia::render('User/Show', [
-                'auth.user.can' => ['edit_user' => false],
-            ]);
-        });
-
-        $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
-
-        $response->assertSuccessful();
-        $response->assertJson([
-            'component' => 'User/Show',
-            'props' => [
-                'auth' => [
-                    'user' => [
-                        'can' => [
-                            'access_user_management' => true,
-                            'delete_user' => false,
-                            'edit_user' => false,
-                        ],
-                    ],
-                ],
-            ],
-        ]);
-    }
-
     public function test_dot_props_are_merged_from_shared(): void
     {
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
@@ -250,6 +221,110 @@ class ResponseFactoryTest extends TestCase
                         'name' => 'Jonathan',
                         'can' => [
                             'create_group' => false,
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+    }
+
+    public function test_shared_props_use_shallow_merge_by_default(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            Inertia::share('auth.user.can', [
+                'delete_user' => false,
+            ]);
+
+            return Inertia::render('User/Show', [
+                'auth.user.can' => [
+                    'edit_user' => false,
+                ],
+            ]);
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Show',
+            'props' => [
+                'auth' => [
+                    'user' => [
+                        'can' => [
+                            'edit_user' => false,
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+    }
+
+    public function test_can_override_shared_prop_merger_globally(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            Inertia::setSharedPropMerger(new DeepMergeStrategy);
+
+            Inertia::share('auth.user.can', [
+                'delete_user' => false,
+            ]);
+
+            return Inertia::render('User/Show', [
+                'auth.user.can' => [
+                    'edit_user' => false,
+                ],
+            ]);
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Show',
+            'props' => [
+                'auth' => [
+                    'user' => [
+                        'can' => [
+                            'delete_user' => false,
+                            'edit_user' => false,
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+    }
+
+    public function test_merge_strategy_can_be_applied_per_share_call(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            Inertia::share([
+                'auth.user.id' => 1,
+                'auth.user.can' => [
+                    'delete_user' => false,
+                ],
+            ]);
+            Inertia::share([
+                'auth.user.can' => [
+                    'edit_user' => false,
+                ],
+            ], new DeepMergeStrategy);
+
+            return Inertia::render('User/Show', [
+                'auth.user.name' => 'John Doe',
+            ]);
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Show',
+            'props' => [
+                'auth' => [
+                    'user' => [
+                        'name' => 'John Doe',
+                        'can' => [
+                            'delete_user' => false,
+                            'edit_user' => false,
                         ],
                     ],
                 ],

@@ -7,44 +7,52 @@ use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Arr;
 use ReflectionFunction;
 
-trait DeepMergesSharedProps
+class DeepMergeStrategy implements MergeStrategy
 {
     /**
      * Recursively merges multiple shared Inertia props within the current request.
      * This method ensures that overlapping keys between multiple sets of props
      * are merged deeply instead of overwritten, preserving nested structures.
      */
-    protected function deepMergeSharedProps(array $props, array $sharedProps = []): array
+    public function merge(array $original, string|array|Arrayable $key, mixed $value = null): array
     {
-        foreach ($props as $key => $prop) {
+        $mergedProps = $original;
+
+        $newProps = match (true) {
+            is_string($key) => [$key => $value],
+            is_array($key) => $key,
+            $key instanceof Arrayable => $value->toArray(),
+        };
+
+        foreach ($newProps as $key => $prop) {
             $propArray = $this->attemptArrayCast($prop);
-            $sharedPropArray = $this->attemptArrayCast(Arr::get($sharedProps, $key));
+            $mergedPropArray = $this->attemptArrayCast(Arr::get($mergedProps, $key));
 
             $shouldFlattenPropArray = is_int($key) && is_array($propArray);
             if ($shouldFlattenPropArray) {
-                $sharedProps = $this->deepMergeSharedProps($propArray, $sharedProps);
+                $mergedProps = $this->merge($propArray, $mergedProps);
 
                 continue;
             }
 
-            $shouldOverride = ! is_array($propArray) || ! is_array($sharedPropArray);
+            $shouldOverride = ! is_array($propArray) || ! is_array($mergedPropArray);
             if ($shouldOverride) {
-                Arr::set($sharedProps, $key, $propArray);
+                Arr::set($mergedProps, $key, $propArray);
 
                 continue;
             }
 
-            $shouldConcatenate = $this->isIndexedArray($propArray) && $this->isIndexedArray($sharedPropArray);
+            $shouldConcatenate = $this->isIndexedArray($propArray) && $this->isIndexedArray($mergedPropArray);
             if ($shouldConcatenate) {
-                Arr::set($sharedProps, $key, array_merge($sharedPropArray, $propArray));
+                Arr::set($mergedProps, $key, array_merge($mergedPropArray, $propArray));
 
                 continue;
             }
 
-            Arr::set($sharedProps, $key, $this->deepMergeSharedProps($propArray, $sharedPropArray));
+            Arr::set($mergedProps, $key, $this->merge($propArray, $mergedPropArray));
         }
 
-        return $sharedProps;
+        return $mergedProps;
     }
 
     protected function isIndexedArray(array $array): bool

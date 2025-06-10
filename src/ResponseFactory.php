@@ -16,7 +16,6 @@ use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class ResponseFactory
 {
-    use DeepMergesSharedProps;
     use Macroable;
 
     /** @var string */
@@ -24,6 +23,8 @@ class ResponseFactory
 
     /** @var array */
     protected $sharedProps = [];
+
+    protected ?MergeStrategy $sharedPropMerger = null;
 
     /** @var Closure|string|null */
     protected $version;
@@ -47,13 +48,17 @@ class ResponseFactory
      */
     public function share($key, $value = null): void
     {
-        $value = match (true) {
-            is_string($key) => [$key => $value],
-            is_array($key) => $key,
-            $key instanceof Arrayable => $value->toArray(),
-        };
+        if ($value instanceof MergeStrategy) {
+            $this->sharedProps = $value->merge($this->sharedProps, $key);
 
-        $this->sharedProps = $this->deepMergeSharedProps($value, $this->sharedProps);
+            return;
+        }
+
+        if (is_null($this->sharedPropMerger)) {
+            $this->sharedPropMerger = App::make(MergeStrategy::class);
+        }
+
+        $this->sharedProps = $this->sharedPropMerger->merge($this->sharedProps, $key, $value);
     }
 
     /**
@@ -67,6 +72,13 @@ class ResponseFactory
         }
 
         return $this->sharedProps;
+    }
+
+    public function setSharedPropMerger(MergeStrategy $mergeStrategy): self
+    {
+        $this->sharedPropMerger = $mergeStrategy;
+
+        return $this;
     }
 
     /**
@@ -158,9 +170,11 @@ class ResponseFactory
             $props = $props->toArray();
         }
 
+        $this->share($props);
+
         return new Response(
             $component,
-            $this->deepMergeSharedProps($props, $this->sharedProps),
+            $this->sharedProps,
             $this->rootView,
             $this->getVersion(),
             $this->encryptHistory ?? config('inertia.history.encrypt', false),

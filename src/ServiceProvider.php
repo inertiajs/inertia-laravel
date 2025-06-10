@@ -20,6 +20,7 @@ class ServiceProvider extends BaseServiceProvider
     {
         $this->app->singleton(ResponseFactory::class);
         $this->app->bind(Gateway::class, HttpGateway::class);
+        $this->app->bind(MergeStrategy::class, ShallowMergeStrategy::class);
 
         $this->mergeConfigFrom(
             __DIR__.'/../config/inertia.php',
