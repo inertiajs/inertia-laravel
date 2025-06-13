@@ -13,11 +13,13 @@ class MergeProp implements Mergeable
 
     /**
      * @param  mixed  $value
+     * @param  string[]  $mergeStrategies
      */
-    public function __construct($value)
+    public function __construct($value, array $mergeStrategies = [])
     {
         $this->value = $value;
         $this->merge = true;
+        $this->mergeStrategies = $mergeStrategies;
     }
 
     public function __invoke()
