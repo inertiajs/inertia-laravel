@@ -134,6 +134,7 @@ class ResponseFactory
 
     /**
      * @param  mixed  $value
+     *
      * @parram null|string|string[]  $mergeStrategies
      */
     public function deepMerge($value, $mergeStrategies = null): MergeProp
