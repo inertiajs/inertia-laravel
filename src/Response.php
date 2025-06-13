@@ -322,7 +322,7 @@ class Response implements Responsable
         $mergeStrategies = $mergeProps
             ->map(function ($prop, $key) {
                 return collect($prop->mergeStrategies())
-                    ->map(fn ($strategy) => $key.".".$strategy)
+                    ->map(fn ($strategy) => $key.'.'.$strategy)
                     ->toArray();
             })
             ->flatten()
