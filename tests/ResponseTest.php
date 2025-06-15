@@ -320,6 +320,64 @@ class ResponseTest extends TestCase
         $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;user&quot;:{&quot;name&quot;:&quot;Jonathan&quot;},&quot;bar&quot;:&quot;bar value&quot;},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;,&quot;clearHistory&quot;:false,&quot;encryptHistory&quot;:false,&quot;deepMergeProps&quot;:[&quot;foo&quot;,&quot;bar&quot;],&quot;deferredProps&quot;:{&quot;default&quot;:[&quot;foo&quot;]}}"></div>', $view->render());
     }
 
+    public function test_exclude_merge_props_from_partial_only_response(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'User/Edit']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'user']);
+
+        $user = ['name' => 'Jonathan'];
+        $response = new Response(
+            'User/Edit',
+            [
+                'user' => $user,
+                'foo' => new MergeProp('foo value'),
+                'bar' => new MergeProp('bar value'),
+            ],
+            'app',
+            '123'
+        );
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $props = get_object_vars($page->props);
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+
+        $this->assertSame('Jonathan', $props['user']->name);
+        $this->assertFalse(isset($page->mergeProps));
+    }
+
+    public function test_exclude_merge_props_from_partial_except_response(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'User/Edit']);
+        $request->headers->add(['X-Inertia-Partial-Except' => 'foo']);
+
+        $user = ['name' => 'Jonathan'];
+        $response = new Response(
+            'User/Edit',
+            [
+                'user' => $user,
+                'foo' => new MergeProp('foo value'),
+                'bar' => new MergeProp('bar value'),
+            ],
+            'app',
+            '123'
+        );
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $props = get_object_vars($page->props);
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+
+        $this->assertSame('Jonathan', $props['user']->name);
+        $this->assertSame(['bar'], $page->mergeProps);
+    }
+
     public function test_xhr_response(): void
     {
         $request = Request::create('/user/123', 'GET');
