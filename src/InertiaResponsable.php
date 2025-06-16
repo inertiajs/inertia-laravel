@@ -2,7 +2,7 @@
 
 namespace Inertia;
 
-interface InertiaResponsible
+interface InertiaResponsable
 {
     public function toInertiaResponse(Prop $prop): mixed;
 }

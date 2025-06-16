@@ -263,7 +263,7 @@ class Response implements Responsable
 
             $currentKey = $parentKey ? $parentKey.'.'.$key : $key;
 
-            if ($value instanceof InertiaResponsible) {
+            if ($value instanceof InertiaResponsable) {
                 $value = $value->toInertiaResponse(new Prop($currentKey, $props, $request));
             }
 
