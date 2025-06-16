@@ -3,10 +3,10 @@
 namespace Inertia\Tests\Stubs;
 
 use Inertia\Inertia;
-use Inertia\InertiaResponsible;
+use Inertia\InertiaResponsable;
 use Inertia\Prop;
 
-class MergeWithSharedProp implements InertiaResponsible
+class MergeWithSharedProp implements InertiaResponsable
 {
     public function __construct(protected array $items = []) {}
 
