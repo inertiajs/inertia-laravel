@@ -245,7 +245,7 @@ class Response implements Responsable
     /**
      * Resolve all necessary class instances in the given props.
      */
-    public function resolvePropertyInstances(array $props, Request $request): array
+    public function resolvePropertyInstances(array $props, Request $request, ?string $parentKey = null): array
     {
         foreach ($props as $key => $value) {
             $resolveViaApp = collect([
@@ -259,6 +259,12 @@ class Response implements Responsable
 
             if ($resolveViaApp) {
                 $value = App::call($value);
+            }
+
+            $currentKey = $parentKey ? $parentKey.'.'.$key : $key;
+
+            if ($value instanceof InertiaResponsible) {
+                $value = $value->toInertiaResponse(new Prop($currentKey, $props, $request));
             }
 
             if ($value instanceof Arrayable) {
@@ -278,7 +284,7 @@ class Response implements Responsable
             }
 
             if (is_array($value)) {
-                $value = $this->resolvePropertyInstances($value, $request);
+                $value = $this->resolvePropertyInstances($value, $request, $currentKey);
             }
 
             $props[$key] = $value;
