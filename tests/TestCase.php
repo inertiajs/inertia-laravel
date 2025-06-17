@@ -31,7 +31,7 @@ abstract class TestCase extends Orchestra
     protected function makeMockRequest($view): TestResponse
     {
         app('router')->get('/example-url', function () use ($view) {
-            return $view;
+            return is_callable($view) ? $view() : $view;
         });
 
         return $this->get('/example-url');
