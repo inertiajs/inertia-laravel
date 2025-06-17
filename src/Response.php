@@ -318,11 +318,16 @@ class Response implements Responsable
 
     public function resolveMergeProps(Request $request): array
     {
-        $resetProps = collect(explode(',', $request->header(Header::RESET, '')));
+        $resetProps = array_filter(explode(',', $request->header(Header::RESET, '')));
+        $onlyProps = array_filter(explode(',', $request->header(Header::PARTIAL_ONLY, '')));
+        $exceptProps = array_filter(explode(',', $request->header(Header::PARTIAL_EXCEPT, '')));
+
         $mergeProps = collect($this->props)
             ->filter(fn ($prop) => $prop instanceof Mergeable)
             ->filter(fn ($prop) => $prop->shouldMerge())
-            ->filter(fn ($_, $key) => ! $resetProps->contains($key));
+            ->reject(fn ($_, $key) => in_array($key, $resetProps))
+            ->filter(fn ($_, $key) => count($onlyProps) === 0 || in_array($key, $onlyProps))
+            ->reject(fn ($_, $key) => in_array($key, $exceptProps));
 
         $deepMergeProps = $mergeProps
             ->filter(fn ($prop) => $prop->shouldDeepMerge())
