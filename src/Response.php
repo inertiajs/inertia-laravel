@@ -374,15 +374,15 @@ class Response implements Responsable
      */
     protected function getUrl(Request $request): string
     {
-        if ($this->urlResolver) {
-            return App::call($this->urlResolver, ['request' => $request]);
-        }
+        $urlResolver = $this->urlResolver ?? function (Request $request) {
+            $url = Str::start(Str::after($request->fullUrl(), $request->getSchemeAndHttpHost()), '/');
 
-        $url = Str::start(Str::after($request->fullUrl(), $request->getSchemeAndHttpHost()), '/');
+            $rawUri = Str::before($request->getRequestUri(), '?');
 
-        $rawUri = Str::before($request->getRequestUri(), '?');
+            return Str::endsWith($rawUri, '/') ? $this->finishUrlWithTrailingSlash($url) : $url;
+        };
 
-        return Str::endsWith($rawUri, '/') ? $this->finishUrlWithTrailingSlash($url) : $url;
+        return App::call($urlResolver, ['request' => $request]);
     }
 
     /**
