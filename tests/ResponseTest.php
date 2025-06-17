@@ -346,6 +346,8 @@ class ResponseTest extends TestCase
         $this->assertInstanceOf(JsonResponse::class, $response);
 
         $this->assertSame('Jonathan', $props['user']->name);
+        $this->assertArrayNotHasKey('foo', $props);
+        $this->assertArrayNotHasKey('bar', $props);
         $this->assertFalse(isset($page->mergeProps));
     }
 
@@ -375,6 +377,8 @@ class ResponseTest extends TestCase
         $this->assertInstanceOf(JsonResponse::class, $response);
 
         $this->assertSame('Jonathan', $props['user']->name);
+        $this->assertArrayNotHasKey('foo', $props);
+        $this->assertArrayHasKey('bar', $props);
         $this->assertSame(['bar'], $page->mergeProps);
     }
 
