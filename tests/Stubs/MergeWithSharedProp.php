@@ -3,14 +3,14 @@
 namespace Inertia\Tests\Stubs;
 
 use Inertia\Inertia;
-use Inertia\InertiaResponsable;
-use Inertia\Prop;
+use Inertia\PropContext;
+use Inertia\ProvidesInertiaProp;
 
-class MergeWithSharedProp implements InertiaResponsable
+class MergeWithSharedProp implements ProvidesInertiaProp
 {
     public function __construct(protected array $items = []) {}
 
-    public function toInertiaResponse(Prop $prop): mixed
+    public function toInertiaProp(PropContext $prop): mixed
     {
         return array_merge(Inertia::getShared($prop->key, []), $this->items);
     }
