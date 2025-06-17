@@ -11,6 +11,9 @@ class ReloadRequest
 {
     use MakesHttpRequests;
 
+    /**
+     * Create a new Inertia reload request instance.
+     */
     public function __construct(
         protected string $url,
         protected string $component,
@@ -22,6 +25,9 @@ class ReloadRequest
         $this->app ??= app();
     }
 
+    /**
+     * Request the Inertia page as a partial reload.
+     */
     public function __invoke(): TestResponse
     {
         $headers = [Header::VERSION => $this->version];

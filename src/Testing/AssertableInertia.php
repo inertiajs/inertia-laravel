@@ -82,6 +82,9 @@ class AssertableInertia extends AssertableJson
         return $this;
     }
 
+    /**
+     * Reload the Inertia page and perform assertions on the response.
+     */
     public function reload(?Closure $callback = null, array|string|null $only = null, array|string|null $except = null): self
     {
         if (is_array($only)) {
@@ -114,6 +117,9 @@ class AssertableInertia extends AssertableJson
         return $this;
     }
 
+    /**
+     * Reload the Inertia page as a partial request with only the specified props.
+     */
     public function reloadOnly(array|string $only, ?Closure $callback = null): self
     {
         return $this->reload(only: $only, callback: function (AssertableInertia $assertable) use ($only, $callback) {
@@ -125,6 +131,9 @@ class AssertableInertia extends AssertableJson
         });
     }
 
+    /**
+     * Reload the Inertia page as a partial request excluding the specified props.
+     */
     public function reloadExcept(array|string $except, ?Closure $callback = null): self
     {
         return $this->reload(except: $except, callback: function (AssertableInertia $assertable) use ($except, $callback) {
