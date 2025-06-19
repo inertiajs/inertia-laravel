@@ -17,6 +17,8 @@ use Inertia\Inertia;
 use Inertia\LazyProp;
 use Inertia\MergeProp;
 use Inertia\OptionalProp;
+use Inertia\ProvidesInertiaProps;
+use Inertia\RenderContext;
 use Inertia\ResponseFactory;
 use Inertia\Tests\Stubs\ExampleMiddleware;
 
@@ -335,6 +337,32 @@ class ResponseFactoryTest extends TestCase
             return Inertia::render('User/Edit', new class implements Arrayable
             {
                 public function toArray()
+                {
+                    return [
+                        'foo' => 'bar',
+                    ];
+                }
+            });
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Edit',
+            'props' => [
+                'foo' => 'bar',
+            ],
+        ]);
+    }
+
+    public function test_will_accept_instances_of_provides_inertia_props()
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            Inertia::share('foo', 'bar');
+
+            return Inertia::render('User/Edit', new class implements ProvidesInertiaProps
+            {
+                public function toInertiaProps(RenderContext $context): iterable
                 {
                     return [
                         'foo' => 'bar',
