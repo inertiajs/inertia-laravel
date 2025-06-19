@@ -157,9 +157,7 @@ class ResponseFactory
     {
         if ($props instanceof Arrayable) {
             $props = $props->toArray();
-        }
-
-        if ($props instanceof ProvidesInertiaProps) {
+        } elseif ($props instanceof ProvidesInertiaProps) {
             // Will be resolved in Response::resolveResponsableProperties()
             $props = [$props];
         }
