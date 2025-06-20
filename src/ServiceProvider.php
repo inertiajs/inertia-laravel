@@ -68,6 +68,7 @@ class ServiceProvider extends BaseServiceProvider
             Commands\CreateMiddleware::class,
             Commands\StartSsr::class,
             Commands\StopSsr::class,
+            Commands\CheckSsr::class,
         ]);
     }
 

@@ -9,11 +9,14 @@ class HttpGatewayTest extends TestCase
 {
     protected HttpGateway $gateway;
 
+    protected string $renderUrl;
+
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->gateway = new HttpGateway;
+        $this->renderUrl = $this->gateway->getUrl('render');
 
         Http::preventStrayRequests();
     }
@@ -46,7 +49,7 @@ class HttpGatewayTest extends TestCase
         ]);
 
         Http::fake([
-            $this->gateway->getHttpUrl() => Http::response(json_encode([
+            $this->renderUrl => Http::response(json_encode([
                 'head' => ['<title>SSR Test</title>', '<style></style>'],
                 'body' => '<div id="app">SSR Response</div>',
             ])),
@@ -69,7 +72,7 @@ class HttpGatewayTest extends TestCase
         ]);
 
         Http::fake([
-            $this->gateway->getHttpUrl() => Http::response(json_encode([
+            $this->renderUrl => Http::response(json_encode([
                 'head' => ['<title>SSR Test</title>', '<style></style>'],
                 'body' => '<div id="app">SSR Response</div>',
             ])),
@@ -91,7 +94,7 @@ class HttpGatewayTest extends TestCase
         ]);
 
         Http::fake([
-            $this->gateway->getHttpUrl() => Http::response(null, 500),
+            $this->renderUrl => Http::response(null, 500),
         ]);
 
         $this->assertNull($this->gateway->dispatch(['page' => self::EXAMPLE_PAGE_OBJECT]));
@@ -105,9 +108,21 @@ class HttpGatewayTest extends TestCase
         ]);
 
         Http::fake([
-            $this->gateway->getHttpUrl() => Http::response('invalid json'),
+            $this->renderUrl => Http::response('invalid json'),
         ]);
 
         $this->assertNull($this->gateway->dispatch(['page' => self::EXAMPLE_PAGE_OBJECT]));
+    }
+
+    public function test_health_check_the_ssr_server()
+    {
+        Http::fake([
+            $this->gateway->getUrl('health') => Http::sequence()
+                ->push(status: 200)
+                ->push(status: 500),
+        ]);
+
+        $this->assertTrue($this->gateway->isHealthy());
+        $this->assertFalse($this->gateway->isHealthy());
     }
 }
