@@ -210,8 +210,8 @@ class ResponseTest extends TestCase
             'User/Edit',
             [
                 'user' => $user,
-                'foo' => (new MergeProp('foo value', ['foo-key']))->deepMerge(),
-                'bar' => (new MergeProp('bar value', ['bar-key']))->deepMerge(),
+                'foo' => (new MergeProp('foo value'))->matchOn('foo-key')->deepMerge(),
+                'bar' => (new MergeProp('bar value'))->matchOn('bar-key')->deepMerge(),
             ],
             'app',
             '123'
@@ -231,13 +231,14 @@ class ResponseTest extends TestCase
             'foo',
             'bar',
         ], $page['deepMergeProps']);
+
         $this->assertSame([
             'foo.foo-key',
             'bar.bar-key',
-        ], $page['mergeStrategies']);
+        ], $page['matchPropsOn']);
         $this->assertFalse($page['clearHistory']);
         $this->assertFalse($page['encryptHistory']);
-        $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;user&quot;:{&quot;name&quot;:&quot;Jonathan&quot;},&quot;foo&quot;:&quot;foo value&quot;,&quot;bar&quot;:&quot;bar value&quot;},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;,&quot;clearHistory&quot;:false,&quot;encryptHistory&quot;:false,&quot;deepMergeProps&quot;:[&quot;foo&quot;,&quot;bar&quot;],&quot;mergeStrategies&quot;:[&quot;foo.foo-key&quot;,&quot;bar.bar-key&quot;]}"></div>', $view->render());
+        $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;user&quot;:{&quot;name&quot;:&quot;Jonathan&quot;},&quot;foo&quot;:&quot;foo value&quot;,&quot;bar&quot;:&quot;bar value&quot;},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;,&quot;clearHistory&quot;:false,&quot;encryptHistory&quot;:false,&quot;deepMergeProps&quot;:[&quot;foo&quot;,&quot;bar&quot;],&quot;matchPropsOn&quot;:[&quot;foo.foo-key&quot;,&quot;bar.bar-key&quot;]}"></div>', $view->render());
     }
 
     public function test_server_response_with_defer_and_merge_props(): void
