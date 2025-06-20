@@ -142,12 +142,10 @@ class ResponseFactory
 
     /**
      * @param  mixed  $value
-     *
-     * @parram null|string|string[]  $mergeStrategies
      */
-    public function deepMerge($value, $mergeStrategies = null): MergeProp
+    public function deepMerge($value): MergeProp
     {
-        return (new MergeProp($value, Arr::wrap($mergeStrategies)))->deepMerge();
+        return (new MergeProp($value))->deepMerge();
     }
 
     /**
