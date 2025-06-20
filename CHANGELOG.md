@@ -1,8 +1,19 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v1.3.2...1.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v1.3.3...1.x)
 
 - Nothing yet!
+
+## [v1.3.3](https://github.com/inertiajs/inertia-laravel/compare/v1.3.2...v1.3.3) - 2025-06-06
+
+### What's Changed
+
+* [1.x] Supports Laravel 12 by [@crynobone](https://github.com/crynobone) in https://github.com/inertiajs/inertia-laravel/pull/708
+* Update versioning in middleware by [@RobertBoes](https://github.com/RobertBoes) in https://github.com/inertiajs/inertia-laravel/pull/658
+* [1.x] Run tests on Ubuntu 24.04 by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/742
+* [1.x] Remove IDE helpers by [@ycs77](https://github.com/ycs77) in https://github.com/inertiajs/inertia-laravel/pull/740
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v1.3.2...v1.3.3
 
 ## [v1.3.2](https://github.com/inertiajs/inertia-laravel/compare/v1.3.1...v1.3.2) - 2024-12-05
 
