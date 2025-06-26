@@ -14,20 +14,12 @@ class HttpGateway implements Gateway, HasHealthCheck
      */
     public function dispatch(array $page): ?Response
     {
-        if (! config('inertia.ssr.enabled', true)) {
-            return null;
-        }
-
-        if (! $this->shouldDispatchWithoutBundle() && ! $this->bundleExists()) {
-            return null;
-        }
-
-        if (! $url = $this->getUrl('/render')) {
+        if (! $this->shouldDispatch()) {
             return null;
         }
 
         try {
-            $response = Http::post($url, $page)->throw()->json();
+            $response = Http::post($this->getUrl('/render'), $page)->throw()->json();
         } catch (Exception $e) {
             if ($e instanceof StrayRequestException) {
                 throw $e;
@@ -44,6 +36,22 @@ class HttpGateway implements Gateway, HasHealthCheck
             implode("\n", $response['head']),
             $response['body']
         );
+    }
+
+    /**
+     * Determine if the page should be dispatched to the SSR engine.
+     */
+    protected function shouldDispatch(): bool
+    {
+        return $this->ssrIsEnabled() && ($this->shouldDispatchWithoutBundle() || $this->bundleExists());
+    }
+
+    /**
+     * Determine if the SSR feature is enabled.
+     */
+    protected function ssrIsEnabled(): bool
+    {
+        return config('inertia.ssr.enabled', true);
     }
 
     /**
@@ -73,7 +81,7 @@ class HttpGateway implements Gateway, HasHealthCheck
     /**
      * Get the SSR URL from the configuration, ensuring it ends with '/{$path}'.
      */
-    public function getUrl(string $path): ?string
+    public function getUrl(string $path): string
     {
         $path = Str::start($path, '/');
 
