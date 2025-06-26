@@ -43,7 +43,6 @@ return [
     | The `page_paths` and `page_extensions` options define where to look
     | for page components and which file extensions to consider.
     |
-    |
     */
 
     'ensure_pages_exist' => false,
