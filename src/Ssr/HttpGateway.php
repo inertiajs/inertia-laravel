@@ -5,8 +5,9 @@ namespace Inertia\Ssr;
 use Exception;
 use Illuminate\Http\Client\StrayRequestException;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
-class HttpGateway implements Gateway
+class HttpGateway implements Gateway, HasHealthCheck
 {
     /**
      * Dispatch the Inertia page to the Server Side Rendering engine.
@@ -21,7 +22,7 @@ class HttpGateway implements Gateway
             return null;
         }
 
-        if (! $url = $this->getHttpUrl()) {
+        if (! $url = $this->getUrl('/render')) {
             return null;
         }
 
@@ -46,6 +47,14 @@ class HttpGateway implements Gateway
     }
 
     /**
+     * Determine if the SSR server is healthy.
+     */
+    public function isHealthy(): bool
+    {
+        return Http::get($this->getUrl('/health'))->successful();
+    }
+
+    /**
      * Determine if dispatch should proceed even if no bundle is detected.
      */
     protected function shouldDispatchWithoutBundle(): bool
@@ -62,10 +71,12 @@ class HttpGateway implements Gateway
     }
 
     /**
-     * Get the SSR URL from the configuration, ensuring it ends with '/render'.
+     * Get the SSR URL from the configuration, ensuring it ends with '/{$path}'.
      */
-    public function getHttpUrl(): ?string
+    public function getUrl(string $path): ?string
     {
-        return str_replace('/render', '', rtrim(config('inertia.ssr.url', 'http://127.0.0.1:13714'), '/')).'/render';
+        $path = Str::start($path, '/');
+
+        return str_replace($path, '', rtrim(config('inertia.ssr.url', 'http://127.0.0.1:13714'), '/')).$path;
     }
 }
