@@ -63,11 +63,11 @@ class HttpGatewayTest extends TestCase
         $this->assertEquals('<div id="app">SSR Response</div>', $response->body);
     }
 
-    public function test_it_uses_the_configured_http_url__when_bundle_file_detection_is_disabled()
+    public function test_it_uses_the_configured_http_url_when_bundle_file_detection_is_disabled()
     {
         config([
             'inertia.ssr.enabled' => true,
-            'inertia.ssr.dispatch_without_bundle' => true,
+            'inertia.ssr.ensure_bundle_exists' => false,
             'inertia.ssr.bundle' => null,
         ]);
 
