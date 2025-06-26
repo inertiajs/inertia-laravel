@@ -67,7 +67,7 @@ class HttpGateway implements Gateway, HasHealthCheck
      */
     protected function shouldDispatchWithoutBundle(): bool
     {
-        return config('inertia.ssr.dispatch_without_bundle', false);
+        return ! config('inertia.ssr.ensure_bundle_exists', true);
     }
 
     /**
