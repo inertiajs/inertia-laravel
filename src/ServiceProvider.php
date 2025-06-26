@@ -43,8 +43,8 @@ class ServiceProvider extends BaseServiceProvider
         $this->app->bind('inertia.testing.view-finder', function ($app) {
             return new FileViewFinder(
                 $app['files'],
-                $app['config']->get('inertia.testing.page_paths', fn () => $app['config']->get('inertia.page_paths')),
-                $app['config']->get('inertia.testing.page_extensions', fn () => $app['config']->get('inertia.page_extensions'))
+                $app['config']->get('inertia.testing.page_paths'),
+                $app['config']->get('inertia.testing.page_extensions')
             );
         });
     }
