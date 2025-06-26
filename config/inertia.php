@@ -36,9 +36,12 @@ return [
     | Pages
     |--------------------------------------------------------------------------
     |
-    | If you want to ensure that the pages exist, you can set `ensure_pages_exist` to true.
-    | This will throw an exception if the component does not exist on the filesystem
-    | when rendering a page. You may configure this separately for testing.
+    | Set `ensure_pages_exist` to true if you want to enforce that Inertia page
+    | components exist on disk when rendering a page. This is useful for
+    | catching missing or misnamed components.
+    |
+    | The `page_paths` and `page_extensions` options define where to look
+    | for page components and which file extensions to consider.
     |
     */
 
@@ -71,15 +74,32 @@ return [
     | attempts to locate the component as a file relative to any of the
     | paths AND with any of the extensions specified here.
     |
-    | By default, it uses the `page_paths` and `page_extensions` settings
-    | defined above. You may override these values for testing purposes
-    | by adding these two keys to this `testing` array.
+    | Note: In a future release, the `page_paths` and `page_extensions`
+    | options below will be removed. The root-level options above
+    | will be used for both application and testing purposes.
     |
     */
 
     'testing' => [
 
         'ensure_pages_exist' => true,
+
+        'page_paths' => [
+
+            resource_path('js/Pages'),
+
+        ],
+
+        'page_extensions' => [
+
+            'js',
+            'jsx',
+            'svelte',
+            'ts',
+            'tsx',
+            'vue',
+
+        ],
 
     ],
 
