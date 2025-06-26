@@ -12,6 +12,7 @@ use Illuminate\Session\Store;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\AlwaysProp;
+use Inertia\ComponentNotFoundException;
 use Inertia\DeferProp;
 use Inertia\Inertia;
 use Inertia\LazyProp;
@@ -375,5 +376,23 @@ class ResponseFactoryTest extends TestCase
                 'foo' => 'bar',
             ],
         ]);
+    }
+
+    public function test_will_throw_exception_if_component_does_not_exist_when_ensuring_is_enabled(): void
+    {
+        config()->set('inertia.ensure_pages_exist', true);
+
+        $this->expectException(ComponentNotFoundException::class);
+        $this->expectExceptionMessage('Inertia page component [foo] not found.');
+
+        (new ResponseFactory)->render('foo');
+    }
+
+    public function test_will_not_throw_exception_if_component_does_not_exist_when_ensuring_is_disabled(): void
+    {
+        config()->set('inertia.ensure_pages_exist', false);
+
+        $response = (new ResponseFactory)->render('foo');
+        $this->assertInstanceOf(\Inertia\Response::class, $response);
     }
 }

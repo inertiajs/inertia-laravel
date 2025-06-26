@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response as BaseResponse;
 use Illuminate\Support\Traits\Macroable;
 use Inertia\Support\Header;
+use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirect;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
@@ -157,10 +158,26 @@ class ResponseFactory
     }
 
     /**
+     * @throws ComponentNotFoundException
+     */
+    protected function findComponentOrFail(string $component): void
+    {
+        try {
+            app('inertia.view-finder')->find($component);
+        } catch (InvalidArgumentException) {
+            throw new ComponentNotFoundException("Inertia page component [{$component}] not found.");
+        }
+    }
+
+    /**
      * @param  array|Arrayable  $props
      */
     public function render(string $component, $props = []): Response
     {
+        if (config('inertia.ensure_pages_exist', false)) {
+            $this->findComponentOrFail($component);
+        }
+
         if ($props instanceof Arrayable) {
             $props = $props->toArray();
         }
