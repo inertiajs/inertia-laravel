@@ -48,7 +48,7 @@ class Middleware
      *
      * @see https://inertiajs.com/shared-data
      *
-     * @return array
+     * @return array<string, mixed>
      */
     public function share(Request $request)
     {
