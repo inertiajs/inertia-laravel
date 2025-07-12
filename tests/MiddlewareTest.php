@@ -12,6 +12,7 @@ use Illuminate\Support\ViewErrorBag;
 use Inertia\AlwaysProp;
 use Inertia\Inertia;
 use Inertia\Middleware;
+use Inertia\Tests\Stubs\CustomOncePropsResolverMiddleware;
 use Inertia\Tests\Stubs\CustomUrlResolverMiddleware;
 use Inertia\Tests\Stubs\ExampleMiddleware;
 use LogicException;
@@ -144,6 +145,19 @@ class MiddlewareTest extends TestCase
             'component' => 'User/Edit',
             'url' => '/my-custom-url',
         ]);
+    }
+
+    public function test_the_once_props_can_be_resolved_with_a_custom_resolver()
+    {
+        $this->prepareMockEndpoint(middleware: new CustomOncePropsResolverMiddleware);
+
+        $response = $this->withoutExceptionHandling()->get('/');
+
+        $response->assertSuccessful();
+        $this->assertSame(
+            '<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;errors&quot;:{},&quot;user&quot;:{&quot;name&quot;:&quot;Jonathan&quot;}},&quot;url&quot;:&quot;\/&quot;,&quot;version&quot;:&quot;&quot;,&quot;clearHistory&quot;:false,&quot;encryptHistory&quot;:false,&quot;onceProps&quot;:{&quot;once&quot;:true,&quot;appName&quot;:&quot;test&quot;}}"></div>',
+            $response->content(),
+        );
     }
 
     public function test_validation_errors_are_registered_as_of_default(): void

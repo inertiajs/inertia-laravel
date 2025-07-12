@@ -388,7 +388,7 @@ class Response implements Responsable
             ? App::call($this->oncePropsResolver, ['request' => $request])
             : [];
 
-        return ['onceProps' => $onceProps];
+        return empty($onceProps) ? [] : ['onceProps' => $onceProps];
     }
 
     /**
