@@ -38,6 +38,8 @@ class Response implements Responsable
 
     protected ?Closure $urlResolver = null;
 
+    protected ?Closure $oncePropsResolver = null;
+
     /**
      * @param  array|Arrayable  $props
      */
@@ -47,7 +49,8 @@ class Response implements Responsable
         string $rootView = 'app',
         string $version = '',
         bool $encryptHistory = false,
-        ?Closure $urlResolver = null
+        ?Closure $urlResolver = null,
+        ?Closure $oncePropsResolver = null,
     ) {
         $this->component = $component;
         $this->props = $props instanceof Arrayable ? $props->toArray() : $props;
@@ -56,6 +59,7 @@ class Response implements Responsable
         $this->clearHistory = session()->pull('inertia.clear_history', false);
         $this->encryptHistory = $encryptHistory;
         $this->urlResolver = $urlResolver;
+        $this->oncePropsResolver = $oncePropsResolver;
     }
 
     /**
@@ -131,6 +135,8 @@ class Response implements Responsable
         if ($request->header(Header::INERTIA)) {
             return new JsonResponse($page, 200, [Header::INERTIA => 'true']);
         }
+
+        $page += $this->resolveOnceProps($request);
 
         return ResponseFactory::view($this->rootView, $this->viewData + ['page' => $page]);
     }
@@ -374,6 +380,15 @@ class Response implements Responsable
             ->pluck('key');
 
         return $deferredProps->isNotEmpty() ? ['deferredProps' => $deferredProps->toArray()] : [];
+    }
+
+    public function resolveOnceProps(Request $request): array
+    {
+        $onceProps = $this->oncePropsResolver
+            ? App::call($this->oncePropsResolver, ['request' => $request])
+            : [];
+
+        return ['onceProps' => $onceProps];
     }
 
     /**

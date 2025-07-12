@@ -35,7 +35,10 @@ class ResponseFactory
     /** @var Closure|null */
     protected $urlResolver;
 
-    /***
+    /** @var Closure|null */
+    protected $oncePropsResolver;
+
+    /**
      * @param string $name The name of the root view
      * @return void
      */
@@ -100,6 +103,11 @@ class ResponseFactory
     public function resolveUrlUsing(?Closure $urlResolver = null): void
     {
         $this->urlResolver = $urlResolver;
+    }
+
+    public function resolveOncePropsUsing(?Closure $oncePropsResolver = null): void
+    {
+        $this->oncePropsResolver = $oncePropsResolver;
     }
 
     public function clearHistory(): void
@@ -189,6 +197,7 @@ class ResponseFactory
             $this->getVersion(),
             $this->encryptHistory ?? config('inertia.history.encrypt', false),
             $this->urlResolver,
+            $this->oncePropsResolver,
         );
     }
 

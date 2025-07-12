@@ -80,6 +80,16 @@ class Middleware
     }
 
     /**
+     * Defines the props that are shared for one time.
+     *
+     * @return Closure|null
+     */
+    public function oncePropsResolver()
+    {
+        return null;
+    }
+
+    /**
      * Handle the incoming request.
      *
      * @return Response
@@ -95,6 +105,10 @@ class Middleware
 
         if ($urlResolver = $this->urlResolver()) {
             Inertia::resolveUrlUsing($urlResolver);
+        }
+
+        if ($oncePropsResolver = $this->oncePropsResolver()) {
+            Inertia::resolveOncePropsUsing($oncePropsResolver);
         }
 
         $response = $next($request);

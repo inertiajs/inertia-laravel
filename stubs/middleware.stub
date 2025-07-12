@@ -40,4 +40,16 @@ class {{ class }} extends Middleware
             //
         ];
     }
+
+    /**
+     * Defines the props that are shared for one time.
+     *
+     * @return Closure
+     */
+    public function oncePropsResolver()
+    {
+        return function (Request $request): array {
+            return [];
+        };
+    }
 }
