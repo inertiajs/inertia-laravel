@@ -3,14 +3,10 @@
 if (! function_exists('inertia')) {
     /**
      * Inertia helper.
-     *
-     * @param  null|string  $component
-     * @param  array|\Illuminate\Contracts\Support\Arrayable  $props
-     * @return \Inertia\ResponseFactory|\Inertia\Response
      */
-    function inertia($component = null, $props = [])
+    function inertia(?string $component = null, array|Illuminate\Contracts\Support\Arrayable $props = []): Inertia\ResponseFactory|Inertia\Response
     {
-        $instance = \Inertia\Inertia::getFacadeRoot();
+        $instance = Inertia\Inertia::getFacadeRoot();
 
         if ($component) {
             return $instance->render($component, $props);
@@ -23,13 +19,10 @@ if (! function_exists('inertia')) {
 if (! function_exists('inertia_location')) {
     /**
      * Inertia location helper.
-     *
-     * @param  string  url
-     * @return \Symfony\Component\HttpFoundation\Response
      */
-    function inertia_location($url)
+    function inertia_location(string $url): Symfony\Component\HttpFoundation\Response
     {
-        $instance = \Inertia\Inertia::getFacadeRoot();
+        $instance = Inertia\Inertia::getFacadeRoot();
 
         return $instance->location($url);
     }

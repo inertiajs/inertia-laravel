@@ -9,17 +9,17 @@ use PHPUnit\Framework\Assert as PHPUnit;
 
 trait Has
 {
-    protected function count(string $key, int $length): self
-    {
-        PHPUnit::assertCount(
-            $length,
-            $this->prop($key),
-            sprintf('Inertia property [%s] does not have the expected size.', $this->dotPath($key))
-        );
+    abstract protected function prop(?string $key = null);
 
-        return $this;
-    }
+    abstract protected function dotPath(string $key): string;
 
+    abstract protected function interactsWith(string $key): void;
+
+    abstract protected function scope(string $key, Closure $callback);
+
+    /**
+     * Assert that all specified properties exist.
+     */
     public function hasAll($key): self
     {
         $keys = is_array($key) ? $key : func_get_args();
@@ -36,10 +36,9 @@ trait Has
     }
 
     /**
-     * @param  mixed  $value
-     * @return $this
+     * Assert that a property exists and optionally has a specific value or count.
      */
-    public function has(string $key, $value = null, ?Closure $scope = null): self
+    public function has(string $key, mixed $value = null, ?Closure $scope = null): self
     {
         PHPUnit::assertTrue(
             Arr::has($this->prop(), $key),
@@ -72,6 +71,9 @@ trait Has
         return $this;
     }
 
+    /**
+     * Assert that all specified properties are missing.
+     */
     public function missingAll($key): self
     {
         $keys = is_array($key) ? $key : func_get_args();
@@ -83,6 +85,9 @@ trait Has
         return $this;
     }
 
+    /**
+     * Assert that a property is missing.
+     */
     public function missing(string $key): self
     {
         $this->interactsWith($key);
@@ -95,6 +100,9 @@ trait Has
         return $this;
     }
 
+    /**
+     * Alias for missingAll method.
+     */
     public function missesAll($key): self
     {
         return $this->missingAll(
@@ -102,16 +110,25 @@ trait Has
         );
     }
 
+    /**
+     * Alias for missing method.
+     */
     public function misses(string $key): self
     {
         return $this->missing($key);
     }
 
-    abstract protected function prop(?string $key = null);
+    /**
+     * Assert that a property has a specific count.
+     */
+    protected function count(string $key, int $length): self
+    {
+        PHPUnit::assertCount(
+            $length,
+            $this->prop($key),
+            sprintf('Inertia property [%s] does not have the expected size.', $this->dotPath($key))
+        );
 
-    abstract protected function dotPath(string $key): string;
-
-    abstract protected function interactsWith(string $key): void;
-
-    abstract protected function scope(string $key, Closure $callback);
+        return $this;
+    }
 }

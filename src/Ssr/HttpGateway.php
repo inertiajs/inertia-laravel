@@ -39,6 +39,24 @@ class HttpGateway implements Gateway, HasHealthCheck
     }
 
     /**
+     * Determine if the SSR server is healthy.
+     */
+    public function isHealthy(): bool
+    {
+        return Http::get($this->getUrl('/health'))->successful();
+    }
+
+    /**
+     * Get the SSR URL from the configuration, ensuring it ends with '/{$path}'.
+     */
+    public function getUrl(string $path): string
+    {
+        $path = Str::start($path, '/');
+
+        return str_replace($path, '', mb_rtrim(config('inertia.ssr.url', 'http://127.0.0.1:13714'), '/')).$path;
+    }
+
+    /**
      * Determine if the page should be dispatched to the SSR engine.
      */
     protected function shouldDispatch(): bool
@@ -55,14 +73,6 @@ class HttpGateway implements Gateway, HasHealthCheck
     }
 
     /**
-     * Determine if the SSR server is healthy.
-     */
-    public function isHealthy(): bool
-    {
-        return Http::get($this->getUrl('/health'))->successful();
-    }
-
-    /**
      * Determine if dispatch should proceed even if no bundle is detected.
      */
     protected function shouldDispatchWithoutBundle(): bool
@@ -76,15 +86,5 @@ class HttpGateway implements Gateway, HasHealthCheck
     protected function bundleExists(): bool
     {
         return (new BundleDetector)->detect() !== null;
-    }
-
-    /**
-     * Get the SSR URL from the configuration, ensuring it ends with '/{$path}'.
-     */
-    public function getUrl(string $path): string
-    {
-        $path = Str::start($path, '/');
-
-        return str_replace($path, '', rtrim(config('inertia.ssr.url', 'http://127.0.0.1:13714'), '/')).$path;
     }
 }

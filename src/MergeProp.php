@@ -8,20 +8,25 @@ class MergeProp implements Mergeable
 {
     use MergesProps;
 
-    /** @var mixed */
-    protected $value;
-
     /**
-     * @param  mixed  $value
+     * Create a new merge property instance.
      */
-    public function __construct($value)
-    {
-        $this->value = $value;
+    public function __construct(
+        protected mixed $value,
+    ) {
         $this->merge = true;
     }
 
+    /**
+     * Invoke the property to get its value.
+     *
+     * If the value is callable, it will be executed and the result returned.
+     * Otherwise, the value itself is returned.
+     */
     public function __invoke()
     {
-        return is_callable($this->value) ? App::call($this->value) : $this->value;
+        return is_callable($this->value)
+            ? App::call($this->value)
+            : $this->value;
     }
 }

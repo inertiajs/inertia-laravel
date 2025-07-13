@@ -20,50 +20,27 @@ class Response implements Responsable
 {
     use Macroable;
 
-    protected $component;
-
     protected $props;
 
-    protected $rootView;
-
-    protected $version;
-
     protected $clearHistory;
-
-    protected $encryptHistory;
 
     protected $viewData = [];
 
     protected $cacheFor = [];
 
-    protected ?Closure $urlResolver = null;
-
-    /**
-     * @param  array|Arrayable  $props
-     */
     public function __construct(
-        string $component,
-        array $props,
-        string $rootView = 'app',
-        string $version = '',
-        bool $encryptHistory = false,
-        ?Closure $urlResolver = null
+        protected string $component,
+        array|Arrayable $props,
+        protected string $rootView = 'app',
+        protected string $version = '',
+        protected bool $encryptHistory = false,
+        protected ?Closure $urlResolver = null
     ) {
-        $this->component = $component;
         $this->props = $props instanceof Arrayable ? $props->toArray() : $props;
-        $this->rootView = $rootView;
-        $this->version = $version;
         $this->clearHistory = session()->pull('inertia.clear_history', false);
-        $this->encryptHistory = $encryptHistory;
-        $this->urlResolver = $urlResolver;
     }
 
-    /**
-     * @param  string|array  $key
-     * @param  mixed  $value
-     * @return $this
-     */
-    public function with($key, $value = null): self
+    public function with(string|array $key, mixed $value = null): self
     {
         if (is_array($key)) {
             $this->props = array_merge($this->props, $key);
@@ -74,12 +51,7 @@ class Response implements Responsable
         return $this;
     }
 
-    /**
-     * @param  string|array  $key
-     * @param  mixed  $value
-     * @return $this
-     */
-    public function withViewData($key, $value = null): self
+    public function withViewData(string|array $key, mixed $value = null): self
     {
         if (is_array($key)) {
             $this->viewData = array_merge($this->viewData, $key);
@@ -107,7 +79,7 @@ class Response implements Responsable
     /**
      * Create an HTTP response that represents the object.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function toResponse($request)
@@ -136,7 +108,7 @@ class Response implements Responsable
     }
 
     /**
-     * Resolve the properites for the response.
+     * Resolve the properties for the response.
      */
     public function resolveProperties(Request $request, array $props): array
     {
@@ -180,7 +152,7 @@ class Response implements Responsable
     }
 
     /**
-     * Resolve all arrayables properties into an array.
+     * Resolve all arrayable properties into an array.
      */
     public function resolveArrayableProperties(array $props, Request $request, bool $unpackDotProps = true): array
     {
@@ -241,9 +213,10 @@ class Response implements Responsable
      */
     public function resolveAlways(array $props): array
     {
-        $always = array_filter($this->props, static function ($prop) {
-            return $prop instanceof AlwaysProp;
-        });
+        $always = array_filter(
+            $this->props,
+            static fn ($prop): bool => $prop instanceof AlwaysProp,
+        );
 
         return array_merge(
             $always,
@@ -311,7 +284,7 @@ class Response implements Responsable
                     return $value->totalSeconds;
                 }
 
-                return intval($value);
+                return (int) $value;
             }),
         ];
     }
@@ -334,11 +307,11 @@ class Response implements Responsable
             ->keys();
 
         $matchPropsOn = $mergeProps
-            ->map(function ($prop, $key) {
-                return collect($prop->matchesOn())
+            ->map(
+                fn ($prop, $key) => collect($prop->matchesOn())
                     ->map(fn ($strategy) => $key.'.'.$strategy)
-                    ->toArray();
-            })
+                    ->toArray()
+            )
             ->flatten()
             ->values();
 
@@ -360,15 +333,11 @@ class Response implements Responsable
         }
 
         $deferredProps = collect($this->props)
-            ->filter(function ($prop) {
-                return $prop instanceof DeferProp;
-            })
-            ->map(function ($prop, $key) {
-                return [
-                    'key' => $key,
-                    'group' => $prop->group(),
-                ];
-            })
+            ->filter(fn ($prop) => $prop instanceof DeferProp)
+            ->map(fn ($prop, $key) => [
+                'key' => $key,
+                'group' => $prop->group(),
+            ])
             ->groupBy('group')
             ->map
             ->pluck('key');

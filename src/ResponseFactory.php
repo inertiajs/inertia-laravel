@@ -19,25 +19,20 @@ class ResponseFactory
 {
     use Macroable;
 
-    /** @var string */
-    protected $rootView = 'app';
+    protected string $rootView = 'app';
 
-    /** @var array */
-    protected $sharedProps = [];
+    protected array $sharedProps = [];
 
-    /** @var Closure|string|null */
-    protected $version;
+    protected Closure|string|null $version;
 
-    protected $clearHistory = false;
+    protected bool $clearHistory = false;
 
-    protected $encryptHistory;
+    protected bool $encryptHistory;
 
-    /** @var Closure|null */
-    protected $urlResolver;
+    protected ?Closure $urlResolver;
 
-    /***
-     * @param string $name The name of the root view
-     * @return void
+    /**
+     * For set the root view.
      */
     public function setRootView(string $name): void
     {
@@ -45,10 +40,9 @@ class ResponseFactory
     }
 
     /**
-     * @param  string|array|Arrayable  $key
-     * @param  mixed  $value
+     * Share data with all Inertia responses.
      */
-    public function share($key, $value = null): void
+    public function share(string|array|Arrayable $key, mixed $value = null): void
     {
         if (is_array($key)) {
             $this->sharedProps = array_merge($this->sharedProps, $key);
@@ -60,10 +54,9 @@ class ResponseFactory
     }
 
     /**
-     * @param  mixed  $default
-     * @return mixed
+     * Get shared data by key or all shared data.
      */
-    public function getShared(?string $key = null, $default = null)
+    public function getShared(?string $key = null, mixed $default = null): mixed
     {
         if ($key) {
             return Arr::get($this->sharedProps, $key, $default);
@@ -73,21 +66,24 @@ class ResponseFactory
     }
 
     /**
-     * @return void
+     * Clear all shared data.
      */
-    public function flushShared()
+    public function flushShared(): void
     {
         $this->sharedProps = [];
     }
 
     /**
-     * @param  Closure|string|null  $version
+     * Set the asset version for cache busting.
      */
-    public function version($version): void
+    public function version(Closure|string|null $version): void
     {
         $this->version = $version;
     }
 
+    /**
+     * Get the current asset version.
+     */
     public function getVersion(): string
     {
         $version = $this->version instanceof Closure
@@ -97,25 +93,33 @@ class ResponseFactory
         return (string) $version;
     }
 
+    /**
+     * Set a custom URL resolver for Inertia responses.
+     */
     public function resolveUrlUsing(?Closure $urlResolver = null): void
     {
         $this->urlResolver = $urlResolver;
     }
 
+    /**
+     * Clear the browser history on the next response.
+     */
     public function clearHistory(): void
     {
         session(['inertia.clear_history' => true]);
     }
 
     /**
-     * @param  bool  $encrypt
+     * Enable or disable history encryption for sensitive data.
      */
-    public function encryptHistory($encrypt = true): void
+    public function encryptHistory(bool $encrypt = true): void
     {
         $this->encryptHistory = $encrypt;
     }
 
     /**
+     * Create a lazy-loaded property that only loads on subsequent requests.
+     *
      * @deprecated Use `optional` instead.
      */
     public function lazy(callable $callback): LazyProp
@@ -123,56 +127,52 @@ class ResponseFactory
         return new LazyProp($callback);
     }
 
+    /**
+     * Create an optional property that only loads when explicitly requested.
+     */
     public function optional(callable $callback): OptionalProp
     {
         return new OptionalProp($callback);
     }
 
+    /**
+     * Create a deferred property that loads after the initial page load.
+     */
     public function defer(callable $callback, string $group = 'default'): DeferProp
     {
         return new DeferProp($callback, $group);
     }
 
     /**
-     * @param  mixed  $value
+     * Create a property that merges with existing data.
      */
-    public function merge($value): MergeProp
+    public function merge(mixed $value): MergeProp
     {
         return new MergeProp($value);
     }
 
     /**
-     * @param  mixed  $value
+     * Create a property that deeply merges with existing data.
      */
-    public function deepMerge($value): MergeProp
+    public function deepMerge(mixed $value): MergeProp
     {
         return (new MergeProp($value))->deepMerge();
     }
 
     /**
-     * @param  mixed  $value
+     * Create a property that is always included in responses.
      */
-    public function always($value): AlwaysProp
+    public function always(mixed $value): AlwaysProp
     {
         return new AlwaysProp($value);
     }
 
     /**
-     * @throws ComponentNotFoundException
+     * Render an Inertia response for the given component.
+     *
+     * @throws ComponentNotFoundException If the component doesn't exist and ensure_pages_exist is enabled
      */
-    protected function findComponentOrFail(string $component): void
-    {
-        try {
-            app('inertia.view-finder')->find($component);
-        } catch (InvalidArgumentException) {
-            throw new ComponentNotFoundException("Inertia page component [{$component}] not found.");
-        }
-    }
-
-    /**
-     * @param  array|Arrayable  $props
-     */
-    public function render(string $component, $props = []): Response
+    public function render(string $component, array|Arrayable $props = []): Response
     {
         if (config('inertia.ensure_pages_exist', false)) {
             $this->findComponentOrFail($component);
@@ -193,14 +193,34 @@ class ResponseFactory
     }
 
     /**
-     * @param  string|SymfonyRedirect  $url
+     * Redirect to a new location.
      */
-    public function location($url): SymfonyResponse
+    public function location(string|SymfonyRedirect $url): SymfonyResponse
     {
         if (Request::inertia()) {
-            return BaseResponse::make('', 409, [Header::LOCATION => $url instanceof SymfonyRedirect ? $url->getTargetUrl() : $url]);
+            return BaseResponse::make(
+                '',
+                409,
+                [
+                    Header::LOCATION => $url instanceof SymfonyRedirect ? $url->getTargetUrl() : $url,
+                ]
+            );
         }
 
         return $url instanceof SymfonyRedirect ? $url : Redirect::away($url);
+    }
+
+    /**
+     * Find the component and throw an exception if it doesn't exist.
+     *
+     * @throws ComponentNotFoundException
+     */
+    protected function findComponentOrFail(string $component): void
+    {
+        try {
+            app('inertia.view-finder')->find($component);
+        } catch (InvalidArgumentException) {
+            throw new ComponentNotFoundException("Inertia page component [{$component}] not found.");
+        }
     }
 }

@@ -16,6 +16,9 @@ use ReflectionException;
 
 class ServiceProvider extends BaseServiceProvider
 {
+    /**
+     * Register any application services.
+     */
     public function register(): void
     {
         $this->app->singleton(ResponseFactory::class);
@@ -49,6 +52,9 @@ class ServiceProvider extends BaseServiceProvider
         });
     }
 
+    /**
+     * Bootstrap any application services.
+     */
     public function boot(): void
     {
         $this->registerConsoleCommands();
@@ -58,6 +64,9 @@ class ServiceProvider extends BaseServiceProvider
         ]);
     }
 
+    /**
+     * Register Blade directives for Inertia.
+     */
     protected function registerBladeDirectives(): void
     {
         $this->callAfterResolving('blade.compiler', function ($blade) {
@@ -66,6 +75,9 @@ class ServiceProvider extends BaseServiceProvider
         });
     }
 
+    /**
+     * Register console commands for Inertia.
+     */
     protected function registerConsoleCommands(): void
     {
         if (! $this->app->runningInConsole()) {
@@ -80,6 +92,9 @@ class ServiceProvider extends BaseServiceProvider
         ]);
     }
 
+    /**
+     * Register the 'inertia' macro on the Request class.
+     */
     protected function registerRequestMacro(): void
     {
         Request::macro('inertia', function () {
@@ -87,9 +102,13 @@ class ServiceProvider extends BaseServiceProvider
         });
     }
 
+    /**
+     * Register the 'inertia' macro on the Router class.
+     */
     protected function registerRouterMacro(): void
     {
         Router::macro('inertia', function ($uri, $component, $props = []) {
+            /** @var Router $this */
             return $this->match(['GET', 'HEAD'], $uri, '\\'.Controller::class)
                 ->defaults('component', $component)
                 ->defaults('props', $props);
@@ -97,6 +116,8 @@ class ServiceProvider extends BaseServiceProvider
     }
 
     /**
+     * Register testing macros for Inertia.
+     *
      * @throws ReflectionException|LogicException
      */
     protected function registerTestingMacros(): void
@@ -110,6 +131,9 @@ class ServiceProvider extends BaseServiceProvider
         throw new LogicException('Could not detect TestResponse class.');
     }
 
+    /**
+     * Register Inertia middleware aliases.
+     */
     protected function registerMiddleware(): void
     {
         $this->app['router']->aliasMiddleware(

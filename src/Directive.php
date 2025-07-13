@@ -6,12 +6,10 @@ class Directive
 {
     /**
      * Compiles the "@inertia" directive.
-     *
-     * @param  string  $expression
      */
-    public static function compile($expression = ''): string
+    public static function compile(string $expression = ''): string
     {
-        $id = trim(trim($expression), "\'\"") ?: 'app';
+        $id = mb_trim(mb_trim($expression), "\'\"") ?: 'app';
 
         $template = '<?php
             if (!isset($__inertiaSsrDispatched)) {
@@ -31,10 +29,8 @@ class Directive
 
     /**
      * Compiles the "@inertiaHead" directive.
-     *
-     * @param  string  $expression
      */
-    public static function compileHead($expression = ''): string
+    public static function compileHead(string $expression = ''): string
     {
         $template = '<?php
             if (!isset($__inertiaSsrDispatched)) {

@@ -4,7 +4,13 @@ namespace Inertia;
 
 interface Mergeable
 {
-    public function merge();
+    /**
+     * Enable merging for this object.
+     */
+    public function merge(): static;
 
-    public function shouldMerge();
+    /**
+     * Check if this object should be merged.
+     */
+    public function shouldMerge(): bool;
 }

@@ -2,29 +2,36 @@
 
 namespace Inertia;
 
+use Closure;
 use Illuminate\Support\Facades\App;
 
 class DeferProp implements IgnoreFirstLoad, Mergeable
 {
     use MergesProps;
 
-    protected $callback;
+    /**
+     * Create a new deferred property instance.
+     */
+    public function __construct(
+        protected Closure $callback,
+        protected ?string $group = null,
+    ) {}
 
-    protected $group;
-
-    public function __construct(callable $callback, ?string $group = null)
-    {
-        $this->callback = $callback;
-        $this->group = $group;
-    }
-
-    public function group()
-    {
-        return $this->group;
-    }
-
+    /**
+     * Invoke the property to get its value.
+     *
+     * Executes the callback and returns the result.
+     */
     public function __invoke()
     {
         return App::call($this->callback);
+    }
+
+    /**
+     * Get the group name for this deferred property.
+     */
+    public function group(): ?string
+    {
+        return $this->group;
     }
 }

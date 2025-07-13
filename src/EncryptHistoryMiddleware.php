@@ -10,10 +10,8 @@ class EncryptHistoryMiddleware
 {
     /**
      * Handle the incoming request.
-     *
-     * @return Response
      */
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): Response
     {
         Inertia::encryptHistory();
 

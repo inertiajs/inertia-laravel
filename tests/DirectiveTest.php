@@ -17,15 +17,9 @@ use Throwable;
 
 class DirectiveTest extends TestCase
 {
-    /**
-     * @var Filesystem|m\MockInterface
-     */
-    private $filesystem;
+    protected BladeCompiler $compiler;
 
-    /**
-     * @var BladeCompiler
-     */
-    protected $compiler;
+    protected Filesystem|m\MockInterface $filesystem;
 
     protected function setUp(): void
     {
@@ -43,46 +37,6 @@ class DirectiveTest extends TestCase
     {
         m::close();
         parent::tearDown();
-    }
-
-    protected function renderView($contents, $data = [])
-    {
-        // Laravel 8+ only: https://github.com/laravel/framework/pull/40425
-        if (method_exists(BladeCompiler::class, 'render')) {
-            return Blade::render($contents, $data, true);
-        }
-
-        // First, we'll create a temporary file, and use compileString to 'emulate' compilation of our view.
-        // This skips caching, and a bunch of other logic that's not relevant for what we need here.
-        $path = tempnam(sys_get_temp_dir(), 'inertia_tests_render_');
-        file_put_contents($path, $this->compiler->compileString($contents));
-
-        // Next, we'll 'render' out compiled view.
-        $view = new View(
-            m::mock(Factory::class),
-            new PhpEngine(new Filesystem),
-            'fake-view',
-            $path,
-            $data
-        );
-
-        // Then, we'll just hack and slash our way to success..
-        $view->getFactory()->allows('incrementRender')->once();
-        $view->getFactory()->allows('callComposer')->once();
-        $view->getFactory()->allows('getShared')->once()->andReturn([]);
-        $view->getFactory()->allows('decrementRender')->once();
-        $view->getFactory()->allows('flushStateIfDoneRendering')->once();
-        $view->getFactory()->allows('flushState');
-
-        try {
-            $output = $view->render();
-            @unlink($path);
-        } catch (Throwable $e) {
-            @unlink($path);
-            throw $e;
-        }
-
-        return $output;
     }
 
     public function test_inertia_directive_renders_the_root_element(): void
@@ -149,5 +103,45 @@ class DirectiveTest extends TestCase
         );
 
         $this->assertSame(1, $gateway->times);
+    }
+
+    protected function renderView($contents, $data = [])
+    {
+        // Laravel 8+ only: https://github.com/laravel/framework/pull/40425
+        if (method_exists(BladeCompiler::class, 'render')) {
+            return Blade::render($contents, $data, true);
+        }
+
+        // First, we'll create a temporary file, and use compileString to 'emulate' compilation of our view.
+        // This skips caching, and a bunch of other logic that's not relevant for what we need here.
+        $path = tempnam(sys_get_temp_dir(), 'inertia_tests_render_');
+        file_put_contents($path, $this->compiler->compileString($contents));
+
+        // Next, we'll 'render' out compiled view.
+        $view = new View(
+            m::mock(Factory::class),
+            new PhpEngine(new Filesystem),
+            'fake-view',
+            $path,
+            $data
+        );
+
+        // Then, we'll just hack and slash our way to success..
+        $view->getFactory()->allows('incrementRender')->once();
+        $view->getFactory()->allows('callComposer')->once();
+        $view->getFactory()->allows('getShared')->once()->andReturn([]);
+        $view->getFactory()->allows('decrementRender')->once();
+        $view->getFactory()->allows('flushStateIfDoneRendering')->once();
+        $view->getFactory()->allows('flushState');
+
+        try {
+            $output = $view->render();
+            @unlink($path);
+        } catch (Throwable $e) {
+            @unlink($path);
+            throw $e;
+        }
+
+        return $output;
     }
 }

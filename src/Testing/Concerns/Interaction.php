@@ -7,18 +7,14 @@ use PHPUnit\Framework\Assert as PHPUnit;
 
 trait Interaction
 {
-    /** @var array */
-    protected $interacted = [];
+    /** Array of property names that have been interacted with */
+    protected array $interacted = [];
 
-    protected function interactsWith(string $key): void
-    {
-        $prop = Str::before($key, '.');
+    abstract protected function prop(?string $key = null);
 
-        if (! in_array($prop, $this->interacted, true)) {
-            $this->interacted[] = $prop;
-        }
-    }
-
+    /**
+     * Assert that all properties have been interacted with.
+     */
     public function interacted(): void
     {
         PHPUnit::assertSame(
@@ -30,6 +26,9 @@ trait Interaction
         );
     }
 
+    /**
+     * Mark all remaining properties as interacted with.
+     */
     public function etc(): self
     {
         $this->interacted = array_keys($this->prop());
@@ -37,5 +36,15 @@ trait Interaction
         return $this;
     }
 
-    abstract protected function prop(?string $key = null);
+    /**
+     * Mark a property as having been interacted with.
+     */
+    protected function interactsWith(string $key): void
+    {
+        $prop = Str::before($key, '.');
+
+        if (! in_array($prop, $this->interacted, true)) {
+            $this->interacted[] = $prop;
+        }
+    }
 }

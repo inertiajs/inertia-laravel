@@ -15,13 +15,6 @@ abstract class TestCase extends Orchestra
      */
     protected const EXAMPLE_PAGE_OBJECT = ['component' => 'Foo/Bar', 'props' => ['foo' => 'bar'], 'url' => '/test', 'version' => '', 'encryptHistory' => false, 'clearHistory' => false];
 
-    protected function getPackageProviders($app): array
-    {
-        return [
-            ServiceProvider::class,
-        ];
-    }
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -31,6 +24,13 @@ abstract class TestCase extends Orchestra
         Inertia::setRootView('welcome');
         config()->set('inertia.testing.ensure_pages_exist', false);
         config()->set('inertia.testing.page_paths', [realpath(__DIR__)]);
+    }
+
+    protected function getPackageProviders($app): array
+    {
+        return [
+            ServiceProvider::class,
+        ];
     }
 
     protected function makeMockRequest($view): TestResponse

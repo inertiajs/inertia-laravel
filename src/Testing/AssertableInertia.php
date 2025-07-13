@@ -11,21 +11,24 @@ use PHPUnit\Framework\AssertionFailedError;
 
 class AssertableInertia extends AssertableJson
 {
-    /** @var string */
-    private $component;
+    /** The component name being rendered */
+    private string $component;
 
-    /** @var string */
-    private $url;
+    /** The URL of the current page */
+    private string $url;
 
-    /** @var string|null */
-    private $version;
+    /** The asset version for cache busting */
+    private ?string $version;
 
-    /** @var bool */
-    private $encryptHistory;
+    /** Whether history encryption is enabled */
+    private bool $encryptHistory;
 
-    /** @var bool */
-    private $clearHistory;
+    /** Whether history should be cleared */
+    private bool $clearHistory;
 
+    /**
+     * Create an AssertableInertia instance from a TestResponse.
+     */
     public static function fromTestResponse(TestResponse $response): self
     {
         try {
@@ -53,6 +56,9 @@ class AssertableInertia extends AssertableJson
         return $instance;
     }
 
+    /**
+     * Assert that the component name matches the expected value.
+     */
     public function component(?string $value = null, $shouldExist = null): self
     {
         PHPUnit::assertSame($value, $this->component, 'Unexpected Inertia page component.');
@@ -68,6 +74,9 @@ class AssertableInertia extends AssertableJson
         return $this;
     }
 
+    /**
+     * Assert that the URL matches the expected value.
+     */
     public function url(string $value): self
     {
         PHPUnit::assertSame($value, $this->url, 'Unexpected Inertia page url.');
@@ -75,6 +84,9 @@ class AssertableInertia extends AssertableJson
         return $this;
     }
 
+    /**
+     * Assert that the asset version matches the expected value.
+     */
     public function version(string $value): self
     {
         PHPUnit::assertSame($value, $this->version, 'Unexpected Inertia asset version.');
@@ -103,7 +115,7 @@ class AssertableInertia extends AssertableJson
             $except,
         );
 
-        $assertable = AssertableInertia::fromTestResponse($reloadRequest());
+        $assertable = self::fromTestResponse($reloadRequest());
 
         // Make sure we get the same data as the original request.
         $assertable->component($this->component);
@@ -145,7 +157,10 @@ class AssertableInertia extends AssertableJson
         });
     }
 
-    public function toArray()
+    /**
+     * Convert the Inertia response to an array.
+     */
+    public function toArray(): array
     {
         return [
             'component' => $this->component,

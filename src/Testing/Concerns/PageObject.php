@@ -8,6 +8,9 @@ use PHPUnit\Framework\Assert as PHPUnit;
 
 trait PageObject
 {
+    /**
+     * Assert that the component name matches the expected value.
+     */
     public function component(?string $value = null, $shouldExist = null): self
     {
         PHPUnit::assertSame($value, $this->component, 'Unexpected Inertia page component.');
@@ -23,11 +26,9 @@ trait PageObject
         return $this;
     }
 
-    protected function prop(?string $key = null)
-    {
-        return Arr::get($this->props, $key);
-    }
-
+    /**
+     * Assert that the URL matches the expected value.
+     */
     public function url(string $value): self
     {
         PHPUnit::assertSame($value, $this->url, 'Unexpected Inertia page url.');
@@ -35,6 +36,9 @@ trait PageObject
         return $this;
     }
 
+    /**
+     * Assert that the asset version matches the expected value.
+     */
     public function version(string $value): self
     {
         PHPUnit::assertSame($value, $this->version, 'Unexpected Inertia asset version.');
@@ -42,6 +46,9 @@ trait PageObject
         return $this;
     }
 
+    /**
+     * Convert the Inertia page to an array.
+     */
     public function toArray(): array
     {
         return [
@@ -52,5 +59,13 @@ trait PageObject
             'encryptHistory' => $this->encryptHistory,
             'clearHistory' => $this->clearHistory,
         ];
+    }
+
+    /**
+     * Get a specific prop from the page props.
+     */
+    protected function prop(?string $key = null)
+    {
+        return Arr::get($this->props, $key);
     }
 }

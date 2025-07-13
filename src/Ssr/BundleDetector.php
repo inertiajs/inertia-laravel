@@ -4,6 +4,9 @@ namespace Inertia\Ssr;
 
 class BundleDetector
 {
+    /**
+     * Detect the SSR bundle file location.
+     */
     public function detect()
     {
         return collect([
@@ -11,8 +14,6 @@ class BundleDetector
             base_path('bootstrap/ssr/ssr.mjs'),
             base_path('bootstrap/ssr/ssr.js'),
             public_path('js/ssr.js'),
-        ])->filter()->first(function ($path) {
-            return file_exists($path);
-        });
+        ])->filter()->first(file_exists(...));
     }
 }

@@ -47,7 +47,9 @@ class StartSsr extends Command
             );
 
             return self::FAILURE;
-        } elseif ($configuredBundle && $bundle !== $configuredBundle) {
+        }
+
+        if ($configuredBundle && $bundle !== $configuredBundle) {
             $this->warn('Inertia SSR bundle not found at the configured path: "'.$configuredBundle.'"');
             $this->warn('Using a default bundle instead: "'.$bundle.'"');
         }
@@ -78,9 +80,9 @@ class StartSsr extends Command
 
         foreach ($process as $type => $data) {
             if ($process::OUT === $type) {
-                $this->info(trim($data));
+                $this->info(mb_trim($data));
             } else {
-                $this->error(trim($data));
+                $this->error(mb_trim($data));
                 report(new SsrException($data));
             }
         }

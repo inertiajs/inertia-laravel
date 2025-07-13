@@ -6,17 +6,16 @@ use Illuminate\Support\Facades\App;
 
 class AlwaysProp
 {
-    /** @var mixed */
-    protected $value;
+    /**
+     * Create a new always property instance.
+     */
+    public function __construct(
+        protected mixed $value,
+    ) {}
 
     /**
-     * @param  mixed  $value
+     * Invoke the property to get its value.
      */
-    public function __construct($value)
-    {
-        $this->value = $value;
-    }
-
     public function __invoke()
     {
         return is_callable($this->value) ? App::call($this->value) : $this->value;

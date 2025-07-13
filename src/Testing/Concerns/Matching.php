@@ -11,6 +11,15 @@ use PHPUnit\Framework\Assert as PHPUnit;
 
 trait Matching
 {
+    abstract protected function dotPath(string $key): string;
+
+    abstract protected function prop(?string $key = null);
+
+    abstract public function has(string $key, $value = null, ?Closure $scope = null);
+
+    /**
+     * Assert that multiple properties match their expected values.
+     */
     public function whereAll(array $bindings): self
     {
         foreach ($bindings as $key => $value) {
@@ -20,6 +29,9 @@ trait Matching
         return $this;
     }
 
+    /**
+     * Assert that a property matches an expected value.
+     */
     public function where(string $key, $expected): self
     {
         $this->has($key);
@@ -53,6 +65,9 @@ trait Matching
         return $this;
     }
 
+    /**
+     * Recursively sort arrays to ensure consistent comparison.
+     */
     protected function ensureSorted(&$value): void
     {
         if (! is_array($value)) {
@@ -65,10 +80,4 @@ trait Matching
 
         ksort($value);
     }
-
-    abstract protected function dotPath(string $key): string;
-
-    abstract protected function prop(?string $key = null);
-
-    abstract public function has(string $key, $value = null, ?Closure $scope = null);
 }
