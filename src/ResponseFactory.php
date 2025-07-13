@@ -23,13 +23,13 @@ class ResponseFactory
 
     protected array $sharedProps = [];
 
-    protected Closure|string|null $version;
+    protected Closure|string|null $version = null;
 
     protected bool $clearHistory = false;
 
     protected bool $encryptHistory;
 
-    protected ?Closure $urlResolver;
+    protected ?Closure $urlResolver = null;
 
     /**
      * For set the root view.
@@ -122,7 +122,7 @@ class ResponseFactory
      *
      * @deprecated Use `optional` instead.
      */
-    public function lazy(callable $callback): LazyProp
+    public function lazy(Closure $callback): LazyProp
     {
         return new LazyProp($callback);
     }
@@ -130,7 +130,7 @@ class ResponseFactory
     /**
      * Create an optional property that only loads when explicitly requested.
      */
-    public function optional(callable $callback): OptionalProp
+    public function optional(Closure $callback): OptionalProp
     {
         return new OptionalProp($callback);
     }
@@ -138,7 +138,7 @@ class ResponseFactory
     /**
      * Create a deferred property that loads after the initial page load.
      */
-    public function defer(callable $callback, string $group = 'default'): DeferProp
+    public function defer(Closure $callback, string $group = 'default'): DeferProp
     {
         return new DeferProp($callback, $group);
     }

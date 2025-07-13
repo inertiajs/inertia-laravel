@@ -9,7 +9,7 @@ class Directive
      */
     public static function compile(string $expression = ''): string
     {
-        $id = mb_trim(mb_trim($expression), "\'\"") ?: 'app';
+        $id = trim(trim($expression), "\'\"") ?: 'app';
 
         $template = '<?php
             if (!isset($__inertiaSsrDispatched)) {

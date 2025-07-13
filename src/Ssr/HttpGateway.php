@@ -53,7 +53,7 @@ class HttpGateway implements Gateway, HasHealthCheck
     {
         $path = Str::start($path, '/');
 
-        return str_replace($path, '', mb_rtrim(config('inertia.ssr.url', 'http://127.0.0.1:13714'), '/')).$path;
+        return str_replace($path, '', rtrim(config('inertia.ssr.url', 'http://127.0.0.1:13714'), '/')).$path;
     }
 
     /**

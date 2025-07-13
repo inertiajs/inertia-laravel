@@ -14,6 +14,6 @@ class BundleDetector
             base_path('bootstrap/ssr/ssr.mjs'),
             base_path('bootstrap/ssr/ssr.js'),
             public_path('js/ssr.js'),
-        ])->filter()->first(file_exists(...));
+        ])->filter()->first(fn ($path) => file_exists($path));
     }
 }

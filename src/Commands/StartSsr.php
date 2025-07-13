@@ -80,9 +80,9 @@ class StartSsr extends Command
 
         foreach ($process as $type => $data) {
             if ($process::OUT === $type) {
-                $this->info(mb_trim($data));
+                $this->info(trim($data));
             } else {
-                $this->error(mb_trim($data));
+                $this->error(trim($data));
                 report(new SsrException($data));
             }
         }
