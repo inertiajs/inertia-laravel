@@ -142,10 +142,10 @@ class Response implements Responsable
     public function resolveProperties(Request $request, array $props): array
     {
         $props = $this->resolvePartialProperties($props, $request);
+        $props = $this->filterInitialProps($props);
         $props = $this->resolveArrayableProperties($props, $request);
         $props = $this->resolveAlways($props);
         $props = $this->resolvePropertyInstances($props, $request);
-        $props = $this->removeInitialProperties($props);
 
         return $props;
     }
@@ -299,9 +299,9 @@ class Response implements Responsable
     }
 
     /**
-     * Remove initial properties from the response.
+     * Filter initial properties from the props.
      */
-    public function removeInitialProperties(array $props): array
+    public function filterInitialProps(array $props): array
     {
         return array_filter($props, static fn ($prop) => ! $prop instanceof InitialProp);
     }
