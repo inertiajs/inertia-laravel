@@ -38,8 +38,6 @@ class Response implements Responsable
 
     protected ?Closure $urlResolver = null;
 
-    protected ?Closure $oncePropsResolver = null;
-
     /**
      * @param  array|Arrayable  $props
      */
@@ -50,7 +48,6 @@ class Response implements Responsable
         string $version = '',
         bool $encryptHistory = false,
         ?Closure $urlResolver = null,
-        ?Closure $oncePropsResolver = null,
     ) {
         $this->component = $component;
         $this->props = $props instanceof Arrayable ? $props->toArray() : $props;
@@ -59,7 +56,6 @@ class Response implements Responsable
         $this->clearHistory = session()->pull('inertia.clear_history', false);
         $this->encryptHistory = $encryptHistory;
         $this->urlResolver = $urlResolver;
-        $this->oncePropsResolver = $oncePropsResolver;
     }
 
     /**
@@ -130,13 +126,12 @@ class Response implements Responsable
             $this->resolveMergeProps($request),
             $this->resolveDeferredProps($request),
             $this->resolveCacheDirections($request),
+            $this->resolveInitialProps($request),
         );
 
         if ($request->header(Header::INERTIA)) {
             return new JsonResponse($page, 200, [Header::INERTIA => 'true']);
         }
-
-        $page += $this->resolveOnceProps($request);
 
         return ResponseFactory::view($this->rootView, $this->viewData + ['page' => $page]);
     }
@@ -150,6 +145,7 @@ class Response implements Responsable
         $props = $this->resolveArrayableProperties($props, $request);
         $props = $this->resolveAlways($props);
         $props = $this->resolvePropertyInstances($props, $request);
+        $props = $this->removeInitialProperties($props);
 
         return $props;
     }
@@ -303,6 +299,14 @@ class Response implements Responsable
     }
 
     /**
+     * Remove initial properties from the response.
+     */
+    public function removeInitialProperties(array $props): array
+    {
+        return array_filter($props, static fn ($prop) => ! $prop instanceof InitialProp);
+    }
+
+    /**
      * Resolve the cache directions for the response.
      */
     public function resolveCacheDirections(Request $request): array
@@ -382,13 +386,17 @@ class Response implements Responsable
         return $deferredProps->isNotEmpty() ? ['deferredProps' => $deferredProps->toArray()] : [];
     }
 
-    public function resolveOnceProps(Request $request): array
+    public function resolveInitialProps(Request $request): array
     {
-        $onceProps = $this->oncePropsResolver
-            ? App::call($this->oncePropsResolver, ['request' => $request])
-            : [];
+        if ($request->header(Header::INERTIA)) {
+            return [];
+        }
 
-        return empty($onceProps) ? [] : ['onceProps' => $onceProps];
+        $initialProps = collect($this->props)
+            ->filter(fn ($prop) => $prop instanceof InitialProp)
+            ->mapWithKeys(fn ($value, $key) => [$key => App::call($value)]);
+
+        return $initialProps->isNotEmpty() ? ['initialProps' => $initialProps->toArray()] : [];
     }
 
     /**

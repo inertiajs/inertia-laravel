@@ -35,12 +35,8 @@ class ResponseFactory
     /** @var Closure|null */
     protected $urlResolver;
 
-    /** @var Closure|null */
-    protected $oncePropsResolver;
-
     /**
-     * @param string $name The name of the root view
-     * @return void
+     * @param  string  $name  The name of the root view
      */
     public function setRootView(string $name): void
     {
@@ -105,11 +101,6 @@ class ResponseFactory
         $this->urlResolver = $urlResolver;
     }
 
-    public function resolveOncePropsUsing(?Closure $oncePropsResolver = null): void
-    {
-        $this->oncePropsResolver = $oncePropsResolver;
-    }
-
     public function clearHistory(): void
     {
         session(['inertia.clear_history' => true]);
@@ -134,6 +125,11 @@ class ResponseFactory
     public function optional(callable $callback): OptionalProp
     {
         return new OptionalProp($callback);
+    }
+
+    public function initial(callable $callback): InitialProp
+    {
+        return new InitialProp($callback);
     }
 
     public function defer(callable $callback, string $group = 'default'): DeferProp
@@ -197,7 +193,6 @@ class ResponseFactory
             $this->getVersion(),
             $this->encryptHistory ?? config('inertia.history.encrypt', false),
             $this->urlResolver,
-            $this->oncePropsResolver,
         );
     }
 

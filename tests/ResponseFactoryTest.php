@@ -15,6 +15,7 @@ use Inertia\AlwaysProp;
 use Inertia\ComponentNotFoundException;
 use Inertia\DeferProp;
 use Inertia\Inertia;
+use Inertia\InitialProp;
 use Inertia\LazyProp;
 use Inertia\MergeProp;
 use Inertia\OptionalProp;
@@ -340,6 +341,16 @@ class ResponseFactoryTest extends TestCase
         });
 
         $this->assertInstanceOf(OptionalProp::class, $optionalProp);
+    }
+
+    public function test_can_create_initial_prop(): void
+    {
+        $factory = new ResponseFactory;
+        $initialProp = $factory->initial(function () {
+            return 'An initial value';
+        });
+
+        $this->assertInstanceOf(InitialProp::class, $initialProp);
     }
 
     public function test_can_create_always_prop(): void
