@@ -6,14 +6,10 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Config;
 use Illuminate\View\Compilers\BladeCompiler;
-use Illuminate\View\Engines\PhpEngine;
-use Illuminate\View\Factory;
-use Illuminate\View\View;
 use Inertia\Directive;
 use Inertia\Ssr\Gateway;
 use Inertia\Tests\Stubs\FakeGateway;
 use Mockery as m;
-use Throwable;
 
 class DirectiveTest extends TestCase
 {
@@ -47,42 +43,7 @@ class DirectiveTest extends TestCase
 
     protected function renderView($contents, $data = [])
     {
-        // Laravel 8+ only: https://github.com/laravel/framework/pull/40425
-        if (method_exists(BladeCompiler::class, 'render')) {
-            return Blade::render($contents, $data, true);
-        }
-
-        // First, we'll create a temporary file, and use compileString to 'emulate' compilation of our view.
-        // This skips caching, and a bunch of other logic that's not relevant for what we need here.
-        $path = tempnam(sys_get_temp_dir(), 'inertia_tests_render_');
-        file_put_contents($path, $this->compiler->compileString($contents));
-
-        // Next, we'll 'render' out compiled view.
-        $view = new View(
-            m::mock(Factory::class),
-            new PhpEngine(new Filesystem),
-            'fake-view',
-            $path,
-            $data
-        );
-
-        // Then, we'll just hack and slash our way to success..
-        $view->getFactory()->allows('incrementRender')->once();
-        $view->getFactory()->allows('callComposer')->once();
-        $view->getFactory()->allows('getShared')->once()->andReturn([]);
-        $view->getFactory()->allows('decrementRender')->once();
-        $view->getFactory()->allows('flushStateIfDoneRendering')->once();
-        $view->getFactory()->allows('flushState');
-
-        try {
-            $output = $view->render();
-            @unlink($path);
-        } catch (Throwable $e) {
-            @unlink($path);
-            throw $e;
-        }
-
-        return $output;
+        return Blade::render($contents, $data, true);
     }
 
     public function test_inertia_directive_renders_the_root_element(): void
