@@ -1,8 +1,30 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.3...2.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.4...2.x)
 
 - Nothing!
+
+## [v2.0.4](https://github.com/inertiajs/inertia-laravel/compare/v2.0.3...v2.0.4) - 2025-07-15
+
+### What's Changed
+
+* [2.x] Ability to perform a SSR request without a bundle by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/751
+* [2.x] Added `inertia:check-ssr` Artisan command and `isHealthy()` method on `HttpGateway` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/752
+* [2.x] Refactor `HttpGateway` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/754
+* [2.x] Support for checking if the component exists when rendering by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/749
+* [2.x] Refactored `ssr.dispatch_without_bundle` to `ssr.ensure_bundle_exists` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/755
+* [2.x] Restore `testing.page_paths` and `testing.page_extensions` configs by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/756
+* GitHub issue template by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/757
+* update return type in Middleware share method by [@hosmelq](https://github.com/hosmelq) in https://github.com/inertiajs/inertia-laravel/pull/758
+* Fix project name in `SECURITY.md` by [@duncanmcclean](https://github.com/duncanmcclean) in https://github.com/inertiajs/inertia-laravel/pull/759
+* [2.x] Remove old version checks by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/763
+
+### New Contributors
+
+* [@hosmelq](https://github.com/hosmelq) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/758
+* [@duncanmcclean](https://github.com/duncanmcclean) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/759
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.3...v2.0.4
 
 ## [v2.0.3](https://github.com/inertiajs/inertia-laravel/compare/v2.0.2...v2.0.3) - 2025-06-20
 
