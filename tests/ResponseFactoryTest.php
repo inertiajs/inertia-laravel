@@ -17,7 +17,7 @@ use Inertia\Inertia;
 use Inertia\LazyProp;
 use Inertia\MergeProp;
 use Inertia\OptionalProp;
-use Inertia\ProvidesInertiaProps;
+use Inertia\ProvidesInertiaProperties;
 use Inertia\RenderContext;
 use Inertia\ResponseFactory;
 use Inertia\Tests\Stubs\ExampleMiddleware;
@@ -358,7 +358,7 @@ class ResponseFactoryTest extends TestCase
     public function test_will_accept_instances_of_provides_inertia_props()
     {
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
-            return Inertia::render('User/Edit', new class implements ProvidesInertiaProps
+            return Inertia::render('User/Edit', new class implements ProvidesInertiaProperties
             {
                 public function toInertiaProps(RenderContext $context): iterable
                 {

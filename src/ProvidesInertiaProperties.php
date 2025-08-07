@@ -2,7 +2,7 @@
 
 namespace Inertia;
 
-interface ProvidesInertiaProps
+interface ProvidesInertiaProperties
 {
     public function toInertiaProps(RenderContext $context): iterable;
 }

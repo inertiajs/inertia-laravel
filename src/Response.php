@@ -50,13 +50,13 @@ class Response implements Responsable
     }
 
     /**
-     * @param  string|array|ProvidesInertiaProps  $key
+     * @param  string|array|ProvidesInertiaProperties  $key
      * @param  mixed  $value
      * @return $this
      */
     public function with($key, $value = null): self
     {
-        if ($key instanceof ProvidesInertiaProps) {
+        if ($key instanceof ProvidesInertiaProperties) {
             $this->props[] = $key;
         } elseif (is_array($key)) {
             $this->props = array_merge($this->props, $key);
@@ -143,7 +143,7 @@ class Response implements Responsable
     }
 
     /**
-     * Resolve the ProvidesInertiaProps props.
+     * Resolve the ProvidesInertiaProperties props.
      */
     public function resolveInertiaPropsProviders(array $props, Request $request): array
     {
@@ -152,7 +152,7 @@ class Response implements Responsable
         $renderContext = new RenderContext($this->component, $request);
 
         foreach ($props as $key => $value) {
-            if (is_numeric($key) && $value instanceof ProvidesInertiaProps) {
+            if (is_numeric($key) && $value instanceof ProvidesInertiaProperties) {
                 // Pipe into a Collection to leverage Collection::getArrayableItems()
                 $newProps = array_merge(
                     $newProps,
