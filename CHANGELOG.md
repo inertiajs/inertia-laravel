@@ -1,8 +1,57 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.2...2.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.4...2.x)
 
 - Nothing!
+
+## [v2.0.4](https://github.com/inertiajs/inertia-laravel/compare/v2.0.3...v2.0.4) - 2025-07-15
+
+### What's Changed
+
+* [2.x] Ability to perform a SSR request without a bundle by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/751
+* [2.x] Added `inertia:check-ssr` Artisan command and `isHealthy()` method on `HttpGateway` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/752
+* [2.x] Refactor `HttpGateway` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/754
+* [2.x] Support for checking if the component exists when rendering by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/749
+* [2.x] Refactored `ssr.dispatch_without_bundle` to `ssr.ensure_bundle_exists` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/755
+* [2.x] Restore `testing.page_paths` and `testing.page_extensions` configs by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/756
+* GitHub issue template by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/757
+* update return type in Middleware share method by [@hosmelq](https://github.com/hosmelq) in https://github.com/inertiajs/inertia-laravel/pull/758
+* Fix project name in `SECURITY.md` by [@duncanmcclean](https://github.com/duncanmcclean) in https://github.com/inertiajs/inertia-laravel/pull/759
+* [2.x] Remove old version checks by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/763
+
+### New Contributors
+
+* [@hosmelq](https://github.com/hosmelq) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/758
+* [@duncanmcclean](https://github.com/duncanmcclean) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/759
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.3...v2.0.4
+
+## [v2.0.3](https://github.com/inertiajs/inertia-laravel/compare/v2.0.2...v2.0.3) - 2025-06-20
+
+### What's Changed
+
+* Run tests on Ubuntu 24.04 by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/735
+* Improve URL handling with support for trailing slashes by [@ljbw](https://github.com/ljbw) in https://github.com/inertiajs/inertia-laravel/pull/731
+* [2.x] Remove old LegacyTestResponse by [@nshiro](https://github.com/nshiro) in https://github.com/inertiajs/inertia-laravel/pull/736
+* [2.x] Introduce inertiaProps Method in TestResponseMacros for Improved Inertia.js Testing by [@ashokatheheroo](https://github.com/ashokatheheroo) in https://github.com/inertiajs/inertia-laravel/pull/700
+* [2.x] Remove check for `TestResponse` from Laravel <= 6.0 by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/743
+* [2.x] Check Vite manifest before Mix manifest by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/737
+* [2.x] Remove IDE helpers by [@ycs77](https://github.com/ycs77) in https://github.com/inertiajs/inertia-laravel/pull/675
+* [2.x] Allow deepMerge on custom properties by [@mpociot](https://github.com/mpociot) in https://github.com/inertiajs/inertia-laravel/pull/732
+* [2.x] Test helper for partial requests by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/738
+* [2.x] Support for a custom URL resolver by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/739
+* [2.x] Keep only partial data in mergeProps by [@vinnygambiny](https://github.com/vinnygambiny) in https://github.com/inertiajs/inertia-laravel/pull/745
+* [2.x] Refactor `mergeStrategies` argument to `matchOn()` method by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/747
+
+### New Contributors
+
+* [@ljbw](https://github.com/ljbw) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/731
+* [@nshiro](https://github.com/nshiro) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/736
+* [@ashokatheheroo](https://github.com/ashokatheheroo) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/700
+* [@mpociot](https://github.com/mpociot) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/732
+* [@vinnygambiny](https://github.com/vinnygambiny) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/745
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.2...v2.0.3
 
 ## [v2.0.2](https://github.com/inertiajs/inertia-laravel/compare/v2.0.1...v2.0.2) - 2025-04-10
 

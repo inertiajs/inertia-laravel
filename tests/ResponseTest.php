@@ -212,8 +212,8 @@ class ResponseTest extends TestCase
             'User/Edit',
             [
                 'user' => $user,
-                'foo' => (new MergeProp('foo value', ['foo-key']))->deepMerge(),
-                'bar' => (new MergeProp('bar value', ['bar-key']))->deepMerge(),
+                'foo' => (new MergeProp('foo value'))->matchOn('foo-key')->deepMerge(),
+                'bar' => (new MergeProp('bar value'))->matchOn('bar-key')->deepMerge(),
             ],
             'app',
             '123'
@@ -233,13 +233,14 @@ class ResponseTest extends TestCase
             'foo',
             'bar',
         ], $page['deepMergeProps']);
+
         $this->assertSame([
             'foo.foo-key',
             'bar.bar-key',
-        ], $page['mergeStrategies']);
+        ], $page['matchPropsOn']);
         $this->assertFalse($page['clearHistory']);
         $this->assertFalse($page['encryptHistory']);
-        $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;user&quot;:{&quot;name&quot;:&quot;Jonathan&quot;},&quot;foo&quot;:&quot;foo value&quot;,&quot;bar&quot;:&quot;bar value&quot;},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;,&quot;clearHistory&quot;:false,&quot;encryptHistory&quot;:false,&quot;deepMergeProps&quot;:[&quot;foo&quot;,&quot;bar&quot;],&quot;mergeStrategies&quot;:[&quot;foo.foo-key&quot;,&quot;bar.bar-key&quot;]}"></div>', $view->render());
+        $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;user&quot;:{&quot;name&quot;:&quot;Jonathan&quot;},&quot;foo&quot;:&quot;foo value&quot;,&quot;bar&quot;:&quot;bar value&quot;},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;,&quot;clearHistory&quot;:false,&quot;encryptHistory&quot;:false,&quot;deepMergeProps&quot;:[&quot;foo&quot;,&quot;bar&quot;],&quot;matchPropsOn&quot;:[&quot;foo.foo-key&quot;,&quot;bar.bar-key&quot;]}"></div>', $view->render());
     }
 
     public function test_server_response_with_defer_and_merge_props(): void
@@ -320,6 +321,68 @@ class ResponseTest extends TestCase
         $this->assertFalse($page['clearHistory']);
         $this->assertFalse($page['encryptHistory']);
         $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;user&quot;:{&quot;name&quot;:&quot;Jonathan&quot;},&quot;bar&quot;:&quot;bar value&quot;},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;,&quot;clearHistory&quot;:false,&quot;encryptHistory&quot;:false,&quot;deepMergeProps&quot;:[&quot;foo&quot;,&quot;bar&quot;],&quot;deferredProps&quot;:{&quot;default&quot;:[&quot;foo&quot;]}}"></div>', $view->render());
+    }
+
+    public function test_exclude_merge_props_from_partial_only_response(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'User/Edit']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'user']);
+
+        $user = ['name' => 'Jonathan'];
+        $response = new Response(
+            'User/Edit',
+            [
+                'user' => $user,
+                'foo' => new MergeProp('foo value'),
+                'bar' => new MergeProp('bar value'),
+            ],
+            'app',
+            '123'
+        );
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $props = get_object_vars($page->props);
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+
+        $this->assertSame('Jonathan', $props['user']->name);
+        $this->assertArrayNotHasKey('foo', $props);
+        $this->assertArrayNotHasKey('bar', $props);
+        $this->assertFalse(isset($page->mergeProps));
+    }
+
+    public function test_exclude_merge_props_from_partial_except_response(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'User/Edit']);
+        $request->headers->add(['X-Inertia-Partial-Except' => 'foo']);
+
+        $user = ['name' => 'Jonathan'];
+        $response = new Response(
+            'User/Edit',
+            [
+                'user' => $user,
+                'foo' => new MergeProp('foo value'),
+                'bar' => new MergeProp('bar value'),
+            ],
+            'app',
+            '123'
+        );
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $props = get_object_vars($page->props);
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+
+        $this->assertSame('Jonathan', $props['user']->name);
+        $this->assertArrayNotHasKey('foo', $props);
+        $this->assertArrayHasKey('bar', $props);
+        $this->assertSame(['bar'], $page->mergeProps);
     }
 
     public function test_xhr_response(): void
@@ -855,10 +918,6 @@ class ResponseTest extends TestCase
 
     public function test_the_page_url_is_prefixed_with_the_proxy_prefix(): void
     {
-        if (version_compare(app()->version(), '7', '<')) {
-            $this->markTestSkipped('This test requires Laravel 7 or higher.');
-        }
-
         Request::setTrustedProxies(['1.2.3.4'], Request::HEADER_X_FORWARDED_PREFIX);
 
         $request = Request::create('/user/123', 'GET');
