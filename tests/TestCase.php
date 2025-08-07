@@ -10,6 +10,11 @@ use Orchestra\Testbench\TestCase as Orchestra;
 
 abstract class TestCase extends Orchestra
 {
+    /**
+     * Example Page Objects.
+     */
+    protected const EXAMPLE_PAGE_OBJECT = ['component' => 'Foo/Bar', 'props' => ['foo' => 'bar'], 'url' => '/test', 'version' => '', 'encryptHistory' => false, 'clearHistory' => false];
+
     protected function getPackageProviders($app): array
     {
         return [
@@ -31,7 +36,7 @@ abstract class TestCase extends Orchestra
     protected function makeMockRequest($view): TestResponse
     {
         app('router')->get('/example-url', function () use ($view) {
-            return $view;
+            return is_callable($view) ? $view() : $view;
         });
 
         return $this->get('/example-url');

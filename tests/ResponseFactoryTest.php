@@ -12,6 +12,7 @@ use Illuminate\Session\Store;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\AlwaysProp;
+use Inertia\ComponentNotFoundException;
 use Inertia\DeferProp;
 use Inertia\Inertia;
 use Inertia\LazyProp;
@@ -127,6 +128,30 @@ class ResponseFactoryTest extends TestCase
 
         $response->assertSuccessful();
         $response->assertJson(['component' => 'User/Edit']);
+    }
+
+    public function test_the_url_can_be_resolved_with_a_custom_resolver()
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            Inertia::resolveUrlUsing(function ($request, ResponseFactory $otherDependency) {
+                $this->assertInstanceOf(HttpRequest::class, $request);
+                $this->assertInstanceOf(ResponseFactory::class, $otherDependency);
+
+                return '/my-custom-url';
+            });
+
+            return Inertia::render('User/Edit');
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', [
+            'X-Inertia' => 'true',
+        ]);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Edit',
+            'url' => '/my-custom-url',
+        ]);
     }
 
     public function test_shared_data_can_be_shared_from_anywhere(): void
@@ -377,5 +402,23 @@ class ResponseFactoryTest extends TestCase
                 'foo' => 'bar',
             ],
         ]);
+    }
+
+    public function test_will_throw_exception_if_component_does_not_exist_when_ensuring_is_enabled(): void
+    {
+        config()->set('inertia.ensure_pages_exist', true);
+
+        $this->expectException(ComponentNotFoundException::class);
+        $this->expectExceptionMessage('Inertia page component [foo] not found.');
+
+        (new ResponseFactory)->render('foo');
+    }
+
+    public function test_will_not_throw_exception_if_component_does_not_exist_when_ensuring_is_disabled(): void
+    {
+        config()->set('inertia.ensure_pages_exist', false);
+
+        $response = (new ResponseFactory)->render('foo');
+        $this->assertInstanceOf(\Inertia\Response::class, $response);
     }
 }

@@ -36,17 +36,26 @@ class Response implements Responsable
 
     protected $cacheFor = [];
 
+    protected ?Closure $urlResolver = null;
+
     /**
      * @param  array|Arrayable  $props
      */
-    public function __construct(string $component, array $props, string $rootView = 'app', string $version = '', bool $encryptHistory = false)
-    {
+    public function __construct(
+        string $component,
+        array $props,
+        string $rootView = 'app',
+        string $version = '',
+        bool $encryptHistory = false,
+        ?Closure $urlResolver = null
+    ) {
         $this->component = $component;
         $this->props = $props instanceof Arrayable ? $props->toArray() : $props;
         $this->rootView = $rootView;
         $this->version = $version;
         $this->clearHistory = session()->pull('inertia.clear_history', false);
         $this->encryptHistory = $encryptHistory;
+        $this->urlResolver = $urlResolver;
     }
 
     /**
@@ -342,19 +351,24 @@ class Response implements Responsable
 
     public function resolveMergeProps(Request $request): array
     {
-        $resetProps = collect(explode(',', $request->header(Header::RESET, '')));
+        $resetProps = array_filter(explode(',', $request->header(Header::RESET, '')));
+        $onlyProps = array_filter(explode(',', $request->header(Header::PARTIAL_ONLY, '')));
+        $exceptProps = array_filter(explode(',', $request->header(Header::PARTIAL_EXCEPT, '')));
+
         $mergeProps = collect($this->props)
             ->filter(fn ($prop) => $prop instanceof Mergeable)
             ->filter(fn ($prop) => $prop->shouldMerge())
-            ->filter(fn ($_, $key) => ! $resetProps->contains($key));
+            ->reject(fn ($_, $key) => in_array($key, $resetProps))
+            ->filter(fn ($_, $key) => count($onlyProps) === 0 || in_array($key, $onlyProps))
+            ->reject(fn ($_, $key) => in_array($key, $exceptProps));
 
         $deepMergeProps = $mergeProps
             ->filter(fn ($prop) => $prop->shouldDeepMerge())
             ->keys();
 
-        $mergeStrategies = $mergeProps
+        $matchPropsOn = $mergeProps
             ->map(function ($prop, $key) {
-                return collect($prop->mergeStrategies())
+                return collect($prop->matchesOn())
                     ->map(fn ($strategy) => $key.'.'.$strategy)
                     ->toArray();
             })
@@ -368,7 +382,7 @@ class Response implements Responsable
         return array_filter([
             'mergeProps' => $mergeProps->toArray(),
             'deepMergeProps' => $deepMergeProps->toArray(),
-            'mergeStrategies' => $mergeStrategies->toArray(),
+            'matchPropsOn' => $matchPropsOn->toArray(),
         ], fn ($prop) => count($prop) > 0);
     }
 
@@ -408,11 +422,15 @@ class Response implements Responsable
      */
     protected function getUrl(Request $request): string
     {
-        $url = Str::start(Str::after($request->fullUrl(), $request->getSchemeAndHttpHost()), '/');
+        $urlResolver = $this->urlResolver ?? function (Request $request) {
+            $url = Str::start(Str::after($request->fullUrl(), $request->getSchemeAndHttpHost()), '/');
 
-        $rawUri = Str::before($request->getRequestUri(), '?');
+            $rawUri = Str::before($request->getRequestUri(), '?');
 
-        return Str::endsWith($rawUri, '/') ? $this->finishUrlWithTrailingSlash($url) : $url;
+            return Str::endsWith($rawUri, '/') ? $this->finishUrlWithTrailingSlash($url) : $url;
+        };
+
+        return App::call($urlResolver, ['request' => $request]);
     }
 
     /**
