@@ -12,6 +12,7 @@ use Illuminate\Support\ViewErrorBag;
 use Inertia\AlwaysProp;
 use Inertia\Inertia;
 use Inertia\Middleware;
+use Inertia\Tests\Stubs\CustomUrlResolverMiddleware;
 use Inertia\Tests\Stubs\ExampleMiddleware;
 use LogicException;
 use PHPUnit\Framework\Attributes\After;
@@ -128,6 +129,21 @@ class MiddlewareTest extends TestCase
         $response->assertStatus(409);
         $response->assertHeader('X-Inertia-Location', $this->baseUrl);
         self::assertEmpty($response->getContent());
+    }
+
+    public function test_the_url_can_be_resolved_with_a_custom_resolver()
+    {
+        $this->prepareMockEndpoint(middleware: new CustomUrlResolverMiddleware);
+
+        $response = $this->withoutExceptionHandling()->get('/', [
+            'X-Inertia' => 'true',
+        ]);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Edit',
+            'url' => '/my-custom-url',
+        ]);
     }
 
     public function test_validation_errors_are_registered_as_of_default(): void

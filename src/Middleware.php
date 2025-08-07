@@ -48,7 +48,7 @@ class Middleware
      *
      * @see https://inertiajs.com/shared-data
      *
-     * @return array
+     * @return array<string, mixed>
      */
     public function share(Request $request)
     {
@@ -70,6 +70,16 @@ class Middleware
     }
 
     /**
+     * Defines a callback that returns the relative URL.
+     *
+     * @return Closure|null
+     */
+    public function urlResolver()
+    {
+        return null;
+    }
+
+    /**
      * Handle the incoming request.
      *
      * @return Response
@@ -82,6 +92,10 @@ class Middleware
 
         Inertia::share($this->share($request));
         Inertia::setRootView($this->rootView($request));
+
+        if ($urlResolver = $this->urlResolver()) {
+            Inertia::resolveUrlUsing($urlResolver);
+        }
 
         $response = $next($request);
         $response->headers->set('Vary', Header::INERTIA);

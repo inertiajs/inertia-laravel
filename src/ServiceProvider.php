@@ -32,6 +32,14 @@ class ServiceProvider extends BaseServiceProvider
         $this->registerTestingMacros();
         $this->registerMiddleware();
 
+        $this->app->bind('inertia.view-finder', function ($app) {
+            return new FileViewFinder(
+                $app['files'],
+                $app['config']->get('inertia.page_paths'),
+                $app['config']->get('inertia.page_extensions')
+            );
+        });
+
         $this->app->bind('inertia.testing.view-finder', function ($app) {
             return new FileViewFinder(
                 $app['files'],
@@ -68,6 +76,7 @@ class ServiceProvider extends BaseServiceProvider
             Commands\CreateMiddleware::class,
             Commands\StartSsr::class,
             Commands\StopSsr::class,
+            Commands\CheckSsr::class,
         ]);
     }
 
