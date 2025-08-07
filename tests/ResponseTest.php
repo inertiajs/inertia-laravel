@@ -17,7 +17,7 @@ use Inertia\DeferProp;
 use Inertia\Inertia;
 use Inertia\LazyProp;
 use Inertia\MergeProp;
-use Inertia\ProvidesInertiaProps;
+use Inertia\ProvidesInertiaProperties;
 use Inertia\RenderContext;
 use Inertia\Response;
 use Inertia\Tests\Stubs\FakeResource;
@@ -767,7 +767,7 @@ class ResponseTest extends TestCase
 
         $response = new Response('User/Edit', [
             'foo' => 'bar',
-            new class implements ProvidesInertiaProps
+            new class implements ProvidesInertiaProperties
             {
                 public function toInertiaProps(RenderContext $context): iterable
                 {
@@ -872,7 +872,7 @@ class ResponseTest extends TestCase
 
         $response->with(['foo' => 'bar', 'baz' => 'qux'])
             ->with(['quux' => 'corge'])
-            ->with(new class implements ProvidesInertiaProps
+            ->with(new class implements ProvidesInertiaProperties
             {
                 public function toInertiaProps(RenderContext $context): iterable
                 {
