@@ -6,7 +6,7 @@ if (! function_exists('inertia')) {
      *
      * @param  null|string  $component
      * @param  array|\Illuminate\Contracts\Support\Arrayable  $props
-     * @return \Inertia\ResponseFactory|\Inertia\Response
+     * @return ($component is null ? \Inertia\ResponseFactory : \Inertia\Response)
      */
     function inertia($component = null, $props = [])
     {

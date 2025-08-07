@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static void flushShared()
  * @method static void version(\Closure|string|null $version)
  * @method static string getVersion()
+ * @method static void resolveUrlUsing(\Closure|null $urlResolver = null)
  * @method static \Inertia\OptionalProp optional(callable $callback)
  * @method static \Inertia\LazyProp lazy(callable $callback)
  * @method static \Inertia\DeferProp defer(callable $callback, string $group = 'default')

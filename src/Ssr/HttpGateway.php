@@ -3,24 +3,28 @@
 namespace Inertia\Ssr;
 
 use Exception;
+use Illuminate\Http\Client\StrayRequestException;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
-class HttpGateway implements Gateway
+class HttpGateway implements Gateway, HasHealthCheck
 {
     /**
      * Dispatch the Inertia page to the Server Side Rendering engine.
      */
     public function dispatch(array $page): ?Response
     {
-        if (! config('inertia.ssr.enabled', true) || ! (new BundleDetector)->detect()) {
+        if (! $this->shouldDispatch()) {
             return null;
         }
 
-        $url = str_replace('/render', '', rtrim(config('inertia.ssr.url', 'http://127.0.0.1:13714'), '/')).'/render';
-
         try {
-            $response = Http::post($url, $page)->throw()->json();
+            $response = Http::post($this->getUrl('/render'), $page)->throw()->json();
         } catch (Exception $e) {
+            if ($e instanceof StrayRequestException) {
+                throw $e;
+            }
+
             return null;
         }
 
@@ -32,5 +36,55 @@ class HttpGateway implements Gateway
             implode("\n", $response['head']),
             $response['body']
         );
+    }
+
+    /**
+     * Determine if the page should be dispatched to the SSR engine.
+     */
+    protected function shouldDispatch(): bool
+    {
+        return $this->ssrIsEnabled() && ($this->shouldDispatchWithoutBundle() || $this->bundleExists());
+    }
+
+    /**
+     * Determine if the SSR feature is enabled.
+     */
+    protected function ssrIsEnabled(): bool
+    {
+        return config('inertia.ssr.enabled', true);
+    }
+
+    /**
+     * Determine if the SSR server is healthy.
+     */
+    public function isHealthy(): bool
+    {
+        return Http::get($this->getUrl('/health'))->successful();
+    }
+
+    /**
+     * Determine if dispatch should proceed even if no bundle is detected.
+     */
+    protected function shouldDispatchWithoutBundle(): bool
+    {
+        return ! config('inertia.ssr.ensure_bundle_exists', true);
+    }
+
+    /**
+     * Check if an SSR bundle exists.
+     */
+    protected function bundleExists(): bool
+    {
+        return (new BundleDetector)->detect() !== null;
+    }
+
+    /**
+     * Get the SSR URL from the configuration, ensuring it ends with '/{$path}'.
+     */
+    public function getUrl(string $path): string
+    {
+        $path = Str::start($path, '/');
+
+        return str_replace($path, '', rtrim(config('inertia.ssr.url', 'http://127.0.0.1:13714'), '/')).$path;
     }
 }

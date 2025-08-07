@@ -2,13 +2,15 @@
 
 namespace Inertia;
 
+use Illuminate\Support\Arr;
+
 trait MergesProps
 {
     protected bool $merge = false;
 
     protected bool $deepMerge = false;
 
-    protected array $mergeStrategies = [];
+    protected array $matchOn = [];
 
     public function merge(): static
     {
@@ -24,6 +26,13 @@ trait MergesProps
         return $this->merge();
     }
 
+    public function matchOn(string|array $matchOn): static
+    {
+        $this->matchOn = Arr::wrap($matchOn);
+
+        return $this;
+    }
+
     public function shouldMerge(): bool
     {
         return $this->merge;
@@ -34,8 +43,8 @@ trait MergesProps
         return $this->deepMerge;
     }
 
-    public function mergeStrategies(): array
+    public function matchesOn(): array
     {
-        return $this->mergeStrategies;
+        return $this->matchOn;
     }
 }
