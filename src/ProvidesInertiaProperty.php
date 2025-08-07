@@ -2,7 +2,7 @@
 
 namespace Inertia;
 
-interface ProvidesInertiaProp
+interface ProvidesInertiaProperty
 {
     public function toInertiaProp(PropContext $prop): mixed;
 }

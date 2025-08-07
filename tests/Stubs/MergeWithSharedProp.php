@@ -4,9 +4,9 @@ namespace Inertia\Tests\Stubs;
 
 use Inertia\Inertia;
 use Inertia\PropContext;
-use Inertia\ProvidesInertiaProp;
+use Inertia\ProvidesInertiaProperty;
 
-class MergeWithSharedProp implements ProvidesInertiaProp
+class MergeWithSharedProp implements ProvidesInertiaProperty
 {
     public function __construct(protected array $items = []) {}
 
