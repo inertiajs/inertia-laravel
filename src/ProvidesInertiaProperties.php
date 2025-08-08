@@ -4,5 +4,5 @@ namespace Inertia;
 
 interface ProvidesInertiaProperties
 {
-    public function toInertiaProps(RenderContext $context): iterable;
+    public function toInertiaProperties(RenderContext $context): iterable;
 }

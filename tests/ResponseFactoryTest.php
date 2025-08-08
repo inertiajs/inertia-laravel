@@ -385,7 +385,7 @@ class ResponseFactoryTest extends TestCase
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
             return Inertia::render('User/Edit', new class implements ProvidesInertiaProperties
             {
-                public function toInertiaProps(RenderContext $context): iterable
+                public function toInertiaProperties(RenderContext $context): iterable
                 {
                     return [
                         'foo' => 'bar',

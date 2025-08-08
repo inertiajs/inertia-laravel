@@ -832,7 +832,7 @@ class ResponseTest extends TestCase
             'foo' => 'bar',
             new class implements ProvidesInertiaProperties
             {
-                public function toInertiaProps(RenderContext $context): iterable
+                public function toInertiaProperties(RenderContext $context): iterable
                 {
                     return collect([
                         'baz' => 'qux',
@@ -937,7 +937,7 @@ class ResponseTest extends TestCase
             ->with(['quux' => 'corge'])
             ->with(new class implements ProvidesInertiaProperties
             {
-                public function toInertiaProps(RenderContext $context): iterable
+                public function toInertiaProperties(RenderContext $context): iterable
                 {
                     return collect(['grault' => 'garply']);
                 }
