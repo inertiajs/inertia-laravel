@@ -170,7 +170,7 @@ class ResponseFactory
     }
 
     /**
-     * @param  array|Arrayable  $props
+     * @param  array|Arrayable|ProvidesInertiaProperties  $props
      */
     public function render(string $component, $props = []): Response
     {
@@ -180,6 +180,9 @@ class ResponseFactory
 
         if ($props instanceof Arrayable) {
             $props = $props->toArray();
+        } elseif ($props instanceof ProvidesInertiaProperties) {
+            // Will be resolved in Response::resolveResponsableProperties()
+            $props = [$props];
         }
 
         return new Response(

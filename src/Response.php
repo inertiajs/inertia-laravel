@@ -59,13 +59,15 @@ class Response implements Responsable
     }
 
     /**
-     * @param  string|array  $key
+     * @param  string|array|ProvidesInertiaProperties  $key
      * @param  mixed  $value
      * @return $this
      */
     public function with($key, $value = null): self
     {
-        if (is_array($key)) {
+        if ($key instanceof ProvidesInertiaProperties) {
+            $this->props[] = $key;
+        } elseif (is_array($key)) {
             $this->props = array_merge($this->props, $key);
         } else {
             $this->props[$key] = $value;
@@ -140,6 +142,7 @@ class Response implements Responsable
      */
     public function resolveProperties(Request $request, array $props): array
     {
+        $props = $this->resolveInertiaPropsProviders($props, $request);
         $props = $this->resolvePartialProperties($props, $request);
         $props = $this->resolveArrayableProperties($props, $request);
         $props = $this->resolveAlways($props);
@@ -149,12 +152,36 @@ class Response implements Responsable
     }
 
     /**
+     * Resolve the ProvidesInertiaProperties props.
+     */
+    public function resolveInertiaPropsProviders(array $props, Request $request): array
+    {
+        $newProps = [];
+
+        $renderContext = new RenderContext($this->component, $request);
+
+        foreach ($props as $key => $value) {
+            if (is_numeric($key) && $value instanceof ProvidesInertiaProperties) {
+                // Pipe into a Collection to leverage Collection::getArrayableItems()
+                $newProps = array_merge(
+                    $newProps,
+                    collect($value->toInertiaProperties($renderContext))->all()
+                );
+            } else {
+                $newProps[$key] = $value;
+            }
+        }
+
+        return $newProps;
+    }
+
+    /**
      * Resolve the `only` and `except` partial request props.
      */
     public function resolvePartialProperties(array $props, Request $request): array
     {
         if (! $this->isPartial($request)) {
-            return array_filter($this->props, static function ($prop) {
+            return array_filter($props, static function ($prop) {
                 return ! ($prop instanceof IgnoreFirstLoad);
             });
         }

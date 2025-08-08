@@ -17,6 +17,8 @@ use Inertia\DeferProp;
 use Inertia\Inertia;
 use Inertia\LazyProp;
 use Inertia\MergeProp;
+use Inertia\ProvidesInertiaProperties;
+use Inertia\RenderContext;
 use Inertia\Response;
 use Inertia\Tests\Stubs\FakeResource;
 use Inertia\Tests\Stubs\MergeWithSharedProp;
@@ -822,6 +824,33 @@ class ResponseTest extends TestCase
         $this->assertFalse(isset($page->props->user));
     }
 
+    public function test_inertia_responsable_objects(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+
+        $response = new Response('User/Edit', [
+            'foo' => 'bar',
+            new class implements ProvidesInertiaProperties
+            {
+                public function toInertiaProperties(RenderContext $context): iterable
+                {
+                    return collect([
+                        'baz' => 'qux',
+                    ]);
+                }
+            },
+            'quux' => 'corge',
+
+        ], 'app', '123');
+        $response = $response->toResponse($request);
+        $view = $response->getOriginalContent();
+        $page = $view->getData()['page'];
+
+        $this->assertSame('bar', $page['props']['foo']);
+        $this->assertSame('qux', $page['props']['baz']);
+        $this->assertSame('corge', $page['props']['quux']);
+    }
+
     public function test_inertia_response_type_prop(): void
     {
         $request = Request::create('/user/123', 'GET');
@@ -897,6 +926,30 @@ class ResponseTest extends TestCase
         $this->assertSame('Jonathan Reinink', $auth['user']['name']);
         $this->assertTrue($auth['user.can']['do.stuff']);
         $this->assertFalse(array_key_exists('can', $auth));
+    }
+
+    public function test_props_can_be_added_using_the_with_method(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+        $response = new Response('User/Edit', [], 'app', '123');
+
+        $response->with(['foo' => 'bar', 'baz' => 'qux'])
+            ->with(['quux' => 'corge'])
+            ->with(new class implements ProvidesInertiaProperties
+            {
+                public function toInertiaProperties(RenderContext $context): iterable
+                {
+                    return collect(['grault' => 'garply']);
+                }
+            });
+
+        $response = $response->toResponse($request);
+        $view = $response->getOriginalContent();
+        $page = $view->getData()['page'];
+
+        $this->assertSame('bar', $page['props']['foo']);
+        $this->assertSame('qux', $page['props']['baz']);
+        $this->assertSame('corge', $page['props']['quux']);
     }
 
     public function test_responsable_with_invalid_key(): void
