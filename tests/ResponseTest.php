@@ -14,10 +14,12 @@ use Illuminate\Support\Fluent;
 use Illuminate\View\View;
 use Inertia\AlwaysProp;
 use Inertia\DeferProp;
+use Inertia\Inertia;
 use Inertia\LazyProp;
 use Inertia\MergeProp;
 use Inertia\Response;
 use Inertia\Tests\Stubs\FakeResource;
+use Inertia\Tests\Stubs\MergeWithSharedProp;
 use Mockery;
 
 class ResponseTest extends TestCase
@@ -818,6 +820,29 @@ class ResponseTest extends TestCase
         $this->assertSame('The email field is required.', $page->props->errors->name);
         $this->assertSame('Taylor Otwell', $page->props->data->name);
         $this->assertFalse(isset($page->props->user));
+    }
+
+    public function test_inertia_response_type_prop(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+
+        Inertia::share('items', ['foo']);
+        Inertia::share('deep.foo.bar', ['foo']);
+
+        $response = new Response('User/Edit', [
+            'items' => new MergeWithSharedProp(['bar']),
+            'deep' => [
+                'foo' => [
+                    'bar' => new MergeWithSharedProp(['baz']),
+                ],
+            ],
+        ], 'app', '123');
+        $response = $response->toResponse($request);
+        $view = $response->getOriginalContent();
+        $page = $view->getData()['page'];
+
+        $this->assertSame(['foo', 'bar'], $page['props']['items']);
+        $this->assertSame(['foo', 'baz'], $page['props']['deep']['foo']['bar']);
     }
 
     public function test_top_level_dot_props_get_unpacked(): void
