@@ -19,27 +19,50 @@ class ResponseFactory
 {
     use Macroable;
 
-    /** @var string */
+    /**
+     * The name of the root view.
+     *
+     * @var string
+     */
     protected $rootView = 'app';
 
-    /** @var array<string, mixed> */
+    /**
+     * The shared properties.
+     *
+     * @var array<string, mixed>
+     */
     protected $sharedProps = [];
 
-    /** @var Closure|string|null */
+    /**
+     * The asset version.
+     *
+     * @var Closure|string|null
+     */
     protected $version;
 
-    /** @var bool */
+    /**
+     * Indicates if the browser history should be cleared.
+     *
+     * @var bool
+     */
     protected $clearHistory = false;
 
-    /** @var bool|null */
+    /**
+     * Indicates if the browser history should be encrypted.
+     *
+     * @var bool|null
+     */
     protected $encryptHistory;
 
-    /** @var Closure|null */
+    /**
+     * The URL resolver callback.
+     *
+     * @var Closure|null
+     */
     protected $urlResolver;
 
-    /***
-     * @param string $name The name of the root view
-     * @return void
+    /**
+     * Set the root view.
      */
     public function setRootView(string $name): void
     {
@@ -47,7 +70,9 @@ class ResponseFactory
     }
 
     /**
-     * @param  string|array<string, mixed>|Arrayable<array-key, mixed>  $key
+     * Share data with all Inertia responses.
+     *
+     * @param  string|array<string, mixed>|\Illuminate\Contracts\Support\Arrayable<array-key, mixed>  $key
      * @param  mixed  $value
      */
     public function share($key, $value = null): void
@@ -62,6 +87,8 @@ class ResponseFactory
     }
 
     /**
+     * Get shared data.
+     *
      * @param  mixed  $default
      * @return mixed
      */
@@ -75,6 +102,8 @@ class ResponseFactory
     }
 
     /**
+     * Flush all shared data.
+     *
      * @return void
      */
     public function flushShared()
@@ -83,13 +112,18 @@ class ResponseFactory
     }
 
     /**
-     * @param  Closure|string|null  $version
+     * Set the asset version.
+     *
+     * @param  \Closure|string|null  $version
      */
     public function version($version): void
     {
         $this->version = $version;
     }
 
+    /**
+     * Get the asset version.
+     */
     public function getVersion(): string
     {
         $version = $this->version instanceof Closure
@@ -99,17 +133,25 @@ class ResponseFactory
         return (string) $version;
     }
 
+    /**
+     * Set the URL resolver.
+     */
     public function resolveUrlUsing(?Closure $urlResolver = null): void
     {
         $this->urlResolver = $urlResolver;
     }
 
+    /**
+     * Clear the browser history on the next visit.
+     */
     public function clearHistory(): void
     {
         session(['inertia.clear_history' => true]);
     }
 
     /**
+     * Encrypt the browser history.
+     *
      * @param  bool  $encrypt
      */
     public function encryptHistory($encrypt = true): void
@@ -118,6 +160,8 @@ class ResponseFactory
     }
 
     /**
+     * Create a lazy property.
+     *
      * @deprecated Use `optional` instead.
      */
     public function lazy(callable $callback): LazyProp
@@ -125,17 +169,25 @@ class ResponseFactory
         return new LazyProp($callback);
     }
 
+    /**
+     * Create an optional property.
+     */
     public function optional(callable $callback): OptionalProp
     {
         return new OptionalProp($callback);
     }
 
+    /**
+     * Create a deferred property.
+     */
     public function defer(callable $callback, string $group = 'default'): DeferProp
     {
         return new DeferProp($callback, $group);
     }
 
     /**
+     * Create a merge property.
+     *
      * @param  mixed  $value
      */
     public function merge($value): MergeProp
@@ -144,6 +196,8 @@ class ResponseFactory
     }
 
     /**
+     * Create a deep merge property.
+     *
      * @param  mixed  $value
      */
     public function deepMerge($value): MergeProp
@@ -152,6 +206,8 @@ class ResponseFactory
     }
 
     /**
+     * Create an always property.
+     *
      * @param  mixed  $value
      */
     public function always($value): AlwaysProp
@@ -160,7 +216,9 @@ class ResponseFactory
     }
 
     /**
-     * @throws ComponentNotFoundException
+     * Find the component or fail.
+     *
+     * @throws \Inertia\ComponentNotFoundException
      */
     protected function findComponentOrFail(string $component): void
     {
@@ -172,7 +230,9 @@ class ResponseFactory
     }
 
     /**
-     * @param  array<string, mixed>|Arrayable<array-key, mixed>  $props
+     * Create an Inertia response.
+     *
+     * @param  array<string, mixed>|\Illuminate\Contracts\Support\Arrayable<array-key, mixed>  $props
      */
     public function render(string $component, $props = []): Response
     {
@@ -195,7 +255,9 @@ class ResponseFactory
     }
 
     /**
-     * @param  string|SymfonyRedirect  $url
+     * Create an Inertia location response.
+     *
+     * @param  string|\Symfony\Component\HttpFoundation\RedirectResponse  $url
      */
     public function location($url): SymfonyResponse
     {

@@ -8,6 +8,8 @@ use Illuminate\Support\Arr;
 class TestResponseMacros
 {
     /**
+     * Register the 'assertInertia' macro for TestResponse.
+     *
      * @return Closure
      */
     public function assertInertia()
@@ -27,6 +29,8 @@ class TestResponseMacros
     }
 
     /**
+     * Register the 'inertiaPage' macro for TestResponse.
+     *
      * @return Closure
      */
     public function inertiaPage()
@@ -38,6 +42,8 @@ class TestResponseMacros
     }
 
     /**
+     * Register the 'inertiaProps' macro for TestResponse.
+     *
      * @return Closure
      */
     public function inertiaProps()

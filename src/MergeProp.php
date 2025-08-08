@@ -4,14 +4,24 @@ namespace Inertia;
 
 use Illuminate\Support\Facades\App;
 
+/**
+ * A property that merges with existing client-side data during partial reloads.
+ * Supports both shallow and deep merging strategies.
+ */
 class MergeProp implements Mergeable
 {
     use MergesProps;
 
-    /** @var mixed */
+    /**
+     * The property value.
+     *
+     * @var mixed
+     */
     protected $value;
 
     /**
+     * Create a new merge property instance.
+     *
      * @param  mixed  $value
      */
     public function __construct($value)
@@ -21,6 +31,8 @@ class MergeProp implements Mergeable
     }
 
     /**
+     * Resolve the property value.
+     *
      * @return mixed
      */
     public function __invoke()

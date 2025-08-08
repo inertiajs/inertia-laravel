@@ -5,7 +5,7 @@ namespace Inertia;
 class Directive
 {
     /**
-     * Compiles the "@inertia" directive.
+     * Compile the "@inertia" Blade directive.
      *
      * @param  string  $expression
      */
@@ -30,7 +30,7 @@ class Directive
     }
 
     /**
-     * Compiles the "@inertiaHead" directive.
+     * Compile the "@inertiaHead" Blade directive.
      *
      * @param  string  $expression
      */

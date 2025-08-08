@@ -12,10 +12,12 @@ use Inertia\Ssr\HttpGateway;
 use Inertia\Support\Header;
 use Inertia\Testing\TestResponseMacros;
 use LogicException;
-use ReflectionException;
 
 class ServiceProvider extends BaseServiceProvider
 {
+    /**
+     * Register the service provider.
+     */
     public function register(): void
     {
         $this->app->singleton(ResponseFactory::class);
@@ -49,6 +51,9 @@ class ServiceProvider extends BaseServiceProvider
         });
     }
 
+    /**
+     * Boot the service provider.
+     */
     public function boot(): void
     {
         $this->registerConsoleCommands();
@@ -58,6 +63,9 @@ class ServiceProvider extends BaseServiceProvider
         ]);
     }
 
+    /**
+     * Register the Blade directives.
+     */
     protected function registerBladeDirectives(): void
     {
         $this->callAfterResolving('blade.compiler', function ($blade) {
@@ -66,6 +74,9 @@ class ServiceProvider extends BaseServiceProvider
         });
     }
 
+    /**
+     * Register the console commands.
+     */
     protected function registerConsoleCommands(): void
     {
         if (! $this->app->runningInConsole()) {
@@ -80,6 +91,9 @@ class ServiceProvider extends BaseServiceProvider
         ]);
     }
 
+    /**
+     * Register the request macro.
+     */
     protected function registerRequestMacro(): void
     {
         Request::macro('inertia', function () {
@@ -87,6 +101,9 @@ class ServiceProvider extends BaseServiceProvider
         });
     }
 
+    /**
+     * Register the router macro.
+     */
     protected function registerRouterMacro(): void
     {
         /**
@@ -100,7 +117,9 @@ class ServiceProvider extends BaseServiceProvider
     }
 
     /**
-     * @throws ReflectionException|LogicException
+     * Register the testing macros.
+     *
+     * @throws \LogicException
      */
     protected function registerTestingMacros(): void
     {
@@ -113,6 +132,9 @@ class ServiceProvider extends BaseServiceProvider
         throw new LogicException('Could not detect TestResponse class.');
     }
 
+    /**
+     * Register the middleware aliases.
+     */
     protected function registerMiddleware(): void
     {
         $this->app['router']->aliasMiddleware(

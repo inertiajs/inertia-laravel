@@ -2,10 +2,13 @@
 
 namespace Inertia\Ssr;
 
+/**
+ * Server-side rendering gateway interface.
+ */
 interface Gateway
 {
     /**
-     * Dispatch the Inertia page to the Server Side Rendering engine.
+     * Dispatch the Inertia page to the SSR engine.
      *
      * @param  array<string, mixed>  $page
      */

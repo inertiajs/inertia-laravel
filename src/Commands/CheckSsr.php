@@ -25,7 +25,7 @@ class CheckSsr extends Command
     protected $description = 'Check the Inertia SSR server health status';
 
     /**
-     * check the SSR server via a Node process.
+     * Check the Inertia SSR server health status.
      */
     public function handle(Gateway $gateway): int
     {

@@ -27,7 +27,7 @@ class ReloadRequest
     }
 
     /**
-     * Request the Inertia page as a partial reload.
+     * Execute the reload request with appropriate Inertia headers.
      *
      * @return TestResponse<Response>
      */
