@@ -40,7 +40,6 @@
         "mockery/mockery": "^1.3.3",
         "phpunit/phpunit": "^10.4|^11.5",
         "laravel/pint": "^1.16",
-        "phpstan/phpstan": "^2.1",
         "larastan/larastan": "^3.0"
     },
     "suggest": {
