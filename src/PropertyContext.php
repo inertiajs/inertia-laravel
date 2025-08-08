@@ -4,7 +4,7 @@ namespace Inertia;
 
 use Illuminate\Http\Request;
 
-class PropContext
+class PropertyContext
 {
     public function __construct(
         public string $key,

@@ -273,7 +273,7 @@ class Response implements Responsable
             $currentKey = $parentKey ? $parentKey.'.'.$key : $key;
 
             if ($value instanceof ProvidesInertiaProperty) {
-                $value = $value->toInertiaProp(new PropContext($currentKey, $props, $request));
+                $value = $value->toInertiaProperty(new PropertyContext($currentKey, $props, $request));
             }
 
             if ($value instanceof Arrayable) {

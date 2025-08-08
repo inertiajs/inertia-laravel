@@ -4,5 +4,5 @@ namespace Inertia;
 
 interface ProvidesInertiaProperty
 {
-    public function toInertiaProp(PropContext $prop): mixed;
+    public function toInertiaProperty(PropertyContext $prop): mixed;
 }
