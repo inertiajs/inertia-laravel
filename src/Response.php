@@ -165,7 +165,7 @@ class Response implements Responsable
                 // Pipe into a Collection to leverage Collection::getArrayableItems()
                 $newProps = array_merge(
                     $newProps,
-                    collect($value->toInertiaProps($renderContext))->all()
+                    collect($value->toInertiaProperties($renderContext))->all()
                 );
             } else {
                 $newProps[$key] = $value;
