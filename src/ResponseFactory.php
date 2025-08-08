@@ -22,14 +22,16 @@ class ResponseFactory
     /** @var string */
     protected $rootView = 'app';
 
-    /** @var array */
+    /** @var array<string, mixed> */
     protected $sharedProps = [];
 
     /** @var Closure|string|null */
     protected $version;
 
+    /** @var bool */
     protected $clearHistory = false;
 
+    /** @var bool|null */
     protected $encryptHistory;
 
     /** @var Closure|null */
@@ -45,7 +47,7 @@ class ResponseFactory
     }
 
     /**
-     * @param  string|array|Arrayable  $key
+     * @param  string|array<string, mixed>|Arrayable<array-key, mixed>  $key
      * @param  mixed  $value
      */
     public function share($key, $value = null): void
@@ -170,7 +172,7 @@ class ResponseFactory
     }
 
     /**
-     * @param  array|Arrayable  $props
+     * @param  array<string, mixed>|Arrayable<array-key, mixed>  $props
      */
     public function render(string $component, $props = []): Response
     {

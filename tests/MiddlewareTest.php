@@ -4,6 +4,7 @@ namespace Inertia\Tests;
 
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Route as RouteInstance;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
@@ -131,7 +132,7 @@ class MiddlewareTest extends TestCase
         self::assertEmpty($response->getContent());
     }
 
-    public function test_the_url_can_be_resolved_with_a_custom_resolver()
+    public function test_the_url_can_be_resolved_with_a_custom_resolver(): void
     {
         $this->prepareMockEndpoint(middleware: new CustomUrlResolverMiddleware);
 
@@ -308,7 +309,10 @@ class MiddlewareTest extends TestCase
         $response->assertViewHas('page.version', hash('xxh128', $contents));
     }
 
-    private function prepareMockEndpoint($version = null, $shared = [], $middleware = null): \Illuminate\Routing\Route
+    /**
+     * @param  array<string, mixed>  $shared
+     */
+    private function prepareMockEndpoint(int|string|null $version = null, array $shared = [], ?Middleware $middleware = null): RouteInstance
     {
         if (is_null($middleware)) {
             $middleware = new ExampleMiddleware($version, $shared);

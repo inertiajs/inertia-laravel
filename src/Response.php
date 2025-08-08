@@ -20,26 +20,50 @@ class Response implements Responsable
 {
     use Macroable;
 
+    /**
+     * @var string
+     */
     protected $component;
 
+    /**
+     * @var array<string, mixed>
+     */
     protected $props;
 
+    /**
+     * @var string
+     */
     protected $rootView;
 
+    /**
+     * @var string
+     */
     protected $version;
 
+    /**
+     * @var bool
+     */
     protected $clearHistory;
 
+    /**
+     * @var bool
+     */
     protected $encryptHistory;
 
+    /**
+     * @var array<string, mixed>
+     */
     protected $viewData = [];
 
+    /**
+     * @var array<int, mixed>
+     */
     protected $cacheFor = [];
 
     protected ?Closure $urlResolver = null;
 
     /**
-     * @param  array|Arrayable  $props
+     * @param  array<string, mixed>  $props
      */
     public function __construct(
         string $component,
@@ -50,7 +74,7 @@ class Response implements Responsable
         ?Closure $urlResolver = null
     ) {
         $this->component = $component;
-        $this->props = $props instanceof Arrayable ? $props->toArray() : $props;
+        $this->props = $props;
         $this->rootView = $rootView;
         $this->version = $version;
         $this->clearHistory = session()->pull('inertia.clear_history', false);
@@ -59,7 +83,7 @@ class Response implements Responsable
     }
 
     /**
-     * @param  string|array  $key
+     * @param  string|array<string, mixed>  $key
      * @param  mixed  $value
      * @return $this
      */
@@ -75,7 +99,7 @@ class Response implements Responsable
     }
 
     /**
-     * @param  string|array  $key
+     * @param  string|array<string, mixed>  $key
      * @param  mixed  $value
      * @return $this
      */
@@ -97,6 +121,9 @@ class Response implements Responsable
         return $this;
     }
 
+    /**
+     * @param  string|array<int, mixed>  $cacheFor
+     */
     public function cache(string|array $cacheFor): self
     {
         $this->cacheFor = is_array($cacheFor) ? $cacheFor : [$cacheFor];
@@ -137,6 +164,9 @@ class Response implements Responsable
 
     /**
      * Resolve the properites for the response.
+     *
+     * @param  array<string, mixed>  $props
+     * @return array<string, mixed>
      */
     public function resolveProperties(Request $request, array $props): array
     {
@@ -150,6 +180,9 @@ class Response implements Responsable
 
     /**
      * Resolve the `only` and `except` partial request props.
+     *
+     * @param  array<string, mixed>  $props
+     * @return array<string, mixed>
      */
     public function resolvePartialProperties(array $props, Request $request): array
     {
@@ -181,6 +214,9 @@ class Response implements Responsable
 
     /**
      * Resolve all arrayables properties into an array.
+     *
+     * @param  array<string, mixed>  $props
+     * @return array<string, mixed>
      */
     public function resolveArrayableProperties(array $props, Request $request, bool $unpackDotProps = true): array
     {
@@ -210,6 +246,9 @@ class Response implements Responsable
 
     /**
      * Resolve the `only` partial request props.
+     *
+     * @param  array<string, mixed>  $props
+     * @return array<string, mixed>
      */
     public function resolveOnly(Request $request, array $props): array
     {
@@ -226,6 +265,9 @@ class Response implements Responsable
 
     /**
      * Resolve the `except` partial request props.
+     *
+     * @param  array<string, mixed>  $props
+     * @return array<string, mixed>
      */
     public function resolveExcept(Request $request, array $props): array
     {
@@ -238,6 +280,9 @@ class Response implements Responsable
 
     /**
      * Resolve `always` properties that should always be included on all visits, regardless of "only" or "except" requests.
+     *
+     * @param  array<string, mixed>  $props
+     * @return array<string, mixed>
      */
     public function resolveAlways(array $props): array
     {
@@ -253,6 +298,9 @@ class Response implements Responsable
 
     /**
      * Resolve all necessary class instances in the given props.
+     *
+     * @param  array<string, mixed>  $props
+     * @return array<string, mixed>
      */
     public function resolvePropertyInstances(array $props, Request $request, ?string $parentKey = null): array
     {
@@ -304,6 +352,8 @@ class Response implements Responsable
 
     /**
      * Resolve the cache directions for the response.
+     *
+     * @return array<string, mixed>
      */
     public function resolveCacheDirections(Request $request): array
     {
@@ -322,6 +372,9 @@ class Response implements Responsable
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function resolveMergeProps(Request $request): array
     {
         $resetProps = array_filter(explode(',', $request->header(Header::RESET, '')));
@@ -340,7 +393,7 @@ class Response implements Responsable
             ->keys();
 
         $matchPropsOn = $mergeProps
-            ->map(function ($prop, $key) {
+            ->map(function (Mergeable $prop, $key) {
                 return collect($prop->matchesOn())
                     ->map(fn ($strategy) => $key.'.'.$strategy)
                     ->toArray();
@@ -359,6 +412,9 @@ class Response implements Responsable
         ], fn ($prop) => count($prop) > 0);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function resolveDeferredProps(Request $request): array
     {
         if ($this->isPartial($request)) {

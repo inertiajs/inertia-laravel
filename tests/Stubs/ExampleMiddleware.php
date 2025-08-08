@@ -19,7 +19,10 @@ class ExampleMiddleware extends Middleware
      */
     protected $shared = [];
 
-    public function __construct($version = null, $shared = [])
+    /**
+     * @param  array<string, mixed>  $shared
+     */
+    public function __construct(mixed $version = null, array $shared = [])
     {
         $this->version = $version;
         $this->shared = $shared;

@@ -21,7 +21,7 @@ class HttpGatewayTest extends TestCase
         Http::preventStrayRequests();
     }
 
-    public function test_it_returns_null_when_ssr_is_disabled()
+    public function test_it_returns_null_when_ssr_is_disabled(): void
     {
         config([
             'inertia.ssr.enabled' => false,
@@ -31,7 +31,7 @@ class HttpGatewayTest extends TestCase
         $this->assertNull($this->gateway->dispatch(['page' => self::EXAMPLE_PAGE_OBJECT]));
     }
 
-    public function test_it_returns_null_when_no_bundle_file_is_detected()
+    public function test_it_returns_null_when_no_bundle_file_is_detected(): void
     {
         config([
             'inertia.ssr.enabled' => true,
@@ -41,7 +41,7 @@ class HttpGatewayTest extends TestCase
         $this->assertNull($this->gateway->dispatch(['page' => self::EXAMPLE_PAGE_OBJECT]));
     }
 
-    public function test_it_uses_the_configured_http_url_when_the_bundle_file_is_detected()
+    public function test_it_uses_the_configured_http_url_when_the_bundle_file_is_detected(): void
     {
         config([
             'inertia.ssr.enabled' => true,
@@ -63,7 +63,7 @@ class HttpGatewayTest extends TestCase
         $this->assertEquals('<div id="app">SSR Response</div>', $response->body);
     }
 
-    public function test_it_uses_the_configured_http_url_when_bundle_file_detection_is_disabled()
+    public function test_it_uses_the_configured_http_url_when_bundle_file_detection_is_disabled(): void
     {
         config([
             'inertia.ssr.enabled' => true,
@@ -86,7 +86,7 @@ class HttpGatewayTest extends TestCase
         $this->assertEquals('<div id="app">SSR Response</div>', $response->body);
     }
 
-    public function test_it_returns_null_when_the_http_request_fails()
+    public function test_it_returns_null_when_the_http_request_fails(): void
     {
         config([
             'inertia.ssr.enabled' => true,
@@ -100,7 +100,7 @@ class HttpGatewayTest extends TestCase
         $this->assertNull($this->gateway->dispatch(['page' => self::EXAMPLE_PAGE_OBJECT]));
     }
 
-    public function test_it_returns_null_when_invalid_json_is_returned()
+    public function test_it_returns_null_when_invalid_json_is_returned(): void
     {
         config([
             'inertia.ssr.enabled' => true,
@@ -114,7 +114,7 @@ class HttpGatewayTest extends TestCase
         $this->assertNull($this->gateway->dispatch(['page' => self::EXAMPLE_PAGE_OBJECT]));
     }
 
-    public function test_health_check_the_ssr_server()
+    public function test_health_check_the_ssr_server(): void
     {
         Http::fake([
             $this->gateway->getUrl('health') => Http::sequence()

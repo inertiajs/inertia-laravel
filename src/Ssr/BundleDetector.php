@@ -4,6 +4,9 @@ namespace Inertia\Ssr;
 
 class BundleDetector
 {
+    /**
+     * @return string|null
+     */
     public function detect()
     {
         return collect([

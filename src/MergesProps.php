@@ -10,6 +10,7 @@ trait MergesProps
 
     protected bool $deepMerge = false;
 
+    /** @var array<int, string> */
     protected array $matchOn = [];
 
     public function merge(): static
@@ -26,6 +27,9 @@ trait MergesProps
         return $this->merge();
     }
 
+    /**
+     * @param  string|array<int, string>  $matchOn
+     */
     public function matchOn(string|array $matchOn): static
     {
         $this->matchOn = Arr::wrap($matchOn);
@@ -43,6 +47,9 @@ trait MergesProps
         return $this->deepMerge;
     }
 
+    /**
+     * @return array<int, string>
+     */
     public function matchesOn(): array
     {
         return $this->matchOn;

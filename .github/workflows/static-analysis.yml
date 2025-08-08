@@ -1,0 +1,14 @@
+name: static analysis
+
+on:
+  push:
+    branches:
+      - "2.x"
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    uses: laravel/.github/.github/workflows/static-analysis.yml@main

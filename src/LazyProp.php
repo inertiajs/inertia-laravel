@@ -6,6 +6,9 @@ use Illuminate\Support\Facades\App;
 
 class LazyProp implements IgnoreFirstLoad
 {
+    /**
+     * @var callable
+     */
     protected $callback;
 
     public function __construct(callable $callback)
@@ -13,6 +16,9 @@ class LazyProp implements IgnoreFirstLoad
         $this->callback = $callback;
     }
 
+    /**
+     * @return mixed
+     */
     public function __invoke()
     {
         return App::call($this->callback);

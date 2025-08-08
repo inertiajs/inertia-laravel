@@ -128,7 +128,7 @@ class ResponseFactoryTest extends TestCase
         $response->assertJson(['component' => 'User/Edit']);
     }
 
-    public function test_the_url_can_be_resolved_with_a_custom_resolver()
+    public function test_the_url_can_be_resolved_with_a_custom_resolver(): void
     {
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
             Inertia::resolveUrlUsing(function ($request, ResponseFactory $otherDependency) {
@@ -352,7 +352,7 @@ class ResponseFactoryTest extends TestCase
         $this->assertInstanceOf(AlwaysProp::class, $alwaysProp);
     }
 
-    public function test_will_accept_arrayabe_props()
+    public function test_will_accept_arrayabe_props(): void
     {
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
             Inertia::share('foo', 'bar');

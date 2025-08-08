@@ -3,6 +3,7 @@
 namespace Inertia\Testing;
 
 use Closure;
+use Illuminate\Http\Response;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Illuminate\Testing\TestResponse;
 use InvalidArgumentException;
@@ -26,6 +27,9 @@ class AssertableInertia extends AssertableJson
     /** @var bool */
     private $clearHistory;
 
+    /**
+     * @param  TestResponse<Response>  $response
+     */
     public static function fromTestResponse(TestResponse $response): self
     {
         try {
@@ -53,6 +57,9 @@ class AssertableInertia extends AssertableJson
         return $instance;
     }
 
+    /**
+     * @param  bool|null  $shouldExist
+     */
     public function component(?string $value = null, $shouldExist = null): self
     {
         PHPUnit::assertSame($value, $this->component, 'Unexpected Inertia page component.');
@@ -84,6 +91,9 @@ class AssertableInertia extends AssertableJson
 
     /**
      * Reload the Inertia page and perform assertions on the response.
+     *
+     * @param  array<int, string>|string|null  $only
+     * @param  array<int, string>|string|null  $except
      */
     public function reload(?Closure $callback = null, array|string|null $only = null, array|string|null $except = null): self
     {
@@ -119,6 +129,8 @@ class AssertableInertia extends AssertableJson
 
     /**
      * Reload the Inertia page as a partial request with only the specified props.
+     *
+     * @param  array<int, string>|string  $only
      */
     public function reloadOnly(array|string $only, ?Closure $callback = null): self
     {
@@ -133,6 +145,8 @@ class AssertableInertia extends AssertableJson
 
     /**
      * Reload the Inertia page as a partial request excluding the specified props.
+     *
+     * @param  array<int, string>|string  $except
      */
     public function reloadExcept(array|string $except, ?Closure $callback = null): self
     {
@@ -145,6 +159,9 @@ class AssertableInertia extends AssertableJson
         });
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray()
     {
         return [

@@ -17,6 +17,9 @@ class AlwaysProp
         $this->value = $value;
     }
 
+    /**
+     * @return mixed
+     */
     public function __invoke()
     {
         return is_callable($this->value) ? App::call($this->value) : $this->value;

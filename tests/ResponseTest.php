@@ -5,7 +5,6 @@ namespace Inertia\Tests;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Http\Response as BaseResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -40,6 +39,7 @@ class ResponseTest extends TestCase
 
         $user = ['name' => 'Jonathan'];
         $response = new Response('User/Edit', ['user' => $user], 'app', '123');
+        /** @var BaseResponse $response */
         $response = $response->toResponse($request);
         $view = $response->getOriginalContent();
         $page = $view->getData()['page'];
@@ -73,6 +73,7 @@ class ResponseTest extends TestCase
             '123'
         );
         $response = $response->toResponse($request);
+        /** @var BaseResponse $response */
         $view = $response->getOriginalContent();
         $page = $view->getData()['page'];
 
@@ -114,6 +115,7 @@ class ResponseTest extends TestCase
             '123'
         );
         $response = $response->toResponse($request);
+        /** @var BaseResponse $response */
         $view = $response->getOriginalContent();
         $page = $view->getData()['page'];
 
@@ -149,6 +151,7 @@ class ResponseTest extends TestCase
             '123'
         );
         $response = $response->toResponse($request);
+        /** @var BaseResponse $response */
         $view = $response->getOriginalContent();
         $page = $view->getData()['page'];
 
@@ -184,6 +187,7 @@ class ResponseTest extends TestCase
             '123'
         );
         $response = $response->toResponse($request);
+        /** @var BaseResponse $response */
         $view = $response->getOriginalContent();
         $page = $view->getData()['page'];
 
@@ -219,6 +223,7 @@ class ResponseTest extends TestCase
             '123'
         );
         $response = $response->toResponse($request);
+        /** @var BaseResponse $response */
         $view = $response->getOriginalContent();
         $page = $view->getData()['page'];
 
@@ -261,6 +266,7 @@ class ResponseTest extends TestCase
             '123'
         );
         $response = $response->toResponse($request);
+        /** @var BaseResponse $response */
         $view = $response->getOriginalContent();
         $page = $view->getData()['page'];
 
@@ -301,6 +307,7 @@ class ResponseTest extends TestCase
             '123'
         );
         $response = $response->toResponse($request);
+        /** @var BaseResponse $response */
         $view = $response->getOriginalContent();
         $page = $view->getData()['page'];
 
@@ -341,6 +348,7 @@ class ResponseTest extends TestCase
             'app',
             '123'
         );
+        /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
 
@@ -372,6 +380,7 @@ class ResponseTest extends TestCase
             'app',
             '123'
         );
+        /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
 
@@ -392,6 +401,7 @@ class ResponseTest extends TestCase
 
         $user = (object) ['name' => 'Jonathan'];
         $response = new Response('User/Edit', ['user' => $user], 'app', '123');
+        /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
 
@@ -410,6 +420,7 @@ class ResponseTest extends TestCase
         $resource = new FakeResource(['name' => 'Jonathan']);
 
         $response = new Response('User/Edit', ['user' => $resource], 'app', '123');
+        /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
 
@@ -429,6 +440,7 @@ class ResponseTest extends TestCase
             'users' => fn () => [['name' => 'Jonathan']],
             'organizations' => fn () => [['name' => 'Inertia']],
         ], 'app', '123');
+        /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
 
@@ -455,6 +467,7 @@ class ResponseTest extends TestCase
             'users' => fn () => [['name' => 'Jonathan']],
             'organizations' => fn () => [['name' => 'Inertia']],
         ], 'app', '123');
+        /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
 
@@ -482,10 +495,11 @@ class ResponseTest extends TestCase
         $callable = static function () use ($users) {
             $page = new LengthAwarePaginator($users->take(2), $users->count(), 2);
 
-            return new class($page, JsonResource::class) extends ResourceCollection {};
+            return new class($page) extends ResourceCollection {};
         };
 
         $response = new Response('User/Index', ['users' => $callable], 'app', '123');
+        /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
 
@@ -535,11 +549,12 @@ class ResponseTest extends TestCase
 
             // nested array with ResourceCollection to resolve
             return [
-                'users' => new class($page, JsonResource::class) extends ResourceCollection {},
+                'users' => new class($page) extends ResourceCollection {},
             ];
         };
 
         $response = new Response('User/Index', ['something' => $callable], 'app', '123');
+        /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
 
@@ -583,6 +598,7 @@ class ResponseTest extends TestCase
         $resource = FakeResource::make(['name' => 'Jonathan']);
 
         $response = new Response('User/Edit', ['user' => $resource], 'app', '123');
+        /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
 
@@ -603,9 +619,10 @@ class ResponseTest extends TestCase
         $promise = Mockery::mock('GuzzleHttp\Promise\PromiseInterface')
             ->shouldReceive('wait')
             ->andReturn($user)
-            ->mock();
+            ->getMock();
 
         $response = new Response('User/Edit', ['user' => $promise], 'app', '123');
+        /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
 
@@ -625,6 +642,7 @@ class ResponseTest extends TestCase
 
         $user = (object) ['name' => 'Jonathan'];
         $response = new Response('User/Edit', ['user' => $user, 'partial' => 'partial-data'], 'app', '123');
+        /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
 
@@ -648,6 +666,7 @@ class ResponseTest extends TestCase
 
         $user = (object) ['name' => 'Jonathan'];
         $response = new Response('User/Edit', ['user' => $user, 'partial' => 'partial-data'], 'app', '123');
+        /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
 
@@ -686,6 +705,7 @@ class ResponseTest extends TestCase
         ];
 
         $response = new Response('User/Edit', $props);
+        /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
 
@@ -720,6 +740,7 @@ class ResponseTest extends TestCase
         ];
 
         $response = new Response('User/Edit', $props);
+        /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
 
@@ -738,6 +759,7 @@ class ResponseTest extends TestCase
         });
 
         $response = new Response('Users', ['users' => [], 'lazy' => $lazyProp], 'app', '123');
+        /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
 
@@ -757,6 +779,7 @@ class ResponseTest extends TestCase
         });
 
         $response = new Response('Users', ['users' => [], 'lazy' => $lazyProp], 'app', '123');
+        /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
 
@@ -782,6 +805,7 @@ class ResponseTest extends TestCase
         });
 
         $response = new Response('Users', ['users' => [], 'defer' => $deferProp], 'app', '123');
+        /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
 
@@ -814,6 +838,7 @@ class ResponseTest extends TestCase
         ];
 
         $response = new Response('User/Edit', $props, 'app', '123');
+        /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
 
@@ -837,6 +862,7 @@ class ResponseTest extends TestCase
                 ],
             ],
         ], 'app', '123');
+        /** @var BaseResponse $response */
         $response = $response->toResponse($request);
         $view = $response->getOriginalContent();
         $page = $view->getData()['page'];
@@ -863,6 +889,7 @@ class ResponseTest extends TestCase
         $request->headers->add(['X-Inertia' => 'true']);
 
         $response = new Response('User/Edit', $props, 'app', '123');
+        /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData(true);
 
@@ -890,6 +917,7 @@ class ResponseTest extends TestCase
         $request->headers->add(['X-Inertia' => 'true']);
 
         $response = new Response('User/Edit', $props, 'app', '123');
+        /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData(true);
 
@@ -907,6 +935,7 @@ class ResponseTest extends TestCase
         $resource = new FakeResource(["\x00*\x00_invalid_key" => 'for object']);
 
         $response = new Response('User/Edit', ['resource' => $resource], 'app', '123');
+        /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData(true);
 
@@ -926,6 +955,7 @@ class ResponseTest extends TestCase
 
         $user = ['name' => 'Jonathan'];
         $response = new Response('User/Edit', ['user' => $user], 'app', '123');
+        /** @var BaseResponse $response */
         $response = $response->toResponse($request);
         $view = $response->getOriginalContent();
         $page = $view->getData()['page'];
@@ -945,6 +975,7 @@ class ResponseTest extends TestCase
         $request->headers->add(['X-Inertia' => 'true']);
 
         $response = new Response('Product/Show', []);
+        /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
 
@@ -957,6 +988,7 @@ class ResponseTest extends TestCase
         $request->headers->add(['X-Inertia' => 'true']);
 
         $response = new Response('User/Index', []);
+        /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
 
@@ -969,6 +1001,7 @@ class ResponseTest extends TestCase
         $request->headers->add(['X-Inertia' => 'true']);
 
         $response = new Response('User/Index', []);
+        /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
 
@@ -981,6 +1014,7 @@ class ResponseTest extends TestCase
         $request->headers->add(['X-Inertia' => 'true']);
 
         $response = new Response('User/Index', []);
+        /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
 
@@ -993,6 +1027,7 @@ class ResponseTest extends TestCase
         $request->headers->add(['X-Inertia' => 'true']);
 
         $response = new Response('User/Index', []);
+        /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
 

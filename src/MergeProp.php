@@ -20,6 +20,9 @@ class MergeProp implements Mergeable
         $this->merge = true;
     }
 
+    /**
+     * @return mixed
+     */
     public function __invoke()
     {
         return is_callable($this->value) ? App::call($this->value) : $this->value;

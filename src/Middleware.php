@@ -4,7 +4,9 @@ namespace Inertia;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Session\Store;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\MessageBag;
 use Inertia\Support\Header;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -135,7 +137,9 @@ class Middleware
     public function onVersionChange(Request $request, Response $response): Response
     {
         if ($request->hasSession()) {
-            $request->session()->reflash();
+            /** @var Store $session */
+            $session = $request->session();
+            $session->reflash();
         }
 
         return Inertia::location($request->fullUrl());
@@ -153,7 +157,10 @@ class Middleware
             return (object) [];
         }
 
-        return (object) collect($request->session()->get('errors')->getBags())->map(function ($bag) {
+        /** @var array<string, MessageBag> $bags */
+        $bags = $request->session()->get('errors')->getBags();
+
+        return (object) collect($bags)->map(function ($bag) {
             return (object) collect($bag->messages())->map(function ($errors) {
                 return $errors[0];
             })->toArray();
