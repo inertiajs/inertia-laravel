@@ -12,8 +12,7 @@ class ExampleInertiaPropsProvider implements ProvidesInertiaProperties
      */
     public function __construct(
         protected array $properties
-    ) {
-    }
+    ) {}
 
     /**
      * @return array<string, mixed>

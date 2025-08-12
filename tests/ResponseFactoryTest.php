@@ -18,11 +18,9 @@ use Inertia\Inertia;
 use Inertia\LazyProp;
 use Inertia\MergeProp;
 use Inertia\OptionalProp;
-use Inertia\ProvidesInertiaProperties;
-use Inertia\RenderContext;
 use Inertia\ResponseFactory;
-use Inertia\Tests\Stubs\ExampleMiddleware;
 use Inertia\Tests\Stubs\ExampleInertiaPropsProvider;
+use Inertia\Tests\Stubs\ExampleMiddleware;
 
 class ResponseFactoryTest extends TestCase
 {
