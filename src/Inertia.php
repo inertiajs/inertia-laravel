@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Facade;
 
 /**
  * @method static void setRootView(string $name)
- * @method static void share(string|array|\Illuminate\Contracts\Support\Arrayable $key, mixed $value = null)
+ * @method static void share(string|array<array-key, mixed>|\Illuminate\Contracts\Support\Arrayable<array-key, mixed>|\Inertia\ProvidesInertiaProperties $key, mixed $value = null)
  * @method static mixed getShared(string|null $key = null, mixed $default = null)
  * @method static void clearHistory()
  * @method static void encryptHistory($encrypt = true)
@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Inertia\AlwaysProp always(mixed $value)
  * @method static \Inertia\MergeProp merge(mixed $value)
  * @method static \Inertia\MergeProp deepMerge(mixed $value)
- * @method static \Inertia\Response render(string $component, array|\Illuminate\Contracts\Support\Arrayable $props = [])
+ * @method static \Inertia\Response render(string $component, array<array-key, mixed>|\Illuminate\Contracts\Support\Arrayable<array-key, mixed>|\Inertia\ProvidesInertiaProperties $props = [])
  * @method static \Symfony\Component\HttpFoundation\Response location(string|\Symfony\Component\HttpFoundation\RedirectResponse $url)
  * @method static void macro(string $name, object|callable $macro)
  * @method static void mixin(object $mixin, bool $replace = true)

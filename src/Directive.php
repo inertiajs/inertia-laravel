@@ -5,7 +5,9 @@ namespace Inertia;
 class Directive
 {
     /**
-     * Compiles the "@inertia" directive.
+     * Compile the "@inertia" Blade directive. This directive renders the
+     * Inertia root element with the page data, handling both client-side
+     * rendering and SSR fallback scenarios.
      *
      * @param  string  $expression
      */
@@ -30,7 +32,9 @@ class Directive
     }
 
     /**
-     * Compiles the "@inertiaHead" directive.
+     * Compile the "@inertiaHead" Blade directive. This directive renders the
+     * head content for SSR responses, including meta tags, title, and other
+     * head elements from the server-side render.
      *
      * @param  string  $expression
      */

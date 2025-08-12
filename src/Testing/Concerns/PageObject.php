@@ -6,6 +6,10 @@ use Illuminate\Support\Arr;
 use InvalidArgumentException;
 use PHPUnit\Framework\Assert as PHPUnit;
 
+/**
+ * @deprecated This trait is deprecated and will be removed in a future version.
+ * @see https://github.com/inertiajs/inertia-laravel/pull/338
+ */
 trait PageObject
 {
     public function component(?string $value = null, $shouldExist = null): self

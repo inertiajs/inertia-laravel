@@ -23,7 +23,7 @@ class StopSsr extends Command
     protected $description = 'Stop the Inertia SSR server';
 
     /**
-     * Stop the SSR server.
+     * Stop the Inertia SSR server.
      */
     public function handle(): int
     {

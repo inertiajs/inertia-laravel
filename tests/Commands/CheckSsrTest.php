@@ -7,7 +7,7 @@ use Inertia\Ssr\HttpGateway;
 
 class CheckSsrTest extends TestCase
 {
-    public function test_success_on_healthy_ssr_server()
+    public function test_success_on_healthy_ssr_server(): void
     {
         $this->mock(HttpGateway::class, fn ($mock) => $mock
             ->shouldReceive('isHealthy')
@@ -20,7 +20,7 @@ class CheckSsrTest extends TestCase
             ->assertExitCode(0);
     }
 
-    public function test_failure_on_unhealthy_ssr_server()
+    public function test_failure_on_unhealthy_ssr_server(): void
     {
         $this->mock(HttpGateway::class, fn ($mock) => $mock
             ->shouldReceive('isHealthy')
@@ -33,7 +33,7 @@ class CheckSsrTest extends TestCase
             ->assertExitCode(1);
     }
 
-    public function test_failure_on_unsupported_gateway()
+    public function test_failure_on_unsupported_gateway(): void
     {
         $this->mock(Gateway::class);
 

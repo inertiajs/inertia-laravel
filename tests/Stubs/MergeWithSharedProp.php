@@ -8,6 +8,9 @@ use Inertia\ProvidesInertiaProperty;
 
 class MergeWithSharedProp implements ProvidesInertiaProperty
 {
+    /**
+     * @param  array<int, mixed>  $items
+     */
     public function __construct(protected array $items = []) {}
 
     public function toInertiaProperty(PropertyContext $prop): mixed

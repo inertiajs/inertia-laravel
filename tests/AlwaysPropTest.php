@@ -27,7 +27,7 @@ class AlwaysPropTest extends TestCase
     {
         $callable = new class
         {
-            public function __invoke()
+            public function __invoke(): string
             {
                 return 'An always value';
             }

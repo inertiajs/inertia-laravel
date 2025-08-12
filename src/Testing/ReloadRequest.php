@@ -4,6 +4,7 @@ namespace Inertia\Testing;
 
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Testing\Concerns\MakesHttpRequests;
+use Illuminate\Http\Response;
 use Illuminate\Testing\TestResponse;
 use Inertia\Support\Header;
 
@@ -26,7 +27,9 @@ class ReloadRequest
     }
 
     /**
-     * Request the Inertia page as a partial reload.
+     * Execute the reload request with appropriate Inertia headers.
+     *
+     * @return TestResponse<Response>
      */
     public function __invoke(): TestResponse
     {
