@@ -232,7 +232,7 @@ class ResponseFactory
     /**
      * Create an Inertia response.
      *
-     * @param  array<string, mixed>|\Illuminate\Contracts\Support\Arrayable<array-key, mixed>  $props
+     * @param  array<string, mixed>|\Illuminate\Contracts\Support\Arrayable<array-key, mixed>|ProvidesInertiaProperties  $props
      */
     public function render(string $component, $props = []): Response
     {
@@ -242,6 +242,9 @@ class ResponseFactory
 
         if ($props instanceof Arrayable) {
             $props = $props->toArray();
+        } elseif ($props instanceof ProvidesInertiaProperties) {
+            // Will be resolved in Response::resolveResponsableProperties()
+            $props = [$props];
         }
 
         return new Response(
