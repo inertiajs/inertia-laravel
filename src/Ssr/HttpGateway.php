@@ -7,9 +7,6 @@ use Illuminate\Http\Client\StrayRequestException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
-/**
- * HTTP-based server-side rendering gateway.
- */
 class HttpGateway implements Gateway, HasHealthCheck
 {
     /**

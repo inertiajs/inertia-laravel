@@ -64,7 +64,8 @@ class ServiceProvider extends BaseServiceProvider
     }
 
     /**
-     * Register the Blade directives.
+     * Register @inertia and @inertiaHead directives for rendering the Inertia
+     * root element and SSR head content in Blade templates.
      */
     protected function registerBladeDirectives(): void
     {
@@ -75,7 +76,8 @@ class ServiceProvider extends BaseServiceProvider
     }
 
     /**
-     * Register the console commands.
+     * Register Artisan commands for managing Inertia middleware creation
+     * and server-side rendering operations when running in console mode.
      */
     protected function registerConsoleCommands(): void
     {
@@ -92,7 +94,8 @@ class ServiceProvider extends BaseServiceProvider
     }
 
     /**
-     * Register the request macro.
+     * Add an 'inertia' method to the Request class that returns true
+     * if the current request is an Inertia request.
      */
     protected function registerRequestMacro(): void
     {

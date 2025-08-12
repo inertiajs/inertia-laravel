@@ -4,21 +4,21 @@ namespace Inertia;
 
 use Illuminate\Support\Facades\App;
 
-/**
- * A property that is only included when explicitly requested via partial reloads.
- * Enables on-demand evaluation for performance optimization.
- */
 class OptionalProp implements IgnoreFirstLoad
 {
     /**
      * The callback to resolve the property.
+     *
+     * Only included when explicitly requested via partial reloads.
      *
      * @var callable
      */
     protected $callback;
 
     /**
-     * Create a new optional property instance.
+     * Create a new optional property instance. Optional properties are only
+     * included when explicitly requested via partial reloads, reducing
+     * initial payload size and improving performance.
      */
     public function __construct(callable $callback)
     {

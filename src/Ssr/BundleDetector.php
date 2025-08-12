@@ -2,9 +2,6 @@
 
 namespace Inertia\Ssr;
 
-/**
- * Detect SSR bundle files.
- */
 class BundleDetector
 {
     /**

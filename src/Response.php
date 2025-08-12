@@ -241,7 +241,9 @@ class Response implements Responsable
     }
 
     /**
-     * Resolve the `only` and `except` partial request props.
+     * Resolve properties for partial requests. Filters properties based on
+     * 'only' and 'except' headers from the client, allowing for selective
+     * data loading to improve performance.
      *
      * @param  array<string, mixed>  $props
      * @return array<string, mixed>
@@ -275,7 +277,9 @@ class Response implements Responsable
     }
 
     /**
-     * Resolve all arrayables properties into an array.
+     * Resolve arrayable properties and closures. Converts Arrayable objects
+     * to arrays, evaluates closures, and handles dot notation properties
+     * for nested data structures.
      *
      * @param  array<string, mixed>  $props
      * @return array<string, mixed>

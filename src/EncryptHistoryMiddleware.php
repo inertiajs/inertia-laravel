@@ -8,7 +8,9 @@ use Illuminate\Http\Request;
 class EncryptHistoryMiddleware
 {
     /**
-     * Handle the incoming request.
+     * Handle the incoming request and enable history encryption. This middleware
+     * enables encryption of the browser history state, providing additional
+     * security for sensitive data in Inertia responses.
      *
      * @return \Symfony\Component\HttpFoundation\Response
      */

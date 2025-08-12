@@ -4,21 +4,21 @@ namespace Inertia;
 
 use Illuminate\Support\Facades\App;
 
-/**
- * A property that is always included in Inertia responses.
- * Bypasses partial reload filtering to ensure critical data is available.
- */
 class AlwaysProp
 {
     /**
      * The property value.
+     *
+     * Always included in Inertia responses, bypassing partial reload filtering.
      *
      * @var mixed
      */
     protected $value;
 
     /**
-     * Create a new always property instance.
+     * Create a new always property instance. Always properties are included
+     * in every Inertia response, even during partial reloads when only
+     * specific props are requested.
      *
      * @param  mixed  $value
      */

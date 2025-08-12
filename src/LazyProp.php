@@ -5,8 +5,6 @@ namespace Inertia;
 use Illuminate\Support\Facades\App;
 
 /**
- * A property that is excluded from initial page loads but evaluated during partial reloads.
- *
  * @deprecated Use OptionalProp instead for clearer semantics.
  */
 class LazyProp implements IgnoreFirstLoad

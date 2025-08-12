@@ -2,9 +2,6 @@
 
 namespace Inertia\Ssr;
 
-/**
- * Server-side rendering gateway interface.
- */
 interface Gateway
 {
     /**

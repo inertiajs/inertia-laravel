@@ -62,7 +62,9 @@ class ResponseFactory
     protected $urlResolver;
 
     /**
-     * Set the root view.
+     * Set the root view template for Inertia responses. This template
+     * serves as the HTML wrapper that contains the Inertia root element
+     * where the frontend application will be mounted.
      */
     public function setRootView(string $name): void
     {
@@ -70,7 +72,9 @@ class ResponseFactory
     }
 
     /**
-     * Share data with all Inertia responses.
+     * Share data across all Inertia responses. This data is automatically
+     * included with every response, making it ideal for user authentication
+     * state, flash messages, etc.
      *
      * @param  string|array<string, mixed>|\Illuminate\Contracts\Support\Arrayable<array-key, mixed>  $key
      * @param  mixed  $value
@@ -87,7 +91,9 @@ class ResponseFactory
     }
 
     /**
-     * Get shared data.
+     * Get the shared data for a given key. Returns all shared data if
+     * no key is provided, or the value for a specific key with an
+     * optional default fallback.
      *
      * @param  mixed  $default
      * @return mixed

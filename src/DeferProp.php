@@ -4,16 +4,14 @@ namespace Inertia;
 
 use Illuminate\Support\Facades\App;
 
-/**
- * A property that is loaded asynchronously after the initial page render.
- * Implements lazy loading for improved page performance.
- */
 class DeferProp implements IgnoreFirstLoad, Mergeable
 {
     use MergesProps;
 
     /**
      * The callback to resolve the property.
+     *
+     * Loaded asynchronously after initial page render for performance.
      *
      * @var callable
      */
@@ -27,7 +25,9 @@ class DeferProp implements IgnoreFirstLoad, Mergeable
     protected $group;
 
     /**
-     * Create a new deferred property instance.
+     * Create a new deferred property instance. Deferred properties are excluded
+     * from the initial page load and only evaluated when requested by the
+     * frontend, improving initial page performance.
      */
     public function __construct(callable $callback, ?string $group = null)
     {
@@ -36,7 +36,9 @@ class DeferProp implements IgnoreFirstLoad, Mergeable
     }
 
     /**
-     * Get the defer group.
+     * Get the defer group for this property. Properties with the same group
+     * are loaded together in a single request, allowing for efficient
+     * batching of related deferred data.
      *
      * @return string|null
      */
