@@ -11,5 +11,4 @@
 /tests export-ignore
 /CHANGELOG.md export-ignore
 /README.md export-ignore
-/phpstan-macros.php export-ignore
 /phpstan.neon export-ignore
