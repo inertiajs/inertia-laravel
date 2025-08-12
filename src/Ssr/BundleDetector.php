@@ -4,6 +4,11 @@ namespace Inertia\Ssr;
 
 class BundleDetector
 {
+    /**
+     * Detect and return the path to the SSR bundle file.
+     *
+     * @return string|null
+     */
     public function detect()
     {
         return collect([

@@ -30,7 +30,9 @@ class DirectiveTest extends TestCase
         $this->app->bind(Gateway::class, FakeGateway::class);
         $this->filesystem = m::mock(Filesystem::class);
 
-        $this->compiler = new BladeCompiler($this->filesystem, __DIR__.'/cache/views');
+        /** @var Filesystem $filesystem */
+        $filesystem = $this->filesystem;
+        $this->compiler = new BladeCompiler($filesystem, __DIR__.'/cache/views');
         $this->compiler->directive('inertia', [Directive::class, 'compile']);
         $this->compiler->directive('inertiaHead', [Directive::class, 'compileHead']);
     }
@@ -41,7 +43,10 @@ class DirectiveTest extends TestCase
         parent::tearDown();
     }
 
-    protected function renderView($contents, $data = [])
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    protected function renderView(string $contents, array $data = []): string
     {
         return Blade::render($contents, $data, true);
     }

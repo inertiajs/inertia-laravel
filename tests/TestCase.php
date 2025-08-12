@@ -2,6 +2,7 @@
 
 namespace Inertia\Tests;
 
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\View;
 use Illuminate\Testing\TestResponse;
 use Inertia\Inertia;
@@ -33,7 +34,10 @@ abstract class TestCase extends Orchestra
         config()->set('inertia.testing.page_paths', [realpath(__DIR__)]);
     }
 
-    protected function makeMockRequest($view): TestResponse
+    /**
+     * @return TestResponse<Response>
+     */
+    protected function makeMockRequest(mixed $view): TestResponse
     {
         app('router')->get('/example-url', function () use ($view) {
             return is_callable($view) ? $view() : $view;

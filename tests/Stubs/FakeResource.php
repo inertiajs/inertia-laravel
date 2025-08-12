@@ -9,9 +9,9 @@ class FakeResource extends JsonResource
     /**
      * The data that will be used.
      *
-     * @var array
+     * @var array<string, mixed>
      */
-    private $data;
+    private array $data;
 
     /**
      * The "data" wrapper that should be applied.
@@ -20,6 +20,9 @@ class FakeResource extends JsonResource
      */
     public static $wrap = null;
 
+    /**
+     * @param  array<string, mixed>  $resource
+     */
     public function __construct(array $resource)
     {
         parent::__construct(null);
@@ -30,6 +33,7 @@ class FakeResource extends JsonResource
      * Transform the resource into an array.
      *
      * @param  \Illuminate\Http\Request  $request
+     * @return array<string, mixed>
      */
     public function toArray($request): array
     {

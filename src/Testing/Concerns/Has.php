@@ -7,6 +7,10 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use PHPUnit\Framework\Assert as PHPUnit;
 
+/**
+ * @deprecated This trait is deprecated and will be removed in a future version.
+ * @see https://github.com/inertiajs/inertia-laravel/pull/338
+ */
 trait Has
 {
     protected function count(string $key, int $length): self

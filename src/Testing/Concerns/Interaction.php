@@ -5,6 +5,10 @@ namespace Inertia\Testing\Concerns;
 use Illuminate\Support\Str;
 use PHPUnit\Framework\Assert as PHPUnit;
 
+/**
+ * @deprecated This trait is deprecated and will be removed in a future version.
+ * @see https://github.com/inertiajs/inertia-laravel/pull/338
+ */
 trait Interaction
 {
     /** @var array */

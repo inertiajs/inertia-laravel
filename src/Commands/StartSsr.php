@@ -26,7 +26,7 @@ class StartSsr extends Command
     protected $description = 'Start the Inertia SSR server';
 
     /**
-     * Start the SSR server via a Node process.
+     * Start the Inertia SSR server.
      */
     public function handle(): int
     {
