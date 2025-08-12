@@ -76,7 +76,7 @@ class ResponseFactory
      * included with every response, making it ideal for user authentication
      * state, flash messages, etc.
      *
-     * @param  string|array<string, mixed>|\Illuminate\Contracts\Support\Arrayable<array-key, mixed>  $key
+     * @param  string|array<string, mixed>|\Illuminate\Contracts\Support\Arrayable<array-key, mixed>|\Inertia\ProvidesInertiaProperties  $key
      * @param  mixed  $value
      */
     public function share($key, $value = null): void
@@ -85,6 +85,8 @@ class ResponseFactory
             $this->sharedProps = array_merge($this->sharedProps, $key);
         } elseif ($key instanceof Arrayable) {
             $this->sharedProps = array_merge($this->sharedProps, $key->toArray());
+        } elseif ($key instanceof ProvidesInertiaProperties) {
+            $this->sharedProps = array_merge($this->sharedProps, [$key]);
         } else {
             Arr::set($this->sharedProps, $key, $value);
         }

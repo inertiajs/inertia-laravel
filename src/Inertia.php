@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Facade;
 
 /**
  * @method static void setRootView(string $name)
- * @method static void share(string|array<string, mixed>|\Illuminate\Contracts\Support\Arrayable<array-key, mixed> $key, mixed $value = null)
+ * @method static void share(string|array<string, mixed>|\Illuminate\Contracts\Support\Arrayable<array-key, mixed>|\Inertia\ProvidesInertiaProperties $key, mixed $value = null)
  * @method static mixed getShared(string|null $key = null, mixed $default = null)
  * @method static void clearHistory()
  * @method static void encryptHistory($encrypt = true)
