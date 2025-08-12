@@ -22,6 +22,7 @@ use Inertia\ProvidesInertiaProperties;
 use Inertia\RenderContext;
 use Inertia\ResponseFactory;
 use Inertia\Tests\Stubs\ExampleMiddleware;
+use Inertia\Tests\Stubs\ExampleInertiaPropsProvider;
 
 class ResponseFactoryTest extends TestCase
 {
@@ -383,18 +384,9 @@ class ResponseFactoryTest extends TestCase
     public function test_will_accept_instances_of_provides_inertia_props(): void
     {
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
-            return Inertia::render('User/Edit', new class implements ProvidesInertiaProperties
-            {
-                /**
-                 * @return array<string, mixed>
-                 */
-                public function toInertiaProperties(RenderContext $context): iterable
-                {
-                    return [
-                        'foo' => 'bar',
-                    ];
-                }
-            });
+            return Inertia::render('User/Edit', new ExampleInertiaPropsProvider([
+                'foo' => 'bar',
+            ]));
         });
 
         $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
@@ -407,21 +399,36 @@ class ResponseFactoryTest extends TestCase
         ]);
     }
 
+    public function test_will_accept_arrays_containing_provides_inertia_props_in_render(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            return Inertia::render('User/Edit', [
+                'regular' => 'prop',
+                new ExampleInertiaPropsProvider([
+                    'from_object' => 'value',
+                ]),
+                'another' => 'normal_prop',
+            ]);
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Edit',
+            'props' => [
+                'regular' => 'prop',
+                'from_object' => 'value',
+                'another' => 'normal_prop',
+            ],
+        ]);
+    }
+
     public function test_can_share_instances_of_provides_inertia_props(): void
     {
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
-            Inertia::share(new class implements ProvidesInertiaProperties
-            {
-                /**
-                 * @return array<string, mixed>
-                 */
-                public function toInertiaProperties(RenderContext $context): iterable
-                {
-                    return [
-                        'shared' => 'data',
-                    ];
-                }
-            });
+            Inertia::share(new ExampleInertiaPropsProvider([
+                'shared' => 'data',
+            ]));
 
             return Inertia::render('User/Edit', [
                 'regular' => 'prop',
@@ -444,18 +451,9 @@ class ResponseFactoryTest extends TestCase
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
             Inertia::share([
                 'regular' => 'shared_prop',
-                new class implements ProvidesInertiaProperties
-                {
-                    /**
-                     * @return array<string, mixed>
-                     */
-                    public function toInertiaProperties(RenderContext $context): iterable
-                    {
-                        return [
-                            'from_object' => 'shared_value',
-                        ];
-                    }
-                },
+                new ExampleInertiaPropsProvider([
+                    'from_object' => 'shared_value',
+                ]),
             ]);
 
             return Inertia::render('User/Edit', [

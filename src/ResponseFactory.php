@@ -240,7 +240,7 @@ class ResponseFactory
     /**
      * Create an Inertia response.
      *
-     * @param  array<string, mixed>|\Illuminate\Contracts\Support\Arrayable<array-key, mixed>|ProvidesInertiaProperties  $props
+     * @param  array<array-key, mixed>|\Illuminate\Contracts\Support\Arrayable<array-key, mixed>|ProvidesInertiaProperties  $props
      */
     public function render(string $component, $props = []): Response
     {
