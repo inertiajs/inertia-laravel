@@ -857,6 +857,9 @@ class ResponseTest extends TestCase
             'foo' => 'bar',
             new class implements ProvidesInertiaProperties
             {
+                /**
+                 * @return \Illuminate\Support\Collection<string, string>
+                 */
                 public function toInertiaProperties(RenderContext $context): iterable
                 {
                     return collect([
@@ -867,6 +870,7 @@ class ResponseTest extends TestCase
             'quux' => 'corge',
 
         ], 'app', '123');
+        /** @var BaseResponse $response */
         $response = $response->toResponse($request);
         $view = $response->getOriginalContent();
         $page = $view->getData()['page'];
@@ -965,12 +969,16 @@ class ResponseTest extends TestCase
             ->with(['quux' => 'corge'])
             ->with(new class implements ProvidesInertiaProperties
             {
+                /**
+                 * @return \Illuminate\Support\Collection<string, string>
+                 */
                 public function toInertiaProperties(RenderContext $context): iterable
                 {
                     return collect(['grault' => 'garply']);
                 }
             });
 
+        /** @var BaseResponse $response */
         $response = $response->toResponse($request);
         $view = $response->getOriginalContent();
         $page = $view->getData()['page'];

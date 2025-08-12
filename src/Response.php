@@ -84,7 +84,7 @@ class Response implements Responsable
     /**
      * Create a new Inertia response instance.
      *
-     * @param  array<string, mixed>  $props
+     * @param  array<int|string, mixed|\Inertia\ProvidesInertiaProperties>  $props
      */
     public function __construct(
         string $component,
@@ -216,6 +216,9 @@ class Response implements Responsable
 
     /**
      * Resolve the ProvidesInertiaProperties props.
+     *
+     * @param  array<string, mixed>  $props
+     * @return array<string, mixed>
      */
     public function resolveInertiaPropsProviders(array $props, Request $request): array
     {
@@ -226,10 +229,9 @@ class Response implements Responsable
         foreach ($props as $key => $value) {
             if (is_numeric($key) && $value instanceof ProvidesInertiaProperties) {
                 // Pipe into a Collection to leverage Collection::getArrayableItems()
-                $newProps = array_merge(
-                    $newProps,
-                    collect($value->toInertiaProperties($renderContext))->all()
-                );
+                /** @var array<string, mixed> $inertiaProps */
+                $inertiaProps = collect($value->toInertiaProperties($renderContext))->all();
+                $newProps = array_merge($newProps, $inertiaProps);
             } else {
                 $newProps[$key] = $value;
             }

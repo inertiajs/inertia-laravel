@@ -380,11 +380,14 @@ class ResponseFactoryTest extends TestCase
         ]);
     }
 
-    public function test_will_accept_instances_of_provides_inertia_props()
+    public function test_will_accept_instances_of_provides_inertia_props(): void
     {
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
             return Inertia::render('User/Edit', new class implements ProvidesInertiaProperties
             {
+                /**
+                 * @return array<string, mixed>
+                 */
                 public function toInertiaProperties(RenderContext $context): iterable
                 {
                     return [

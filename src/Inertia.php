@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Inertia\AlwaysProp always(mixed $value)
  * @method static \Inertia\MergeProp merge(mixed $value)
  * @method static \Inertia\MergeProp deepMerge(mixed $value)
- * @method static \Inertia\Response render(string $component, array<string, mixed>|\Illuminate\Contracts\Support\Arrayable<array-key, mixed> $props = [])
+ * @method static \Inertia\Response render(string $component, array<string, mixed>|\Illuminate\Contracts\Support\Arrayable<array-key, mixed>|\Inertia\ProvidesInertiaProperties $props = [])
  * @method static \Symfony\Component\HttpFoundation\Response location(string|\Symfony\Component\HttpFoundation\RedirectResponse $url)
  * @method static void macro(string $name, object|callable $macro)
  * @method static void mixin(object $mixin, bool $replace = true)
