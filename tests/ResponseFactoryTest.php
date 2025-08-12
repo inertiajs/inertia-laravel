@@ -439,6 +439,42 @@ class ResponseFactoryTest extends TestCase
         ]);
     }
 
+    public function test_can_share_arrays_containing_provides_inertia_props(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            Inertia::share([
+                'regular' => 'shared_prop',
+                new class implements ProvidesInertiaProperties
+                {
+                    /**
+                     * @return array<string, mixed>
+                     */
+                    public function toInertiaProperties(RenderContext $context): iterable
+                    {
+                        return [
+                            'from_object' => 'shared_value',
+                        ];
+                    }
+                },
+            ]);
+
+            return Inertia::render('User/Edit', [
+                'component' => 'prop',
+            ]);
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Edit',
+            'props' => [
+                'regular' => 'shared_prop',
+                'from_object' => 'shared_value',
+                'component' => 'prop',
+            ],
+        ]);
+    }
+
     public function test_will_throw_exception_if_component_does_not_exist_when_ensuring_is_enabled(): void
     {
         config()->set('inertia.ensure_pages_exist', true);
