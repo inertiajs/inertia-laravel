@@ -84,7 +84,7 @@ class Response implements Responsable
     /**
      * Create a new Inertia response instance.
      *
-     * @param  array<int|string, mixed|\Inertia\ProvidesInertiaProperties>  $props
+     * @param  array<array-key, mixed|\Inertia\ProvidesInertiaProperties>  $props
      */
     public function __construct(
         string $component,
@@ -200,7 +200,7 @@ class Response implements Responsable
     /**
      * Resolve the properties for the response.
      *
-     * @param  array<string, mixed>  $props
+     * @param  array<array-key, mixed>  $props
      * @return array<string, mixed>
      */
     public function resolveProperties(Request $request, array $props): array
@@ -217,7 +217,7 @@ class Response implements Responsable
     /**
      * Resolve the ProvidesInertiaProperties props.
      *
-     * @param  array<string, mixed>  $props
+     * @param  array<array-key, mixed>  $props
      * @return array<string, mixed>
      */
     public function resolveInertiaPropsProviders(array $props, Request $request): array
