@@ -32,6 +32,7 @@ class ResponseTest extends TestCase
             return 'bar';
         });
 
+        /** @phpstan-ignore-next-line */
         $this->assertEquals('bar', $response->foo());
     }
 

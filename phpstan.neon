@@ -8,5 +8,10 @@ parameters:
 		- tests
 	excludePaths:
 		- src/Testing/Concerns
-	bootstrapFiles:
-		- phpstan-macros.php
+	ignoreErrors:
+		- '#Call to an undefined method.*TestResponse.*::assertInertia\(\)#'
+		- '#Call to an undefined method.*TestResponse.*::inertiaPage\(\)#'
+		- '#Call to an undefined method.*TestResponse.*::inertiaProps\(\)#'
+		- '#Call to an undefined.*method.*Request::inertia\(\)#'
+		- '#Call to an undefined.*method.*Route::inertia\(\)#'
+
