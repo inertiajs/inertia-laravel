@@ -1,8 +1,23 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.4...2.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.5...2.x)
 
 - Nothing!
+
+## [v2.0.5](https://github.com/inertiajs/inertia-laravel/compare/v2.0.4...v2.0.5) - 2025-08-12
+
+### What's Changed
+
+* [2.x] Improve inertia helper docblock by [@mtlukaszczyk](https://github.com/mtlukaszczyk) in https://github.com/inertiajs/inertia-laravel/pull/766
+* [2.x] Introduce `ProvidesInertiaProp` interface by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/746
+* [2.x] Introduce ProvidesInertiaProps interface by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/769
+* Introduce PHPStan + improve DocBlocks by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/768
+
+### New Contributors
+
+* [@mtlukaszczyk](https://github.com/mtlukaszczyk) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/766
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.4...v2.0.5
 
 ## [v2.0.4](https://github.com/inertiajs/inertia-laravel/compare/v2.0.3...v2.0.4) - 2025-07-15
 
