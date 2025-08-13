@@ -2,6 +2,7 @@
 
 namespace Inertia;
 
+use BackedEnum;
 use Closure;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Arr;
@@ -242,8 +243,16 @@ class ResponseFactory
      *
      * @param  array<array-key, mixed>|\Illuminate\Contracts\Support\Arrayable<array-key, mixed>|ProvidesInertiaProperties  $props
      */
-    public function render(string $component, $props = []): Response
+    public function render(BackedEnum|string $component, $props = []): Response
     {
+        if($component instanceof BackedEnum) {
+            $component = $component->value;
+
+            if(!is_string($component)) {
+                throw new InvalidArgumentException('Component argument must be of type string or a string BackedEnum');
+            }
+        }
+
         if (config('inertia.ensure_pages_exist', false)) {
             $this->findComponentOrFail($component);
         }

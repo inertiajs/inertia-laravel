@@ -19,8 +19,11 @@ use Inertia\LazyProp;
 use Inertia\MergeProp;
 use Inertia\OptionalProp;
 use Inertia\ResponseFactory;
+use Inertia\Tests\Enums\IntBackedEnum;
+use Inertia\Tests\Enums\StringBackedEnum;
 use Inertia\Tests\Stubs\ExampleInertiaPropsProvider;
 use Inertia\Tests\Stubs\ExampleMiddleware;
+use InvalidArgumentException;
 
 class ResponseFactoryTest extends TestCase
 {
@@ -488,5 +491,18 @@ class ResponseFactoryTest extends TestCase
 
         $response = (new ResponseFactory)->render('foo');
         $this->assertInstanceOf(\Inertia\Response::class, $response);
+    }
+
+    public function test_render_accepts_backed_enum(): void
+    {
+        $response = (new ResponseFactory)->render(StringBackedEnum::UsersIndex);
+        $this->assertInstanceOf(\Inertia\Response::class, $response);
+    }
+
+    public function test_render_throws_for_non_string_backed_enum(): void
+    {
+        $factory = new ResponseFactory;
+        $this->expectException(InvalidArgumentException::class);
+        $factory->render(IntBackedEnum::Zero);
     }
 }
