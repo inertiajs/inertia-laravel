@@ -62,6 +62,13 @@ class ResponseFactory
     protected $urlResolver;
 
     /**
+     * The initial props resolver callback.
+     *
+     * @var Closure|null
+     */
+    protected $initialPropsResolver;
+
+    /**
      * Set the root view template for Inertia responses. This template
      * serves as the HTML wrapper that contains the Inertia root element
      * where the frontend application will be mounted.
@@ -147,6 +154,14 @@ class ResponseFactory
     public function resolveUrlUsing(?Closure $urlResolver = null): void
     {
         $this->urlResolver = $urlResolver;
+    }
+
+    /**
+     * Set the initial props resolver.
+     */
+    public function resolveInitialPropsUsing(?Closure $initialPropsResolver = null): void
+    {
+        $this->initialPropsResolver = $initialPropsResolver;
     }
 
     /**
@@ -262,6 +277,7 @@ class ResponseFactory
             $this->getVersion(),
             $this->encryptHistory ?? config('inertia.history.encrypt', false),
             $this->urlResolver,
+            $this->initialPropsResolver,
         );
     }
 

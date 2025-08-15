@@ -82,6 +82,11 @@ class Response implements Responsable
     protected ?Closure $urlResolver = null;
 
     /**
+     * The initial props resolver callback.
+     */
+    protected ?Closure $initialPropsResolver = null;
+
+    /**
      * Create a new Inertia response instance.
      *
      * @param  array<array-key, mixed|\Inertia\ProvidesInertiaProperties>  $props
@@ -92,7 +97,8 @@ class Response implements Responsable
         string $rootView = 'app',
         string $version = '',
         bool $encryptHistory = false,
-        ?Closure $urlResolver = null
+        ?Closure $urlResolver = null,
+        ?Closure $initialPropsResolver = null,
     ) {
         $this->component = $component;
         $this->props = $props;
@@ -101,6 +107,7 @@ class Response implements Responsable
         $this->clearHistory = session()->pull('inertia.clear_history', false);
         $this->encryptHistory = $encryptHistory;
         $this->urlResolver = $urlResolver;
+        $this->initialPropsResolver = $initialPropsResolver;
     }
 
     /**
@@ -188,6 +195,7 @@ class Response implements Responsable
             $this->resolveMergeProps($request),
             $this->resolveDeferredProps($request),
             $this->resolveCacheDirections($request),
+            $this->resolveInitialProps($request),
         );
 
         if ($request->header(Header::INERTIA)) {
@@ -506,6 +514,26 @@ class Response implements Responsable
             ->pluck('key');
 
         return $deferredProps->isNotEmpty() ? ['deferredProps' => $deferredProps->toArray()] : [];
+    }
+
+    /**
+     * Resolve initial props.
+     *
+     * @return array<string, mixed>
+     */
+    public function resolveInitialProps(Request $request): array
+    {
+        if ($request->header(Header::INERTIA)) {
+            return [];
+        }
+
+        if ($this->initialPropsResolver === null) {
+            return [];
+        }
+
+        $initialProps = App::call($this->initialPropsResolver, ['request' => $request]);
+
+        return empty($initialProps) ? [] : ['initialProps' => $initialProps];
     }
 
     /**

@@ -76,6 +76,16 @@ class Middleware
     }
 
     /**
+     * Defines the initial props that are shared by default.
+     *
+     * @return \Closure|null
+     */
+    public function initialPropsResolver()
+    {
+        return null;
+    }
+
+    /**
      * Handle the incoming request.
      *
      * @return \Symfony\Component\HttpFoundation\Response
@@ -91,6 +101,10 @@ class Middleware
 
         if ($urlResolver = $this->urlResolver()) {
             Inertia::resolveUrlUsing($urlResolver);
+        }
+
+        if ($initialPropsResolver = $this->initialPropsResolver()) {
+            Inertia::resolveInitialPropsUsing($initialPropsResolver);
         }
 
         $response = $next($request);
