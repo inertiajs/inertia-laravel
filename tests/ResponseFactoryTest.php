@@ -20,6 +20,7 @@ use Inertia\LazyProp;
 use Inertia\MergeProp;
 use Inertia\OptionalProp;
 use Inertia\ResponseFactory;
+use Inertia\Tests\Stubs\ExampleInertiaPropsProvider;
 use Inertia\Tests\Stubs\ExampleMiddleware;
 
 class ResponseFactoryTest extends TestCase
@@ -31,6 +32,7 @@ class ResponseFactoryTest extends TestCase
             return 'bar';
         });
 
+        /** @phpstan-ignore-next-line */
         $this->assertEquals('bar', $factory->foo());
     }
 
@@ -129,7 +131,7 @@ class ResponseFactoryTest extends TestCase
         $response->assertJson(['component' => 'User/Edit']);
     }
 
-    public function test_the_url_can_be_resolved_with_a_custom_resolver()
+    public function test_the_url_can_be_resolved_with_a_custom_resolver(): void
     {
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
             Inertia::resolveUrlUsing(function ($request, ResponseFactory $otherDependency) {
@@ -363,7 +365,7 @@ class ResponseFactoryTest extends TestCase
         $this->assertInstanceOf(AlwaysProp::class, $alwaysProp);
     }
 
-    public function test_will_accept_arrayabe_props()
+    public function test_will_accept_arrayabe_props(): void
     {
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
             Inertia::share('foo', 'bar');
@@ -385,6 +387,98 @@ class ResponseFactoryTest extends TestCase
             'component' => 'User/Edit',
             'props' => [
                 'foo' => 'bar',
+            ],
+        ]);
+    }
+
+    public function test_will_accept_instances_of_provides_inertia_props(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            return Inertia::render('User/Edit', new ExampleInertiaPropsProvider([
+                'foo' => 'bar',
+            ]));
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Edit',
+            'props' => [
+                'foo' => 'bar',
+            ],
+        ]);
+    }
+
+    public function test_will_accept_arrays_containing_provides_inertia_props_in_render(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            return Inertia::render('User/Edit', [
+                'regular' => 'prop',
+                new ExampleInertiaPropsProvider([
+                    'from_object' => 'value',
+                ]),
+                'another' => 'normal_prop',
+            ]);
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Edit',
+            'props' => [
+                'regular' => 'prop',
+                'from_object' => 'value',
+                'another' => 'normal_prop',
+            ],
+        ]);
+    }
+
+    public function test_can_share_instances_of_provides_inertia_props(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            Inertia::share(new ExampleInertiaPropsProvider([
+                'shared' => 'data',
+            ]));
+
+            return Inertia::render('User/Edit', [
+                'regular' => 'prop',
+            ]);
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Edit',
+            'props' => [
+                'shared' => 'data',
+                'regular' => 'prop',
+            ],
+        ]);
+    }
+
+    public function test_can_share_arrays_containing_provides_inertia_props(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            Inertia::share([
+                'regular' => 'shared_prop',
+                new ExampleInertiaPropsProvider([
+                    'from_object' => 'shared_value',
+                ]),
+            ]);
+
+            return Inertia::render('User/Edit', [
+                'component' => 'prop',
+            ]);
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Edit',
+            'props' => [
+                'regular' => 'shared_prop',
+                'from_object' => 'shared_value',
+                'component' => 'prop',
             ],
         ]);
     }

@@ -2,6 +2,10 @@
 
 namespace Inertia\Testing\Concerns;
 
+/**
+ * @deprecated This trait is deprecated and will be removed in a future version.
+ * @see https://github.com/inertiajs/inertia-laravel/pull/338
+ */
 trait Debugging
 {
     public function dump(?string $prop = null): self

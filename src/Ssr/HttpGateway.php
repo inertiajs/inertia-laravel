@@ -10,7 +10,9 @@ use Illuminate\Support\Str;
 class HttpGateway implements Gateway, HasHealthCheck
 {
     /**
-     * Dispatch the Inertia page to the Server Side Rendering engine.
+     * Dispatch the Inertia page to the SSR engine via HTTP.
+     *
+     * @param  array<string, mixed>  $page
      */
     public function dispatch(array $page): ?Response
     {
@@ -63,7 +65,7 @@ class HttpGateway implements Gateway, HasHealthCheck
     }
 
     /**
-     * Determine if dispatch should proceed even if no bundle is detected.
+     * Determine if dispatch should proceed without bundle detection.
      */
     protected function shouldDispatchWithoutBundle(): bool
     {
@@ -79,7 +81,7 @@ class HttpGateway implements Gateway, HasHealthCheck
     }
 
     /**
-     * Get the SSR URL from the configuration, ensuring it ends with '/{$path}'.
+     * Get the complete SSR URL by combining the base URL with the given path.
      */
     public function getUrl(string $path): string
     {
