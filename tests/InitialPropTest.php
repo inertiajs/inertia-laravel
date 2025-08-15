@@ -10,7 +10,7 @@ use Inertia\Tests\Stubs\ExampleMiddleware;
 
 class InitialPropTest extends TestCase
 {
-    public function test_initial_props_accessibility()
+    public function test_initial_props_accessibility(): void
     {
         $this->prepareMockEndpoint();
 
@@ -23,7 +23,7 @@ class InitialPropTest extends TestCase
         );
     }
 
-    public function test_initial_props_are_not_accessible()
+    public function test_initial_props_are_not_accessible(): void
     {
         $this->prepareMockEndpoint();
 

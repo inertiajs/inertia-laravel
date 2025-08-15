@@ -9,7 +9,7 @@ use PHPUnit\Framework\Assert;
 
 class CustomInitialPropsResolverMiddleware extends Middleware
 {
-    public function initialPropsResolver()
+    public function initialPropsResolver(): callable
     {
         return function ($request, ResponseFactory $otherDependency) {
             Assert::assertInstanceOf(Request::class, $request);
