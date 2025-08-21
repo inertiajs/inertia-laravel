@@ -241,9 +241,10 @@ class ResponseFactory
     /**
      * Create an Inertia response.
      *
+     * @param  BackedEnum|string $component
      * @param  array<array-key, mixed>|\Illuminate\Contracts\Support\Arrayable<array-key, mixed>|ProvidesInertiaProperties  $props
      */
-    public function render(BackedEnum|string $component, $props = []): Response
+    public function render($component, $props = []): Response
     {
         if($component instanceof BackedEnum) {
             $component = $component->value;
