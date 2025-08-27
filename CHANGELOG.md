@@ -1,8 +1,20 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.5...2.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.6...2.x)
 
 - Nothing!
+
+## [v2.0.6](https://github.com/inertiajs/inertia-laravel/compare/v2.0.5...v2.0.6) - 2025-08-26
+
+### What's Changed
+
+* Add encrypt history middleware that follows laravel naming conventions by [@taylorotwell](https://github.com/taylorotwell) in https://github.com/inertiajs/inertia-laravel/pull/773
+
+### New Contributors
+
+* [@taylorotwell](https://github.com/taylorotwell) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/773
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.5...v2.0.6
 
 ## [v2.0.5](https://github.com/inertiajs/inertia-laravel/compare/v2.0.4...v2.0.5) - 2025-08-12
 
