@@ -18,7 +18,7 @@ use InvalidArgumentException;
  *
  * @implements Arrayable<string, mixed>
  */
-readonly class PaginatorMeta implements Arrayable
+class PaginatorMeta implements Arrayable
 {
     /**
      * Create a new paginator meta instance.
