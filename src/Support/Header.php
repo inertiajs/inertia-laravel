@@ -43,4 +43,9 @@ class Header
      * Header for resetting the page state.
      */
     public const RESET = 'X-Inertia-Reset';
+
+    /**
+     * Header for specifying the scroll direction when paginating on infinite scroll.
+     */
+    public const SCROLL_DIRECTION = 'X-Inertia-Scroll-Direction';
 }

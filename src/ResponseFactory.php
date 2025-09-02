@@ -224,6 +224,16 @@ class ResponseFactory
     }
 
     /**
+     * Create an paginate property.
+     *
+     * @param  mixed  $value
+     */
+    public function paginate($value, ?string $wrapper = 'data', ?callable $meta = null): PaginateProp
+    {
+        return new PaginateProp($value, $wrapper, $meta);
+    }
+
+    /**
      * Find the component or fail.
      *
      * @throws \Inertia\ComponentNotFoundException

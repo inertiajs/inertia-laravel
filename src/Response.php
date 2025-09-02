@@ -456,7 +456,15 @@ class Response implements Responsable
             ->filter(fn ($_, $key) => count($onlyProps) === 0 || in_array($key, $onlyProps))
             ->reject(fn ($_, $key) => in_array($key, $exceptProps));
 
+        $shouldAppendPaginationData = $request->header(Header::SCROLL_DIRECTION) !== 'up';
+
+        $paginateProps = $mergeProps
+            ->filter(fn ($prop) => $prop instanceof PaginateProp)
+            ->each(fn (PaginateProp $prop) => $prop->setMergeStrategy($shouldAppendPaginationData))
+            ->mapWithKeys(fn (PaginateProp $prop, string $key) => [$key => $prop->meta()]);
+
         $deepMergeProps = $mergeProps
+            ->reject(fn ($prop) => $prop->hasAppendPaths() || $prop->hasPrependPaths())
             ->filter(fn ($prop) => $prop->shouldDeepMerge())
             ->keys();
 
@@ -469,14 +477,36 @@ class Response implements Responsable
             ->flatten()
             ->values();
 
-        $mergeProps = $mergeProps
-            ->filter(fn ($prop) => ! $prop->shouldDeepMerge())
+        $prependProps = $mergeProps
+            ->reject(fn ($prop) => $prop->hasAppendPaths() || $prop->hasPrependPaths())
+            ->filter(fn (Mergeable $prop) => ! $prop->shouldAppend() && ! $prop->shouldDeepMerge())
             ->keys();
+
+        $mergeProps = $mergeProps
+            ->reject(fn ($prop) => $prop->hasAppendPaths() || $prop->hasPrependPaths())
+            ->filter(fn (Mergeable $prop) => $prop->shouldAppend() && ! $prop->shouldDeepMerge())
+            ->keys();
+
+        $appendPaths = collect($this->props)
+            ->filter(fn ($prop) => $prop instanceof MergeProp)
+            ->flatMap(fn (MergeProp $prop, string $key) => collect($prop->appendPaths())->map(fn ($path) => $path ? $key.'.'.$path : $key))
+            ->unique()
+            ->values();
+
+        $prependPaths = collect($this->props)
+            ->filter(fn ($prop) => $prop instanceof MergeProp)
+            ->flatMap(fn (MergeProp $prop, string $key) => collect($prop->prependPaths())->map(fn ($path) => $path ? $key.'.'.$path : $key))
+            ->unique()
+            ->values();
 
         return array_filter([
             'mergeProps' => $mergeProps->toArray(),
+            'prependProps' => $prependProps->toArray(),
             'deepMergeProps' => $deepMergeProps->toArray(),
             'matchPropsOn' => $matchPropsOn->toArray(),
+            'appendPaths' => $appendPaths->toArray(),
+            'prependPaths' => $prependPaths->toArray(),
+            'paginateProps' => $paginateProps->toArray(),
         ], fn ($prop) => count($prop) > 0);
     }
 

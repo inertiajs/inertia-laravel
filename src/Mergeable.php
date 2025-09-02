@@ -31,4 +31,25 @@ interface Mergeable
      * @return array<int, string>
      */
     public function matchesOn();
+
+    /**
+     * Determine if the property should be appended or prepended.
+     *
+     * @return bool
+     */
+    public function shouldAppend();
+
+    /**
+     * Determine if the property has paths to append.
+     *
+     * @return bool
+     */
+    public function hasAppendPaths();
+
+    /**
+     * Determine if the property has paths to prepend.
+     *
+     * @return bool
+     */
+    public function hasPrependPaths();
 }
