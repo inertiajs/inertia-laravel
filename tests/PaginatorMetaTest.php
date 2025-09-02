@@ -16,6 +16,7 @@ class PaginatorMetaTest extends TestCase
         parent::setUp();
 
         // Create 'users' table and seed 40 users
+        config()->set('database.default', 'sqlite');
         config()->set('database.connections.sqlite.database', ':memory:');
         DB::statement('CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT)');
         DB::table('users')->insert(array_fill(0, 40, ['id' => null]));
