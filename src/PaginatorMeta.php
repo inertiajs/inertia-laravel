@@ -18,13 +18,13 @@ use InvalidArgumentException;
  *
  * @implements Arrayable<string, mixed>
  */
-class PaginatorMeta implements Arrayable
+readonly class PaginatorMeta implements Arrayable
 {
     /**
      * Create a new paginator meta instance.
      */
     public function __construct(
-        public string $queryParam,
+        public string $queryParam = 'page',
         public int|string|null $previousPage = null,
         public int|string|null $nextPage = null,
         public int|string|null $currentPage = null,

@@ -2,6 +2,7 @@
 
 namespace Inertia;
 
+use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Facades\App;
 
 /**
@@ -79,9 +80,9 @@ class PaginateProp implements Mergeable
     {
         $paginator = $this();
 
-        return $this->meta
-            ? App::call($this->meta, $paginator)
-            : PaginatorMeta::from($paginator)->toArray();
+        $meta = $this->meta ? call_user_func($this->meta, $paginator) : PaginatorMeta::from($paginator);
+
+        return $meta instanceof Arrayable ? $meta->toArray() : $meta;
     }
 
     /**

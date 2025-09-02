@@ -2,7 +2,6 @@
 
 namespace Inertia\Tests;
 
-use Illuminate\Support\Facades\DB;
 use Inertia\PaginatorMeta;
 use Inertia\Tests\Stubs\User;
 use Inertia\Tests\Stubs\UserResource;
@@ -11,18 +10,12 @@ use PHPUnit\Framework\Attributes\DataProvider;
 
 class PaginatorMetaTest extends TestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
+    use InteractsWithUserModels;
 
-        // Create 'users' table and seed 40 users
-        config()->set('database.default', 'sqlite');
-        config()->set('database.connections.sqlite.database', ':memory:');
-        DB::statement('CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT)');
-        DB::table('users')->insert(array_fill(0, 40, ['id' => null]));
-    }
-
-    public static function wrappedOrUnwrappedProvider()
+    /**
+     * @return array<string, array<bool>>
+     */
+    public static function wrappedOrUnwrappedProvider(): array
     {
         return [
             'wrapped in http resource' => [true],
@@ -31,7 +24,7 @@ class PaginatorMetaTest extends TestCase
     }
 
     #[DataProvider('wrappedOrUnwrappedProvider')]
-    public function test_extract_metadata_from_simple_paginator(bool $wrappedinHttpResource)
+    public function test_extract_metadata_from_simple_paginator(bool $wrappedinHttpResource): void
     {
         $users = User::query()->simplePaginate(15);
 
@@ -74,7 +67,7 @@ class PaginatorMetaTest extends TestCase
     }
 
     #[DataProvider('wrappedOrUnwrappedProvider')]
-    public function test_extract_metadata_from_length_aware_paginator(bool $wrappedinHttpResource)
+    public function test_extract_metadata_from_length_aware_paginator(bool $wrappedinHttpResource): void
     {
         $users = User::query()->paginate(15);
 
@@ -117,7 +110,7 @@ class PaginatorMetaTest extends TestCase
     }
 
     #[DataProvider('wrappedOrUnwrappedProvider')]
-    public function test_extract_metadata_from_cursor_paginator(bool $wrappedinHttpResource)
+    public function test_extract_metadata_from_cursor_paginator(bool $wrappedinHttpResource): void
     {
         $users = User::query()->cursorPaginate(15);
 
@@ -159,7 +152,7 @@ class PaginatorMetaTest extends TestCase
         ], PaginatorMeta::from($users)->toArray());
     }
 
-    public function test_throws_exception_if_not_a_paginator()
+    public function test_throws_exception_if_not_a_paginator(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('The given value is not a Laravel paginator instance. Use a custom callback to extract pagination metadata.');
