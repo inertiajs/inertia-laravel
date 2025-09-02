@@ -43,7 +43,7 @@ class PaginateProp implements Mergeable
      *
      * @var callable|null
      */
-    protected $meta;
+    protected $metaResolver;
 
     /**
      * Create a new merge property instance. Merge properties are combined
@@ -52,10 +52,10 @@ class PaginateProp implements Mergeable
      *
      * @param  mixed  $value
      */
-    public function __construct($value, string $wrapper = 'data', ?callable $meta = null)
+    public function __construct($value, string $wrapper = 'data', callable|array|null $meta = null)
     {
         $this->value = $value;
-        $this->meta = $meta;
+        $this->metaResolver = is_array($meta) ? fn () => $meta : $meta;
         $this->wrapper = $wrapper;
     }
 
@@ -80,7 +80,9 @@ class PaginateProp implements Mergeable
     {
         $paginator = $this();
 
-        $meta = $this->meta ? call_user_func($this->meta, $paginator) : PaginatorMeta::from($paginator);
+        $meta = $this->metaResolver
+            ? call_user_func($this->metaResolver, $paginator)
+            : PaginatorMeta::from($paginator);
 
         return $meta instanceof Arrayable ? $meta->toArray() : $meta;
     }

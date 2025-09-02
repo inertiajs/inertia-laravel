@@ -58,9 +58,9 @@ class PaginatorMeta implements Arrayable
     {
         $paginator = $value instanceof JsonResource ? $value->resource : $value;
 
-        $request ??= request();
-
         if ($paginator instanceof CursorPaginator) {
+            $request ??= request();
+
             return new self(
                 $cursorName = $paginator->getCursorName(),
                 $paginator->previousCursor()?->encode(),
