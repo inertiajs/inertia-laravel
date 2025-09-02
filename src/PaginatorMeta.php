@@ -82,6 +82,6 @@ class PaginatorMeta implements Arrayable
             );
         }
 
-        throw new InvalidArgumentException('The given value is not a Laravel paginator instance. Use a custom callback to transform the value instead.');
+        throw new InvalidArgumentException('The given value is not a Laravel paginator instance. Use a custom callback to extract pagination metadata.');
     }
 }
