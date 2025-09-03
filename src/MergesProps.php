@@ -33,14 +33,14 @@ trait MergesProps
      *
      * @var array<int, string>
      */
-    protected array $appendPaths = [];
+    protected array $appendsAtPaths = [];
 
     /**
      * The paths to prepend.
      *
      * @var array<int, string>
      */
-    protected array $prependPaths = [];
+    protected array $prependsAtPaths = [];
 
     /**
      * Mark the property for merging.
@@ -101,11 +101,31 @@ trait MergesProps
     }
 
     /**
-     * Determine if the property values should be appended or prepended.
+     * Determine if the property should be appended at the root level.
+     *
+     * @return bool
      */
-    public function shouldAppend(): bool
+    public function appendsAtRoot()
     {
-        return $this->append;
+        return $this->append && $this->mergesAtRoot();
+    }
+
+    /**
+     * Determine if the property should be prepended at the root level.
+     *
+     * @return bool
+     */
+    public function prependsAtRoot()
+    {
+        return ! $this->append && $this->mergesAtRoot();
+    }
+
+    /**
+     * Determine if the property merges at the root level.
+     */
+    protected function mergesAtRoot(): bool
+    {
+        return count($this->appendsAtPaths) === 0 && count($this->prependsAtPaths) === 0;
     }
 
     /**
@@ -115,10 +135,9 @@ trait MergesProps
      */
     public function append(bool|string|array $path = true, ?string $matchOn = null): self
     {
-
         match (true) {
             is_bool($path) => $this->append = $path,
-            is_string($path) => $this->appendPaths[] = $path,
+            is_string($path) => $this->appendsAtPaths[] = $path,
             is_array($path) => collect($path)->each(
                 fn ($value, $key) => is_numeric($key) ? $this->append($value) : $this->append($key, $value)
             ),
@@ -140,7 +159,7 @@ trait MergesProps
     {
         match (true) {
             is_bool($path) => $this->append = ! $path,
-            is_string($path) => $this->prependPaths[] = $path,
+            is_string($path) => $this->prependsAtPaths[] = $path,
             is_array($path) => collect($path)->each(
                 fn ($value, $key) => is_numeric($key) ? $this->prepend($value) : $this->prepend($key, $value)
             ),
@@ -154,21 +173,13 @@ trait MergesProps
     }
 
     /**
-     * Determine if the property should merge at the root level (vs at specific paths).
-     */
-    public function hasNestedMergePaths(): bool
-    {
-        return count($this->appendPaths) > 0 || count($this->prependPaths) > 0;
-    }
-
-    /**
      * Get the paths to append.
      *
      * @return array<int, string>
      */
-    public function appendPaths(): array
+    public function appendsAtPaths(): array
     {
-        return $this->appendPaths;
+        return $this->appendsAtPaths;
     }
 
     /**
@@ -176,8 +187,8 @@ trait MergesProps
      *
      * @return array<int, string>
      */
-    public function prependPaths(): array
+    public function prependsAtPaths(): array
     {
-        return $this->prependPaths;
+        return $this->prependsAtPaths;
     }
 }

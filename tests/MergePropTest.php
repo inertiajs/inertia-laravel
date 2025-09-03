@@ -36,10 +36,10 @@ class MergePropTest extends TestCase
     {
         $mergeProp = new MergeProp([]);
 
-        $this->assertTrue($mergeProp->shouldAppend());
-        $this->assertFalse($mergeProp->hasNestedMergePaths());
-        $this->assertSame([], $mergeProp->appendPaths());
-        $this->assertSame([], $mergeProp->prependPaths());
+        $this->assertTrue($mergeProp->appendsAtRoot());
+        $this->assertFalse($mergeProp->prependsAtRoot());
+        $this->assertSame([], $mergeProp->appendsAtPaths());
+        $this->assertSame([], $mergeProp->prependsAtPaths());
         $this->assertSame([], $mergeProp->matchesOn());
     }
 
@@ -47,10 +47,10 @@ class MergePropTest extends TestCase
     {
         $mergeProp = (new MergeProp([]))->prepend();
 
-        $this->assertFalse($mergeProp->shouldAppend());
-        $this->assertFalse($mergeProp->hasNestedMergePaths());
-        $this->assertSame([], $mergeProp->appendPaths());
-        $this->assertSame([], $mergeProp->prependPaths());
+        $this->assertFalse($mergeProp->appendsAtRoot());
+        $this->assertTrue($mergeProp->prependsAtRoot());
+        $this->assertSame([], $mergeProp->appendsAtPaths());
+        $this->assertSame([], $mergeProp->prependsAtPaths());
         $this->assertSame([], $mergeProp->matchesOn());
     }
 
@@ -58,10 +58,10 @@ class MergePropTest extends TestCase
     {
         $mergeProp = (new MergeProp([]))->append('data');
 
-        $this->assertTrue($mergeProp->shouldAppend());
-        $this->assertTrue($mergeProp->hasNestedMergePaths());
-        $this->assertSame(['data'], $mergeProp->appendPaths());
-        $this->assertSame([], $mergeProp->prependPaths());
+        $this->assertFalse($mergeProp->appendsAtRoot());
+        $this->assertFalse($mergeProp->prependsAtRoot());
+        $this->assertSame(['data'], $mergeProp->appendsAtPaths());
+        $this->assertSame([], $mergeProp->prependsAtPaths());
         $this->assertSame([], $mergeProp->matchesOn());
     }
 
@@ -69,10 +69,10 @@ class MergePropTest extends TestCase
     {
         $mergeProp = (new MergeProp([]))->append('data', 'id');
 
-        $this->assertTrue($mergeProp->shouldAppend());
-        $this->assertTrue($mergeProp->hasNestedMergePaths());
-        $this->assertSame(['data'], $mergeProp->appendPaths());
-        $this->assertSame([], $mergeProp->prependPaths());
+        $this->assertFalse($mergeProp->appendsAtRoot());
+        $this->assertFalse($mergeProp->prependsAtRoot());
+        $this->assertSame(['data'], $mergeProp->appendsAtPaths());
+        $this->assertSame([], $mergeProp->prependsAtPaths());
         $this->assertSame(['data.id'], $mergeProp->matchesOn());
     }
 
@@ -80,10 +80,10 @@ class MergePropTest extends TestCase
     {
         $mergeProp = (new MergeProp([]))->prepend('data');
 
-        $this->assertTrue($mergeProp->shouldAppend());
-        $this->assertTrue($mergeProp->hasNestedMergePaths());
-        $this->assertSame([], $mergeProp->appendPaths());
-        $this->assertSame(['data'], $mergeProp->prependPaths());
+        $this->assertFalse($mergeProp->appendsAtRoot());
+        $this->assertFalse($mergeProp->prependsAtRoot());
+        $this->assertSame([], $mergeProp->appendsAtPaths());
+        $this->assertSame(['data'], $mergeProp->prependsAtPaths());
         $this->assertSame([], $mergeProp->matchesOn());
     }
 
@@ -91,10 +91,10 @@ class MergePropTest extends TestCase
     {
         $mergeProp = (new MergeProp([]))->prepend('data', 'id');
 
-        $this->assertTrue($mergeProp->shouldAppend());
-        $this->assertTrue($mergeProp->hasNestedMergePaths());
-        $this->assertSame([], $mergeProp->appendPaths());
-        $this->assertSame(['data'], $mergeProp->prependPaths());
+        $this->assertFalse($mergeProp->appendsAtRoot());
+        $this->assertFalse($mergeProp->prependsAtRoot());
+        $this->assertSame([], $mergeProp->appendsAtPaths());
+        $this->assertSame(['data'], $mergeProp->prependsAtPaths());
         $this->assertSame(['data.id'], $mergeProp->matchesOn());
     }
 
@@ -102,10 +102,10 @@ class MergePropTest extends TestCase
     {
         $mergeProp = (new MergeProp([]))->append(['data', 'items']);
 
-        $this->assertTrue($mergeProp->shouldAppend());
-        $this->assertTrue($mergeProp->hasNestedMergePaths());
-        $this->assertSame(['data', 'items'], $mergeProp->appendPaths());
-        $this->assertSame([], $mergeProp->prependPaths());
+        $this->assertFalse($mergeProp->appendsAtRoot());
+        $this->assertFalse($mergeProp->prependsAtRoot());
+        $this->assertSame(['data', 'items'], $mergeProp->appendsAtPaths());
+        $this->assertSame([], $mergeProp->prependsAtPaths());
         $this->assertSame([], $mergeProp->matchesOn());
     }
 
@@ -113,10 +113,10 @@ class MergePropTest extends TestCase
     {
         $mergeProp = (new MergeProp([]))->append(['data' => 'id', 'items' => 'uid']);
 
-        $this->assertTrue($mergeProp->shouldAppend());
-        $this->assertTrue($mergeProp->hasNestedMergePaths());
-        $this->assertSame(['data', 'items'], $mergeProp->appendPaths());
-        $this->assertSame([], $mergeProp->prependPaths());
+        $this->assertFalse($mergeProp->appendsAtRoot());
+        $this->assertFalse($mergeProp->prependsAtRoot());
+        $this->assertSame(['data', 'items'], $mergeProp->appendsAtPaths());
+        $this->assertSame([], $mergeProp->prependsAtPaths());
         $this->assertSame(['data.id', 'items.uid'], $mergeProp->matchesOn());
     }
 
@@ -124,10 +124,10 @@ class MergePropTest extends TestCase
     {
         $mergeProp = (new MergeProp([]))->prepend(['data', 'items']);
 
-        $this->assertTrue($mergeProp->shouldAppend());
-        $this->assertTrue($mergeProp->hasNestedMergePaths());
-        $this->assertSame([], $mergeProp->appendPaths());
-        $this->assertSame(['data', 'items'], $mergeProp->prependPaths());
+        $this->assertFalse($mergeProp->appendsAtRoot());
+        $this->assertFalse($mergeProp->prependsAtRoot());
+        $this->assertSame([], $mergeProp->appendsAtPaths());
+        $this->assertSame(['data', 'items'], $mergeProp->prependsAtPaths());
         $this->assertSame([], $mergeProp->matchesOn());
     }
 
@@ -135,10 +135,10 @@ class MergePropTest extends TestCase
     {
         $mergeProp = (new MergeProp([]))->prepend(['data' => 'id', 'items' => 'uid']);
 
-        $this->assertTrue($mergeProp->shouldAppend());
-        $this->assertTrue($mergeProp->hasNestedMergePaths());
-        $this->assertSame([], $mergeProp->appendPaths());
-        $this->assertSame(['data', 'items'], $mergeProp->prependPaths());
+        $this->assertFalse($mergeProp->appendsAtRoot());
+        $this->assertFalse($mergeProp->prependsAtRoot());
+        $this->assertSame([], $mergeProp->appendsAtPaths());
+        $this->assertSame(['data', 'items'], $mergeProp->prependsAtPaths());
         $this->assertSame(['data.id', 'items.uid'], $mergeProp->matchesOn());
     }
 
@@ -152,10 +152,10 @@ class MergePropTest extends TestCase
             ->prepend('companies', 'id')
             ->prepend(['tags' => 'name', 'comments']);
 
-        $this->assertTrue($mergeProp->shouldAppend());
-        $this->assertTrue($mergeProp->hasNestedMergePaths());
-        $this->assertSame(['data', 'users', 'items', 'posts'], $mergeProp->appendPaths());
-        $this->assertSame(['categories', 'companies', 'tags', 'comments'], $mergeProp->prependPaths());
+        $this->assertFalse($mergeProp->appendsAtRoot());
+        $this->assertFalse($mergeProp->prependsAtRoot());
+        $this->assertSame(['data', 'users', 'items', 'posts'], $mergeProp->appendsAtPaths());
+        $this->assertSame(['categories', 'companies', 'tags', 'comments'], $mergeProp->prependsAtPaths());
         $this->assertSame(['users.id', 'items.uid', 'companies.id', 'tags.name'], $mergeProp->matchesOn());
     }
 }

@@ -58,21 +58,21 @@ class ScrollPropTest extends TestCase
         // Test append strategy without header
         $appendProp = new ScrollProp($users);
         $appendProp->configureMergeDirection();
-        $this->assertContains('data', $appendProp->appendPaths());
-        $this->assertEmpty($appendProp->prependPaths());
+        $this->assertContains('data', $appendProp->appendsAtPaths());
+        $this->assertEmpty($appendProp->prependsAtPaths());
 
         // Test append strategy with header set to 'down'
         request()->headers->set(Header::SCROLL_DIRECTION, 'down');
         $appendProp = new ScrollProp($users);
         $appendProp->configureMergeDirection();
-        $this->assertContains('data', $appendProp->appendPaths());
-        $this->assertEmpty($appendProp->prependPaths());
+        $this->assertContains('data', $appendProp->appendsAtPaths());
+        $this->assertEmpty($appendProp->prependsAtPaths());
 
         // Test prepend strategy
         request()->headers->set(Header::SCROLL_DIRECTION, 'up');
         $prependProp = new ScrollProp($users);
         $prependProp->configureMergeDirection();
-        $this->assertContains('data', $prependProp->prependPaths());
-        $this->assertEmpty($prependProp->appendPaths());
+        $this->assertContains('data', $prependProp->prependsAtPaths());
+        $this->assertEmpty($prependProp->appendsAtPaths());
     }
 }

@@ -33,30 +33,30 @@ interface Mergeable
     public function matchesOn();
 
     /**
-     * Determine if the property should be appended or prepended.
+     * Determine if the property should be appended at the root level.
      *
      * @return bool
      */
-    public function shouldAppend();
+    public function appendsAtRoot();
 
     /**
-     * Determine if the property has nested merge paths instead of just top-level merging.
+     * Determine if the property should be prepended at the root level.
      *
      * @return bool
      */
-    public function hasNestedMergePaths();
+    public function prependsAtRoot();
 
     /**
      * Get the paths to append when merging.
      *
      * @return array<int, string>
      */
-    public function appendPaths(): array;
+    public function appendsAtPaths(): array;
 
     /**
      * Get the paths to prepend when merging.
      *
      * @return array<int, string>
      */
-    public function prependPaths(): array;
+    public function prependsAtPaths(): array;
 }

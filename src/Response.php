@@ -489,13 +489,13 @@ class Response implements Responsable
      */
     protected function resolveAppendMergeProps(Collection $mergeProps): array
     {
-        [$nestedMergeProps, $rootMergeProps] = $mergeProps
+        [$rootAppendProps, $nestedAppendProps] = $mergeProps
             ->reject(fn (Mergeable $prop) => $prop->shouldDeepMerge())
-            ->partition(fn (Mergeable $prop) => $prop->hasNestedMergePaths());
+            ->partition(fn (Mergeable $prop) => $prop->appendsAtRoot());
 
-        return $nestedMergeProps
-            ->flatMap(fn (Mergeable $prop, string $key) => collect($prop->appendPaths())->map(fn ($path) => $key.'.'.$path))
-            ->merge($rootMergeProps->filter(fn (Mergeable $prop) => $prop->shouldAppend())->keys())
+        return $nestedAppendProps
+            ->flatMap(fn (Mergeable $prop, string $key) => collect($prop->appendsAtPaths())->map(fn ($path) => $key.'.'.$path))
+            ->merge($rootAppendProps->keys())
             ->unique()
             ->values()
             ->toArray();
@@ -509,13 +509,13 @@ class Response implements Responsable
      */
     protected function resolvePrependMergeProps(Collection $mergeProps): array
     {
-        [$nestedMergeProps, $rootMergeProps] = $mergeProps
+        [$rootPrependProps, $nestedPrependProps] = $mergeProps
             ->reject(fn (Mergeable $prop) => $prop->shouldDeepMerge())
-            ->partition(fn (Mergeable $prop) => $prop->hasNestedMergePaths());
+            ->partition(fn (Mergeable $prop) => $prop->prependsAtRoot());
 
-        return $nestedMergeProps
-            ->flatMap(fn (Mergeable $prop, string $key) => collect($prop->prependPaths())->map(fn ($path) => $key.'.'.$path))
-            ->merge($rootMergeProps->filter(fn (Mergeable $prop) => ! $prop->shouldAppend())->keys())
+        return $nestedPrependProps
+            ->flatMap(fn (Mergeable $prop, string $key) => collect($prop->prependsAtPaths())->map(fn ($path) => $key.'.'.$path))
+            ->merge($rootPrependProps->keys())
             ->unique()
             ->values()
             ->toArray();
