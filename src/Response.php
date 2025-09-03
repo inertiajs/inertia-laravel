@@ -453,10 +453,10 @@ class Response implements Responsable
 
         return collect($this->props)
             ->filter(fn ($prop) => $prop instanceof Mergeable)
-            ->filter(fn ($prop) => $prop->shouldMerge())
-            ->reject(fn ($_, $key) => in_array($key, $resetProps))
-            ->filter(fn ($_, $key) => count($onlyProps) === 0 || in_array($key, $onlyProps))
-            ->reject(fn ($_, $key) => in_array($key, $exceptProps));
+            ->filter(fn (Mergeable $prop) => $prop->shouldMerge())
+            ->reject(fn ($_, string $key) => in_array($key, $resetProps))
+            ->filter(fn ($_, string $key) => count($onlyProps) === 0 || in_array($key, $onlyProps))
+            ->reject(fn ($_, string $key) => in_array($key, $exceptProps));
     }
 
     /**
@@ -467,8 +467,8 @@ class Response implements Responsable
     public function resolveScrollProps(Request $request): array
     {
         $scrollProps = $this->getMergePropsForRequest($request)
-            ->filter(fn ($prop) => $prop instanceof ScrollProp)
-            ->each(fn (ScrollProp $prop) => $prop->setMergeStrategy($request))
+            ->filter(fn (Mergeable $prop) => $prop instanceof ScrollProp)
+            ->each(fn (ScrollProp $prop) => $prop->configureMergeDirection($request))
             ->mapWithKeys(fn (ScrollProp $prop, string $key) => [$key => $prop->meta()]);
 
         return $scrollProps->isNotEmpty() ? ['scrollProps' => $scrollProps->toArray()] : [];
@@ -483,9 +483,13 @@ class Response implements Responsable
     {
         $mergeProps = $this->getMergePropsForRequest($request);
 
+        $mergePropsWithAppendOrPrependPath = $mergeProps
+            ->filter(fn (Mergeable $prop) => $prop->hasAppendPaths() || $prop->hasPrependPaths())
+            ->keys();
+
         $deepMergeProps = $mergeProps
-            ->reject(fn ($prop) => $prop->hasAppendPaths() || $prop->hasPrependPaths())
-            ->filter(fn ($prop) => $prop->shouldDeepMerge())
+            ->reject(fn ($_, string $key) => $mergePropsWithAppendOrPrependPath->contains($key))
+            ->filter(fn (Mergeable $prop) => $prop->shouldDeepMerge())
             ->keys();
 
         $matchPropsOn = $mergeProps
@@ -498,12 +502,12 @@ class Response implements Responsable
             ->values();
 
         $prependProps = $mergeProps
-            ->reject(fn ($prop) => $prop->hasAppendPaths() || $prop->hasPrependPaths())
+            ->reject(fn ($_, string $key) => $mergePropsWithAppendOrPrependPath->contains($key))
             ->filter(fn (Mergeable $prop) => ! $prop->shouldAppend() && ! $prop->shouldDeepMerge())
             ->keys();
 
         $mergeProps = $mergeProps
-            ->reject(fn ($prop) => $prop->hasAppendPaths() || $prop->hasPrependPaths())
+            ->reject(fn ($_, string $key) => $mergePropsWithAppendOrPrependPath->contains($key))
             ->filter(fn (Mergeable $prop) => $prop->shouldAppend() && ! $prop->shouldDeepMerge())
             ->keys();
 

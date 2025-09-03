@@ -63,9 +63,12 @@ class ScrollProp implements Mergeable
     }
 
     /**
-     * Set the merge strategy for the paginated data.
+     * Configure the merge strategy based on the scroll direction header.
+     *
+     * If the "X-Inertia-Scroll-Direction" header is set to "up", the items
+     * will be prepended; otherwise, it will be appended.
      */
-    public function setMergeStrategy(?Request $request = null): self
+    public function configureMergeDirection(?Request $request = null): self
     {
         $request ??= request();
 
