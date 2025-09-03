@@ -110,17 +110,22 @@ trait MergesProps
 
     /**
      * Specify that the value should be appended, optionally providing a key to append and a property to match on.
+     *
+     * @param  bool|string|array<array-key, string>  $path
      */
-    public function append(bool|string|array $key = true, ?string $matchOn = null): self
+    public function append(bool|string|array $path = true, ?string $matchOn = null): self
     {
+
         match (true) {
-            is_bool($key) => $this->append = $key,
-            is_string($key) => $this->appendPaths[] = $key,
-            is_array($key) => $this->appendPaths = array_merge($this->appendPaths, $key),
+            is_bool($path) => $this->append = $path,
+            is_string($path) => $this->appendPaths[] = $path,
+            is_array($path) => collect($path)->each(
+                fn ($value, $key) => is_numeric($key) ? $this->append($value) : $this->append($key, $value)
+            ),
         };
 
-        if (is_string($key) && $matchOn) {
-            $this->matchOn("{$key}.{$matchOn}");
+        if (is_string($path) && $matchOn) {
+            $this->matchOn([...$this->matchOn, "{$path}.{$matchOn}"]);
         }
 
         return $this;
@@ -128,17 +133,21 @@ trait MergesProps
 
     /**
      * Specify that the value should be prepended, optionally providing a key to prepend and a property to match on.
+     *
+     * @param  bool|string|array<array-key, string>  $path
      */
-    public function prepend(bool|string|array $key = true, ?string $matchOn = null): self
+    public function prepend(bool|string|array $path = true, ?string $matchOn = null): self
     {
         match (true) {
-            is_bool($key) => $this->append = ! $key,
-            is_string($key) => $this->prependPaths[] = $key,
-            is_array($key) => $this->prependPaths = array_merge($this->prependPaths, $key),
+            is_bool($path) => $this->append = ! $path,
+            is_string($path) => $this->prependPaths[] = $path,
+            is_array($path) => collect($path)->each(
+                fn ($value, $key) => is_numeric($key) ? $this->prepend($value) : $this->prepend($key, $value)
+            ),
         };
 
-        if (is_string($key) && $matchOn) {
-            $this->matchOn("{$key}.{$matchOn}");
+        if (is_string($path) && $matchOn) {
+            $this->matchOn([...$this->matchOn, "{$path}.{$matchOn}"]);
         }
 
         return $this;
