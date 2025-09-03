@@ -40,11 +40,11 @@ interface Mergeable
     public function shouldAppend();
 
     /**
-     * Determine if the property should merge at the root level (vs at specific paths).
+     * Determine if the property has nested merge paths instead of just top-level merging.
      *
      * @return bool
      */
-    public function shouldMergeAtRootLevel();
+    public function hasNestedMergePaths();
 
     /**
      * Get the paths to append when merging.

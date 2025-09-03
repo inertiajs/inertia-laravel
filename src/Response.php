@@ -484,12 +484,12 @@ class Response implements Responsable
      */
     protected function resolveAppendMergeProps(Collection $mergeProps): array
     {
-        [$rootMergeProps, $nestedMergeProps] = $mergeProps
+        [$nestedMergeProps, $rootMergeProps] = $mergeProps
             ->reject(fn (Mergeable $prop) => $prop->shouldDeepMerge())
-            ->partition(fn (Mergeable $prop) => $prop->shouldMergeAtRootLevel());
+            ->partition(fn (Mergeable $prop) => $prop->hasNestedMergePaths());
 
         return $nestedMergeProps
-            ->flatMap(fn (Mergeable $prop, string $key) => collect($prop->appendPaths())->map(fn ($path) => $path ? $key.'.'.$path : $key))
+            ->flatMap(fn (Mergeable $prop, string $key) => collect($prop->appendPaths())->map(fn ($path) => $key.'.'.$path))
             ->merge($rootMergeProps->filter(fn (Mergeable $prop) => $prop->shouldAppend())->keys())
             ->unique()
             ->values()
@@ -504,12 +504,12 @@ class Response implements Responsable
      */
     protected function resolvePrependMergeProps(Collection $mergeProps): array
     {
-        [$rootMergeProps, $nestedMergeProps] = $mergeProps
+        [$nestedMergeProps, $rootMergeProps] = $mergeProps
             ->reject(fn (Mergeable $prop) => $prop->shouldDeepMerge())
-            ->partition(fn (Mergeable $prop) => $prop->shouldMergeAtRootLevel());
+            ->partition(fn (Mergeable $prop) => $prop->hasNestedMergePaths());
 
         return $nestedMergeProps
-            ->flatMap(fn (Mergeable $prop, string $key) => collect($prop->prependPaths())->map(fn ($path) => $path ? $key.'.'.$path : $key))
+            ->flatMap(fn (Mergeable $prop, string $key) => collect($prop->prependPaths())->map(fn ($path) => $key.'.'.$path))
             ->merge($rootMergeProps->filter(fn (Mergeable $prop) => ! $prop->shouldAppend())->keys())
             ->unique()
             ->values()

@@ -145,9 +145,9 @@ trait MergesProps
     /**
      * Determine if the property should merge at the root level (vs at specific paths).
      */
-    public function shouldMergeAtRootLevel(): bool
+    public function hasNestedMergePaths(): bool
     {
-        return count($this->appendPaths) === 0 && count($this->prependPaths) === 0;
+        return count($this->appendPaths) > 0 || count($this->prependPaths) > 0;
     }
 
     /**
