@@ -169,5 +169,4 @@ trait MergesProps
     {
         return $this->prependPaths;
     }
-
 }
