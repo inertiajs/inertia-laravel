@@ -373,6 +373,10 @@ class Response implements Responsable
     public function resolvePropertyInstances(array $props, Request $request, ?string $parentKey = null): array
     {
         foreach ($props as $key => $value) {
+            if ($value instanceof ScrollProp) {
+                $value->configureMergeDirection($request);
+            }
+
             $resolveViaApp = collect([
                 Closure::class,
                 LazyProp::class,
@@ -380,6 +384,7 @@ class Response implements Responsable
                 DeferProp::class,
                 AlwaysProp::class,
                 MergeProp::class,
+                ScrollProp::class,
             ])->first(fn ($class) => $value instanceof $class);
 
             if ($resolveViaApp) {
@@ -586,7 +591,6 @@ class Response implements Responsable
     {
         $scrollProps = $this->getMergePropsForRequest($request)
             ->filter(fn (Mergeable $prop) => $prop instanceof ScrollProp)
-            ->each(fn (ScrollProp $prop) => $prop->configureMergeDirection($request))
             ->mapWithKeys(fn (ScrollProp $prop, string $key) => [$key => $prop->meta()]);
 
         return $scrollProps->isNotEmpty() ? ['scrollProps' => $scrollProps->toArray()] : [];
