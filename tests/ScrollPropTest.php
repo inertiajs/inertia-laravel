@@ -2,11 +2,12 @@
 
 namespace Inertia\Tests;
 
-use Inertia\PaginateProp;
 use Inertia\PaginatorMeta;
+use Inertia\ScrollProp;
+use Inertia\Support\Header;
 use Inertia\Tests\Stubs\User;
 
-class PaginatePropTest extends TestCase
+class ScrollPropTest extends TestCase
 {
     use InteractsWithUserModels;
 
@@ -19,9 +20,9 @@ class PaginatePropTest extends TestCase
     public function test_resolves_meta_data(): void
     {
         $users = User::query()->paginate(15);
-        $paginateProp = new PaginateProp($users);
+        $scrollProp = new ScrollProp($users);
 
-        $meta = $paginateProp->meta();
+        $meta = $scrollProp->meta();
 
         $this->assertEquals([
             'queryParam' => 'page',
@@ -43,26 +44,34 @@ class PaginatePropTest extends TestCase
             return new PaginatorMeta('usersPage');
         };
 
-        $paginateProp = new PaginateProp($users, 'data', $customMetaCallback);
+        $scrollProp = new ScrollProp($users, 'data', $customMetaCallback);
 
-        $meta = $paginateProp->meta();
+        $meta = $scrollProp->meta();
 
         $this->assertEquals('usersPage', $meta['queryParam']);
     }
 
-    public function test_can_set_the_merge_strategy(): void
+    public function test_can_set_the_merge_strategy_based_on_the_scroll_direction_header(): void
     {
         $users = User::query()->paginate(15);
 
-        // Test append strategy
-        $appendProp = new PaginateProp($users);
-        $appendProp->setMergeStrategy(true);
+        // Test append strategy without header
+        $appendProp = new ScrollProp($users);
+        $appendProp->setMergeStrategy();
+        $this->assertContains('data', $appendProp->appendPaths());
+        $this->assertEmpty($appendProp->prependPaths());
+
+        // Test append strategy with header set to 'down'
+        request()->headers->set(Header::SCROLL_DIRECTION, 'down');
+        $appendProp = new ScrollProp($users);
+        $appendProp->setMergeStrategy();
         $this->assertContains('data', $appendProp->appendPaths());
         $this->assertEmpty($appendProp->prependPaths());
 
         // Test prepend strategy
-        $prependProp = new PaginateProp($users);
-        $prependProp->setMergeStrategy(false);
+        request()->headers->set(Header::SCROLL_DIRECTION, 'up');
+        $prependProp = new ScrollProp($users);
+        $prependProp->setMergeStrategy();
         $this->assertContains('data', $prependProp->prependPaths());
         $this->assertEmpty($prependProp->appendPaths());
     }

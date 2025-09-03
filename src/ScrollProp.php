@@ -3,7 +3,9 @@
 namespace Inertia;
 
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
+use Inertia\Support\Header;
 
 /**
  * Represents a paginated property that can be merged during partial reloads.
@@ -11,7 +13,7 @@ use Illuminate\Support\Facades\App;
  * This class provides functionality for handling pagination data with merge capabilities,
  * allowing paginated content to be appended or prepended during client-side navigation.
  */
-class PaginateProp implements Mergeable
+class ScrollProp implements Mergeable
 {
     use MergesProps;
 
@@ -51,6 +53,7 @@ class PaginateProp implements Mergeable
      * completely replacing the property value.
      *
      * @param  mixed  $value
+     * @param  callable|array{string, mixed}|null  $meta
      */
     public function __construct($value, string $wrapper = 'data', callable|array|null $meta = null)
     {
@@ -61,14 +64,14 @@ class PaginateProp implements Mergeable
 
     /**
      * Set the merge strategy for the paginated data.
-     *
-     * @param  bool  $append  Whether to append (true) or prepend (false) the data
      */
-    public function setMergeStrategy(bool $append): self
+    public function setMergeStrategy(?Request $request = null): self
     {
-        $append ? $this->append($this->wrapper) : $this->prepend($this->wrapper);
+        $request ??= request();
 
-        return $this;
+        return $request->header(Header::SCROLL_DIRECTION) !== 'up'
+            ? $this->append($this->wrapper)
+            : $this->prepend($this->wrapper);
     }
 
     /**

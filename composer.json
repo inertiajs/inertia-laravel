@@ -45,6 +45,11 @@
     "suggest": {
         "ext-pcntl": "Recommended when running the Inertia SSR server via the `inertia:start-ssr` artisan command."
     },
+    "scripts": {
+        "test": "phpunit",
+        "lint": "pint",
+        "analyze": "phpstan analyze --memory-limit=256M"
+    },
     "extra": {
         "laravel": {
             "providers": [

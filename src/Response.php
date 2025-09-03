@@ -10,6 +10,7 @@ use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Response as ResponseFactory;
 use Illuminate\Support\Str;
@@ -188,6 +189,7 @@ class Response implements Responsable
             $this->resolveMergeProps($request),
             $this->resolveDeferredProps($request),
             $this->resolveCacheDirections($request),
+            $this->resolveScrollProps($request),
         );
 
         if ($request->header(Header::INERTIA)) {
@@ -439,29 +441,47 @@ class Response implements Responsable
     }
 
     /**
+     * Get the props that should be considered for merging based on the request headers.
+     *
+     * @return \Illuminate\Support\Collection<string, \Inertia\Mergeable>
+     */
+    protected function getMergePropsForRequest(Request $request): Collection
+    {
+        $resetProps = array_filter(explode(',', $request->header(Header::RESET, '')));
+        $onlyProps = array_filter(explode(',', $request->header(Header::PARTIAL_ONLY, '')));
+        $exceptProps = array_filter(explode(',', $request->header(Header::PARTIAL_EXCEPT, '')));
+
+        return collect($this->props)
+            ->filter(fn ($prop) => $prop instanceof Mergeable)
+            ->filter(fn ($prop) => $prop->shouldMerge())
+            ->reject(fn ($_, $key) => in_array($key, $resetProps))
+            ->filter(fn ($_, $key) => count($onlyProps) === 0 || in_array($key, $onlyProps))
+            ->reject(fn ($_, $key) => in_array($key, $exceptProps));
+    }
+
+    /**
+     * Resolve scroll props configuration for client-side infinite scrolling.
+     *
+     * @return array<string, mixed>
+     */
+    public function resolveScrollProps(Request $request): array
+    {
+        $scrollProps = $this->getMergePropsForRequest($request)
+            ->filter(fn ($prop) => $prop instanceof ScrollProp)
+            ->each(fn (ScrollProp $prop) => $prop->setMergeStrategy($request))
+            ->mapWithKeys(fn (ScrollProp $prop, string $key) => [$key => $prop->meta()]);
+
+        return $scrollProps->isNotEmpty() ? ['scrollProps' => $scrollProps->toArray()] : [];
+    }
+
+    /**
      * Resolve merge props configuration for client-side prop merging.
      *
      * @return array<string, mixed>
      */
     public function resolveMergeProps(Request $request): array
     {
-        $resetProps = array_filter(explode(',', $request->header(Header::RESET, '')));
-        $onlyProps = array_filter(explode(',', $request->header(Header::PARTIAL_ONLY, '')));
-        $exceptProps = array_filter(explode(',', $request->header(Header::PARTIAL_EXCEPT, '')));
-
-        $mergeProps = collect($this->props)
-            ->filter(fn ($prop) => $prop instanceof Mergeable)
-            ->filter(fn ($prop) => $prop->shouldMerge())
-            ->reject(fn ($_, $key) => in_array($key, $resetProps))
-            ->filter(fn ($_, $key) => count($onlyProps) === 0 || in_array($key, $onlyProps))
-            ->reject(fn ($_, $key) => in_array($key, $exceptProps));
-
-        $shouldAppendPaginationData = $request->header(Header::SCROLL_DIRECTION) !== 'up';
-
-        $paginateProps = $mergeProps
-            ->filter(fn ($prop) => $prop instanceof PaginateProp)
-            ->each(fn (PaginateProp $prop) => $prop->setMergeStrategy($shouldAppendPaginationData))
-            ->mapWithKeys(fn (PaginateProp $prop, string $key) => [$key => $prop->meta()]);
+        $mergeProps = $this->getMergePropsForRequest($request);
 
         $deepMergeProps = $mergeProps
             ->reject(fn ($prop) => $prop->hasAppendPaths() || $prop->hasPrependPaths())
@@ -506,7 +526,6 @@ class Response implements Responsable
             'matchPropsOn' => $matchPropsOn->toArray(),
             'appendPaths' => $appendPaths->toArray(),
             'prependPaths' => $prependPaths->toArray(),
-            'paginateProps' => $paginateProps->toArray(),
         ], fn ($prop) => count($prop) > 0);
     }
 

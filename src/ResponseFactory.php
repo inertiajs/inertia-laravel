@@ -224,13 +224,13 @@ class ResponseFactory
     }
 
     /**
-     * Create an paginate property.
+     * Create an scroll property.
      *
      * @param  mixed  $value
      */
-    public function paginate($value, ?string $wrapper = 'data', ?callable $meta = null): PaginateProp
+    public function scroll($value, ?string $wrapper = 'data', ?callable $meta = null): ScrollProp
     {
-        return new PaginateProp($value, $wrapper, $meta);
+        return new ScrollProp($value, $wrapper, $meta);
     }
 
     /**
