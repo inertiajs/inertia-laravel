@@ -60,6 +60,7 @@ class ScrollProp implements Mergeable
         $this->value = $value;
         $this->metaResolver = is_array($meta) ? fn () => $meta : $meta;
         $this->wrapper = $wrapper;
+        $this->merge = true;
     }
 
     /**

@@ -111,11 +111,12 @@ trait MergesProps
     /**
      * Specify that the value should be appended, optionally providing a key to append and a property to match on.
      */
-    public function append(string|bool $key = true, ?string $matchOn = null): self
+    public function append(bool|string|array $key = true, ?string $matchOn = null): self
     {
         match (true) {
             is_bool($key) => $this->append = $key,
             is_string($key) => $this->appendPaths[] = $key,
+            is_array($key) => $this->appendPaths = array_merge($this->appendPaths, $key),
         };
 
         if (is_string($key) && $matchOn) {
@@ -128,11 +129,12 @@ trait MergesProps
     /**
      * Specify that the value should be prepended, optionally providing a key to prepend and a property to match on.
      */
-    public function prepend(string|bool $key = true, ?string $matchOn = null): self
+    public function prepend(bool|string|array $key = true, ?string $matchOn = null): self
     {
         match (true) {
             is_bool($key) => $this->append = ! $key,
             is_string($key) => $this->prependPaths[] = $key,
+            is_array($key) => $this->prependPaths = array_merge($this->prependPaths, $key),
         };
 
         if (is_string($key) && $matchOn) {
