@@ -164,13 +164,13 @@ class AssertableInertia extends AssertableJson
      */
     public function reloadOnly(array|string $only, ?Closure $callback = null): self
     {
-        return $this->reload(only: $only, callback: function (AssertableInertia $assertable) use ($only, $callback) {
-            $assertable->hasAll(explode(',', $only));
+        return $this->reload(callback: function (AssertableInertia $assertable) use ($only, $callback) {
+            $assertable->hasAll(is_array($only) ? $only : explode(',', $only));
 
             if ($callback) {
                 $callback($assertable);
             }
-        });
+        }, only: $only);
     }
 
     /**
@@ -180,13 +180,13 @@ class AssertableInertia extends AssertableJson
      */
     public function reloadExcept(array|string $except, ?Closure $callback = null): self
     {
-        return $this->reload(except: $except, callback: function (AssertableInertia $assertable) use ($except, $callback) {
-            $assertable->missingAll(explode(',', $except));
+        return $this->reload(callback: function (AssertableInertia $assertable) use ($except, $callback) {
+            $assertable->missingAll(is_array($except) ? $except : explode(',', $except));
 
             if ($callback) {
                 $callback($assertable);
             }
-        });
+        }, except: $except);
     }
 
     /**
