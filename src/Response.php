@@ -483,54 +483,97 @@ class Response implements Responsable
     {
         $mergeProps = $this->getMergePropsForRequest($request);
 
-        $mergePropsWithAppendOrPrependPath = $mergeProps
-            ->filter(fn (Mergeable $prop) => $prop->hasAppendPaths() || $prop->hasPrependPaths())
+        return array_filter([
+            'mergeProps' => $this->resolveAppendMergeProps($mergeProps),
+            'prependProps' => $this->resolvePrependMergeProps($mergeProps),
+            'deepMergeProps' => $this->resolveDeepMergeProps($mergeProps),
+            'matchPropsOn' => $this->resolveMergeMatchingKeys($mergeProps),
+        ], fn ($prop) => count($prop) > 0);
+    }
+
+    /**
+     * Resolve props that should be appended during merging.
+     *
+     * @param  \Illuminate\Support\Collection<string, \Inertia\Mergeable>  $mergeProps
+     * @return array<int, string>
+     */
+    protected function resolveAppendMergeProps(Collection $mergeProps): array
+    {
+        [$regularMergeProps, $appendPaths] = $mergeProps
+            ->reject(fn (Mergeable $prop) => $prop->shouldDeepMerge())
+            ->partition(fn (Mergeable $prop) => $prop->shouldMergeAtRootLevel());
+
+        // Regular merge props (root level merging)
+        $regularMergeProps = $regularMergeProps
+            ->filter(fn (Mergeable $prop) => $prop->shouldAppend())
             ->keys();
 
-        $deepMergeProps = $mergeProps
-            ->reject(fn ($_, string $key) => $mergePropsWithAppendOrPrependPath->contains($key))
+        // Specific append paths from MergeProp instances
+        $appendPaths = $appendPaths
+            ->flatMap(fn (Mergeable $prop, string $key) => collect($prop->appendPaths())->map(fn ($path) => $path ? $key.'.'.$path : $key))
+            ->unique()
+            ->values();
+
+        return $regularMergeProps->merge($appendPaths)->values()->toArray();
+    }
+
+    /**
+     * Resolve props that should be prepended during merging.
+     *
+     * @param  \Illuminate\Support\Collection<string, \Inertia\Mergeable>  $mergeProps
+     * @return array<int, string>
+     */
+    protected function resolvePrependMergeProps(Collection $mergeProps): array
+    {
+        [$regularPrependProps, $prependPaths] = $mergeProps
+            ->reject(fn (Mergeable $prop) => $prop->shouldDeepMerge())
+            ->partition(fn (Mergeable $prop) => $prop->shouldMergeAtRootLevel());
+
+        // Regular prepend props (root level merging)
+        $regularPrependProps = $regularPrependProps
+            ->filter(fn (Mergeable $prop) => ! $prop->shouldAppend())
+            ->keys();
+
+        // Specific prepend paths from MergeProp instances
+        $prependPaths = $mergeProps
+            ->flatMap(fn (Mergeable $prop, string $key) => collect($prop->prependPaths())->map(fn ($path) => $path ? $key.'.'.$path : $key))
+            ->unique()
+            ->values();
+
+        return $regularPrependProps->merge($prependPaths)->values()->toArray();
+    }
+
+    /**
+     * Resolve props that should be deep merged.
+     *
+     * @param  \Illuminate\Support\Collection<string, \Inertia\Mergeable>  $mergeProps
+     * @return array<int, string>
+     */
+    protected function resolveDeepMergeProps(Collection $mergeProps): array
+    {
+        return $mergeProps
             ->filter(fn (Mergeable $prop) => $prop->shouldDeepMerge())
-            ->keys();
+            ->keys()
+            ->toArray();
+    }
 
-        $matchPropsOn = $mergeProps
+    /**
+     * Resolve the matching keys for merge props.
+     *
+     * @param  \Illuminate\Support\Collection<string, \Inertia\Mergeable>  $mergeProps
+     * @return array<int, string>
+     */
+    protected function resolveMergeMatchingKeys(Collection $mergeProps): array
+    {
+        return $mergeProps
             ->map(function (Mergeable $prop, $key) {
                 return collect($prop->matchesOn())
                     ->map(fn ($strategy) => $key.'.'.$strategy)
                     ->toArray();
             })
             ->flatten()
-            ->values();
-
-        $prependProps = $mergeProps
-            ->reject(fn ($_, string $key) => $mergePropsWithAppendOrPrependPath->contains($key))
-            ->filter(fn (Mergeable $prop) => ! $prop->shouldAppend() && ! $prop->shouldDeepMerge())
-            ->keys();
-
-        $mergeProps = $mergeProps
-            ->reject(fn ($_, string $key) => $mergePropsWithAppendOrPrependPath->contains($key))
-            ->filter(fn (Mergeable $prop) => $prop->shouldAppend() && ! $prop->shouldDeepMerge())
-            ->keys();
-
-        $appendPaths = collect($this->props)
-            ->filter(fn ($prop) => $prop instanceof MergeProp)
-            ->flatMap(fn (MergeProp $prop, string $key) => collect($prop->appendPaths())->map(fn ($path) => $path ? $key.'.'.$path : $key))
-            ->unique()
-            ->values();
-
-        $prependPaths = collect($this->props)
-            ->filter(fn ($prop) => $prop instanceof MergeProp)
-            ->flatMap(fn (MergeProp $prop, string $key) => collect($prop->prependPaths())->map(fn ($path) => $path ? $key.'.'.$path : $key))
-            ->unique()
-            ->values();
-
-        return array_filter([
-            'mergeProps' => $mergeProps->toArray(),
-            'prependProps' => $prependProps->toArray(),
-            'deepMergeProps' => $deepMergeProps->toArray(),
-            'matchPropsOn' => $matchPropsOn->toArray(),
-            'appendPaths' => $appendPaths->toArray(),
-            'prependPaths' => $prependPaths->toArray(),
-        ], fn ($prop) => count($prop) > 0);
+            ->values()
+            ->toArray();
     }
 
     /**

@@ -143,19 +143,11 @@ trait MergesProps
     }
 
     /**
-     * Determine if the property has paths to append.
+     * Determine if the property should merge at the root level (vs at specific paths).
      */
-    public function hasAppendPaths(): bool
+    public function shouldMergeAtRootLevel(): bool
     {
-        return count($this->appendPaths) > 0;
-    }
-
-    /**
-     * Determine if the property has paths to prepend.
-     */
-    public function hasPrependPaths(): bool
-    {
-        return count($this->prependPaths) > 0;
+        return count($this->appendPaths) === 0 && count($this->prependPaths) === 0;
     }
 
     /**
@@ -177,4 +169,5 @@ trait MergesProps
     {
         return $this->prependPaths;
     }
+
 }

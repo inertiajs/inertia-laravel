@@ -40,16 +40,23 @@ interface Mergeable
     public function shouldAppend();
 
     /**
-     * Determine if the property has paths to append.
+     * Determine if the property should merge at the root level (vs at specific paths).
      *
      * @return bool
      */
-    public function hasAppendPaths();
+    public function shouldMergeAtRootLevel();
 
     /**
-     * Determine if the property has paths to prepend.
+     * Get the paths to append when merging.
      *
-     * @return bool
+     * @return array<int, string>
      */
-    public function hasPrependPaths();
+    public function appendPaths(): array;
+
+    /**
+     * Get the paths to prepend when merging.
+     *
+     * @return array<int, string>
+     */
+    public function prependPaths(): array;
 }
