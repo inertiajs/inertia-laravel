@@ -460,21 +460,6 @@ class Response implements Responsable
     }
 
     /**
-     * Resolve scroll props configuration for client-side infinite scrolling.
-     *
-     * @return array<string, mixed>
-     */
-    public function resolveScrollProps(Request $request): array
-    {
-        $scrollProps = $this->getMergePropsForRequest($request)
-            ->filter(fn (Mergeable $prop) => $prop instanceof ScrollProp)
-            ->each(fn (ScrollProp $prop) => $prop->configureMergeDirection($request))
-            ->mapWithKeys(fn (ScrollProp $prop, string $key) => [$key => $prop->meta()]);
-
-        return $scrollProps->isNotEmpty() ? ['scrollProps' => $scrollProps->toArray()] : [];
-    }
-
-    /**
      * Resolve merge props configuration for client-side prop merging.
      *
      * @return array<string, mixed>
@@ -499,22 +484,16 @@ class Response implements Responsable
      */
     protected function resolveAppendMergeProps(Collection $mergeProps): array
     {
-        [$regularMergeProps, $appendPaths] = $mergeProps
+        [$rootMergeProps, $nestedMergeProps] = $mergeProps
             ->reject(fn (Mergeable $prop) => $prop->shouldDeepMerge())
             ->partition(fn (Mergeable $prop) => $prop->shouldMergeAtRootLevel());
 
-        // Regular merge props (root level merging)
-        $regularMergeProps = $regularMergeProps
-            ->filter(fn (Mergeable $prop) => $prop->shouldAppend())
-            ->keys();
-
-        // Specific append paths from MergeProp instances
-        $appendPaths = $appendPaths
+        return $nestedMergeProps
             ->flatMap(fn (Mergeable $prop, string $key) => collect($prop->appendPaths())->map(fn ($path) => $path ? $key.'.'.$path : $key))
+            ->merge($rootMergeProps->filter(fn (Mergeable $prop) => $prop->shouldAppend())->keys())
             ->unique()
-            ->values();
-
-        return $regularMergeProps->merge($appendPaths)->values()->toArray();
+            ->values()
+            ->toArray();
     }
 
     /**
@@ -525,22 +504,16 @@ class Response implements Responsable
      */
     protected function resolvePrependMergeProps(Collection $mergeProps): array
     {
-        [$regularPrependProps, $prependPaths] = $mergeProps
+        [$rootMergeProps, $nestedMergeProps] = $mergeProps
             ->reject(fn (Mergeable $prop) => $prop->shouldDeepMerge())
             ->partition(fn (Mergeable $prop) => $prop->shouldMergeAtRootLevel());
 
-        // Regular prepend props (root level merging)
-        $regularPrependProps = $regularPrependProps
-            ->filter(fn (Mergeable $prop) => ! $prop->shouldAppend())
-            ->keys();
-
-        // Specific prepend paths from MergeProp instances
-        $prependPaths = $mergeProps
+        return $nestedMergeProps
             ->flatMap(fn (Mergeable $prop, string $key) => collect($prop->prependPaths())->map(fn ($path) => $path ? $key.'.'.$path : $key))
+            ->merge($rootMergeProps->filter(fn (Mergeable $prop) => ! $prop->shouldAppend())->keys())
             ->unique()
-            ->values();
-
-        return $regularPrependProps->merge($prependPaths)->values()->toArray();
+            ->values()
+            ->toArray();
     }
 
     /**
@@ -602,6 +575,21 @@ class Response implements Responsable
             ->pluck('key');
 
         return $deferredProps->isNotEmpty() ? ['deferredProps' => $deferredProps->toArray()] : [];
+    }
+
+    /**
+     * Resolve scroll props configuration for client-side infinite scrolling.
+     *
+     * @return array<string, mixed>
+     */
+    public function resolveScrollProps(Request $request): array
+    {
+        $scrollProps = $this->getMergePropsForRequest($request)
+            ->filter(fn (Mergeable $prop) => $prop instanceof ScrollProp)
+            ->each(fn (ScrollProp $prop) => $prop->configureMergeDirection($request))
+            ->mapWithKeys(fn (ScrollProp $prop, string $key) => [$key => $prop->meta()]);
+
+        return $scrollProps->isNotEmpty() ? ['scrollProps' => $scrollProps->toArray()] : [];
     }
 
     /**
