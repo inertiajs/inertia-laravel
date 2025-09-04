@@ -64,18 +64,18 @@ class ScrollProp implements Mergeable
     }
 
     /**
-     * Configure the merge strategy based on the scroll direction header.
+     * Configure the merge strategy based on the infinite scroll merge intent header.
      *
-     * If the "X-Inertia-Scroll-Direction" header is set to "up", the items
-     * will be prepended; otherwise, it will be appended.
+     * The frontend InfiniteScroll component sends its merge intent directly,
+     * eliminating the need for direction-based logic on the backend.
      */
-    public function configureMergeDirection(?Request $request = null): self
+    public function configureMergeIntent(?Request $request = null): self
     {
         $request ??= request();
 
-        return $request->header(Header::SCROLL_DIRECTION) !== 'up'
-            ? $this->append($this->wrapper)
-            : $this->prepend($this->wrapper);
+        return $request->header(Header::INFINITE_SCROLL_MERGE_INTENT) === 'prepend'
+            ? $this->prepend($this->wrapper)
+            : $this->append($this->wrapper);
     }
 
     /**

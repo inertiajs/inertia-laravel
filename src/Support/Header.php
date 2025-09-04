@@ -45,7 +45,7 @@ class Header
     public const RESET = 'X-Inertia-Reset';
 
     /**
-     * Header for specifying the scroll direction when paginating on infinite scroll.
+     * Header for specifying the merge intent when paginating on infinite scroll.
      */
-    public const SCROLL_DIRECTION = 'X-Inertia-Scroll-Direction';
+    public const INFINITE_SCROLL_MERGE_INTENT = 'X-Inertia-Infinite-Scroll-Merge-Intent';
 }

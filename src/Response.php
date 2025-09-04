@@ -374,7 +374,7 @@ class Response implements Responsable
     {
         foreach ($props as $key => $value) {
             if ($value instanceof ScrollProp) {
-                $value->configureMergeDirection($request);
+                $value->configureMergeIntent($request);
             }
 
             $resolveViaApp = collect([

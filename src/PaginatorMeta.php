@@ -24,12 +24,10 @@ class PaginatorMeta implements Arrayable
      * Create a new paginator meta instance.
      */
     public function __construct(
-        public string $queryParam = 'page',
+        public string $pageName = 'page',
         public int|string|null $previousPage = null,
         public int|string|null $nextPage = null,
         public int|string|null $currentPage = null,
-        public bool $hasPreviousPage = false,
-        public bool $hasNextPage = false,
     ) {
         //
     }
@@ -42,12 +40,10 @@ class PaginatorMeta implements Arrayable
     public function toArray()
     {
         return [
-            'queryParam' => $this->queryParam,
+            'pageName' => $this->pageName,
             'previousPage' => $this->previousPage,
             'nextPage' => $this->nextPage,
             'currentPage' => $this->currentPage,
-            'hasPreviousPage' => $this->hasPreviousPage,
-            'hasNextPage' => $this->hasNextPage,
         ];
     }
 
@@ -66,8 +62,6 @@ class PaginatorMeta implements Arrayable
                 $paginator->previousCursor()?->encode(),
                 $paginator->nextCursor()?->encode(),
                 $paginator->onFirstPage() ? 1 : $request->query($cursorName, 1),
-                ! $paginator->onFirstPage(),
-                $paginator->hasMorePages(),
             );
         }
 
@@ -77,8 +71,6 @@ class PaginatorMeta implements Arrayable
                 $paginator->currentPage() > 1 ? $paginator->currentPage() - 1 : null,
                 $paginator->hasMorePages() ? $paginator->currentPage() + 1 : null,
                 $paginator->currentPage(),
-                $paginator->currentPage() > 1,
-                $paginator->hasMorePages(),
             );
         }
 

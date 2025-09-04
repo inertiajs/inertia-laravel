@@ -33,36 +33,30 @@ class PaginatorMetaTest extends TestCase
         }
 
         $this->assertEquals([
-            'queryParam' => 'page',
+            'pageName' => 'page',
             'previousPage' => null,
             'nextPage' => 2,
             'currentPage' => 1,
-            'hasPreviousPage' => false,
-            'hasNextPage' => true,
         ], PaginatorMeta::from($users)->toArray());
 
         request()->merge(['page' => 2]);
         $users = User::query()->simplePaginate(15);
 
         $this->assertEquals([
-            'queryParam' => 'page',
+            'pageName' => 'page',
             'previousPage' => 1,
             'nextPage' => 3,
             'currentPage' => 2,
-            'hasPreviousPage' => true,
-            'hasNextPage' => true,
         ], PaginatorMeta::from($users)->toArray());
 
         request()->merge(['page' => 3]);
         $users = User::query()->simplePaginate(15);
 
         $this->assertEquals([
-            'queryParam' => 'page',
+            'pageName' => 'page',
             'previousPage' => 2,
             'nextPage' => null,
             'currentPage' => 3,
-            'hasPreviousPage' => true,
-            'hasNextPage' => false,
         ], PaginatorMeta::from($users)->toArray());
     }
 
@@ -76,36 +70,30 @@ class PaginatorMetaTest extends TestCase
         }
 
         $this->assertEquals([
-            'queryParam' => 'page',
+            'pageName' => 'page',
             'previousPage' => null,
             'nextPage' => 2,
             'currentPage' => 1,
-            'hasPreviousPage' => false,
-            'hasNextPage' => true,
         ], PaginatorMeta::from($users)->toArray());
 
         request()->merge(['page' => 2]);
         $users = User::query()->paginate(15);
 
         $this->assertEquals([
-            'queryParam' => 'page',
+            'pageName' => 'page',
             'previousPage' => 1,
             'nextPage' => 3,
             'currentPage' => 2,
-            'hasPreviousPage' => true,
-            'hasNextPage' => true,
         ], PaginatorMeta::from($users)->toArray());
 
         request()->merge(['page' => 3]);
         $users = User::query()->paginate(15);
 
         $this->assertEquals([
-            'queryParam' => 'page',
+            'pageName' => 'page',
             'previousPage' => 2,
             'nextPage' => null,
             'currentPage' => 3,
-            'hasPreviousPage' => true,
-            'hasNextPage' => false,
         ], PaginatorMeta::from($users)->toArray());
     }
 
@@ -119,36 +107,30 @@ class PaginatorMetaTest extends TestCase
         }
 
         $this->assertEquals([
-            'queryParam' => 'cursor',
+            'pageName' => 'cursor',
             'previousPage' => null,
             'nextPage' => $users->nextCursor()?->encode(),
             'currentPage' => 1,
-            'hasPreviousPage' => false,
-            'hasNextPage' => true,
         ], $first = PaginatorMeta::from($users)->toArray());
 
         request()->merge(['cursor' => $first['nextPage']]);
         $users = User::query()->cursorPaginate(15);
 
         $this->assertEquals([
-            'queryParam' => 'cursor',
+            'pageName' => 'cursor',
             'previousPage' => $users->previousCursor()?->encode(),
             'nextPage' => $users->nextCursor()?->encode(),
             'currentPage' => $first['nextPage'],
-            'hasPreviousPage' => true,
-            'hasNextPage' => true,
         ], $second = PaginatorMeta::from($users)->toArray());
 
         request()->merge(['cursor' => $second['nextPage']]);
         $users = User::query()->cursorPaginate(15);
 
         $this->assertEquals([
-            'queryParam' => 'cursor',
+            'pageName' => 'cursor',
             'previousPage' => $users->previousCursor()?->encode(),
             'nextPage' => null,
             'currentPage' => $second['nextPage'],
-            'hasPreviousPage' => true,
-            'hasNextPage' => false,
         ], PaginatorMeta::from($users)->toArray());
     }
 

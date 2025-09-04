@@ -25,12 +25,10 @@ class ScrollPropTest extends TestCase
         $meta = $scrollProp->meta();
 
         $this->assertEquals([
-            'queryParam' => 'page',
+            'pageName' => 'page',
             'previousPage' => null,
             'nextPage' => 2,
             'currentPage' => 1,
-            'hasPreviousPage' => false,
-            'hasNextPage' => true,
         ], $meta);
     }
 
@@ -48,30 +46,30 @@ class ScrollPropTest extends TestCase
 
         $meta = $scrollProp->meta();
 
-        $this->assertEquals('usersPage', $meta['queryParam']);
+        $this->assertEquals('usersPage', $meta['pageName']);
     }
 
-    public function test_can_set_the_merge_strategy_based_on_the_scroll_direction_header(): void
+    public function test_can_set_the_merge_intent_based_on_the_merge_intent_header(): void
     {
         $users = User::query()->paginate(15);
 
-        // Test append strategy without header
+        // Test append intent without header
         $appendProp = new ScrollProp($users);
-        $appendProp->configureMergeDirection();
+        $appendProp->configureMergeIntent();
         $this->assertContains('data', $appendProp->appendsAtPaths());
         $this->assertEmpty($appendProp->prependsAtPaths());
 
-        // Test append strategy with header set to 'down'
-        request()->headers->set(Header::SCROLL_DIRECTION, 'down');
+        // Test append intent with header set to 'down'
+        request()->headers->set(Header::INFINITE_SCROLL_MERGE_INTENT, 'append');
         $appendProp = new ScrollProp($users);
-        $appendProp->configureMergeDirection();
+        $appendProp->configureMergeIntent();
         $this->assertContains('data', $appendProp->appendsAtPaths());
         $this->assertEmpty($appendProp->prependsAtPaths());
 
-        // Test prepend strategy
-        request()->headers->set(Header::SCROLL_DIRECTION, 'up');
+        // Test prepend intent
+        request()->headers->set(Header::INFINITE_SCROLL_MERGE_INTENT, 'prepend');
         $prependProp = new ScrollProp($users);
-        $prependProp->configureMergeDirection();
+        $prependProp->configureMergeIntent();
         $this->assertContains('data', $prependProp->prependsAtPaths());
         $this->assertEmpty($prependProp->appendsAtPaths());
     }
