@@ -44,7 +44,7 @@ class ScrollProp implements Mergeable
     /**
      * The scroll metadata provider.
      *
-     * @var ProvidesScrollMetadata|callable(T): \Inertia\ProvidesScrollMetadata
+     * @var ProvidesScrollMetadata|callable(T): \Inertia\ProvidesScrollMetadata|null
      */
     protected $metadata;
 
@@ -79,6 +79,9 @@ class ScrollProp implements Mergeable
             : $this->append($this->wrapper);
     }
 
+    /**
+     * Resolve the scroll metadata provider.
+     */
     protected function resolveMetadataProvider(): ProvidesScrollMetadata
     {
         if ($this->metadata instanceof ProvidesScrollMetadata) {
