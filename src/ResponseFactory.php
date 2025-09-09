@@ -233,9 +233,9 @@ class ResponseFactory
      * @param  T  $value
      * @return ScrollProp<T>
      */
-    public function scroll($value, ?string $wrapper = 'data', ?callable $meta = null): ScrollProp
+    public function scroll($value, string $wrapper = 'data', ProvidesScrollMetadata|callable|null $metadata = null): ScrollProp
     {
-        return new ScrollProp($value, $wrapper, $meta);
+        return new ScrollProp($value, $wrapper, $metadata);
     }
 
     /**
