@@ -87,7 +87,7 @@ class ScrollProp implements Mergeable
 
         $value = $this();
 
-        if (is_null($value)) {
+        if (is_null($this->metadata)) {
             return ScrollMetadata::fromPaginator($value);
         }
 
