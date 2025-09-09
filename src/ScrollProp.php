@@ -2,7 +2,6 @@
 
 namespace Inertia;
 
-use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Inertia\Support\Header;
@@ -12,6 +11,8 @@ use Inertia\Support\Header;
  *
  * This class provides functionality for handling pagination data with merge capabilities,
  * allowing paginated content to be appended or prepended during client-side navigation.
+ *
+ * @template T
  */
 class ScrollProp implements Mergeable
 {
@@ -22,14 +23,14 @@ class ScrollProp implements Mergeable
      *
      * Merged with existing client-side data during partial reloads.
      *
-     * @var mixed
+     * @var T
      */
     protected $value;
 
     /**
      * The resolved property value.
      *
-     * @var mixed
+     * @var T
      */
     protected $resolved;
 
@@ -41,26 +42,26 @@ class ScrollProp implements Mergeable
     protected $wrapper;
 
     /**
-     * The callback to generate pagination meta information.
+     * The scroll metadata provider.
      *
-     * @var callable|null
+     * @var ProvidesScrollMetadata|callable(T): \Inertia\ProvidesScrollMetadata
      */
-    protected $metaResolver;
+    protected $metadata;
 
     /**
      * Create a new merge property instance. Merge properties are combined
      * with existing client-side data during partial reloads instead of
      * completely replacing the property value.
      *
-     * @param  mixed  $value
-     * @param  callable|array{string, mixed}|null  $meta
+     * @param  T  $value
+     * @param  ProvidesScrollMetadata|callable(T): \Inertia\ProvidesScrollMetadata|null  $metadata
      */
-    public function __construct($value, string $wrapper = 'data', callable|array|null $meta = null)
+    public function __construct(mixed $value, string $wrapper = 'data', ProvidesScrollMetadata|callable|null $metadata = null)
     {
-        $this->value = $value;
-        $this->metaResolver = is_array($meta) ? fn () => $meta : $meta;
-        $this->wrapper = $wrapper;
         $this->merge = true;
+        $this->value = $value;
+        $this->wrapper = $wrapper;
+        $this->metadata = $metadata;
     }
 
     /**
@@ -69,7 +70,7 @@ class ScrollProp implements Mergeable
      * The frontend InfiniteScroll component sends its merge intent directly,
      * eliminating the need for direction-based logic on the backend.
      */
-    public function configureMergeIntent(?Request $request = null): self
+    public function configureMergeIntent(?Request $request = null): static
     {
         $request ??= request();
 
@@ -78,26 +79,42 @@ class ScrollProp implements Mergeable
             : $this->append($this->wrapper);
     }
 
+    protected function resolveMetadataProvider(): ProvidesScrollMetadata
+    {
+        if ($this->metadata instanceof ProvidesScrollMetadata) {
+            return $this->metadata;
+        }
+
+        $value = $this();
+
+        if (is_null($value)) {
+            return ScrollMetadata::fromPaginator($value);
+        }
+
+        return call_user_func($this->metadata, $value);
+    }
+
     /**
      * Get the pagination meta information.
      *
-     * @return mixed
+     * @return array{pageName: string, previousPage: int|string|null, nextPage: int|string|null, currentPage: int|string|null}
      */
-    public function meta()
+    public function metadata(): array
     {
-        $paginator = $this();
+        $metadataProvider = $this->resolveMetadataProvider();
 
-        $meta = $this->metaResolver
-            ? call_user_func($this->metaResolver, $paginator)
-            : PaginatorMeta::from($paginator);
-
-        return $meta instanceof Arrayable ? $meta->toArray() : $meta;
+        return [
+            'pageName' => $metadataProvider->getPageName(),
+            'previousPage' => $metadataProvider->getPreviousPage(),
+            'nextPage' => $metadataProvider->getNextPage(),
+            'currentPage' => $metadataProvider->getCurrentPage(),
+        ];
     }
 
     /**
      * Resolve the property value.
      *
-     * @return mixed
+     * @return T
      */
     public function __invoke()
     {

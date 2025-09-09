@@ -591,7 +591,7 @@ class Response implements Responsable
     {
         $scrollProps = $this->getMergePropsForRequest($request)
             ->filter(fn (Mergeable $prop) => $prop instanceof ScrollProp)
-            ->mapWithKeys(fn (ScrollProp $prop, string $key) => [$key => $prop->meta()]);
+            ->mapWithKeys(fn (ScrollProp $prop, string $key) => [$key => $prop->metadata()]);
 
         return $scrollProps->isNotEmpty() ? ['scrollProps' => $scrollProps->toArray()] : [];
     }

@@ -227,6 +227,11 @@ class ResponseFactory
      * Create an scroll property.
      *
      * @param  mixed  $value
+     *
+     * @template T
+     *
+     * @param  T  $value
+     * @return ScrollProp<T>
      */
     public function scroll($value, ?string $wrapper = 'data', ?callable $meta = null): ScrollProp
     {

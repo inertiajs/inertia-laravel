@@ -133,7 +133,7 @@ trait MergesProps
      *
      * @param  bool|string|array<array-key, string>  $path
      */
-    public function append(bool|string|array $path = true, ?string $matchOn = null): self
+    public function append(bool|string|array $path = true, ?string $matchOn = null): static
     {
         match (true) {
             is_bool($path) => $this->append = $path,
@@ -155,7 +155,7 @@ trait MergesProps
      *
      * @param  bool|string|array<array-key, string>  $path
      */
-    public function prepend(bool|string|array $path = true, ?string $matchOn = null): self
+    public function prepend(bool|string|array $path = true, ?string $matchOn = null): static
     {
         match (true) {
             is_bool($path) => $this->append = ! $path,

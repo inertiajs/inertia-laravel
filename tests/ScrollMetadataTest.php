@@ -2,13 +2,13 @@
 
 namespace Inertia\Tests;
 
-use Inertia\PaginatorMeta;
+use Inertia\ScrollMetadata;
 use Inertia\Tests\Stubs\User;
 use Inertia\Tests\Stubs\UserResource;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\DataProvider;
 
-class PaginatorMetaTest extends TestCase
+class ScrollMetadataTest extends TestCase
 {
     use InteractsWithUserModels;
 
@@ -37,7 +37,7 @@ class PaginatorMetaTest extends TestCase
             'previousPage' => null,
             'nextPage' => 2,
             'currentPage' => 1,
-        ], PaginatorMeta::from($users)->toArray());
+        ], ScrollMetadata::fromPaginator($users)->toArray());
 
         request()->merge(['page' => 2]);
         $users = User::query()->simplePaginate(15);
@@ -47,7 +47,7 @@ class PaginatorMetaTest extends TestCase
             'previousPage' => 1,
             'nextPage' => 3,
             'currentPage' => 2,
-        ], PaginatorMeta::from($users)->toArray());
+        ], ScrollMetadata::fromPaginator($users)->toArray());
 
         request()->merge(['page' => 3]);
         $users = User::query()->simplePaginate(15);
@@ -57,7 +57,7 @@ class PaginatorMetaTest extends TestCase
             'previousPage' => 2,
             'nextPage' => null,
             'currentPage' => 3,
-        ], PaginatorMeta::from($users)->toArray());
+        ], ScrollMetadata::fromPaginator($users)->toArray());
     }
 
     #[DataProvider('wrappedOrUnwrappedProvider')]
@@ -74,7 +74,7 @@ class PaginatorMetaTest extends TestCase
             'previousPage' => null,
             'nextPage' => 2,
             'currentPage' => 1,
-        ], PaginatorMeta::from($users)->toArray());
+        ], ScrollMetadata::fromPaginator($users)->toArray());
 
         request()->merge(['page' => 2]);
         $users = User::query()->paginate(15);
@@ -84,7 +84,7 @@ class PaginatorMetaTest extends TestCase
             'previousPage' => 1,
             'nextPage' => 3,
             'currentPage' => 2,
-        ], PaginatorMeta::from($users)->toArray());
+        ], ScrollMetadata::fromPaginator($users)->toArray());
 
         request()->merge(['page' => 3]);
         $users = User::query()->paginate(15);
@@ -94,7 +94,7 @@ class PaginatorMetaTest extends TestCase
             'previousPage' => 2,
             'nextPage' => null,
             'currentPage' => 3,
-        ], PaginatorMeta::from($users)->toArray());
+        ], ScrollMetadata::fromPaginator($users)->toArray());
     }
 
     #[DataProvider('wrappedOrUnwrappedProvider')]
@@ -111,7 +111,7 @@ class PaginatorMetaTest extends TestCase
             'previousPage' => null,
             'nextPage' => $users->nextCursor()?->encode(),
             'currentPage' => 1,
-        ], $first = PaginatorMeta::from($users)->toArray());
+        ], $first = ScrollMetadata::fromPaginator($users)->toArray());
 
         request()->merge(['cursor' => $first['nextPage']]);
         $users = User::query()->cursorPaginate(15);
@@ -121,7 +121,7 @@ class PaginatorMetaTest extends TestCase
             'previousPage' => $users->previousCursor()?->encode(),
             'nextPage' => $users->nextCursor()?->encode(),
             'currentPage' => $first['nextPage'],
-        ], $second = PaginatorMeta::from($users)->toArray());
+        ], $second = ScrollMetadata::fromPaginator($users)->toArray());
 
         request()->merge(['cursor' => $second['nextPage']]);
         $users = User::query()->cursorPaginate(15);
@@ -131,7 +131,7 @@ class PaginatorMetaTest extends TestCase
             'previousPage' => $users->previousCursor()?->encode(),
             'nextPage' => null,
             'currentPage' => $second['nextPage'],
-        ], PaginatorMeta::from($users)->toArray());
+        ], ScrollMetadata::fromPaginator($users)->toArray());
     }
 
     public function test_throws_exception_if_not_a_paginator(): void
@@ -139,6 +139,6 @@ class PaginatorMetaTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('The given value is not a Laravel paginator instance. Use a custom callback to extract pagination metadata.');
 
-        PaginatorMeta::from(collect());
+        ScrollMetadata::fromPaginator(collect());
     }
 }

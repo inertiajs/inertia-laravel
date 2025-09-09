@@ -2,7 +2,7 @@
 
 namespace Inertia\Tests;
 
-use Inertia\PaginatorMeta;
+use Inertia\ProvidesScrollMetadata;
 use Inertia\ScrollProp;
 use Inertia\Support\Header;
 use Inertia\Tests\Stubs\User;
@@ -22,31 +22,53 @@ class ScrollPropTest extends TestCase
         $users = User::query()->paginate(15);
         $scrollProp = new ScrollProp($users);
 
-        $meta = $scrollProp->meta();
+        $metadata = $scrollProp->metadata();
 
         $this->assertEquals([
             'pageName' => 'page',
             'previousPage' => null,
             'nextPage' => 2,
             'currentPage' => 1,
-        ], $meta);
+        ], $metadata);
     }
 
     public function test_resolves_custom_meta_data(): void
     {
         $users = User::query()->paginate(15);
 
-        $customMetaCallback = function ($paginator) use ($users) {
-            $this->assertEquals($users, $paginator);
+        $customMetaCallback = fn () => new class implements ProvidesScrollMetadata
+        {
+            public function getPageName(): string
+            {
+                return 'usersPage';
+            }
 
-            return new PaginatorMeta('usersPage');
+            public function getPreviousPage(): int
+            {
+                return 10;
+            }
+
+            public function getNextPage(): int
+            {
+                return 12;
+            }
+
+            public function getCurrentPage(): int
+            {
+                return 11;
+            }
         };
 
         $scrollProp = new ScrollProp($users, 'data', $customMetaCallback);
 
-        $meta = $scrollProp->meta();
+        $metadata = $scrollProp->metadata();
 
-        $this->assertEquals('usersPage', $meta['pageName']);
+        $this->assertEquals([
+            'pageName' => 'usersPage',
+            'previousPage' => 10,
+            'nextPage' => 12,
+            'currentPage' => 11,
+        ], $metadata);
     }
 
     public function test_can_set_the_merge_intent_based_on_the_merge_intent_header(): void
