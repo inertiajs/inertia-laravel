@@ -14,14 +14,13 @@ use Illuminate\View\View;
 use Inertia\AlwaysProp;
 use Inertia\DeferProp;
 use Inertia\Inertia;
-use Inertia\LazyProp;
+use Inertia\OptionalProp;
 use Inertia\MergeProp;
 use Inertia\ProvidesInertiaProperties;
 use Inertia\RenderContext;
 use Inertia\Response;
 use Inertia\Tests\Stubs\FakeResource;
 use Inertia\Tests\Stubs\MergeWithSharedProp;
-use Mockery;
 
 class ResponseTest extends TestCase
 {
@@ -619,10 +618,10 @@ class ResponseTest extends TestCase
 
         $user = (object) ['name' => 'Jonathan'];
 
-        $promise = Mockery::mock('GuzzleHttp\Promise\PromiseInterface')
+        $promise = $this->mock(\GuzzleHttp\Promise\PromiseInterface::class, fn ($mock) => $mock
             ->shouldReceive('wait')
             ->andReturn($user)
-            ->getMock();
+        );
 
         $response = new Response('User/Edit', ['user' => $promise], 'app', '123');
         /** @var JsonResponse $response */
@@ -693,7 +692,7 @@ class ResponseTest extends TestCase
 
         $props = [
             'auth' => [
-                'user' => new LazyProp(function () {
+                'user' => new OptionalProp(function () {
                     return [
                         'name' => 'Jonathan Reinink',
                         'email' => 'jonathan@example.com',
@@ -729,7 +728,7 @@ class ResponseTest extends TestCase
 
         $props = [
             'auth' => [
-                'user' => new LazyProp(function () {
+                'user' => new OptionalProp(function () {
                     return [
                         'name' => 'Jonathan Reinink',
                         'email' => 'jonathan@example.com',
@@ -757,7 +756,7 @@ class ResponseTest extends TestCase
         $request = Request::create('/users', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
 
-        $lazyProp = new LazyProp(function () {
+        $lazyProp = new OptionalProp(function () {
             return 'A lazy value';
         });
 
@@ -777,7 +776,7 @@ class ResponseTest extends TestCase
         $request->headers->add(['X-Inertia-Partial-Component' => 'Users']);
         $request->headers->add(['X-Inertia-Partial-Data' => 'lazy']);
 
-        $lazyProp = new LazyProp(function () {
+        $lazyProp = new OptionalProp(function () {
             return 'A lazy value';
         });
 
@@ -824,7 +823,7 @@ class ResponseTest extends TestCase
         $request->headers->add(['X-Inertia-Partial-Data' => 'data']);
 
         $props = [
-            'user' => new LazyProp(function () {
+            'user' => new OptionalProp(function () {
                 return [
                     'name' => 'Jonathan Reinink',
                     'email' => 'jonathan@example.com',
@@ -859,13 +858,13 @@ class ResponseTest extends TestCase
             new class implements ProvidesInertiaProperties
             {
                 /**
-                 * @return \Illuminate\Support\Collection<string, string>
+                 * @return array<string, mixed>
                  */
                 public function toInertiaProperties(RenderContext $context): iterable
                 {
-                    return collect([
+                    return [
                         'baz' => 'qux',
-                    ]);
+                    ];
                 }
             },
             'quux' => 'corge',
@@ -971,11 +970,11 @@ class ResponseTest extends TestCase
             ->with(new class implements ProvidesInertiaProperties
             {
                 /**
-                 * @return \Illuminate\Support\Collection<string, string>
+                 * @return array<string, mixed>
                  */
                 public function toInertiaProperties(RenderContext $context): iterable
                 {
-                    return collect(['grault' => 'garply']);
+                    return ['grault' => 'garply'];
                 }
             });
 
@@ -1009,7 +1008,7 @@ class ResponseTest extends TestCase
 
     public function test_the_page_url_is_prefixed_with_the_proxy_prefix(): void
     {
-        Request::setTrustedProxies(['1.2.3.4'], Request::HEADER_X_FORWARDED_PREFIX);
+        Request::setTrustedProxies(['1.2.3.4'], \Symfony\Component\HttpFoundation\Request::HEADER_X_FORWARDED_PREFIX);
 
         $request = Request::create('/user/123', 'GET');
         $request->server->set('REMOTE_ADDR', '1.2.3.4');
