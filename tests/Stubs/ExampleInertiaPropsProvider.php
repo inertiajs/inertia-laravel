@@ -15,7 +15,7 @@ class ExampleInertiaPropsProvider implements ProvidesInertiaProperties
     ) {}
 
     /**
-     * @return array<string, mixed>
+     * @return iterable<string, mixed>
      */
     public function toInertiaProperties(RenderContext $context): iterable
     {
