@@ -276,4 +276,55 @@ class AssertableInertiaTest extends TestCase
 
         $this->assertTrue($called);
     }
+
+    public function test_assert_against_deferred_props(): void
+    {
+        $response = $this->makeMockRequest(
+            Inertia::render('foo', [
+                'foo' => 'bar',
+                'deferred1' => Inertia::defer(fn () => 'baz'),
+                'deferred2' => Inertia::defer(fn () => 'qux', 'custom'),
+                'deferred3' => Inertia::defer(fn () => 'quux', 'custom'),
+            ])
+        );
+
+        $called = 0;
+
+        $response->assertInertia(function (AssertableInertia $inertia) use (&$called) {
+            $inertia->where('foo', 'bar');
+            $inertia->missing('deferred1');
+            $inertia->missing('deferred2');
+            $inertia->missing('deferred3');
+
+            $inertia->loadDeferredProps(function (AssertableInertia $inertia) use (&$called) {
+                $inertia->where('deferred1', 'baz');
+                $inertia->where('deferred2', 'qux');
+                $inertia->where('deferred3', 'quux');
+                $called++;
+            });
+
+            $inertia->loadDeferredProps('default', function (AssertableInertia $inertia) use (&$called) {
+                $inertia->where('deferred1', 'baz');
+                $inertia->missing('deferred2');
+                $inertia->missing('deferred3');
+                $called++;
+            });
+
+            $inertia->loadDeferredProps('custom', function (AssertableInertia $inertia) use (&$called) {
+                $inertia->missing('deferred1');
+                $inertia->where('deferred2', 'qux');
+                $inertia->where('deferred3', 'quux');
+                $called++;
+            });
+
+            $inertia->loadDeferredProps(['default', 'custom'], function (AssertableInertia $inertia) use (&$called) {
+                $inertia->where('deferred1', 'baz');
+                $inertia->where('deferred2', 'qux');
+                $inertia->where('deferred3', 'quux');
+                $called++;
+            });
+        });
+
+        $this->assertSame(4, $called);
+    }
 }
