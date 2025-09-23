@@ -51,7 +51,7 @@ class AssertableInertia extends AssertableJson
     /**
      * The deferred props (if any).
      *
-     * @var array
+     * @var array<string, array<int, string>>
      */
     private $deferredProps;
 
@@ -130,6 +130,8 @@ class AssertableInertia extends AssertableJson
 
     /**
      * Load the deferred props for the given groups and perform assertions on the response.
+     *
+     * @param  Closure|array<int, string>|string  $groupsOrCallback
      */
     public function loadDeferredProps(Closure|array|string $groupsOrCallback, ?Closure $callback = null): self
     {
