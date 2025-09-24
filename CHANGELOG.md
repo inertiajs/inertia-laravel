@@ -1,8 +1,16 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.6...2.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.7...2.x)
 
 - Nothing!
+
+## [v2.0.7](https://github.com/inertiajs/inertia-laravel/compare/v2.0.6...v2.0.7) - 2025-09-24
+
+### What's Changed
+
+* Added `loadDeferredProps()` method to `AssertableInertia` class by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/779
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.6...v2.0.7
 
 ## [v2.0.6](https://github.com/inertiajs/inertia-laravel/compare/v2.0.5...v2.0.6) - 2025-08-26
 
