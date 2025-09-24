@@ -4,6 +4,7 @@ namespace Inertia\Testing;
 
 use Closure;
 use Illuminate\Http\Response;
+use Illuminate\Support\Arr;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Illuminate\Testing\TestResponse;
 use InvalidArgumentException;
@@ -48,6 +49,13 @@ class AssertableInertia extends AssertableJson
     private $clearHistory;
 
     /**
+     * The deferred props (if any).
+     *
+     * @var array<string, array<int, string>>
+     */
+    private $deferredProps;
+
+    /**
      * Create an AssertableInertia instance from a test response.
      *
      * @param  TestResponse<Response>  $response
@@ -75,6 +83,7 @@ class AssertableInertia extends AssertableJson
         $instance->version = $page['version'];
         $instance->encryptHistory = $page['encryptHistory'];
         $instance->clearHistory = $page['clearHistory'];
+        $instance->deferredProps = $page['deferredProps'] ?? [];
 
         return $instance;
     }
@@ -117,6 +126,24 @@ class AssertableInertia extends AssertableJson
         PHPUnit::assertSame($value, $this->version, 'Unexpected Inertia asset version.');
 
         return $this;
+    }
+
+    /**
+     * Load the deferred props for the given groups and perform assertions on the response.
+     *
+     * @param  Closure|array<int, string>|string  $groupsOrCallback
+     */
+    public function loadDeferredProps(Closure|array|string $groupsOrCallback, ?Closure $callback = null): self
+    {
+        $callback = is_callable($groupsOrCallback) ? $groupsOrCallback : $callback;
+
+        $groups = is_callable($groupsOrCallback) ? array_keys($this->deferredProps) : Arr::wrap($groupsOrCallback);
+
+        $props = collect($groups)->flatMap(function ($group) {
+            return $this->deferredProps[$group] ?? [];
+        })->implode(',');
+
+        return $this->reloadOnly($props, $callback);
     }
 
     /**
