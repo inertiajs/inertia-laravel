@@ -1,8 +1,16 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.7...2.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.8...2.x)
 
 - Nothing!
+
+## [v2.0.8](https://github.com/inertiajs/inertia-laravel/compare/v2.0.7...v2.0.8) - 2025-09-26
+
+### What's Changed
+
+* More fine-grained control for `Inertia::merge()` and a new `Inertia::scroll()` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/774
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.7...v2.0.8
 
 ## [v2.0.7](https://github.com/inertiajs/inertia-laravel/compare/v2.0.6...v2.0.7) - 2025-09-24
 
