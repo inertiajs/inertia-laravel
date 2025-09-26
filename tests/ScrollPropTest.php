@@ -113,17 +113,17 @@ class ScrollPropTest extends TestCase
                     return 'callablePage';
                 }
 
-                public function getPreviousPage(): int|string|null
+                public function getPreviousPage(): int
                 {
                     return 5;
                 }
 
-                public function getNextPage(): int|string|null
+                public function getNextPage(): int
                 {
                     return 7;
                 }
 
-                public function getCurrentPage(): int|string|null
+                public function getCurrentPage(): int
                 {
                     return 6;
                 }
@@ -148,6 +148,7 @@ class ScrollPropTest extends TestCase
 
         $scrollProp = new ScrollProp(function () use (&$callCount) {
             $callCount++;
+
             return ['item1', 'item2', 'item3'];
         });
 
