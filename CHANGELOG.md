@@ -1,8 +1,16 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.8...2.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.9...2.x)
 
 - Nothing!
+
+## [v2.0.9](https://github.com/inertiajs/inertia-laravel/compare/v2.0.8...v2.0.9) - 2025-09-26
+
+### What's Changed
+
+* Add docblock to Inertia Facade for `scroll` by [@joetannenbaum](https://github.com/joetannenbaum) in https://github.com/inertiajs/inertia-laravel/pull/780
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.8...v2.0.9
 
 ## [v2.0.8](https://github.com/inertiajs/inertia-laravel/compare/v2.0.7...v2.0.8) - 2025-09-26
 
