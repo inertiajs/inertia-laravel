@@ -148,6 +148,7 @@ class ScrollPropTest extends TestCase
 
         $scrollProp = new ScrollProp(function () use (&$callCount) {
             $callCount++;
+
             return ['item1', 'item2', 'item3'];
         });
 
