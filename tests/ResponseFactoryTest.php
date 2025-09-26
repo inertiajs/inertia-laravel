@@ -344,6 +344,35 @@ class ResponseFactoryTest extends TestCase
         $this->assertInstanceOf(OptionalProp::class, $optionalProp);
     }
 
+    public function test_can_create_scroll_prop(): void
+    {
+        $factory = new ResponseFactory;
+        $data = ['item1', 'item2'];
+
+        $scrollProp = $factory->scroll($data);
+
+        $this->assertInstanceOf(\Inertia\ScrollProp::class, $scrollProp);
+        $this->assertSame($data, $scrollProp());
+    }
+
+    public function test_can_create_scroll_prop_with_metadata_provider(): void
+    {
+        $factory = new ResponseFactory;
+        $data = ['item1', 'item2'];
+        $metadataProvider = new \Inertia\ScrollMetadata('custom', 1, 3, 2);
+
+        $scrollProp = $factory->scroll($data, 'data', $metadataProvider);
+
+        $this->assertInstanceOf(\Inertia\ScrollProp::class, $scrollProp);
+        $this->assertSame($data, $scrollProp());
+        $this->assertEquals([
+            'pageName' => 'custom',
+            'previousPage' => 1,
+            'nextPage' => 3,
+            'currentPage' => 2,
+        ], $scrollProp->metadata());
+    }
+
     public function test_can_create_always_prop(): void
     {
         $factory = new ResponseFactory;

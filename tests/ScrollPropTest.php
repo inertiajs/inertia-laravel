@@ -94,5 +94,74 @@ class ScrollPropTest extends TestCase
         $prependProp->configureMergeIntent();
         $this->assertContains('data', $prependProp->prependsAtPaths());
         $this->assertEmpty($prependProp->appendsAtPaths());
+
+        // Test prepend intent with custom wrapper
+        request()->headers->set(Header::INFINITE_SCROLL_MERGE_INTENT, 'prepend');
+        $prependProp = new ScrollProp($users, 'items');
+        $prependProp->configureMergeIntent();
+        $this->assertContains('items', $prependProp->prependsAtPaths());
+        $this->assertEmpty($prependProp->appendsAtPaths());
+    }
+
+    public function test_resolves_meta_data_with_callable_provider(): void
+    {
+        $callableMetadata = function () {
+            return new class implements ProvidesScrollMetadata
+            {
+                public function getPageName(): string
+                {
+                    return 'callablePage';
+                }
+
+                public function getPreviousPage(): int|string|null
+                {
+                    return 5;
+                }
+
+                public function getNextPage(): int|string|null
+                {
+                    return 7;
+                }
+
+                public function getCurrentPage(): int|string|null
+                {
+                    return 6;
+                }
+            };
+        };
+
+        $scrollProp = new ScrollProp([], 'data', $callableMetadata);
+
+        $metadata = $scrollProp->metadata();
+
+        $this->assertEquals([
+            'pageName' => 'callablePage',
+            'previousPage' => 5,
+            'nextPage' => 7,
+            'currentPage' => 6,
+        ], $metadata);
+    }
+
+    public function test_scroll_prop_value_is_resolved_only_once(): void
+    {
+        $callCount = 0;
+
+        $scrollProp = new ScrollProp(function () use (&$callCount) {
+            $callCount++;
+            return ['item1', 'item2', 'item3'];
+        });
+
+        // Call the scroll prop multiple times
+        $value1 = $scrollProp();
+        $value2 = $scrollProp();
+        $value3 = $scrollProp();
+
+        // Verify the callback was only called once
+        $this->assertEquals(1, $callCount, 'Scroll prop value callback should only be executed once');
+
+        // Verify all calls return the same result
+        $this->assertEquals($value1, $value2);
+        $this->assertEquals($value2, $value3);
+        $this->assertEquals(['item1', 'item2', 'item3'], $value1);
     }
 }
