@@ -224,6 +224,21 @@ class ResponseFactory
     }
 
     /**
+     * Create an scroll property.
+     *
+     * @param  mixed  $value
+     *
+     * @template T
+     *
+     * @param  T  $value
+     * @return ScrollProp<T>
+     */
+    public function scroll($value, string $wrapper = 'data', ProvidesScrollMetadata|callable|null $metadata = null): ScrollProp
+    {
+        return new ScrollProp($value, $wrapper, $metadata);
+    }
+
+    /**
      * Find the component or fail.
      *
      * @throws \Inertia\ComponentNotFoundException

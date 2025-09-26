@@ -174,6 +174,110 @@ class ResponseTest extends TestCase
         $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;user&quot;:{&quot;name&quot;:&quot;Jonathan&quot;},&quot;foo&quot;:&quot;foo value&quot;,&quot;bar&quot;:&quot;bar value&quot;},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;,&quot;clearHistory&quot;:false,&quot;encryptHistory&quot;:false,&quot;mergeProps&quot;:[&quot;foo&quot;,&quot;bar&quot;]}"></div>', $view->render());
     }
 
+    public function test_server_response_with_merge_props_that_should_prepend(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+
+        $user = ['name' => 'Jonathan'];
+        $response = new Response(
+            'User/Edit',
+            [
+                'user' => $user,
+                'foo' => (new MergeProp('foo value'))->prepend(),
+                'bar' => new MergeProp('bar value'),
+            ],
+            'app',
+            '123'
+        );
+        $response = $response->toResponse($request);
+        /** @var BaseResponse $response */
+        $view = $response->getOriginalContent();
+        $page = $view->getData()['page'];
+
+        $this->assertInstanceOf(BaseResponse::class, $response);
+        $this->assertInstanceOf(View::class, $view);
+
+        $this->assertSame('User/Edit', $page['component']);
+        $this->assertSame('Jonathan', $page['props']['user']['name']);
+        $this->assertSame('/user/123', $page['url']);
+        $this->assertSame('123', $page['version']);
+        $this->assertSame(['bar'], $page['mergeProps']);
+        $this->assertSame(['foo'], $page['prependProps']);
+        $this->assertFalse($page['clearHistory']);
+        $this->assertFalse($page['encryptHistory']);
+        $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;user&quot;:{&quot;name&quot;:&quot;Jonathan&quot;},&quot;foo&quot;:&quot;foo value&quot;,&quot;bar&quot;:&quot;bar value&quot;},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;,&quot;clearHistory&quot;:false,&quot;encryptHistory&quot;:false,&quot;mergeProps&quot;:[&quot;bar&quot;],&quot;prependProps&quot;:[&quot;foo&quot;]}"></div>', $view->render());
+    }
+
+    public function test_server_response_with_merge_props_that_has_nested_paths_to_append_and_prepend(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+
+        $user = ['name' => 'Jonathan'];
+        $response = new Response(
+            'User/Edit',
+            [
+                'user' => $user,
+                'foo' => (new MergeProp(['data' => [['id' => 1], ['id' => 2]]]))->append('data'),
+                'bar' => (new MergeProp(['data' => ['items' => [['uuid' => 1], ['uuid' => 2]]]]))->prepend('data.items'),
+            ],
+            'app',
+            '123'
+        );
+        $response = $response->toResponse($request);
+        /** @var BaseResponse $response */
+        $view = $response->getOriginalContent();
+        $page = $view->getData()['page'];
+
+        $this->assertInstanceOf(BaseResponse::class, $response);
+        $this->assertInstanceOf(View::class, $view);
+
+        $this->assertSame('User/Edit', $page['component']);
+        $this->assertSame('Jonathan', $page['props']['user']['name']);
+        $this->assertSame('/user/123', $page['url']);
+        $this->assertSame('123', $page['version']);
+        $this->assertSame(['foo.data'], $page['mergeProps']);
+        $this->assertSame(['bar.data.items'], $page['prependProps']);
+        $this->assertArrayNotHasKey('matchPropsOn', $page);
+        $this->assertFalse($page['clearHistory']);
+        $this->assertFalse($page['encryptHistory']);
+        $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;user&quot;:{&quot;name&quot;:&quot;Jonathan&quot;},&quot;foo&quot;:{&quot;data&quot;:[{&quot;id&quot;:1},{&quot;id&quot;:2}]},&quot;bar&quot;:{&quot;data&quot;:{&quot;items&quot;:[{&quot;uuid&quot;:1},{&quot;uuid&quot;:2}]}}},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;,&quot;clearHistory&quot;:false,&quot;encryptHistory&quot;:false,&quot;mergeProps&quot;:[&quot;foo.data&quot;],&quot;prependProps&quot;:[&quot;bar.data.items&quot;]}"></div>', $view->render());
+    }
+
+    public function test_server_response_with_merge_props_that_has_nested_paths_to_append_and_prepend_with_match_on_strategies(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+
+        $user = ['name' => 'Jonathan'];
+        $response = new Response(
+            'User/Edit',
+            [
+                'user' => $user,
+                'foo' => (new MergeProp(['data' => [['id' => 1], ['id' => 2]]]))->append('data', 'id'),
+                'bar' => (new MergeProp(['data' => ['items' => [['uuid' => 1], ['uuid' => 2]]]]))->prepend('data.items', 'uuid'),
+            ],
+            'app',
+            '123'
+        );
+        $response = $response->toResponse($request);
+        /** @var BaseResponse $response */
+        $view = $response->getOriginalContent();
+        $page = $view->getData()['page'];
+
+        $this->assertInstanceOf(BaseResponse::class, $response);
+        $this->assertInstanceOf(View::class, $view);
+
+        $this->assertSame('User/Edit', $page['component']);
+        $this->assertSame('Jonathan', $page['props']['user']['name']);
+        $this->assertSame('/user/123', $page['url']);
+        $this->assertSame('123', $page['version']);
+        $this->assertSame(['foo.data'], $page['mergeProps']);
+        $this->assertSame(['bar.data.items'], $page['prependProps']);
+        $this->assertSame(['foo.data.id', 'bar.data.items.uuid'], $page['matchPropsOn']);
+        $this->assertFalse($page['clearHistory']);
+        $this->assertFalse($page['encryptHistory']);
+        $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;user&quot;:{&quot;name&quot;:&quot;Jonathan&quot;},&quot;foo&quot;:{&quot;data&quot;:[{&quot;id&quot;:1},{&quot;id&quot;:2}]},&quot;bar&quot;:{&quot;data&quot;:{&quot;items&quot;:[{&quot;uuid&quot;:1},{&quot;uuid&quot;:2}]}}},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;,&quot;clearHistory&quot;:false,&quot;encryptHistory&quot;:false,&quot;mergeProps&quot;:[&quot;foo.data&quot;],&quot;prependProps&quot;:[&quot;bar.data.items&quot;],&quot;matchPropsOn&quot;:[&quot;foo.data.id&quot;,&quot;bar.data.items.uuid&quot;]}"></div>', $view->render());
+    }
+
     public function test_server_response_with_deep_merge_props(): void
     {
         $request = Request::create('/user/123', 'GET');
@@ -210,7 +314,7 @@ class ResponseTest extends TestCase
         $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;user&quot;:{&quot;name&quot;:&quot;Jonathan&quot;},&quot;foo&quot;:&quot;foo value&quot;,&quot;bar&quot;:&quot;bar value&quot;},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;,&quot;clearHistory&quot;:false,&quot;encryptHistory&quot;:false,&quot;deepMergeProps&quot;:[&quot;foo&quot;,&quot;bar&quot;]}"></div>', $view->render());
     }
 
-    public function test_server_response_with_merge_strategies(): void
+    public function test_server_response_with_match_on_props(): void
     {
         $request = Request::create('/user/123', 'GET');
 

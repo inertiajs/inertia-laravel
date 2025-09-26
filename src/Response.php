@@ -10,6 +10,7 @@ use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Response as ResponseFactory;
 use Illuminate\Support\Str;
@@ -188,6 +189,7 @@ class Response implements Responsable
             $this->resolveMergeProps($request),
             $this->resolveDeferredProps($request),
             $this->resolveCacheDirections($request),
+            $this->resolveScrollProps($request),
         );
 
         if ($request->header(Header::INERTIA)) {
@@ -371,6 +373,10 @@ class Response implements Responsable
     public function resolvePropertyInstances(array $props, Request $request, ?string $parentKey = null): array
     {
         foreach ($props as $key => $value) {
+            if ($value instanceof ScrollProp) {
+                $value->configureMergeIntent($request);
+            }
+
             $resolveViaApp = collect([
                 Closure::class,
                 LazyProp::class,
@@ -378,6 +384,7 @@ class Response implements Responsable
                 DeferProp::class,
                 AlwaysProp::class,
                 MergeProp::class,
+                ScrollProp::class,
             ])->first(fn ($class) => $value instanceof $class);
 
             if ($resolveViaApp) {
@@ -439,45 +446,112 @@ class Response implements Responsable
     }
 
     /**
+     * Get the props that should be considered for merging based on the request headers.
+     *
+     * @return \Illuminate\Support\Collection<string, \Inertia\Mergeable>
+     */
+    protected function getMergePropsForRequest(Request $request): Collection
+    {
+        $resetProps = array_filter(explode(',', $request->header(Header::RESET, '')));
+        $onlyProps = array_filter(explode(',', $request->header(Header::PARTIAL_ONLY, '')));
+        $exceptProps = array_filter(explode(',', $request->header(Header::PARTIAL_EXCEPT, '')));
+
+        return collect($this->props)
+            ->filter(fn ($prop) => $prop instanceof Mergeable)
+            ->filter(fn (Mergeable $prop) => $prop->shouldMerge())
+            ->reject(fn ($_, string $key) => in_array($key, $resetProps))
+            ->filter(fn ($_, string $key) => count($onlyProps) === 0 || in_array($key, $onlyProps))
+            ->reject(fn ($_, string $key) => in_array($key, $exceptProps));
+    }
+
+    /**
      * Resolve merge props configuration for client-side prop merging.
      *
      * @return array<string, mixed>
      */
     public function resolveMergeProps(Request $request): array
     {
-        $resetProps = array_filter(explode(',', $request->header(Header::RESET, '')));
-        $onlyProps = array_filter(explode(',', $request->header(Header::PARTIAL_ONLY, '')));
-        $exceptProps = array_filter(explode(',', $request->header(Header::PARTIAL_EXCEPT, '')));
+        $mergeProps = $this->getMergePropsForRequest($request);
 
-        $mergeProps = collect($this->props)
-            ->filter(fn ($prop) => $prop instanceof Mergeable)
-            ->filter(fn ($prop) => $prop->shouldMerge())
-            ->reject(fn ($_, $key) => in_array($key, $resetProps))
-            ->filter(fn ($_, $key) => count($onlyProps) === 0 || in_array($key, $onlyProps))
-            ->reject(fn ($_, $key) => in_array($key, $exceptProps));
+        return array_filter([
+            'mergeProps' => $this->resolveAppendMergeProps($mergeProps),
+            'prependProps' => $this->resolvePrependMergeProps($mergeProps),
+            'deepMergeProps' => $this->resolveDeepMergeProps($mergeProps),
+            'matchPropsOn' => $this->resolveMergeMatchingKeys($mergeProps),
+        ], fn ($prop) => count($prop) > 0);
+    }
 
-        $deepMergeProps = $mergeProps
-            ->filter(fn ($prop) => $prop->shouldDeepMerge())
-            ->keys();
+    /**
+     * Resolve props that should be appended during merging.
+     *
+     * @param  \Illuminate\Support\Collection<string, \Inertia\Mergeable>  $mergeProps
+     * @return array<int, string>
+     */
+    protected function resolveAppendMergeProps(Collection $mergeProps): array
+    {
+        [$rootAppendProps, $nestedAppendProps] = $mergeProps
+            ->reject(fn (Mergeable $prop) => $prop->shouldDeepMerge())
+            ->partition(fn (Mergeable $prop) => $prop->appendsAtRoot());
 
-        $matchPropsOn = $mergeProps
+        return $nestedAppendProps
+            ->flatMap(fn (Mergeable $prop, string $key) => collect($prop->appendsAtPaths())->map(fn ($path) => $key.'.'.$path))
+            ->merge($rootAppendProps->keys())
+            ->unique()
+            ->values()
+            ->toArray();
+    }
+
+    /**
+     * Resolve props that should be prepended during merging.
+     *
+     * @param  \Illuminate\Support\Collection<string, \Inertia\Mergeable>  $mergeProps
+     * @return array<int, string>
+     */
+    protected function resolvePrependMergeProps(Collection $mergeProps): array
+    {
+        [$rootPrependProps, $nestedPrependProps] = $mergeProps
+            ->reject(fn (Mergeable $prop) => $prop->shouldDeepMerge())
+            ->partition(fn (Mergeable $prop) => $prop->prependsAtRoot());
+
+        return $nestedPrependProps
+            ->flatMap(fn (Mergeable $prop, string $key) => collect($prop->prependsAtPaths())->map(fn ($path) => $key.'.'.$path))
+            ->merge($rootPrependProps->keys())
+            ->unique()
+            ->values()
+            ->toArray();
+    }
+
+    /**
+     * Resolve props that should be deep merged.
+     *
+     * @param  \Illuminate\Support\Collection<string, \Inertia\Mergeable>  $mergeProps
+     * @return array<int, string>
+     */
+    protected function resolveDeepMergeProps(Collection $mergeProps): array
+    {
+        return $mergeProps
+            ->filter(fn (Mergeable $prop) => $prop->shouldDeepMerge())
+            ->keys()
+            ->toArray();
+    }
+
+    /**
+     * Resolve the matching keys for merge props.
+     *
+     * @param  \Illuminate\Support\Collection<string, \Inertia\Mergeable>  $mergeProps
+     * @return array<int, string>
+     */
+    protected function resolveMergeMatchingKeys(Collection $mergeProps): array
+    {
+        return $mergeProps
             ->map(function (Mergeable $prop, $key) {
                 return collect($prop->matchesOn())
                     ->map(fn ($strategy) => $key.'.'.$strategy)
                     ->toArray();
             })
             ->flatten()
-            ->values();
-
-        $mergeProps = $mergeProps
-            ->filter(fn ($prop) => ! $prop->shouldDeepMerge())
-            ->keys();
-
-        return array_filter([
-            'mergeProps' => $mergeProps->toArray(),
-            'deepMergeProps' => $deepMergeProps->toArray(),
-            'matchPropsOn' => $matchPropsOn->toArray(),
-        ], fn ($prop) => count($prop) > 0);
+            ->values()
+            ->toArray();
     }
 
     /**
@@ -506,6 +580,20 @@ class Response implements Responsable
             ->pluck('key');
 
         return $deferredProps->isNotEmpty() ? ['deferredProps' => $deferredProps->toArray()] : [];
+    }
+
+    /**
+     * Resolve scroll props configuration for client-side infinite scrolling.
+     *
+     * @return array<string, mixed>
+     */
+    public function resolveScrollProps(Request $request): array
+    {
+        $scrollProps = $this->getMergePropsForRequest($request)
+            ->filter(fn (Mergeable $prop) => $prop instanceof ScrollProp)
+            ->mapWithKeys(fn (ScrollProp $prop, string $key) => [$key => $prop->metadata()]);
+
+        return $scrollProps->isNotEmpty() ? ['scrollProps' => $scrollProps->toArray()] : [];
     }
 
     /**

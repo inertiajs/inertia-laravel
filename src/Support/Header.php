@@ -43,4 +43,9 @@ class Header
      * Header for resetting the page state.
      */
     public const RESET = 'X-Inertia-Reset';
+
+    /**
+     * Header for specifying the merge intent when paginating on infinite scroll.
+     */
+    public const INFINITE_SCROLL_MERGE_INTENT = 'X-Inertia-Infinite-Scroll-Merge-Intent';
 }
