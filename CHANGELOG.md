@@ -1,8 +1,16 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.9...2.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.10...2.x)
 
 - Nothing!
+
+## [v2.0.10](https://github.com/inertiajs/inertia-laravel/compare/v2.0.9...v2.0.10) - 2025-09-28
+
+### What's Changed
+
+* Include `scrollProps` metadata when prop is requested to reset by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/781
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.9...v2.0.10
 
 ## [v2.0.9](https://github.com/inertiajs/inertia-laravel/compare/v2.0.8...v2.0.9) - 2025-09-26
 
