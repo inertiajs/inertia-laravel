@@ -141,6 +141,9 @@ class ResponseTest extends TestCase
         $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;user&quot;:{&quot;name&quot;:&quot;Jonathan&quot;}},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;,&quot;clearHistory&quot;:false,&quot;encryptHistory&quot;:false,&quot;deferredProps&quot;:{&quot;default&quot;:[&quot;foo&quot;,&quot;bar&quot;],&quot;custom&quot;:[&quot;baz&quot;]}}"></div>', $view->render());
     }
 
+    /**
+     * @return array<string, array{0: bool}>
+     */
     public static function resetUsersProp(): array
     {
         return [
@@ -168,7 +171,7 @@ class ResponseTest extends TestCase
                         return 'page';
                     }
 
-                    public function getPreviousPage(): null
+                    public function getPreviousPage(): ?int
                     {
                         return null;
                     }
