@@ -446,13 +446,23 @@ class Response implements Responsable
     }
 
     /**
+     * Get the props that should be reset based on the request headers.
+     *
+     * @return array<int, string>
+     */
+    public function getResetProps(Request $request): array
+    {
+        return array_filter(explode(',', $request->header(Header::RESET, '')));
+    }
+
+    /**
      * Get the props that should be considered for merging based on the request headers.
      *
      * @return \Illuminate\Support\Collection<string, \Inertia\Mergeable>
      */
-    protected function getMergePropsForRequest(Request $request): Collection
+    protected function getMergePropsForRequest(Request $request, bool $rejectResetProps = true): Collection
     {
-        $resetProps = array_filter(explode(',', $request->header(Header::RESET, '')));
+        $resetProps = $rejectResetProps ? $this->getResetProps($request) : [];
         $onlyProps = array_filter(explode(',', $request->header(Header::PARTIAL_ONLY, '')));
         $exceptProps = array_filter(explode(',', $request->header(Header::PARTIAL_EXCEPT, '')));
 
@@ -589,9 +599,14 @@ class Response implements Responsable
      */
     public function resolveScrollProps(Request $request): array
     {
-        $scrollProps = $this->getMergePropsForRequest($request)
+        $resetProps = $this->getResetProps($request);
+
+        $scrollProps = $this->getMergePropsForRequest($request, false)
             ->filter(fn (Mergeable $prop) => $prop instanceof ScrollProp)
-            ->mapWithKeys(fn (ScrollProp $prop, string $key) => [$key => $prop->metadata()]);
+            ->mapWithKeys(fn (ScrollProp $prop, string $key) => [$key => [
+                ...$prop->metadata(),
+                'reset' => in_array($key, $resetProps),
+            ]]);
 
         return $scrollProps->isNotEmpty() ? ['scrollProps' => $scrollProps->toArray()] : [];
     }

@@ -17,11 +17,14 @@ use Inertia\Inertia;
 use Inertia\LazyProp;
 use Inertia\MergeProp;
 use Inertia\ProvidesInertiaProperties;
+use Inertia\ProvidesScrollMetadata;
 use Inertia\RenderContext;
 use Inertia\Response;
+use Inertia\ScrollProp;
 use Inertia\Tests\Stubs\FakeResource;
 use Inertia\Tests\Stubs\MergeWithSharedProp;
 use Mockery;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class ResponseTest extends TestCase
 {
@@ -136,6 +139,78 @@ class ResponseTest extends TestCase
         $this->assertFalse($page['clearHistory']);
         $this->assertFalse($page['encryptHistory']);
         $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;user&quot;:{&quot;name&quot;:&quot;Jonathan&quot;}},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;,&quot;clearHistory&quot;:false,&quot;encryptHistory&quot;:false,&quot;deferredProps&quot;:{&quot;default&quot;:[&quot;foo&quot;,&quot;bar&quot;],&quot;custom&quot;:[&quot;baz&quot;]}}"></div>', $view->render());
+    }
+
+    /**
+     * @return array<string, array{0: bool}>
+     */
+    public static function resetUsersProp(): array
+    {
+        return [
+            'no reset' => [false],
+            'with reset' => [true],
+        ];
+    }
+
+    #[DataProvider('resetUsersProp')]
+    public function test_server_response_with_scroll_props(bool $resetUsersProp): void
+    {
+        $request = Request::create('/user/123', 'GET');
+
+        if ($resetUsersProp) {
+            $request->headers->add(['X-Inertia-Reset' => 'users']);
+        }
+
+        $response = new Response(
+            'User/Index',
+            [
+                'users' => new ScrollProp(['data' => [['id' => 1]]], 'data', new class implements ProvidesScrollMetadata
+                {
+                    public function getPageName(): string
+                    {
+                        return 'page';
+                    }
+
+                    public function getPreviousPage(): ?int
+                    {
+                        return null;
+                    }
+
+                    public function getNextPage(): int
+                    {
+                        return 2;
+                    }
+
+                    public function getCurrentPage(): int
+                    {
+                        return 1;
+                    }
+                }),
+            ],
+            'app',
+            '123'
+        );
+        $response = $response->toResponse($request);
+        /** @var BaseResponse $response */
+        $view = $response->getOriginalContent();
+        $page = $view->getData()['page'];
+
+        $this->assertInstanceOf(BaseResponse::class, $response);
+        $this->assertInstanceOf(View::class, $view);
+
+        $this->assertSame('User/Index', $page['component']);
+        $this->assertSame(['data' => [['id' => 1]]], $page['props']['users']);
+        $this->assertSame('/user/123', $page['url']);
+        $this->assertSame('123', $page['version']);
+        $this->assertSame([
+            'users' => [
+                'pageName' => 'page',
+                'previousPage' => null,
+                'nextPage' => 2,
+                'currentPage' => 1,
+                'reset' => $resetUsersProp,
+            ],
+        ], $page['scrollProps']);
     }
 
     public function test_server_response_with_merge_props(): void
@@ -499,6 +574,38 @@ class ResponseTest extends TestCase
         $this->assertArrayNotHasKey('foo', $props);
         $this->assertArrayHasKey('bar', $props);
         $this->assertSame(['bar'], $page->mergeProps);
+    }
+
+    public function test_exclude_merge_props_when_passed_in_reset_header(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'User/Edit']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'foo']);
+        $request->headers->add(['X-Inertia-Reset' => 'foo']);
+
+        $user = ['name' => 'Jonathan'];
+        $response = new Response(
+            'User/Edit',
+            [
+                'user' => $user,
+                'foo' => new MergeProp('foo value'),
+                'bar' => new MergeProp('bar value'),
+            ],
+            'app',
+            '123'
+        );
+
+        /** @var JsonResponse $response */
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $props = get_object_vars($page->props);
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertSame($props['foo'], 'foo value');
+        $this->assertArrayNotHasKey('bar', $props);
+        $this->assertFalse(isset($page->mergeProps));
     }
 
     public function test_xhr_response(): void
