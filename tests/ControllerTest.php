@@ -25,6 +25,14 @@ class ControllerTest extends TestCase
             'props' => [
                 'user' => ['name' => 'Jonathan'],
                 'errors' => (object) [],
+                'routeParams' => (object) [
+                    'component' => 'User/Edit',
+                    'props' => [
+                        'user' => [
+                            'name' => 'Jonathan',
+                        ],
+                    ],
+                ],
             ],
             'url' => '/',
             'version' => '',
