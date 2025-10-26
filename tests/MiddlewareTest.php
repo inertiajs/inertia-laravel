@@ -239,6 +239,40 @@ class MiddlewareTest extends TestCase
         $this->withoutExceptionHandling()->get('/', ['X-Inertia-Error-Bag' => 'example']);
     }
 
+    public function test_route_params_are_registered_as_of_default(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            $this->assertInstanceOf(AlwaysProp::class, Inertia::getShared('routeParams'));
+        });
+
+        $this->withoutExceptionHandling()->get('/');
+    }
+
+    public function test_route_params_can_be_empty(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            $routeParams = Inertia::getShared('routeParams')();
+
+            $this->assertIsObject($routeParams);
+            $this->assertEmpty(get_object_vars($routeParams));
+        });
+
+        $this->withoutExceptionHandling()->get('/');
+    }
+
+    public function test_route_params_are_returned_in_the_correct_format(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])
+            ->get('/{number}/{string}', function () {
+                $routeParams = Inertia::getShared('routeParams')();
+                $this->assertIsObject($routeParams);
+                $this->assertSame('1', $routeParams->number);
+                $this->assertSame('john', $routeParams->string);
+            });
+
+        $this->withoutExceptionHandling()->get('/1/john');
+    }
+
     public function test_middleware_can_change_the_root_view_via_a_property(): void
     {
         $this->prepareMockEndpoint(null, [], new class extends Middleware
