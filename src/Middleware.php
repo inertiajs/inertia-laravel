@@ -52,6 +52,7 @@ class Middleware
     {
         return [
             'errors' => Inertia::always($this->resolveValidationErrors($request)),
+            'routeParams' => Inertia::always($this->resolveRouteParams($request)),
         ];
     }
 
@@ -166,5 +167,15 @@ class Middleware
 
             return $bags->toArray();
         });
+    }
+
+    /**
+     * Resolve route params for client-side use.
+     *
+     * @return object
+     */
+    public function resolveRouteParams(Request $request)
+    {
+        return (object) $request->route()->originalParameters();
     }
 }
