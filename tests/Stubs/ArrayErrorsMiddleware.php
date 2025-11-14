@@ -7,5 +7,5 @@ class ArrayErrorsMiddleware extends ExampleMiddleware
     /**
      * @var bool
      */
-    protected $singleErrorPerField = false;
+    protected $arrayErrors = true;
 }
