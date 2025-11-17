@@ -119,10 +119,12 @@ class HttpGatewayTest extends TestCase
         Http::fake([
             $this->gateway->getUrl('health') => Http::sequence()
                 ->push(status: 200)
-                ->push(status: 500),
+                ->push(status: 500)
+                ->pushFailedConnection(),
         ]);
 
         $this->assertTrue($this->gateway->isHealthy());
+        $this->assertFalse($this->gateway->isHealthy());
         $this->assertFalse($this->gateway->isHealthy());
     }
 }
