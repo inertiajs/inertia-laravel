@@ -2,6 +2,8 @@
 
 namespace Inertia\Tests;
 
+use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Promise\Create;
 use Illuminate\Support\Facades\Http;
 use Inertia\Ssr\HttpGateway;
 
@@ -120,7 +122,12 @@ class HttpGatewayTest extends TestCase
             $this->gateway->getUrl('health') => Http::sequence()
                 ->push(status: 200)
                 ->push(status: 500)
-                ->pushFailedConnection(),
+                ->pushResponse(
+                    fn ($request) => Create::rejectionFor(new ConnectException(
+                        $message ?? "cURL error 6: Could not resolve host: {$request->toPsrRequest()->getUri()->getHost()} (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for {$request->toPsrRequest()->getUri()}.",
+                        $request->toPsrRequest(),
+                    ))
+                ),
         ]);
 
         $this->assertTrue($this->gateway->isHealthy());
