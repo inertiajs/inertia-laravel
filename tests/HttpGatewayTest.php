@@ -124,7 +124,7 @@ class HttpGatewayTest extends TestCase
                 ->push(status: 500)
                 ->pushResponse(
                     fn ($request) => Create::rejectionFor(new ConnectException(
-                        $message ?? "cURL error 6: Could not resolve host: {$request->toPsrRequest()->getUri()->getHost()} (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for {$request->toPsrRequest()->getUri()}.",
+                        "cURL error 6: Could not resolve host: {$request->toPsrRequest()->getUri()->getHost()} (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for {$request->toPsrRequest()->getUri()}.",
                         $request->toPsrRequest(),
                     ))
                 ),
