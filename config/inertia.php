@@ -29,8 +29,6 @@ return [
 
         // 'bundle' => base_path('bootstrap/ssr/ssr.mjs'),
 
-        'use_script_element_for_initial_page' => (bool) env('INERTIA_SSR_USE_SCRIPT_ELEMENT_FOR_INITIAL_PAGE', false),
-
     ],
 
     /*
@@ -65,6 +63,8 @@ return [
         'vue',
 
     ],
+
+    'use_script_element_for_initial_page' => (bool) env('INERTIA_USE_SCRIPT_ELEMENT_FOR_INITIAL_PAGE', false),
 
     /*
     |--------------------------------------------------------------------------

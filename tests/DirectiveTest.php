@@ -67,7 +67,7 @@ class DirectiveTest extends TestCase
     {
         Config::set([
             'inertia.ssr.enabled' => false,
-            'inertia.ssr.use_script_element_for_initial_page' => true,
+            'inertia.use_script_element_for_initial_page' => true,
         ]);
 
         $html = '<script id="app_page" type="application/json">{&quot;component&quot;:&quot;Foo\/Bar&quot;,&quot;props&quot;:{&quot;foo&quot;:&quot;bar&quot;},&quot;url&quot;:&quot;\/test&quot;,&quot;version&quot;:&quot;&quot;,&quot;encryptHistory&quot;:false,&quot;clearHistory&quot;:false}</script><div id="app"></div>';
@@ -103,7 +103,7 @@ class DirectiveTest extends TestCase
     {
         Config::set([
             'inertia.ssr.enabled' => false,
-            'inertia.ssr.use_script_element_for_initial_page' => true,
+            'inertia.use_script_element_for_initial_page' => true,
         ]);
 
         $html = '<script id="foo_page" type="application/json">{&quot;component&quot;:&quot;Foo\/Bar&quot;,&quot;props&quot;:{&quot;foo&quot;:&quot;bar&quot;},&quot;url&quot;:&quot;\/test&quot;,&quot;version&quot;:&quot;&quot;,&quot;encryptHistory&quot;:false,&quot;clearHistory&quot;:false}</script><div id="foo"></div>';
