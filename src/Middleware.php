@@ -26,7 +26,7 @@ class Middleware
      *
      * @var bool
      */
-    protected $arrayErrors = false;
+    protected $withAllErrors = false;
 
     /**
      * Determine the current asset version.
@@ -160,7 +160,7 @@ class Middleware
 
         return (object) collect($bags)->map(function ($bag) {
             return (object) collect($bag->messages())->map(function ($errors) {
-                return $this->arrayErrors ? $errors : $errors[0];
+                return $this->withAllErrors ? $errors : $errors[0];
             })->toArray();
         })->pipe(function ($bags) use ($request) {
             if ($bags->has('default') && $request->header(Header::ERROR_BAG)) {

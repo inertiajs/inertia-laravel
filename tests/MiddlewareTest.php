@@ -13,9 +13,9 @@ use Illuminate\Support\ViewErrorBag;
 use Inertia\AlwaysProp;
 use Inertia\Inertia;
 use Inertia\Middleware;
-use Inertia\Tests\Stubs\ArrayErrorsMiddleware;
 use Inertia\Tests\Stubs\CustomUrlResolverMiddleware;
 use Inertia\Tests\Stubs\ExampleMiddleware;
+use Inertia\Tests\Stubs\WithAllErrorsMiddleware;
 use LogicException;
 use PHPUnit\Framework\Attributes\After;
 
@@ -194,7 +194,7 @@ class MiddlewareTest extends TestCase
             'email' => ['Not a valid email address.', 'Another email error.'],
         ])));
 
-        Route::middleware([StartSession::class, ArrayErrorsMiddleware::class])->get('/', function () {
+        Route::middleware([StartSession::class, WithAllErrorsMiddleware::class])->get('/', function () {
             $errors = Inertia::getShared('errors')();
 
             $this->assertIsObject($errors);
