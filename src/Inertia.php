@@ -16,7 +16,6 @@ use Illuminate\Support\Facades\Facade;
  * @method static void resolveUrlUsing(\Closure|null $urlResolver = null)
  * @method static \Inertia\ScrollProp<mixed> scroll(mixed $value, string $wrapper = 'data', \Inertia\ProvidesScrollMetadata|callable|null $metadata = null)
  * @method static \Inertia\OptionalProp optional(callable $callback)
- * @method static \Inertia\LazyProp lazy(callable $callback)
  * @method static \Inertia\DeferProp defer(callable $callback, string $group = 'default')
  * @method static \Inertia\AlwaysProp always(mixed $value)
  * @method static \Inertia\MergeProp merge(mixed $value)

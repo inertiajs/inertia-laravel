@@ -168,16 +168,6 @@ class ResponseFactory
     }
 
     /**
-     * Create a lazy property.
-     *
-     * @deprecated Use `optional` instead.
-     */
-    public function lazy(callable $callback): LazyProp
-    {
-        return new LazyProp($callback);
-    }
-
-    /**
      * Create an optional property.
      */
     public function optional(callable $callback): OptionalProp

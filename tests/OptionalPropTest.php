@@ -10,10 +10,10 @@ class OptionalPropTest extends TestCase
     public function test_can_invoke(): void
     {
         $optionalProp = new OptionalProp(function () {
-            return 'A lazy value';
+            return 'An optional value';
         });
 
-        $this->assertSame('A lazy value', $optionalProp());
+        $this->assertSame('An optional value', $optionalProp());
     }
 
     public function test_can_resolve_bindings_when_invoked(): void

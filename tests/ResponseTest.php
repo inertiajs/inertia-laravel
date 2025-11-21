@@ -14,8 +14,8 @@ use Illuminate\View\View;
 use Inertia\AlwaysProp;
 use Inertia\DeferProp;
 use Inertia\Inertia;
-use Inertia\LazyProp;
 use Inertia\MergeProp;
+use Inertia\OptionalProp;
 use Inertia\ProvidesInertiaProperties;
 use Inertia\ProvidesScrollMetadata;
 use Inertia\RenderContext;
@@ -645,7 +645,7 @@ class ResponseTest extends TestCase
         $this->assertSame('123', $page->version);
     }
 
-    public function test_lazy_callable_resource_response(): void
+    public function test_optional_callable_resource_response(): void
     {
         $request = Request::create('/users', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
@@ -670,7 +670,7 @@ class ResponseTest extends TestCase
         });
     }
 
-    public function test_lazy_callable_resource_partial_response(): void
+    public function test_optional_callable_resource_partial_response(): void
     {
         $request = Request::create('/users', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
@@ -695,7 +695,7 @@ class ResponseTest extends TestCase
         });
     }
 
-    public function test_lazy_resource_response(): void
+    public function test_optional_resource_response(): void
     {
         $request = Request::create('/users', 'GET', ['page' => 1]);
         $request->headers->add(['X-Inertia' => 'true']);
@@ -747,7 +747,7 @@ class ResponseTest extends TestCase
         });
     }
 
-    public function test_nested_lazy_resource_response(): void
+    public function test_nested_optional_resource_response(): void
     {
         $request = Request::create('/users', 'GET', ['page' => 1]);
         $request->headers->add(['X-Inertia' => 'true']);
@@ -904,7 +904,7 @@ class ResponseTest extends TestCase
 
         $props = [
             'auth' => [
-                'user' => new LazyProp(function () {
+                'user' => new OptionalProp(function () {
                     return [
                         'name' => 'Jonathan Reinink',
                         'email' => 'jonathan@example.com',
@@ -940,7 +940,7 @@ class ResponseTest extends TestCase
 
         $props = [
             'auth' => [
-                'user' => new LazyProp(function () {
+                'user' => new OptionalProp(function () {
                     return [
                         'name' => 'Jonathan Reinink',
                         'email' => 'jonathan@example.com',
@@ -963,42 +963,42 @@ class ResponseTest extends TestCase
         $this->assertSame('value', $page->props->auth->refresh_token);
     }
 
-    public function test_lazy_props_are_not_included_by_default(): void
+    public function test_optional_props_are_not_included_by_default(): void
     {
         $request = Request::create('/users', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
 
-        $lazyProp = new LazyProp(function () {
-            return 'A lazy value';
+        $optionalProp = new OptionalProp(function () {
+            return 'An optional value';
         });
 
-        $response = new Response('Users', ['users' => [], 'lazy' => $lazyProp], 'app', '123');
+        $response = new Response('Users', ['users' => [], 'optional' => $optionalProp], 'app', '123');
         /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
 
         $this->assertSame([], $page->props->users);
-        $this->assertFalse(property_exists($page->props, 'lazy'));
+        $this->assertFalse(property_exists($page->props, 'optional'));
     }
 
-    public function test_lazy_props_are_included_in_partial_reload(): void
+    public function test_optional_props_are_included_in_partial_reload(): void
     {
         $request = Request::create('/users', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
         $request->headers->add(['X-Inertia-Partial-Component' => 'Users']);
-        $request->headers->add(['X-Inertia-Partial-Data' => 'lazy']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'optional']);
 
-        $lazyProp = new LazyProp(function () {
-            return 'A lazy value';
+        $optionalProp = new OptionalProp(function () {
+            return 'An optional value';
         });
 
-        $response = new Response('Users', ['users' => [], 'lazy' => $lazyProp], 'app', '123');
+        $response = new Response('Users', ['users' => [], 'optional' => $optionalProp], 'app', '123');
         /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
 
         $this->assertFalse(property_exists($page->props, 'users'));
-        $this->assertSame('A lazy value', $page->props->lazy);
+        $this->assertSame('An optional value', $page->props->optional);
     }
 
     public function test_defer_arrayable_props_are_resolved_in_partial_reload(): void
@@ -1035,7 +1035,7 @@ class ResponseTest extends TestCase
         $request->headers->add(['X-Inertia-Partial-Data' => 'data']);
 
         $props = [
-            'user' => new LazyProp(function () {
+            'user' => new OptionalProp(function () {
                 return [
                     'name' => 'Jonathan Reinink',
                     'email' => 'jonathan@example.com',

@@ -219,13 +219,13 @@ class AssertableInertiaTest extends TestCase
         $this->assertTrue($called);
     }
 
-    public function test_lazy_props_can_be_evaluated(): void
+    public function test_optional_props_can_be_evaluated(): void
     {
         $response = $this->makeMockRequest(
             Inertia::render('foo', [
                 'foo' => 'bar',
-                'lazy1' => Inertia::lazy(fn () => 'baz'),
-                'lazy2' => Inertia::lazy(fn () => 'qux'),
+                'optional1' => Inertia::optional(fn () => 'baz'),
+                'optional2' => Inertia::optional(fn () => 'qux'),
             ])
         );
 
@@ -233,13 +233,13 @@ class AssertableInertiaTest extends TestCase
 
         $response->assertInertia(function ($inertia) use (&$called) {
             $inertia->where('foo', 'bar');
-            $inertia->missing('lazy1');
-            $inertia->missing('lazy2');
+            $inertia->missing('optional1');
+            $inertia->missing('optional2');
 
-            $result = $inertia->reloadOnly('lazy1', function ($inertia) use (&$called) {
+            $result = $inertia->reloadOnly('optional1', function ($inertia) use (&$called) {
                 $inertia->missing('foo');
-                $inertia->where('lazy1', 'baz');
-                $inertia->missing('lazy2');
+                $inertia->where('optional1', 'baz');
+                $inertia->missing('optional2');
                 $called = true;
             });
 
@@ -249,13 +249,13 @@ class AssertableInertiaTest extends TestCase
         $this->assertTrue($called);
     }
 
-    public function test_lazy_props_can_be_evaluated_with_except(): void
+    public function test_optional_props_can_be_evaluated_with_except(): void
     {
         $response = $this->makeMockRequest(
             Inertia::render('foo', [
                 'foo' => 'bar',
-                'lazy1' => Inertia::lazy(fn () => 'baz'),
-                'lazy2' => Inertia::lazy(fn () => 'qux'),
+                'optional1' => Inertia::optional(fn () => 'baz'),
+                'optional2' => Inertia::optional(fn () => 'qux'),
             ])
         );
 
@@ -263,13 +263,13 @@ class AssertableInertiaTest extends TestCase
 
         $response->assertInertia(function (AssertableInertia $inertia) use (&$called) {
             $inertia->where('foo', 'bar');
-            $inertia->missing('lazy1');
-            $inertia->missing('lazy2');
+            $inertia->missing('optional1');
+            $inertia->missing('optional2');
 
-            $inertia->reloadExcept('lazy1', function ($inertia) use (&$called) {
+            $inertia->reloadExcept('optional1', function ($inertia) use (&$called) {
                 $inertia->where('foo', 'bar');
-                $inertia->missing('lazy1');
-                $inertia->where('lazy2', 'qux');
+                $inertia->missing('optional1');
+                $inertia->where('optional2', 'qux');
                 $called = true;
             });
         });
