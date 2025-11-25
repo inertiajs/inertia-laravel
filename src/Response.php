@@ -190,6 +190,7 @@ class Response implements Responsable
             $this->resolveDeferredProps($request),
             $this->resolveCacheDirections($request),
             $this->resolveScrollProps($request),
+            $this->resolveOnceProps($request),
         );
 
         if ($request->header(Header::INERTIA)) {
@@ -209,6 +210,7 @@ class Response implements Responsable
     {
         $props = $this->resolveInertiaPropsProviders($props, $request);
         $props = $this->resolvePartialProperties($props, $request);
+        $props = $this->resolveOnceProperties($props, $request);
         $props = $this->resolveArrayableProperties($props, $request);
         $props = $this->resolveAlways($props);
         $props = $this->resolvePropertyInstances($props, $request);
@@ -276,6 +278,23 @@ class Response implements Responsable
         }
 
         return $props;
+    }
+
+    /**
+     * Resolve properties that should only be resolved once.
+     *
+     * @param  array<string, mixed>  $props
+     * @return array<string, mixed>
+     */
+    public function resolveOnceProperties(array $props, Request $request): array
+    {
+        if (! $this->isInertia($request) || $this->isPartial($request)) {
+            return $props;
+        }
+
+        return array_filter($props, static function ($prop) {
+            return ! ($prop instanceof OnlyResolveOnce && $prop->shouldResolveOnce());
+        });
     }
 
     /**
@@ -385,6 +404,7 @@ class Response implements Responsable
                 AlwaysProp::class,
                 MergeProp::class,
                 ScrollProp::class,
+                OnceProp::class,
             ])->first(fn ($class) => $value instanceof $class);
 
             if ($resolveViaApp) {
@@ -609,6 +629,35 @@ class Response implements Responsable
             ]]);
 
         return $scrollProps->isNotEmpty() ? ['scrollProps' => $scrollProps->toArray()] : [];
+    }
+
+    /**
+     * Resolve props that should only be resolved once.
+     *
+     * @return array<string, mixed>
+     */
+    public function resolveOnceProps(Request $request): array
+    {
+
+        $onceProps = collect($this->props)
+            ->filter(function ($prop) {
+                return $prop instanceof OnlyResolveOnce && $prop->shouldResolveOnce();
+            })
+            ->map(function ($prop, $key) {
+                return $key;
+            })
+            ->values()
+            ->toArray();
+
+        return count($onceProps) > 0 ? ['onceProps' => $onceProps] : [];
+    }
+
+    /**
+     * Determine if the request is an Inertia request.
+     */
+    public function isInertia(Request $request): bool
+    {
+        return (bool) $request->header(Header::INERTIA);
     }
 
     /**

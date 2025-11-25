@@ -17,6 +17,7 @@ use Inertia\DeferProp;
 use Inertia\Inertia;
 use Inertia\LazyProp;
 use Inertia\MergeProp;
+use Inertia\OnceProp;
 use Inertia\OptionalProp;
 use Inertia\ResponseFactory;
 use Inertia\Tests\Stubs\ExampleInertiaPropsProvider;
@@ -371,6 +372,27 @@ class ResponseFactoryTest extends TestCase
             'nextPage' => 3,
             'currentPage' => 2,
         ], $scrollProp->metadata());
+    }
+
+    public function test_can_create_once_prop(): void
+    {
+        $factory = new ResponseFactory;
+        $onceProp = $factory->once(function () {
+            return 'A once value';
+        });
+
+        $this->assertInstanceOf(OnceProp::class, $onceProp);
+    }
+
+    public function test_can_create_deferred_and_once_prop(): void
+    {
+        $factory = new ResponseFactory;
+        $deferredProp = $factory->defer(function () {
+            return 'A deferred + once value';
+        })->once();
+
+        $this->assertInstanceOf(DeferProp::class, $deferredProp);
+        $this->assertTrue($deferredProp->shouldResolveOnce());
     }
 
     public function test_can_create_always_prop(): void

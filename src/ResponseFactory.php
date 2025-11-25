@@ -239,6 +239,14 @@ class ResponseFactory
     }
 
     /**
+     * Create an 'once' property.
+     */
+    public function once(callable $value): OnceProp
+    {
+        return new OnceProp($value);
+    }
+
+    /**
      * Find the component or fail.
      *
      * @throws \Inertia\ComponentNotFoundException

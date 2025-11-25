@@ -1200,6 +1200,119 @@ class ResponseTest extends TestCase
         $this->assertSame('corge', $page['props']['quux']);
     }
 
+    public function test_once_props_are_always_resolved_on_initial_page_load(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+
+        $response = new Response('User/Edit', ['foo' => Inertia::once(fn () => 'bar')], 'app', '123');
+        /** @var BaseResponse $response */
+        $response = $response->toResponse($request);
+        $view = $response->getOriginalContent();
+        $page = $view->getData()['page'];
+
+        $this->assertInstanceOf(BaseResponse::class, $response);
+        $this->assertInstanceOf(View::class, $view);
+
+        $this->assertSame('User/Edit', $page['component']);
+        $this->assertSame('bar', $page['props']['foo']);
+        $this->assertSame('/user/123', $page['url']);
+        $this->assertSame('123', $page['version']);
+        $this->assertFalse($page['clearHistory']);
+        $this->assertFalse($page['encryptHistory']);
+        $this->assertSame(['foo'], $page['onceProps']);
+        $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;foo&quot;:&quot;bar&quot;},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;,&quot;clearHistory&quot;:false,&quot;encryptHistory&quot;:false,&quot;onceProps&quot;:[&quot;foo&quot;]}"></div>', $view->render());
+    }
+
+    public function test_once_props_are_not_resolved_on_subsequent_requests(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $response = new Response('User/Edit', ['foo' => Inertia::once(fn () => 'bar')], 'app', '123');
+        /** @var JsonResponse $response */
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+
+        $this->assertSame('User/Edit', $page->component);
+        $this->assertArrayNotHasKey('foo', (array) $page->props);
+        $this->assertSame('/user/123', $page->url);
+        $this->assertSame('123', $page->version);
+        $this->assertSame(['foo'], $page->onceProps);
+    }
+
+    public function test_once_props_are_resolved_on_partial_requests_without_only_or_except(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'User/Edit']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'foo']);
+
+        $response = new Response('User/Edit', ['foo' => Inertia::once(fn () => 'bar')], 'app', '123');
+        /** @var JsonResponse $response */
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+
+        $this->assertSame('User/Edit', $page->component);
+        $this->assertSame('bar', $page->props->foo);
+        $this->assertSame('/user/123', $page->url);
+        $this->assertSame('123', $page->version);
+        $this->assertSame(['foo'], $page->onceProps);
+    }
+
+    public function test_once_props_are_resolved_on_partial_requests_when_included_in_only_headers()
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'User/Edit']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'foo']);
+
+        $response = new Response('User/Edit', [
+            'foo' => Inertia::once(fn () => 'bar'),
+            'baz' => Inertia::once(fn () => 'qux'),
+        ], 'app', '123');
+        /** @var JsonResponse $response */
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+
+        $this->assertSame('User/Edit', $page->component);
+        $this->assertSame('bar', $page->props->foo);
+        $this->assertFalse(isset($page->props->baz));
+        $this->assertSame('/user/123', $page->url);
+        $this->assertSame('123', $page->version);
+        $this->assertSame(['foo', 'baz'], $page->onceProps);
+    }
+
+    public function test_once_props_are_not_resolved_on_partial_requests_when_excluded_in_except_headers()
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'User/Edit']);
+        $request->headers->add(['X-Inertia-Partial-Except' => 'foo']);
+
+        $response = new Response('User/Edit', [
+            'foo' => Inertia::once(fn () => 'bar'),
+            'baz' => Inertia::once(fn () => 'qux'),
+        ], 'app', '123');
+        /** @var JsonResponse $response */
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+
+        $this->assertSame('User/Edit', $page->component);
+        $this->assertFalse(isset($page->props->foo));
+        $this->assertSame('qux', $page->props->baz);
+        $this->assertSame('/user/123', $page->url);
+        $this->assertSame('123', $page->version);
+        $this->assertSame(['foo', 'baz'], $page->onceProps);
+    }
+
     public function test_responsable_with_invalid_key(): void
     {
         $request = Request::create('/user/123', 'GET');
