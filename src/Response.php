@@ -292,9 +292,15 @@ class Response implements Responsable
             return $props;
         }
 
-        return array_filter($props, static function ($prop) {
-            return ! ($prop instanceof OnlyResolveOnce && $prop->shouldResolveOnce());
-        });
+        $cached = array_filter(explode(',', $request->header(Header::CACHED_ONCE_PROPS, '')));
+
+        if (count($cached) === 0) {
+            return $props;
+        }
+
+        return collect($props)
+            ->reject(fn ($prop, string $key) => $prop instanceof OnlyResolveOnce && $prop->shouldResolveOnce() && in_array($key, $cached))
+            ->all();
     }
 
     /**
@@ -634,22 +640,15 @@ class Response implements Responsable
     /**
      * Resolve props that should only be resolved once.
      *
-     * @return array<string, mixed>
+     * @return array<string, array<int, string>>
      */
     public function resolveOnceProps(Request $request): array
     {
-
         $onceProps = collect($this->props)
-            ->filter(function ($prop) {
-                return $prop instanceof OnlyResolveOnce && $prop->shouldResolveOnce();
-            })
-            ->map(function ($prop, $key) {
-                return $key;
-            })
-            ->values()
-            ->toArray();
+            ->filter(fn ($prop) => $prop instanceof OnlyResolveOnce && $prop->shouldResolveOnce())
+            ->keys();
 
-        return count($onceProps) > 0 ? ['onceProps' => $onceProps] : [];
+        return $onceProps->isNotEmpty() ? ['onceProps' => $onceProps->toArray()] : [];
     }
 
     /**

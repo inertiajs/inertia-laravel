@@ -1223,7 +1223,27 @@ class ResponseTest extends TestCase
         $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;foo&quot;:&quot;bar&quot;},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;,&quot;clearHistory&quot;:false,&quot;encryptHistory&quot;:false,&quot;onceProps&quot;:[&quot;foo&quot;]}"></div>', $view->render());
     }
 
-    public function test_once_props_are_not_resolved_on_subsequent_requests(): void
+    public function test_once_props_are_not_resolved_on_subsequent_requests_when_they_are_in_the_header(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Cached-Once-Props' => 'foo']);
+
+        $response = new Response('User/Edit', ['foo' => Inertia::once(fn () => 'bar')], 'app', '123');
+        /** @var JsonResponse $response */
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+
+        $this->assertSame('User/Edit', $page->component);
+        $this->assertArrayNotHasKey('foo', (array) $page->props);
+        $this->assertSame('/user/123', $page->url);
+        $this->assertSame('123', $page->version);
+        $this->assertSame(['foo'], $page->onceProps);
+    }
+
+    public function test_once_props_are_resolved_on_subsequent_requests_when_the_header_is_missing(): void
     {
         $request = Request::create('/user/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
@@ -1236,7 +1256,27 @@ class ResponseTest extends TestCase
         $this->assertInstanceOf(JsonResponse::class, $response);
 
         $this->assertSame('User/Edit', $page->component);
-        $this->assertArrayNotHasKey('foo', (array) $page->props);
+        $this->assertSame('bar', $page->props->foo);
+        $this->assertSame('/user/123', $page->url);
+        $this->assertSame('123', $page->version);
+        $this->assertSame(['foo'], $page->onceProps);
+    }
+
+    public function test_once_props_are_resolved_on_subsequent_requests_when_they_are_not_in_the_header(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Cached-Once-Props' => 'baz']);
+
+        $response = new Response('User/Edit', ['foo' => Inertia::once(fn () => 'bar')], 'app', '123');
+        /** @var JsonResponse $response */
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+
+        $this->assertSame('User/Edit', $page->component);
+        $this->assertSame('bar', $page->props->foo);
         $this->assertSame('/user/123', $page->url);
         $this->assertSame('123', $page->version);
         $this->assertSame(['foo'], $page->onceProps);
