@@ -1263,7 +1263,7 @@ class ResponseTest extends TestCase
         $this->assertSame(['foo'], $page->onceProps);
     }
 
-    public function test_once_props_are_resolved_on_partial_requests_when_included_in_only_headers()
+    public function test_once_props_are_resolved_on_partial_requests_when_included_in_only_headers(): void
     {
         $request = Request::create('/user/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
@@ -1288,7 +1288,7 @@ class ResponseTest extends TestCase
         $this->assertSame(['foo', 'baz'], $page->onceProps);
     }
 
-    public function test_once_props_are_not_resolved_on_partial_requests_when_excluded_in_except_headers()
+    public function test_once_props_are_not_resolved_on_partial_requests_when_excluded_in_except_headers(): void
     {
         $request = Request::create('/user/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
