@@ -292,14 +292,14 @@ class Response implements Responsable
             return $props;
         }
 
-        $cached = array_filter(explode(',', $request->header(Header::CACHED_ONCE_PROPS, '')));
+        $loaded = array_filter(explode(',', $request->header(Header::PAGE_ONCE_PROPS, '')));
 
-        if (count($cached) === 0) {
+        if (count($loaded) === 0) {
             return $props;
         }
 
         return collect($props)
-            ->reject(fn ($prop, string $key) => $prop instanceof OnlyResolveOnce && $prop->shouldResolveOnce() && in_array($key, $cached))
+            ->reject(fn ($prop, string $key) => $prop instanceof OnlyResolveOnce && $prop->shouldResolveOnce() && in_array($key, $loaded))
             ->all();
     }
 

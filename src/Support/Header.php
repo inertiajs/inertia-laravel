@@ -50,7 +50,7 @@ class Header
     public const INFINITE_SCROLL_MERGE_INTENT = 'X-Inertia-Infinite-Scroll-Merge-Intent';
 
     /**
-     * Header for specifying which props are loaded on the current page.
+     * Header for specifying the once props on the current page.
      */
-    public const CACHED_ONCE_PROPS = 'X-Inertia-Cached-Once-Props';
+    public const PAGE_ONCE_PROPS = 'X-Inertia-Page-Once-Props';
 }

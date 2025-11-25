@@ -1223,11 +1223,11 @@ class ResponseTest extends TestCase
         $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;foo&quot;:&quot;bar&quot;},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;,&quot;clearHistory&quot;:false,&quot;encryptHistory&quot;:false,&quot;onceProps&quot;:[&quot;foo&quot;]}"></div>', $view->render());
     }
 
-    public function test_once_props_are_not_resolved_on_subsequent_requests_when_they_are_in_the_header(): void
+    public function test_once_props_are_not_resolved_on_subsequent_requests_when_they_are_in_the_once_props_header(): void
     {
         $request = Request::create('/user/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
-        $request->headers->add(['X-Inertia-Cached-Once-Props' => 'foo']);
+        $request->headers->add(['X-Inertia-Page-Once-Props' => 'foo']);
 
         $response = new Response('User/Edit', ['foo' => Inertia::once(fn () => 'bar')], 'app', '123');
         /** @var JsonResponse $response */
@@ -1243,7 +1243,7 @@ class ResponseTest extends TestCase
         $this->assertSame(['foo'], $page->onceProps);
     }
 
-    public function test_once_props_are_resolved_on_subsequent_requests_when_the_header_is_missing(): void
+    public function test_once_props_are_resolved_on_subsequent_requests_when_the_once_props_header_is_missing(): void
     {
         $request = Request::create('/user/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
@@ -1262,11 +1262,11 @@ class ResponseTest extends TestCase
         $this->assertSame(['foo'], $page->onceProps);
     }
 
-    public function test_once_props_are_resolved_on_subsequent_requests_when_they_are_not_in_the_header(): void
+    public function test_once_props_are_resolved_on_subsequent_requests_when_they_are_not_in_the_once_props_header(): void
     {
         $request = Request::create('/user/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
-        $request->headers->add(['X-Inertia-Cached-Once-Props' => 'baz']);
+        $request->headers->add(['X-Inertia-Page-Once-Props' => 'baz']);
 
         $response = new Response('User/Edit', ['foo' => Inertia::once(fn () => 'bar')], 'app', '123');
         /** @var JsonResponse $response */
@@ -1288,6 +1288,7 @@ class ResponseTest extends TestCase
         $request->headers->add(['X-Inertia' => 'true']);
         $request->headers->add(['X-Inertia-Partial-Component' => 'User/Edit']);
         $request->headers->add(['X-Inertia-Partial-Data' => 'foo']);
+        $request->headers->add(['X-Inertia-Page-Once-Props' => 'foo']);
 
         $response = new Response('User/Edit', ['foo' => Inertia::once(fn () => 'bar')], 'app', '123');
         /** @var JsonResponse $response */
@@ -1309,6 +1310,7 @@ class ResponseTest extends TestCase
         $request->headers->add(['X-Inertia' => 'true']);
         $request->headers->add(['X-Inertia-Partial-Component' => 'User/Edit']);
         $request->headers->add(['X-Inertia-Partial-Data' => 'foo']);
+        $request->headers->add(['X-Inertia-Page-Once-Props' => 'foo']);
 
         $response = new Response('User/Edit', [
             'foo' => Inertia::once(fn () => 'bar'),
@@ -1334,6 +1336,7 @@ class ResponseTest extends TestCase
         $request->headers->add(['X-Inertia' => 'true']);
         $request->headers->add(['X-Inertia-Partial-Component' => 'User/Edit']);
         $request->headers->add(['X-Inertia-Partial-Except' => 'foo']);
+        $request->headers->add(['X-Inertia-Page-Once-Props' => 'foo']);
 
         $response = new Response('User/Edit', [
             'foo' => Inertia::once(fn () => 'bar'),
