@@ -4,6 +4,8 @@ namespace Inertia\Tests;
 
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Promise\Create;
+use GuzzleHttp\Promise\PromiseInterface;
+use GuzzleHttp\Psr7\Request;
 use Illuminate\Support\Facades\Http;
 use Inertia\Ssr\HttpGateway;
 
@@ -122,14 +124,11 @@ class HttpGatewayTest extends TestCase
      * This is copied over from Laravel's Http::failedConnection() helper
      * method, which is only available in Laravel 11.32.0 and later.
      */
-    private static function rejectionForFailedConnection(?string $message = null): callable
+    private static function rejectionForFailedConnection(): PromiseInterface
     {
-        return function ($request) use ($message) {
-            return Create::rejectionFor(new ConnectException(
-                $message ?? "cURL error 6: Could not resolve host: {$request->toPsrRequest()->getUri()->getHost()} (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for {$request->toPsrRequest()->getUri()}.",
-                $request->toPsrRequest(),
-            ));
-        };
+        return Create::rejectionFor(
+            new ConnectException('Connection refused', new Request('GET', '/'))
+        );
     }
 
     public function test_health_check_the_ssr_server(): void
