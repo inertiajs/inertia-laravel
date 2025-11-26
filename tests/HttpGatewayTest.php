@@ -2,6 +2,10 @@
 
 namespace Inertia\Tests;
 
+use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Promise\Create;
+use GuzzleHttp\Promise\PromiseInterface;
+use GuzzleHttp\Psr7\Request;
 use Illuminate\Support\Facades\Http;
 use Inertia\Ssr\HttpGateway;
 
@@ -114,15 +118,30 @@ class HttpGatewayTest extends TestCase
         $this->assertNull($this->gateway->dispatch(['page' => self::EXAMPLE_PAGE_OBJECT]));
     }
 
+    /**
+     * Create a new connection exception for use during stubbing.
+     *
+     * This is copied over from Laravel's Http::failedConnection() helper
+     * method, which is only available in Laravel 11.32.0 and later.
+     */
+    private static function rejectionForFailedConnection(): PromiseInterface
+    {
+        return Create::rejectionFor(
+            new ConnectException('Connection refused', new Request('GET', '/'))
+        );
+    }
+
     public function test_health_check_the_ssr_server(): void
     {
         Http::fake([
             $this->gateway->getUrl('health') => Http::sequence()
                 ->push(status: 200)
-                ->push(status: 500),
+                ->push(status: 500)
+                ->pushResponse(self::rejectionForFailedConnection()),
         ]);
 
         $this->assertTrue($this->gateway->isHealthy());
+        $this->assertFalse($this->gateway->isHealthy());
         $this->assertFalse($this->gateway->isHealthy());
     }
 }
