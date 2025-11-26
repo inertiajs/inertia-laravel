@@ -15,8 +15,6 @@ trait ResolvesOnce
      */
     protected bool $once = false;
 
-    protected bool $forceResolve = false;
-
     protected ?int $ttl = null;
 
     protected ?string $key = null;
@@ -42,19 +40,19 @@ trait ResolvesOnce
     /**
      * Mark the property to be evaluated only once.
      */
-    public function once(): static
+    public function once(bool $value = true): static
     {
-        $this->once = true;
+        $this->once = $value;
 
         return $this;
     }
 
     /**
-     * Mark the property to be evaluated on every request.
+     * Mark the property to be forcefully sent to the client.
      */
-    public function forceResolve(bool $value = true): static
+    public function fresh(bool $value = true): static
     {
-        $this->forceResolve = $value;
+        $this->once = ! $value;
 
         return $this;
     }
@@ -74,14 +72,18 @@ trait ResolvesOnce
      */
     public function shouldResolveOnce(): bool
     {
-        return $this->once && ! $this->forceResolve;
+        return $this->once;
     }
 
     /**
      * Get the TTL for the property.
      */
-    public function getTtl(): ?int
+    public function expiresAt(): ?int
     {
-        return $this->ttl;
+        if ($this->ttl === null) {
+            return null;
+        }
+
+        return $this->availableAt($this->ttl) * 1000;
     }
 }

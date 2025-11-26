@@ -10,7 +10,6 @@ use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Response as ResponseFactory;
@@ -653,14 +652,10 @@ class Response implements Responsable
     {
         $onceProps = collect($this->props)
             ->filter(fn ($prop) => $prop instanceof Onceable && $prop->shouldResolveOnce())
-            ->mapWithKeys(function (Onceable $prop, string $key) {
-                $expiresAt = $prop->getTtl() ? Carbon::now()->addSeconds($prop->getTtl()) : null;
-
-                return [$prop->getKey() ?? $key => [
-                    'prop' => $key,
-                    'expiresAt' => $expiresAt?->getTimestampMs(),
-                ]];
-            });
+            ->mapWithKeys(fn (Onceable $prop, string $key) => [$prop->getKey() ?? $key => [
+                'prop' => $key,
+                'expiresAt' => $prop->expiresAt(),
+            ]]);
 
         return $onceProps->isNotEmpty() ? ['onceProps' => $onceProps->toArray()] : [];
     }
