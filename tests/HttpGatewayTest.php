@@ -116,18 +116,29 @@ class HttpGatewayTest extends TestCase
         $this->assertNull($this->gateway->dispatch(['page' => self::EXAMPLE_PAGE_OBJECT]));
     }
 
+    /**
+     * Create a new connection exception for use during stubbing.
+     *
+     * This is copied over from Laravel's Http::failedConnection() helper
+     * method, which is only available in Laravel 11.32.0 and later.
+     */
+    private static function rejectionForFailedConnection(?string $message = null): callable
+    {
+        return function ($request) use ($message) {
+            return Create::rejectionFor(new ConnectException(
+                $message ?? "cURL error 6: Could not resolve host: {$request->toPsrRequest()->getUri()->getHost()} (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for {$request->toPsrRequest()->getUri()}.",
+                $request->toPsrRequest(),
+            ));
+        };
+    }
+
     public function test_health_check_the_ssr_server(): void
     {
         Http::fake([
             $this->gateway->getUrl('health') => Http::sequence()
                 ->push(status: 200)
                 ->push(status: 500)
-                ->pushResponse(
-                    fn ($request) => Create::rejectionFor(new ConnectException(
-                        "cURL error 6: Could not resolve host: {$request->toPsrRequest()->getUri()->getHost()} (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for {$request->toPsrRequest()->getUri()}.",
-                        $request->toPsrRequest(),
-                    ))
-                ),
+                ->pushResponse(self::rejectionForFailedConnection()),
         ]);
 
         $this->assertTrue($this->gateway->isHealthy());
