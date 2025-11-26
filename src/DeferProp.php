@@ -4,9 +4,9 @@ namespace Inertia;
 
 use Illuminate\Support\Facades\App;
 
-class DeferProp implements IgnoreFirstLoad, Mergeable, OnlyResolveOnce
+class DeferProp implements IgnoreFirstLoad, Mergeable, Onceable
 {
-    use MergesProps, OnceableProp;
+    use MergesProps, ResolvesOnce;
 
     /**
      * The callback to resolve the property.

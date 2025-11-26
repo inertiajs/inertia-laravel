@@ -10,6 +10,7 @@ use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Response as ResponseFactory;
@@ -299,7 +300,13 @@ class Response implements Responsable
         }
 
         return collect($props)
-            ->reject(fn ($prop, string $key) => $prop instanceof OnlyResolveOnce && $prop->shouldResolveOnce() && in_array($key, $loaded))
+            ->reject(function ($prop, string $key) use ($loaded) {
+                if ($prop instanceof Onceable) {
+                    return $prop->shouldResolveOnce() && in_array($prop->getKey() ?? $key, $loaded);
+                }
+
+                return false;
+            })
             ->all();
     }
 
@@ -645,8 +652,15 @@ class Response implements Responsable
     public function resolveOnceProps(Request $request): array
     {
         $onceProps = collect($this->props)
-            ->filter(fn ($prop) => $prop instanceof OnlyResolveOnce && $prop->shouldResolveOnce())
-            ->keys();
+            ->filter(fn ($prop) => $prop instanceof Onceable && $prop->shouldResolveOnce())
+            ->mapWithKeys(function (Onceable $prop, string $key) {
+                $expiresAt = $prop->getTtl() ? Carbon::now()->addSeconds($prop->getTtl()) : null;
+
+                return [$prop->getKey() ?? $key => [
+                    'prop' => $key,
+                    'expiresAt' => $expiresAt?->getTimestampMs(),
+                ]];
+            });
 
         return $onceProps->isNotEmpty() ? ['onceProps' => $onceProps->toArray()] : [];
     }

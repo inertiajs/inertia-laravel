@@ -1219,8 +1219,31 @@ class ResponseTest extends TestCase
         $this->assertSame('123', $page['version']);
         $this->assertFalse($page['clearHistory']);
         $this->assertFalse($page['encryptHistory']);
-        $this->assertSame(['foo'], $page['onceProps']);
-        $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;foo&quot;:&quot;bar&quot;},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;,&quot;clearHistory&quot;:false,&quot;encryptHistory&quot;:false,&quot;onceProps&quot;:[&quot;foo&quot;]}"></div>', $view->render());
+        $this->assertSame(['foo' => ['prop' => 'foo', 'expiresAt' => null]], $page['onceProps']);
+        $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;foo&quot;:&quot;bar&quot;},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;,&quot;clearHistory&quot;:false,&quot;encryptHistory&quot;:false,&quot;onceProps&quot;:{&quot;foo&quot;:{&quot;prop&quot;:&quot;foo&quot;,&quot;expiresAt&quot;:null}}}"></div>', $view->render());
+    }
+
+    public function test_once_props_are_resolved_with_a_custom_key_and_ttl_value(): void
+    {
+        $this->freezeSecond();
+
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $response = new Response('User/Edit', [
+            'foo' => Inertia::once(fn () => 'bar')->as('baz')->until(now()->addMinute()),
+        ], 'app', '123');
+        /** @var JsonResponse $response */
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+
+        $this->assertSame('User/Edit', $page->component);
+        $this->assertSame('bar', $page->props->foo);
+        $this->assertSame('/user/123', $page->url);
+        $this->assertSame('123', $page->version);
+        $this->assertEquals((object) ['baz' => (object) ['prop' => 'foo', 'expiresAt' => now()->addMinute()->getTimestampMs()]], $page->onceProps);
     }
 
     public function test_once_props_are_not_resolved_on_subsequent_requests_when_they_are_in_the_once_props_header(): void
@@ -1240,7 +1263,7 @@ class ResponseTest extends TestCase
         $this->assertArrayNotHasKey('foo', (array) $page->props);
         $this->assertSame('/user/123', $page->url);
         $this->assertSame('123', $page->version);
-        $this->assertSame(['foo'], $page->onceProps);
+        $this->assertEquals((object) ['foo' => (object) ['prop' => 'foo', 'expiresAt' => null]], $page->onceProps);
     }
 
     public function test_once_props_are_resolved_on_subsequent_requests_when_the_once_props_header_is_missing(): void
@@ -1259,7 +1282,7 @@ class ResponseTest extends TestCase
         $this->assertSame('bar', $page->props->foo);
         $this->assertSame('/user/123', $page->url);
         $this->assertSame('123', $page->version);
-        $this->assertSame(['foo'], $page->onceProps);
+        $this->assertEquals((object) ['foo' => (object) ['prop' => 'foo', 'expiresAt' => null]], $page->onceProps);
     }
 
     public function test_once_props_are_resolved_on_subsequent_requests_when_they_are_not_in_the_once_props_header(): void
@@ -1279,7 +1302,7 @@ class ResponseTest extends TestCase
         $this->assertSame('bar', $page->props->foo);
         $this->assertSame('/user/123', $page->url);
         $this->assertSame('123', $page->version);
-        $this->assertSame(['foo'], $page->onceProps);
+        $this->assertEquals((object) ['foo' => (object) ['prop' => 'foo', 'expiresAt' => null]], $page->onceProps);
     }
 
     public function test_once_props_are_resolved_on_partial_requests_without_only_or_except(): void
@@ -1301,7 +1324,7 @@ class ResponseTest extends TestCase
         $this->assertSame('bar', $page->props->foo);
         $this->assertSame('/user/123', $page->url);
         $this->assertSame('123', $page->version);
-        $this->assertSame(['foo'], $page->onceProps);
+        $this->assertEquals((object) ['foo' => (object) ['prop' => 'foo', 'expiresAt' => null]], $page->onceProps);
     }
 
     public function test_once_props_are_resolved_on_partial_requests_when_included_in_only_headers(): void
@@ -1327,7 +1350,10 @@ class ResponseTest extends TestCase
         $this->assertFalse(isset($page->props->baz));
         $this->assertSame('/user/123', $page->url);
         $this->assertSame('123', $page->version);
-        $this->assertSame(['foo', 'baz'], $page->onceProps);
+        $this->assertEquals((object) [
+            'foo' => (object) ['prop' => 'foo', 'expiresAt' => null],
+            'baz' => (object) ['prop' => 'baz', 'expiresAt' => null],
+        ], $page->onceProps);
     }
 
     public function test_once_props_are_not_resolved_on_partial_requests_when_excluded_in_except_headers(): void
@@ -1353,7 +1379,10 @@ class ResponseTest extends TestCase
         $this->assertSame('qux', $page->props->baz);
         $this->assertSame('/user/123', $page->url);
         $this->assertSame('123', $page->version);
-        $this->assertSame(['foo', 'baz'], $page->onceProps);
+        $this->assertEquals((object) [
+            'foo' => (object) ['prop' => 'foo', 'expiresAt' => null],
+            'baz' => (object) ['prop' => 'baz', 'expiresAt' => null],
+        ], $page->onceProps);
     }
 
     public function test_responsable_with_invalid_key(): void
