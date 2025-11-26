@@ -249,6 +249,36 @@ class AssertableInertiaTest extends TestCase
         $this->assertTrue($called);
     }
 
+    public function test_lazy_props_can_be_evaluated_when_only_is_array(): void
+    {
+        $response = $this->makeMockRequest(
+            Inertia::render('foo', [
+                'foo' => 'bar',
+                'lazy1' => Inertia::optional(fn () => 'baz'),
+                'lazy2' => Inertia::optional(fn () => 'qux'),
+            ])
+        );
+
+        $called = false;
+
+        $response->assertInertia(function ($inertia) use (&$called) {
+            $inertia->where('foo', 'bar');
+            $inertia->missing('lazy1');
+            $inertia->missing('lazy2');
+
+            $result = $inertia->reloadOnly(['lazy1'], function ($inertia) use (&$called) {
+                $inertia->missing('foo');
+                $inertia->where('lazy1', 'baz');
+                $inertia->missing('lazy2');
+                $called = true;
+            });
+
+            $this->assertSame($result, $inertia);
+        });
+
+        $this->assertTrue($called);
+    }
+
     public function test_lazy_props_can_be_evaluated_with_except(): void
     {
         $response = $this->makeMockRequest(
@@ -267,6 +297,34 @@ class AssertableInertiaTest extends TestCase
             $inertia->missing('lazy2');
 
             $inertia->reloadExcept('lazy1', function ($inertia) use (&$called) {
+                $inertia->where('foo', 'bar');
+                $inertia->missing('lazy1');
+                $inertia->where('lazy2', 'qux');
+                $called = true;
+            });
+        });
+
+        $this->assertTrue($called);
+    }
+
+    public function test_lazy_props_can_be_evaluated_with_except_when_except_is_array(): void
+    {
+        $response = $this->makeMockRequest(
+            Inertia::render('foo', [
+                'foo' => 'bar',
+                'lazy1' => Inertia::lazy(fn () => 'baz'),
+                'lazy2' => Inertia::lazy(fn () => 'qux'),
+            ])
+        );
+
+        $called = false;
+
+        $response->assertInertia(function ($inertia) use (&$called) {
+            $inertia->where('foo', 'bar');
+            $inertia->missing('lazy1');
+            $inertia->missing('lazy2');
+
+            $inertia->reloadExcept(['lazy1'], function ($inertia) use (&$called) {
                 $inertia->where('foo', 'bar');
                 $inertia->missing('lazy1');
                 $inertia->where('lazy2', 'qux');
