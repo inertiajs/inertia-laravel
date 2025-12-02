@@ -63,6 +63,21 @@ class DirectiveTest extends TestCase
         $this->assertSame($html, $this->renderView("@inertia('')", ['page' => self::EXAMPLE_PAGE_OBJECT]));
     }
 
+    public function test_inertia_directive_renders_the_root_element_and_script_element(): void
+    {
+        Config::set([
+            'inertia.ssr.enabled' => false,
+            'inertia.use_script_element_for_initial_page' => true,
+        ]);
+
+        $html = '<script data-page="app" type="application/json">{"component":"Foo\/Bar","props":{"foo":"bar"},"url":"\/test","version":"","encryptHistory":false,"clearHistory":false}</script><div id="app"></div>';
+
+        $this->assertSame($html, $this->renderView('@inertia', ['page' => self::EXAMPLE_PAGE_OBJECT]));
+        $this->assertSame($html, $this->renderView('@inertia()', ['page' => self::EXAMPLE_PAGE_OBJECT]));
+        $this->assertSame($html, $this->renderView('@inertia("")', ['page' => self::EXAMPLE_PAGE_OBJECT]));
+        $this->assertSame($html, $this->renderView("@inertia('')", ['page' => self::EXAMPLE_PAGE_OBJECT]));
+    }
+
     public function test_inertia_directive_renders_server_side_rendered_content_when_enabled(): void
     {
         Config::set(['inertia.ssr.enabled' => true]);
@@ -78,6 +93,20 @@ class DirectiveTest extends TestCase
         Config::set(['inertia.ssr.enabled' => false]);
 
         $html = '<div id="foo" data-page="{&quot;component&quot;:&quot;Foo\/Bar&quot;,&quot;props&quot;:{&quot;foo&quot;:&quot;bar&quot;},&quot;url&quot;:&quot;\/test&quot;,&quot;version&quot;:&quot;&quot;,&quot;encryptHistory&quot;:false,&quot;clearHistory&quot;:false}"></div>';
+
+        $this->assertSame($html, $this->renderView('@inertia(foo)', ['page' => self::EXAMPLE_PAGE_OBJECT]));
+        $this->assertSame($html, $this->renderView("@inertia('foo')", ['page' => self::EXAMPLE_PAGE_OBJECT]));
+        $this->assertSame($html, $this->renderView('@inertia("foo")', ['page' => self::EXAMPLE_PAGE_OBJECT]));
+    }
+
+    public function test_inertia_directive_can_use_a_different_root_element_id_when_using_script_element(): void
+    {
+        Config::set([
+            'inertia.ssr.enabled' => false,
+            'inertia.use_script_element_for_initial_page' => true,
+        ]);
+
+        $html = '<script data-page="foo" type="application/json">{"component":"Foo\/Bar","props":{"foo":"bar"},"url":"\/test","version":"","encryptHistory":false,"clearHistory":false}</script><div id="foo"></div>';
 
         $this->assertSame($html, $this->renderView('@inertia(foo)', ['page' => self::EXAMPLE_PAGE_OBJECT]));
         $this->assertSame($html, $this->renderView("@inertia('foo')", ['page' => self::EXAMPLE_PAGE_OBJECT]));
