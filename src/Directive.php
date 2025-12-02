@@ -24,7 +24,7 @@ class Directive
             if ($__inertiaSsrResponse) {
                 echo $__inertiaSsrResponse->body;
             } elseif (config(\'inertia.use_script_element_for_initial_page\')) {
-                ?><script id="'.$id.'_page" type="application/json">{{ json_encode($page) }}</script><div id="'.$id.'"></div><?php
+                ?><script data-page="'.$id.'" type="application/json">{{ json_encode($page) }}</script><div id="'.$id.'"></div><?php
             } else {
                 ?><div id="'.$id.'" data-page="{{ json_encode($page) }}"></div><?php
             }
