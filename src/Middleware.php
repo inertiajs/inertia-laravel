@@ -22,6 +22,13 @@ class Middleware
     protected $rootView = 'app';
 
     /**
+     * Determines if validation errors should be mapped to a single error message per field.
+     *
+     * @var bool
+     */
+    protected $withAllErrors = false;
+
+    /**
      * Determine the current asset version.
      *
      * @return string|null
@@ -153,7 +160,7 @@ class Middleware
 
         return (object) collect($bags)->map(function ($bag) {
             return (object) collect($bag->messages())->map(function ($errors) {
-                return $errors[0];
+                return $this->withAllErrors ? $errors : $errors[0];
             })->toArray();
         })->pipe(function ($bags) use ($request) {
             if ($bags->has('default') && $request->header(Header::ERROR_BAG)) {

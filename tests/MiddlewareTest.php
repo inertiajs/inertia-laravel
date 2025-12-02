@@ -15,6 +15,7 @@ use Inertia\Inertia;
 use Inertia\Middleware;
 use Inertia\Tests\Stubs\CustomUrlResolverMiddleware;
 use Inertia\Tests\Stubs\ExampleMiddleware;
+use Inertia\Tests\Stubs\WithAllErrorsMiddleware;
 use LogicException;
 use PHPUnit\Framework\Attributes\After;
 
@@ -168,11 +169,11 @@ class MiddlewareTest extends TestCase
         $this->withoutExceptionHandling()->get('/');
     }
 
-    public function test_validation_errors_are_returned_in_the_correct_format(): void
+    public function test_validation_errors_are_mapped_to_strings_by_default(): void
     {
         Session::put('errors', (new ViewErrorBag)->put('default', new MessageBag([
-            'name' => 'The name field is required.',
-            'email' => 'Not a valid email address.',
+            'name' => ['The name field is required.'],
+            'email' => ['Not a valid email address.', 'Another email error.'],
         ])));
 
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
@@ -181,6 +182,27 @@ class MiddlewareTest extends TestCase
             $this->assertIsObject($errors);
             $this->assertSame('The name field is required.', $errors->name);
             $this->assertSame('Not a valid email address.', $errors->email);
+        });
+
+        $this->withoutExceptionHandling()->get('/');
+    }
+
+    public function test_validation_errors_can_remain_multiple_per_field(): void
+    {
+        Session::put('errors', (new ViewErrorBag)->put('default', new MessageBag([
+            'name' => ['The name field is required.'],
+            'email' => ['Not a valid email address.', 'Another email error.'],
+        ])));
+
+        Route::middleware([StartSession::class, WithAllErrorsMiddleware::class])->get('/', function () {
+            $errors = Inertia::getShared('errors')();
+
+            $this->assertIsObject($errors);
+            $this->assertSame(['The name field is required.'], $errors->name);
+            $this->assertSame(
+                ['Not a valid email address.', 'Another email error.'],
+                $errors->email
+            );
         });
 
         $this->withoutExceptionHandling()->get('/');

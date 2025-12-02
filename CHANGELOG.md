@@ -1,8 +1,23 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.10...2.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.11...2.x)
 
 - Nothing!
+
+## [v2.0.11](https://github.com/inertiajs/inertia-laravel/compare/v2.0.10...v2.0.11) - 2025-11-26
+
+### What's Changed
+
+* Add PHP 8.5 to test matrix by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/787
+* Support for multiple validation errors per field by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/784
+* Handle array inputs in reloadOnly and reloadExcept by [@hosmelq](https://github.com/hosmelq) in https://github.com/inertiajs/inertia-laravel/pull/792
+* Handle Connection Exceptions During Health Checks by [@Magnesium38](https://github.com/Magnesium38) in https://github.com/inertiajs/inertia-laravel/pull/786
+
+### New Contributors
+
+* [@Magnesium38](https://github.com/Magnesium38) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/786
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.10...v2.0.11
 
 ## [v2.0.10](https://github.com/inertiajs/inertia-laravel/compare/v2.0.9...v2.0.10) - 2025-09-28
 
