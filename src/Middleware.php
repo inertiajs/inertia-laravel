@@ -63,6 +63,16 @@ class Middleware
     }
 
     /**
+     * Define the props that are shared once and remembered across navigations.
+     *
+     * @return array<string, callable|OnceProp>
+     */
+    public function shareOnce(Request $request): array
+    {
+        return [];
+    }
+
+    /**
      * Set the root template that is loaded on the first page visit.
      *
      * @return string
@@ -94,6 +104,15 @@ class Middleware
         });
 
         Inertia::share($this->share($request));
+
+        foreach ($this->shareOnce($request) as $key => $value) {
+            if ($value instanceof OnceProp) {
+                Inertia::share($key, $value);
+            } else {
+                Inertia::shareOnce($key, $value);
+            }
+        }
+
         Inertia::setRootView($this->rootView($request));
 
         if ($urlResolver = $this->urlResolver()) {

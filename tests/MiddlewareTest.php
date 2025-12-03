@@ -331,6 +331,43 @@ class MiddlewareTest extends TestCase
         $response->assertViewHas('page.version', hash('xxh128', $contents));
     }
 
+    public function test_middleware_share_once(): void
+    {
+        $middleware = new class extends Middleware
+        {
+            public function shareOnce(Request $request): array
+            {
+                return [
+                    'permissions' => fn () => ['admin' => true],
+                    'settings' => Inertia::once(fn () => ['theme' => 'dark'])
+                        ->as('app-settings')
+                        ->until(60),
+                ];
+            }
+        };
+
+        Route::middleware(StartSession::class)->get('/', function (Request $request) use ($middleware) {
+            return $middleware->handle($request, function ($request) {
+                return Inertia::render('User/Edit')->toResponse($request);
+            });
+        });
+
+        $response = $this->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'props' => [
+                'permissions' => ['admin' => true],
+                'settings' => ['theme' => 'dark'],
+            ],
+            'onceProps' => [
+                'permissions' => ['prop' => 'permissions', 'expiresAt' => null],
+                'app-settings' => ['prop' => 'settings'],
+            ],
+        ]);
+        $this->assertNotNull($response->json('onceProps.app-settings.expiresAt'));
+    }
+
     /**
      * @param  array<string, mixed>  $shared
      */
