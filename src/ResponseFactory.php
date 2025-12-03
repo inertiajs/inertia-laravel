@@ -247,9 +247,7 @@ class ResponseFactory
     }
 
     /**
-     * Share a property that is resolved only once and then remembered
-     * across subsequent navigations. Useful for expensive computations
-     * that don't change during a user's session.
+     * Create and share an 'once' property.
      */
     public function shareOnce(string $key, callable $callback): OnceProp
     {
