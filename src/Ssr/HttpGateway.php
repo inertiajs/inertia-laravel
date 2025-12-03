@@ -61,7 +61,15 @@ class HttpGateway implements Gateway, HasHealthCheck
      */
     public function isHealthy(): bool
     {
-        return Http::get($this->getUrl('/health'))->successful();
+        try {
+            return Http::get($this->getUrl('/health'))->successful();
+        } catch (Exception $e) {
+            if ($e instanceof StrayRequestException) {
+                throw $e;
+            }
+
+            return false;
+        }
     }
 
     /**
