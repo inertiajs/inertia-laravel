@@ -2,25 +2,51 @@
 
 namespace Inertia;
 
+use BackedEnum;
 use DateInterval;
 use DateTimeInterface;
 use Illuminate\Support\InteractsWithTime;
+use UnitEnum;
 
 trait ResolvesOnce
 {
     use InteractsWithTime;
 
     /**
-     * Indicates if the property should be evaluated only once.
+     * Indicates if the prop should be resolved only once.
      */
     protected bool $once = false;
 
+    /**
+     * The expiration time in seconds.
+     */
     protected ?int $ttl = null;
 
+    /**
+     * The custom key for resolving the once prop.
+     */
     protected ?string $key = null;
 
     /**
-     * Get the custom key.
+     * Mark the prop to be resolved only once.
+     */
+    public function once(bool $value = true): static
+    {
+        $this->once = $value;
+
+        return $this;
+    }
+
+    /**
+     * Determine if the prop should be resolved only once.
+     */
+    public function shouldResolveOnce(): bool
+    {
+        return $this->once;
+    }
+
+    /**
+     * Get the custom key for resolving the once prop.
      */
     public function getKey(): ?string
     {
@@ -28,21 +54,15 @@ trait ResolvesOnce
     }
 
     /**
-     * Set a custom key.
+     * Set a custom key for resolving the once prop.
      */
-    public function as(string $key): static
+    public function as(BackedEnum|UnitEnum|string $key): static
     {
-        $this->key = $key;
-
-        return $this;
-    }
-
-    /**
-     * Mark the property to be evaluated only once.
-     */
-    public function once(bool $value = true): static
-    {
-        $this->once = $value;
+        $this->key = match (true) {
+            $key instanceof BackedEnum => $key->value,
+            $key instanceof UnitEnum => $key->name,
+            default => $key,
+        };
 
         return $this;
     }
@@ -58,7 +78,7 @@ trait ResolvesOnce
     }
 
     /**
-     * Set the time to live (TTL) for the property.
+     * Set the expiration for the once prop.
      */
     public function until(DateTimeInterface|DateInterval|int $delay): static
     {
@@ -68,15 +88,7 @@ trait ResolvesOnce
     }
 
     /**
-     * Determine if the property should be evaluated only once.
-     */
-    public function shouldResolveOnce(): bool
-    {
-        return $this->once;
-    }
-
-    /**
-     * Get the TTL for the property.
+     * Get the expiration timestamp in milliseconds for the once prop.
      */
     public function expiresAt(): ?int
     {

@@ -292,16 +292,16 @@ class Response implements Responsable
             return $props;
         }
 
-        $loaded = array_filter(explode(',', $request->header(Header::PAGE_ONCE_PROPS, '')));
+        $loadedProps = array_filter(explode(',', $request->header(Header::PAGE_ONCE_PROPS, '')));
 
-        if (count($loaded) === 0) {
+        if (count($loadedProps) === 0) {
             return $props;
         }
 
         return collect($props)
-            ->reject(function ($prop, string $key) use ($loaded) {
+            ->reject(function ($prop, string $key) use ($loadedProps) {
                 if ($prop instanceof Onceable) {
-                    return $prop->shouldResolveOnce() && in_array($prop->getKey() ?? $key, $loaded);
+                    return $prop->shouldResolveOnce() && in_array($prop->getKey() ?? $key, $loadedProps);
                 }
 
                 return false;
