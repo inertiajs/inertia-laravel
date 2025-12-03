@@ -1352,7 +1352,6 @@ class ResponseTest extends TestCase
         $this->assertSame('123', $page->version);
         $this->assertEquals((object) [
             'foo' => (object) ['prop' => 'foo', 'expiresAt' => null],
-            'baz' => (object) ['prop' => 'baz', 'expiresAt' => null],
         ], $page->onceProps);
     }
 
@@ -1380,7 +1379,6 @@ class ResponseTest extends TestCase
         $this->assertSame('/user/123', $page->url);
         $this->assertSame('123', $page->version);
         $this->assertEquals((object) [
-            'foo' => (object) ['prop' => 'foo', 'expiresAt' => null],
             'baz' => (object) ['prop' => 'baz', 'expiresAt' => null],
         ], $page->onceProps);
     }
