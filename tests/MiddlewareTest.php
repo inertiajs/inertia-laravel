@@ -368,6 +368,45 @@ class MiddlewareTest extends TestCase
         $this->assertNotNull($response->json('onceProps.app-settings.expiresAt'));
     }
 
+    public function test_middleware_share_and_share_once_are_merged(): void
+    {
+        $middleware = new class extends Middleware
+        {
+            public function share(Request $request): array
+            {
+                return array_merge(parent::share($request), [
+                    'flash' => fn () => ['message' => 'Hello'],
+                ]);
+            }
+
+            public function shareOnce(Request $request): array
+            {
+                return array_merge(parent::shareOnce($request), [
+                    'permissions' => fn () => ['admin' => true],
+                ]);
+            }
+        };
+
+        Route::middleware(StartSession::class)->get('/', function (Request $request) use ($middleware) {
+            return $middleware->handle($request, function ($request) {
+                return Inertia::render('User/Edit')->toResponse($request);
+            });
+        });
+
+        $response = $this->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'props' => [
+                'flash' => ['message' => 'Hello'],
+                'permissions' => ['admin' => true],
+            ],
+            'onceProps' => [
+                'permissions' => ['prop' => 'permissions', 'expiresAt' => null],
+            ],
+        ]);
+    }
+
     /**
      * @param  array<string, mixed>  $shared
      */
