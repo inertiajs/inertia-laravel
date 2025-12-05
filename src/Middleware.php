@@ -5,7 +5,6 @@ namespace Inertia;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Session\Store;
-use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\MessageBag;
 use Inertia\Support\Header;
 use Symfony\Component\HttpFoundation\Response;
@@ -111,6 +110,10 @@ class Middleware
             $response = $this->onVersionChange($request, $response);
         }
 
+        if ($request->header(Header::REDIRECT_BACK)) {
+            $response = Inertia::back();
+        }
+
         if ($response->isOk() && empty($response->getContent())) {
             $response = $this->onEmptyResponse($request, $response);
         }
@@ -119,7 +122,21 @@ class Middleware
             $response->setStatusCode(303);
         }
 
+        if ($response->isRedirect()) {
+            $this->reflash($request);
+        }
+
         return $response;
+    }
+
+    /**
+     * Reflash the session data for the next request.
+     */
+    protected function reflash(Request $request): void
+    {
+        if ($flashed = Inertia::getFlashed($request)) {
+            $request->session()->flash(SessionKey::Flash->value, $flashed);
+        }
     }
 
     /**
@@ -127,7 +144,7 @@ class Middleware
      */
     public function onEmptyResponse(Request $request, Response $response): Response
     {
-        return Redirect::back();
+        return Inertia::back();
     }
 
     /**

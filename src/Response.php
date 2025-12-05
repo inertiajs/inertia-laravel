@@ -2,6 +2,7 @@
 
 namespace Inertia;
 
+use BackedEnum;
 use Carbon\CarbonInterval;
 use Closure;
 use GuzzleHttp\Promise\PromiseInterface;
@@ -16,6 +17,7 @@ use Illuminate\Support\Facades\Response as ResponseFactory;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
 use Inertia\Support\Header;
+use UnitEnum;
 
 class Response implements Responsable
 {
@@ -99,7 +101,7 @@ class Response implements Responsable
         $this->props = $props;
         $this->rootView = $rootView;
         $this->version = $version;
-        $this->clearHistory = session()->pull('inertia.clear_history', false);
+        $this->clearHistory = session()->pull(SessionKey::ClearHistory->value, false);
         $this->encryptHistory = $encryptHistory;
         $this->urlResolver = $urlResolver;
     }
@@ -168,6 +170,19 @@ class Response implements Responsable
     }
 
     /**
+     * Add flash data to the response.
+     *
+     * @param  \BackedEnum|\UnitEnum|string|array<string, mixed>  $key
+     * @return $this
+     */
+    public function flash(BackedEnum|UnitEnum|string|array $key, mixed $value = null): self
+    {
+        Inertia::flash($key, $value);
+
+        return $this;
+    }
+
+    /**
      * Create an HTTP response that represents the object.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -190,6 +205,7 @@ class Response implements Responsable
             $this->resolveDeferredProps($request),
             $this->resolveCacheDirections($request),
             $this->resolveScrollProps($request),
+            $this->resolveFlash($request),
         );
 
         if ($request->header(Header::INERTIA)) {
@@ -609,6 +625,18 @@ class Response implements Responsable
             ]]);
 
         return $scrollProps->isNotEmpty() ? ['scrollProps' => $scrollProps->toArray()] : [];
+    }
+
+    /**
+     * Resolve flash data from the session.
+     *
+     * @return array<string, mixed>
+     */
+    protected function resolveFlash(Request $request): array
+    {
+        $flash = Inertia::getFlashed($request);
+
+        return $flash ? ['flash' => $flash] : [];
     }
 
     /**
