@@ -289,7 +289,7 @@ class Response implements Responsable
             return $props;
         }
 
-        $loadedProps = array_filter(explode(',', $request->header(Header::PAGE_ONCE_PROPS, '')));
+        $loadedProps = array_filter(explode(',', $request->header(Header::EXCEPT_ONCE_PROPS, '')));
 
         if (count($loadedProps) === 0) {
             return $props;

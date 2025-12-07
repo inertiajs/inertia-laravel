@@ -1250,7 +1250,7 @@ class ResponseTest extends TestCase
     {
         $request = Request::create('/user/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
-        $request->headers->add(['X-Inertia-Page-Once-Props' => 'foo']);
+        $request->headers->add(['X-Inertia-Except-Once-Props' => 'foo']);
 
         $response = new Response('User/Edit', ['foo' => Inertia::once(fn () => 'bar')], 'app', '123');
         /** @var JsonResponse $response */
@@ -1289,7 +1289,7 @@ class ResponseTest extends TestCase
     {
         $request = Request::create('/user/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
-        $request->headers->add(['X-Inertia-Page-Once-Props' => 'baz']);
+        $request->headers->add(['X-Inertia-Except-Once-Props' => 'baz']);
 
         $response = new Response('User/Edit', ['foo' => Inertia::once(fn () => 'bar')], 'app', '123');
         /** @var JsonResponse $response */
@@ -1311,7 +1311,7 @@ class ResponseTest extends TestCase
         $request->headers->add(['X-Inertia' => 'true']);
         $request->headers->add(['X-Inertia-Partial-Component' => 'User/Edit']);
         $request->headers->add(['X-Inertia-Partial-Data' => 'foo']);
-        $request->headers->add(['X-Inertia-Page-Once-Props' => 'foo']);
+        $request->headers->add(['X-Inertia-Except-Once-Props' => 'foo']);
 
         $response = new Response('User/Edit', ['foo' => Inertia::once(fn () => 'bar')], 'app', '123');
         /** @var JsonResponse $response */
@@ -1333,7 +1333,7 @@ class ResponseTest extends TestCase
         $request->headers->add(['X-Inertia' => 'true']);
         $request->headers->add(['X-Inertia-Partial-Component' => 'User/Edit']);
         $request->headers->add(['X-Inertia-Partial-Data' => 'foo']);
-        $request->headers->add(['X-Inertia-Page-Once-Props' => 'foo']);
+        $request->headers->add(['X-Inertia-Except-Once-Props' => 'foo']);
 
         $response = new Response('User/Edit', [
             'foo' => Inertia::once(fn () => 'bar'),
@@ -1361,7 +1361,7 @@ class ResponseTest extends TestCase
         $request->headers->add(['X-Inertia' => 'true']);
         $request->headers->add(['X-Inertia-Partial-Component' => 'User/Edit']);
         $request->headers->add(['X-Inertia-Partial-Except' => 'foo']);
-        $request->headers->add(['X-Inertia-Page-Once-Props' => 'foo']);
+        $request->headers->add(['X-Inertia-Except-Once-Props' => 'foo']);
 
         $response = new Response('User/Edit', [
             'foo' => Inertia::once(fn () => 'bar'),
