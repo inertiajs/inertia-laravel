@@ -596,20 +596,4 @@ class ResponseFactoryTest extends TestCase
             ],
         ]);
     }
-
-    public function test_inertia_back_header_triggers_redirect_to_referer(): void
-    {
-        Route::middleware([ExampleMiddleware::class])->post('/delete', function () {
-            return redirect('/default-location');
-        });
-
-        $response = $this->post('/delete', [], [
-            'X-Inertia' => 'true',
-            'X-Inertia-Redirect-Back' => 'true',
-            'Referer' => 'https://example.com/previous-page',
-        ]);
-
-        $response->assertStatus(Response::HTTP_FOUND);
-        $this->assertEquals('https://example.com/previous-page', $response->headers->get('Location'));
-    }
 }

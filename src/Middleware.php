@@ -110,10 +110,6 @@ class Middleware
             $response = $this->onVersionChange($request, $response);
         }
 
-        if ($request->header(Header::REDIRECT_BACK)) {
-            $response = Inertia::back();
-        }
-
         if ($response->isOk() && empty($response->getContent())) {
             $response = $this->onEmptyResponse($request, $response);
         }

@@ -48,9 +48,4 @@ class Header
      * Header for specifying the merge intent when paginating on infinite scroll.
      */
     public const INFINITE_SCROLL_MERGE_INTENT = 'X-Inertia-Infinite-Scroll-Merge-Intent';
-
-    /**
-     * Header indicating the client wants to redirect back instead of following the server's response.
-     */
-    public const REDIRECT_BACK = 'X-Inertia-Redirect-Back';
 }
