@@ -5,6 +5,7 @@ namespace Inertia;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Session\Store;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\MessageBag;
 use Inertia\Support\Header;
 use Symfony\Component\HttpFoundation\Response;
@@ -140,7 +141,7 @@ class Middleware
      */
     public function onEmptyResponse(Request $request, Response $response): Response
     {
-        return Inertia::back();
+        return Redirect::back();
     }
 
     /**
