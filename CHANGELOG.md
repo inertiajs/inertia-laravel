@@ -1,8 +1,17 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.11...2.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.12...2.x)
 
 - Nothing!
+
+## [v2.0.12](https://github.com/inertiajs/inertia-laravel/compare/v2.0.11...v2.0.12) - 2025-12-09
+
+### What's Changed
+
+* Ability to use `<script>` element for initial page data by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/788
+* Support for `once()` props by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/793
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.11...v2.0.12
 
 ## [v2.0.11](https://github.com/inertiajs/inertia-laravel/compare/v2.0.10...v2.0.11) - 2025-11-26
 
