@@ -34,4 +34,14 @@ class DeferPropTest extends TestCase
 
         $this->assertInstanceOf(Request::class, $deferProp());
     }
+
+    public function test_is_onceable(): void
+    {
+        $deferProp = (new DeferProp(fn () => 'value'))
+            ->once(as: 'custom-key', until: 60);
+
+        $this->assertTrue($deferProp->shouldResolveOnce());
+        $this->assertSame('custom-key', $deferProp->getKey());
+        $this->assertNotNull($deferProp->expiresAt());
+    }
 }

@@ -17,6 +17,7 @@ use Inertia\DeferProp;
 use Inertia\Inertia;
 use Inertia\LazyProp;
 use Inertia\MergeProp;
+use Inertia\OnceProp;
 use Inertia\OptionalProp;
 use Inertia\ResponseFactory;
 use Inertia\Tests\Stubs\ExampleInertiaPropsProvider;
@@ -373,6 +374,27 @@ class ResponseFactoryTest extends TestCase
         ], $scrollProp->metadata());
     }
 
+    public function test_can_create_once_prop(): void
+    {
+        $factory = new ResponseFactory;
+        $onceProp = $factory->once(function () {
+            return 'A once value';
+        });
+
+        $this->assertInstanceOf(OnceProp::class, $onceProp);
+    }
+
+    public function test_can_create_deferred_and_once_prop(): void
+    {
+        $factory = new ResponseFactory;
+        $deferredProp = $factory->defer(function () {
+            return 'A deferred + once value';
+        })->once();
+
+        $this->assertInstanceOf(DeferProp::class, $deferredProp);
+        $this->assertTrue($deferredProp->shouldResolveOnce());
+    }
+
     public function test_can_create_always_prop(): void
     {
         $factory = new ResponseFactory;
@@ -517,5 +539,53 @@ class ResponseFactoryTest extends TestCase
 
         $response = (new ResponseFactory)->render('foo');
         $this->assertInstanceOf(\Inertia\Response::class, $response);
+    }
+
+    public function test_share_once_shares_a_once_prop(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            Inertia::shareOnce('settings', fn () => ['theme' => 'dark']);
+
+            return Inertia::render('User/Edit');
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Edit',
+            'props' => [
+                'settings' => ['theme' => 'dark'],
+            ],
+            'onceProps' => [
+                'settings' => [
+                    'prop' => 'settings',
+                    'expiresAt' => null,
+                ],
+            ],
+        ]);
+    }
+
+    public function test_share_once_is_chainable(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            $prop = Inertia::shareOnce('settings', fn () => ['theme' => 'dark'])
+                ->as('app-settings')
+                ->until(60);
+
+            $this->assertInstanceOf(OnceProp::class, $prop);
+
+            return Inertia::render('User/Edit');
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertSuccessful();
+        $data = $response->json();
+
+        $this->assertArrayHasKey('onceProps', $data);
+        $this->assertArrayHasKey('app-settings', $data['onceProps']);
+        $this->assertEquals('settings', $data['onceProps']['app-settings']['prop']);
+        $this->assertNotNull($data['onceProps']['app-settings']['expiresAt']);
     }
 }

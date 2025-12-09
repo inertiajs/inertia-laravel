@@ -190,6 +190,7 @@ class Response implements Responsable
             $this->resolveDeferredProps($request),
             $this->resolveCacheDirections($request),
             $this->resolveScrollProps($request),
+            $this->resolveOnceProps($request),
         );
 
         if ($request->header(Header::INERTIA)) {
@@ -209,6 +210,7 @@ class Response implements Responsable
     {
         $props = $this->resolveInertiaPropsProviders($props, $request);
         $props = $this->resolvePartialProperties($props, $request);
+        $props = $this->resolveOnceProperties($props, $request);
         $props = $this->resolveArrayableProperties($props, $request);
         $props = $this->resolveAlways($props);
         $props = $this->resolvePropertyInstances($props, $request);
@@ -258,10 +260,7 @@ class Response implements Responsable
             });
         }
 
-        $only = array_filter(explode(',', $request->header(Header::PARTIAL_ONLY, '')));
-        $except = array_filter(explode(',', $request->header(Header::PARTIAL_EXCEPT, '')));
-
-        if (count($only)) {
+        if ($only = $this->getOnlyProps($request)) {
             $newProps = [];
 
             foreach ($only as $key) {
@@ -271,11 +270,40 @@ class Response implements Responsable
             $props = $newProps;
         }
 
-        if ($except) {
+        if ($except = $this->getExceptProps($request)) {
             Arr::forget($props, $except);
         }
 
         return $props;
+    }
+
+    /**
+     * Resolve properties that should only be resolved once.
+     *
+     * @param  array<string, mixed>  $props
+     * @return array<string, mixed>
+     */
+    public function resolveOnceProperties(array $props, Request $request): array
+    {
+        if (! $this->isInertia($request) || $this->isPartial($request)) {
+            return $props;
+        }
+
+        $loadedProps = array_filter(explode(',', $request->header(Header::EXCEPT_ONCE_PROPS, '')));
+
+        if (count($loadedProps) === 0) {
+            return $props;
+        }
+
+        return collect($props)
+            ->reject(function ($prop, string $key) use ($loadedProps) {
+                if ($prop instanceof Onceable) {
+                    return $prop->shouldResolveOnce() && in_array($prop->getKey() ?? $key, $loadedProps);
+                }
+
+                return false;
+            })
+            ->all();
     }
 
     /**
@@ -320,11 +348,9 @@ class Response implements Responsable
      */
     public function resolveOnly(Request $request, array $props): array
     {
-        $only = array_filter(explode(',', $request->header(Header::PARTIAL_ONLY, '')));
-
         $value = [];
 
-        foreach ($only as $key) {
+        foreach ($this->getOnlyProps($request) as $key) {
             Arr::set($value, $key, data_get($props, $key));
         }
 
@@ -339,9 +365,7 @@ class Response implements Responsable
      */
     public function resolveExcept(Request $request, array $props): array
     {
-        $except = array_filter(explode(',', $request->header(Header::PARTIAL_EXCEPT, '')));
-
-        Arr::forget($props, $except);
+        Arr::forget($props, $this->getExceptProps($request));
 
         return $props;
     }
@@ -385,6 +409,7 @@ class Response implements Responsable
                 AlwaysProp::class,
                 MergeProp::class,
                 ScrollProp::class,
+                OnceProp::class,
             ])->first(fn ($class) => $value instanceof $class);
 
             if ($resolveViaApp) {
@@ -446,6 +471,26 @@ class Response implements Responsable
     }
 
     /**
+     * Get the props that should be included based on the request headers when using 'only'.
+     *
+     * @return array<int, string>
+     */
+    protected function getOnlyProps(Request $request): ?array
+    {
+        return array_filter(explode(',', $request->header(Header::PARTIAL_ONLY, ''))) ?: null;
+    }
+
+    /**
+     * Get the props that should be excluded based on the request headers when using 'except'.
+     *
+     * @return array<int, string>
+     */
+    protected function getExceptProps(Request $request): ?array
+    {
+        return array_filter(explode(',', $request->header(Header::PARTIAL_EXCEPT, ''))) ?: null;
+    }
+
+    /**
      * Get the props that should be reset based on the request headers.
      *
      * @return array<int, string>
@@ -462,16 +507,11 @@ class Response implements Responsable
      */
     protected function getMergePropsForRequest(Request $request, bool $rejectResetProps = true): Collection
     {
-        $resetProps = $rejectResetProps ? $this->getResetProps($request) : [];
-        $onlyProps = array_filter(explode(',', $request->header(Header::PARTIAL_ONLY, '')));
-        $exceptProps = array_filter(explode(',', $request->header(Header::PARTIAL_EXCEPT, '')));
-
         return collect($this->props)
-            ->filter(fn ($prop) => $prop instanceof Mergeable)
-            ->filter(fn (Mergeable $prop) => $prop->shouldMerge())
-            ->reject(fn ($_, string $key) => in_array($key, $resetProps))
-            ->filter(fn ($_, string $key) => count($onlyProps) === 0 || in_array($key, $onlyProps))
-            ->reject(fn ($_, string $key) => in_array($key, $exceptProps));
+            ->filter(fn ($prop) => $prop instanceof Mergeable && $prop->shouldMerge())
+            ->when($rejectResetProps, fn (Collection $props) => $props->except($this->getResetProps($request)))
+            ->only($this->getOnlyProps($request))
+            ->except($this->getExceptProps($request));
     }
 
     /**
@@ -609,6 +649,33 @@ class Response implements Responsable
             ]]);
 
         return $scrollProps->isNotEmpty() ? ['scrollProps' => $scrollProps->toArray()] : [];
+    }
+
+    /**
+     * Resolve props that should only be resolved once.
+     *
+     * @return array<string, array<int, string>>
+     */
+    public function resolveOnceProps(Request $request): array
+    {
+        $onceProps = collect($this->props)
+            ->filter(fn ($prop) => $prop instanceof Onceable && $prop->shouldResolveOnce())
+            ->only($this->getOnlyProps($request))
+            ->except($this->getExceptProps($request))
+            ->mapWithKeys(fn (Onceable $prop, string $key) => [$prop->getKey() ?? $key => [
+                'prop' => $key,
+                'expiresAt' => $prop->expiresAt(),
+            ]]);
+
+        return $onceProps->isNotEmpty() ? ['onceProps' => $onceProps->toArray()] : [];
+    }
+
+    /**
+     * Determine if the request is an Inertia request.
+     */
+    public function isInertia(Request $request): bool
+    {
+        return (bool) $request->header(Header::INERTIA);
     }
 
     /**

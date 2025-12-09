@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Inertia\OptionalProp optional(callable $callback)
  * @method static \Inertia\LazyProp lazy(callable $callback)
  * @method static \Inertia\DeferProp defer(callable $callback, string $group = 'default')
+ * @method static \Inertia\OnceProp once(callable $callback)
  * @method static \Inertia\AlwaysProp always(mixed $value)
  * @method static \Inertia\MergeProp merge(mixed $value)
  * @method static \Inertia\MergeProp deepMerge(mixed $value)
