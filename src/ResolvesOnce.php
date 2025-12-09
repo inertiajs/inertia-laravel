@@ -30,9 +30,17 @@ trait ResolvesOnce
     /**
      * Mark the prop to be resolved only once.
      */
-    public function once(bool $value = true): static
+    public function once(bool $value = true, ?string $as = null, DateTimeInterface|DateInterval|int|null $until = null): static
     {
         $this->once = $value;
+
+        if ($as !== null) {
+            $this->as($as);
+        }
+
+        if ($until !== null) {
+            $this->until($until);
+        }
 
         return $this;
     }
