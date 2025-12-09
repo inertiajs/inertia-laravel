@@ -239,7 +239,7 @@ class ResponseFactory
     }
 
     /**
-     * Create an 'once' property.
+     * Create an once property.
      */
     public function once(callable $value): OnceProp
     {
@@ -247,7 +247,7 @@ class ResponseFactory
     }
 
     /**
-     * Create and share an 'once' property.
+     * Create and share an once property.
      */
     public function shareOnce(string $key, callable $callback): OnceProp
     {

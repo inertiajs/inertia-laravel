@@ -16,7 +16,7 @@ class OnceProp implements Onceable
     protected $callback;
 
     /**
-     * Create a new 'once' property instance.
+     * Create a new once property instance.
      */
     public function __construct(callable $callback)
     {
