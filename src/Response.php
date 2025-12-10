@@ -71,13 +71,6 @@ class Response implements Responsable
     protected $viewData = [];
 
     /**
-     * The cache duration settings.
-     *
-     * @var array<int, mixed>
-     */
-    protected $cacheFor = [];
-
-    /**
      * The URL resolver callback.
      */
     protected ?Closure $urlResolver = null;
@@ -155,19 +148,6 @@ class Response implements Responsable
     }
 
     /**
-     * Set the cache duration for the response.
-     *
-     * @param  string|array<int, mixed>  $cacheFor
-     * @return $this
-     */
-    public function cache(string|array $cacheFor): self
-    {
-        $this->cacheFor = is_array($cacheFor) ? $cacheFor : [$cacheFor];
-
-        return $this;
-    }
-
-    /**
      * Create an HTTP response that represents the object.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -188,7 +168,6 @@ class Response implements Responsable
             ],
             $this->resolveMergeProps($request),
             $this->resolveDeferredProps($request),
-            $this->resolveCacheDirections($request),
             $this->resolveScrollProps($request),
             $this->resolveOnceProps($request),
         );
@@ -446,28 +425,6 @@ class Response implements Responsable
         }
 
         return $props;
-    }
-
-    /**
-     * Resolve the cache directions for the response.
-     *
-     * @return array<string, mixed>
-     */
-    public function resolveCacheDirections(Request $request): array
-    {
-        if (count($this->cacheFor) === 0) {
-            return [];
-        }
-
-        return [
-            'cache' => collect($this->cacheFor)->map(function ($value) {
-                if ($value instanceof CarbonInterval) {
-                    return $value->totalSeconds;
-                }
-
-                return intval($value);
-            }),
-        ];
     }
 
     /**
