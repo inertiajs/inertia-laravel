@@ -18,9 +18,9 @@ trait ResolvesOnce
     protected bool $once = false;
 
     /**
-     * Indicates if the prop was marked as fresh.
+     * Indicates if the prop should be forcefully refreshed.
      */
-    protected bool $fresh = false;
+    protected bool $refresh = false;
 
     /**
      * The expiration time in seconds.
@@ -59,11 +59,11 @@ trait ResolvesOnce
     }
 
     /**
-     * Determine if the prop was marked as fresh.
+     * Determine if the prop should be forcefully refreshed.
      */
-    public function markedAsFresh(): bool
+    public function shouldBeRefreshed(): bool
     {
-        return $this->fresh;
+        return $this->refresh;
     }
 
     /**
@@ -93,7 +93,7 @@ trait ResolvesOnce
      */
     public function fresh(bool $value = true): static
     {
-        $this->fresh = $value;
+        $this->refresh = $value;
 
         return $this;
     }

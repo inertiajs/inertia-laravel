@@ -22,7 +22,7 @@ interface Onceable
     /**
      * Determine if the prop was marked as fresh.
      */
-    public function markedAsFresh(): bool;
+    public function shouldBeRefreshed(): bool;
 
     /**
      * Get the custom key for resolving the once prop.

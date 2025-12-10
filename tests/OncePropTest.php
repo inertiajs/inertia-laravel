@@ -54,7 +54,7 @@ class OncePropTest extends TestCase
     {
         $onceProp = new OnceProp(fn () => 'value');
 
-        $this->assertFalse($onceProp->markedAsFresh());
+        $this->assertFalse($onceProp->shouldBeRefreshed());
     }
 
     public function test_is_fresh_returns_true_after_fresh_called(): void
@@ -62,7 +62,7 @@ class OncePropTest extends TestCase
         $onceProp = new OnceProp(fn () => 'value');
         $onceProp->fresh();
 
-        $this->assertTrue($onceProp->markedAsFresh());
+        $this->assertTrue($onceProp->shouldBeRefreshed());
     }
 
     public function test_is_fresh_returns_false_after_fresh_false_called(): void
@@ -71,6 +71,6 @@ class OncePropTest extends TestCase
         $onceProp->fresh();
         $onceProp->fresh(false);
 
-        $this->assertFalse($onceProp->markedAsFresh());
+        $this->assertFalse($onceProp->shouldBeRefreshed());
     }
 }
