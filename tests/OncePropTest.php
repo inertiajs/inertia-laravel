@@ -49,4 +49,28 @@ class OncePropTest extends TestCase
         $onceProp->as(TestUnitEnum::Baz);
         $this->assertSame('Baz', $onceProp->getKey());
     }
+
+    public function test_should_not_be_refreshed_by_default(): void
+    {
+        $onceProp = new OnceProp(fn () => 'value');
+
+        $this->assertFalse($onceProp->shouldBeRefreshed());
+    }
+
+    public function test_can_forcefully_refresh(): void
+    {
+        $onceProp = new OnceProp(fn () => 'value');
+        $onceProp->fresh();
+
+        $this->assertTrue($onceProp->shouldBeRefreshed());
+    }
+
+    public function test_can_disable_forceful_refresh(): void
+    {
+        $onceProp = new OnceProp(fn () => 'value');
+        $onceProp->fresh();
+        $onceProp->fresh(false);
+
+        $this->assertFalse($onceProp->shouldBeRefreshed());
+    }
 }
