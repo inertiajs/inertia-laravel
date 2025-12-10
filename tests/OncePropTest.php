@@ -50,14 +50,14 @@ class OncePropTest extends TestCase
         $this->assertSame('Baz', $onceProp->getKey());
     }
 
-    public function test_is_fresh_returns_false_by_default(): void
+    public function test_should_not_be_refreshed_by_default(): void
     {
         $onceProp = new OnceProp(fn () => 'value');
 
         $this->assertFalse($onceProp->shouldBeRefreshed());
     }
 
-    public function test_is_fresh_returns_true_after_fresh_called(): void
+    public function test_can_forcefully_refresh(): void
     {
         $onceProp = new OnceProp(fn () => 'value');
         $onceProp->fresh();
@@ -65,7 +65,7 @@ class OncePropTest extends TestCase
         $this->assertTrue($onceProp->shouldBeRefreshed());
     }
 
-    public function test_is_fresh_returns_false_after_fresh_false_called(): void
+    public function test_can_disable_forceful_refresh(): void
     {
         $onceProp = new OnceProp(fn () => 'value');
         $onceProp->fresh();

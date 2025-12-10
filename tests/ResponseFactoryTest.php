@@ -589,7 +589,7 @@ class ResponseFactoryTest extends TestCase
         $this->assertNotNull($data['onceProps']['app-settings']['expiresAt']);
     }
 
-    public function test_fresh_keeps_prop_in_once_props_and_in_props(): void
+    public function test_forcefully_refreshing_a_once_prop_includes_it_in_once_props(): void
     {
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
             return Inertia::render('User/Edit', [
@@ -611,7 +611,7 @@ class ResponseFactoryTest extends TestCase
         ]);
     }
 
-    public function test_once_prop_without_fresh_is_present_in_both_props_and_once_props(): void
+    public function test_once_prop_is_included_in_once_props_by_default(): void
     {
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
             return Inertia::render('User/Edit', [

@@ -1223,7 +1223,7 @@ class ResponseTest extends TestCase
         $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;foo&quot;:&quot;bar&quot;},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;,&quot;clearHistory&quot;:false,&quot;encryptHistory&quot;:false,&quot;onceProps&quot;:{&quot;foo&quot;:{&quot;prop&quot;:&quot;foo&quot;,&quot;expiresAt&quot;:null}}}"></div>', $view->render());
     }
 
-    public function test_fresh_once_props_are_included_in_once_props_on_initial_page_load(): void
+    public function test_fresh_once_props_are_included_on_initial_page_load(): void
     {
         $request = Request::create('/user/123', 'GET');
 
@@ -1421,7 +1421,6 @@ class ResponseTest extends TestCase
         $this->assertSame('bar', $page->props->foo);
         $this->assertSame('/user/123', $page->url);
         $this->assertSame('123', $page->version);
-        // fresh() props should still be in onceProps so the client can track them
         $this->assertEquals((object) [
             'foo' => (object) ['prop' => 'foo', 'expiresAt' => null],
         ], $page->onceProps);
@@ -1444,13 +1443,10 @@ class ResponseTest extends TestCase
         $this->assertInstanceOf(JsonResponse::class, $response);
 
         $this->assertSame('User/Edit', $page->component);
-        // fresh() prop is resolved even when in X-Inertia-Except-Once-Props header
         $this->assertSame('bar', $page->props->foo);
-        // once() prop is excluded when in X-Inertia-Except-Once-Props header
         $this->assertFalse(isset($page->props->baz));
         $this->assertSame('/user/123', $page->url);
         $this->assertSame('123', $page->version);
-        // Both fresh() and once() props are in onceProps so the client can track them
         $this->assertEquals((object) [
             'foo' => (object) ['prop' => 'foo', 'expiresAt' => null],
             'baz' => (object) ['prop' => 'baz', 'expiresAt' => null],
