@@ -1453,6 +1453,58 @@ class ResponseTest extends TestCase
         ], $page->onceProps);
     }
 
+    public function test_defer_props_that_are_once_and_already_loaded_are_excluded(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Except-Once-Props' => 'defer']);
+
+        $response = new Response('User/Edit', [
+            'defer' => Inertia::defer(fn () => 'value')->once(),
+        ], 'app', '123');
+        /** @var JsonResponse $response */
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+
+        $this->assertSame('User/Edit', $page->component);
+        $this->assertFalse(isset($page->props->defer));
+        $this->assertFalse(isset($page->deferredProps));
+        $this->assertSame('/user/123', $page->url);
+        $this->assertSame('123', $page->version);
+        $this->assertEquals((object) [
+            'defer' => (object) ['prop' => 'defer', 'expiresAt' => null],
+        ], $page->onceProps);
+    }
+
+    public function test_defer_props_that_are_once_and_already_loaded_not_excluded_when_explicitly_requested(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'User/Edit']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'defer']);
+        $request->headers->add(['X-Inertia-Except-Once-Props' => 'defer']);
+
+        $response = new Response('User/Edit', [
+            'defer' => Inertia::defer(fn () => 'value')->once(),
+        ], 'app', '123');
+        /** @var JsonResponse $response */
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+
+        $this->assertSame('User/Edit', $page->component);
+        $this->assertSame('value', $page->props->defer);
+        $this->assertSame('/user/123', $page->url);
+        $this->assertSame('123', $page->version);
+        $this->assertFalse(isset($page->deferredProps));
+        $this->assertEquals((object) [
+            'defer' => (object) ['prop' => 'defer', 'expiresAt' => null],
+        ], $page->onceProps);
+    }
+
     public function test_responsable_with_invalid_key(): void
     {
         $request = Request::create('/user/123', 'GET');
