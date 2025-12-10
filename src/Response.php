@@ -297,11 +297,19 @@ class Response implements Responsable
 
         return collect($props)
             ->reject(function ($prop, string $key) use ($loadedProps) {
-                if ($prop instanceof Onceable) {
-                    return $prop->shouldResolveOnce() && in_array($prop->getKey() ?? $key, $loadedProps);
+                if (! $prop instanceof Onceable) {
+                    return false;
                 }
 
-                return false;
+                if (! $prop->shouldResolveOnce()) {
+                    return false;
+                }
+
+                if ($prop->shouldBeRefreshed()) {
+                    return false;
+                }
+
+                return in_array($prop->getKey() ?? $key, $loadedProps);
             })
             ->all();
     }
