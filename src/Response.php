@@ -289,14 +289,14 @@ class Response implements Responsable
             return $props;
         }
 
-        $loadedProps = array_filter(explode(',', $request->header(Header::EXCEPT_ONCE_PROPS, '')));
+        $exceptOnceProps = $this->getExceptOnceProps($request);
 
-        if (count($loadedProps) === 0) {
+        if (count($exceptOnceProps) === 0) {
             return $props;
         }
 
         return collect($props)
-            ->reject(function ($prop, string $key) use ($loadedProps) {
+            ->reject(function ($prop, string $key) use ($exceptOnceProps) {
                 if (! $prop instanceof Onceable) {
                     return false;
                 }
@@ -309,7 +309,7 @@ class Response implements Responsable
                     return false;
                 }
 
-                return in_array($prop->getKey() ?? $key, $loadedProps);
+                return in_array($prop->getKey() ?? $key, $exceptOnceProps);
             })
             ->all();
     }
@@ -479,13 +479,23 @@ class Response implements Responsable
     }
 
     /**
+     * Parse props from request headers.
+     *
+     * @return array<int, string>|null
+     */
+    protected static function parsePropsFromHeader(Request $request, string $key): ?array
+    {
+        return array_filter(explode(',', $request->header($key, ''))) ?: null;
+    }
+
+    /**
      * Get the props that should be included based on the request headers when using 'only'.
      *
      * @return array<int, string>
      */
     protected function getOnlyProps(Request $request): ?array
     {
-        return array_filter(explode(',', $request->header(Header::PARTIAL_ONLY, ''))) ?: null;
+        return static::parsePropsFromHeader($request, Header::PARTIAL_ONLY);
     }
 
     /**
@@ -495,7 +505,7 @@ class Response implements Responsable
      */
     protected function getExceptProps(Request $request): ?array
     {
-        return array_filter(explode(',', $request->header(Header::PARTIAL_EXCEPT, ''))) ?: null;
+        return static::parsePropsFromHeader($request, Header::PARTIAL_EXCEPT);
     }
 
     /**
@@ -505,7 +515,17 @@ class Response implements Responsable
      */
     public function getResetProps(Request $request): array
     {
-        return array_filter(explode(',', $request->header(Header::RESET, '')));
+        return static::parsePropsFromHeader($request, Header::RESET) ?? [];
+    }
+
+    /**
+     * Get the props that have already been loaded once based on the request headers.
+     *
+     * @return array<int, string>
+     */
+    protected function getExceptOnceProps(Request $request): array
+    {
+        return static::parsePropsFromHeader($request, Header::EXCEPT_ONCE_PROPS) ?? [];
     }
 
     /**
@@ -623,9 +643,22 @@ class Response implements Responsable
             return [];
         }
 
+        $exceptOnceProps = $this->getExceptOnceProps($request);
+
         $deferredProps = collect($this->props)
             ->filter(function ($prop) {
                 return $prop instanceof DeferProp;
+            })
+            ->reject(function (DeferProp $prop, string $key) use ($exceptOnceProps) {
+                if (! $prop->shouldResolveOnce()) {
+                    return false;
+                }
+
+                if ($prop->shouldBeRefreshed()) {
+                    return false;
+                }
+
+                return in_array($prop->getKey() ?? $key, $exceptOnceProps);
             })
             ->map(function ($prop, $key) {
                 return [
