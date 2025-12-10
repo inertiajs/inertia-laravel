@@ -50,25 +50,27 @@ class OncePropTest extends TestCase
         $this->assertSame('Baz', $onceProp->getKey());
     }
 
-    public function test_fresh_disables_once_resolution(): void
+    public function test_is_fresh_returns_false_by_default(): void
     {
         $onceProp = new OnceProp(fn () => 'value');
 
-        $this->assertTrue($onceProp->shouldResolveOnce());
-
-        $result = $onceProp->fresh();
-        $this->assertSame($onceProp, $result);
-        $this->assertFalse($onceProp->shouldResolveOnce());
+        $this->assertFalse($onceProp->markedAsFresh());
     }
 
-    public function test_fresh_with_false_enables_once_resolution(): void
+    public function test_is_fresh_returns_true_after_fresh_called(): void
     {
         $onceProp = new OnceProp(fn () => 'value');
         $onceProp->fresh();
 
-        $this->assertFalse($onceProp->shouldResolveOnce());
+        $this->assertTrue($onceProp->markedAsFresh());
+    }
 
+    public function test_is_fresh_returns_false_after_fresh_false_called(): void
+    {
+        $onceProp = new OnceProp(fn () => 'value');
+        $onceProp->fresh();
         $onceProp->fresh(false);
-        $this->assertTrue($onceProp->shouldResolveOnce());
+
+        $this->assertFalse($onceProp->markedAsFresh());
     }
 }

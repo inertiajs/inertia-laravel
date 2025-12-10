@@ -20,6 +20,11 @@ interface Onceable
     public function shouldResolveOnce(): bool;
 
     /**
+     * Determine if the prop was marked as fresh.
+     */
+    public function markedAsFresh(): bool;
+
+    /**
      * Get the custom key for resolving the once prop.
      */
     public function getKey(): ?string;

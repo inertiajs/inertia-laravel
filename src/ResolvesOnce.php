@@ -18,6 +18,11 @@ trait ResolvesOnce
     protected bool $once = false;
 
     /**
+     * Indicates if the prop was marked as fresh.
+     */
+    protected bool $fresh = false;
+
+    /**
      * The expiration time in seconds.
      */
     protected ?int $ttl = null;
@@ -54,6 +59,14 @@ trait ResolvesOnce
     }
 
     /**
+     * Determine if the prop was marked as fresh.
+     */
+    public function markedAsFresh(): bool
+    {
+        return $this->fresh;
+    }
+
+    /**
      * Get the custom key for resolving the once prop.
      */
     public function getKey(): ?string
@@ -80,7 +93,7 @@ trait ResolvesOnce
      */
     public function fresh(bool $value = true): static
     {
-        $this->once = ! $value;
+        $this->fresh = $value;
 
         return $this;
     }

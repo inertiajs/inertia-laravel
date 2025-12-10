@@ -298,7 +298,7 @@ class Response implements Responsable
         return collect($props)
             ->reject(function ($prop, string $key) use ($loadedProps) {
                 if ($prop instanceof Onceable) {
-                    return $prop->shouldResolveOnce() && in_array($prop->getKey() ?? $key, $loadedProps);
+                    return !$prop->markedAsFresh() && $prop->shouldResolveOnce() && in_array($prop->getKey() ?? $key, $loadedProps);
                 }
 
                 return false;
@@ -659,7 +659,7 @@ class Response implements Responsable
     public function resolveOnceProps(Request $request): array
     {
         $onceProps = collect($this->props)
-            ->filter(fn ($prop) => $prop instanceof Onceable && $prop->shouldResolveOnce())
+            ->filter(fn ($prop) => $prop instanceof Onceable && ($prop->shouldResolveOnce() || $prop->markedAsFresh()))
             ->only($this->getOnlyProps($request))
             ->except($this->getExceptProps($request))
             ->mapWithKeys(fn (Onceable $prop, string $key) => [$prop->getKey() ?? $key => [

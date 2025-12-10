@@ -1223,6 +1223,27 @@ class ResponseTest extends TestCase
         $this->assertSame('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;foo&quot;:&quot;bar&quot;},&quot;url&quot;:&quot;\/user\/123&quot;,&quot;version&quot;:&quot;123&quot;,&quot;clearHistory&quot;:false,&quot;encryptHistory&quot;:false,&quot;onceProps&quot;:{&quot;foo&quot;:{&quot;prop&quot;:&quot;foo&quot;,&quot;expiresAt&quot;:null}}}"></div>', $view->render());
     }
 
+    public function test_fresh_once_props_are_included_in_once_props_on_initial_page_load(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+
+        $response = new Response('User/Edit', ['foo' => Inertia::once(fn () => 'bar')->fresh()], 'app', '123');
+        /** @var BaseResponse $response */
+        $response = $response->toResponse($request);
+        $view = $response->getOriginalContent();
+        $page = $view->getData()['page'];
+
+        $this->assertInstanceOf(BaseResponse::class, $response);
+        $this->assertInstanceOf(View::class, $view);
+
+        $this->assertSame('User/Edit', $page['component']);
+        $this->assertSame('bar', $page['props']['foo']);
+        $this->assertSame('/user/123', $page['url']);
+        $this->assertSame('123', $page['version']);
+        $this->assertArrayHasKey('onceProps', $page);
+        $this->assertSame(['foo' => ['prop' => 'foo', 'expiresAt' => null]], $page['onceProps']);
+    }
+
     public function test_once_props_are_resolved_with_a_custom_key_and_ttl_value(): void
     {
         $this->freezeSecond();
@@ -1400,7 +1421,10 @@ class ResponseTest extends TestCase
         $this->assertSame('bar', $page->props->foo);
         $this->assertSame('/user/123', $page->url);
         $this->assertSame('123', $page->version);
-        $this->assertFalse(isset($page->onceProps));
+        // fresh() props should still be in onceProps so the client can track them
+        $this->assertEquals((object) [
+            'foo' => (object) ['prop' => 'foo', 'expiresAt' => null],
+        ], $page->onceProps);
     }
 
     public function test_fresh_props_are_not_excluded_while_once_props_are_excluded(): void
@@ -1426,9 +1450,9 @@ class ResponseTest extends TestCase
         $this->assertFalse(isset($page->props->baz));
         $this->assertSame('/user/123', $page->url);
         $this->assertSame('123', $page->version);
-        // fresh() prop is NOT in onceProps, but baz IS in onceProps (even though excluded from props)
-        $this->assertFalse(isset($page->onceProps->foo));
+        // Both fresh() and once() props are in onceProps so the client can track them
         $this->assertEquals((object) [
+            'foo' => (object) ['prop' => 'foo', 'expiresAt' => null],
             'baz' => (object) ['prop' => 'baz', 'expiresAt' => null],
         ], $page->onceProps);
     }
