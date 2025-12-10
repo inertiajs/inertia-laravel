@@ -588,4 +588,49 @@ class ResponseFactoryTest extends TestCase
         $this->assertEquals('settings', $data['onceProps']['app-settings']['prop']);
         $this->assertNotNull($data['onceProps']['app-settings']['expiresAt']);
     }
+
+    public function test_fresh_removes_prop_from_once_props_but_keeps_it_in_props(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            return Inertia::render('User/Edit', [
+                'settings' => Inertia::once(fn () => ['theme' => 'dark'])->fresh(),
+            ]);
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Edit',
+            'props' => [
+                'settings' => ['theme' => 'dark'],
+            ],
+        ]);
+        $this->assertArrayNotHasKey('onceProps', $response->json());
+    }
+
+    public function test_once_prop_without_fresh_is_present_in_both_props_and_once_props(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            return Inertia::render('User/Edit', [
+                'settings' => Inertia::once(fn () => ['theme' => 'dark']),
+            ]);
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Edit',
+            'props' => [
+                'settings' => ['theme' => 'dark'],
+            ],
+            'onceProps' => [
+                'settings' => [
+                    'prop' => 'settings',
+                    'expiresAt' => null,
+                ],
+            ],
+        ]);
+    }
 }

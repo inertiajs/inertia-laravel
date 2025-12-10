@@ -1383,6 +1383,56 @@ class ResponseTest extends TestCase
         ], $page->onceProps);
     }
 
+    public function test_fresh_props_are_resolved_even_when_in_except_once_props_header(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Except-Once-Props' => 'foo']);
+
+        $response = new Response('User/Edit', ['foo' => Inertia::once(fn () => 'bar')->fresh()], 'app', '123');
+        /** @var JsonResponse $response */
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+
+        $this->assertSame('User/Edit', $page->component);
+        $this->assertSame('bar', $page->props->foo);
+        $this->assertSame('/user/123', $page->url);
+        $this->assertSame('123', $page->version);
+        $this->assertFalse(isset($page->onceProps));
+    }
+
+    public function test_fresh_props_are_not_excluded_while_once_props_are_excluded(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Except-Once-Props' => 'foo,baz']);
+
+        $response = new Response('User/Edit', [
+            'foo' => Inertia::once(fn () => 'bar')->fresh(),
+            'baz' => Inertia::once(fn () => 'qux'),
+        ], 'app', '123');
+        /** @var JsonResponse $response */
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+
+        $this->assertSame('User/Edit', $page->component);
+        // fresh() prop is resolved even when in X-Inertia-Except-Once-Props header
+        $this->assertSame('bar', $page->props->foo);
+        // once() prop is excluded when in X-Inertia-Except-Once-Props header
+        $this->assertFalse(isset($page->props->baz));
+        $this->assertSame('/user/123', $page->url);
+        $this->assertSame('123', $page->version);
+        // fresh() prop is NOT in onceProps, but baz IS in onceProps (even though excluded from props)
+        $this->assertFalse(isset($page->onceProps->foo));
+        $this->assertEquals((object) [
+            'baz' => (object) ['prop' => 'baz', 'expiresAt' => null],
+        ], $page->onceProps);
+    }
+
     public function test_responsable_with_invalid_key(): void
     {
         $request = Request::create('/user/123', 'GET');

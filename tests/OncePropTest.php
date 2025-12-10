@@ -49,4 +49,26 @@ class OncePropTest extends TestCase
         $onceProp->as(TestUnitEnum::Baz);
         $this->assertSame('Baz', $onceProp->getKey());
     }
+
+    public function test_fresh_disables_once_resolution(): void
+    {
+        $onceProp = new OnceProp(fn () => 'value');
+
+        $this->assertTrue($onceProp->shouldResolveOnce());
+
+        $result = $onceProp->fresh();
+        $this->assertSame($onceProp, $result);
+        $this->assertFalse($onceProp->shouldResolveOnce());
+    }
+
+    public function test_fresh_with_false_enables_once_resolution(): void
+    {
+        $onceProp = new OnceProp(fn () => 'value');
+        $onceProp->fresh();
+
+        $this->assertFalse($onceProp->shouldResolveOnce());
+
+        $onceProp->fresh(false);
+        $this->assertTrue($onceProp->shouldResolveOnce());
+    }
 }
