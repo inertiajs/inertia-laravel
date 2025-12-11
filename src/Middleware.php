@@ -151,7 +151,7 @@ class Middleware
     protected function reflash(Request $request): void
     {
         if ($flashed = Inertia::getFlashed($request)) {
-            $request->session()->flash(SessionKey::Flash->value, $flashed);
+            $request->session()->flash(SessionKey::FlashData->value, $flashed);
         }
     }
 

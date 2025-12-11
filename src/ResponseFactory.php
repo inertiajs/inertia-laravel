@@ -335,7 +335,7 @@ class ResponseFactory
             $flash = [$key => $value];
         }
 
-        session()->now(SessionKey::Flash->value, [
+        session()->now(SessionKey::FlashData->value, [
             ...$this->getFlashed(),
             ...$flash,
         ]);
@@ -362,6 +362,6 @@ class ResponseFactory
     {
         $request ??= request();
 
-        return $request->hasSession() ? $request->session()->get(SessionKey::Flash->value, []) : [];
+        return $request->hasSession() ? $request->session()->get(SessionKey::FlashData->value, []) : [];
     }
 }

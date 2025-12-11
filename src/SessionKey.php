@@ -12,5 +12,5 @@ enum SessionKey: string
     /**
      * Session key for flash data.
      */
-    case Flash = 'inertia.flash';
+    case FlashData = 'inertia.flash_data';
 }

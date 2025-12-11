@@ -647,14 +647,14 @@ class ResponseFactoryTest extends TestCase
         ]);
 
         $response->assertRedirect();
-        $this->assertEquals(['message' => 'Success!'], session('inertia.flash'));
+        $this->assertEquals(['message' => 'Success!'], session('inertia.flash_data'));
     }
 
     public function test_render_with_flash_includes_flash_in_page(): void
     {
         Route::middleware([StartSession::class, ExampleMiddleware::class])->post('/flash-test', function () {
-            return Inertia::render('User/Edit', ['user' => 'Jonathan'])
-                ->flash('type', 'success')
+            return Inertia::flash('type', 'success')
+                ->render('User/Edit', ['user' => 'Jonathan'])
                 ->flash(['message' => 'User updated!']);
         });
 
@@ -675,7 +675,7 @@ class ResponseFactoryTest extends TestCase
         ]);
 
         // Flash data should not persist in session after being included in response
-        $this->assertNull(session('inertia.flash'));
+        $this->assertNull(session('inertia.flash_data'));
     }
 
     public function test_render_without_flash_does_not_include_flash_key(): void
