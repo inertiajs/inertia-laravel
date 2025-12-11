@@ -4,9 +4,9 @@ namespace Inertia;
 
 use Illuminate\Support\Facades\App;
 
-class MergeProp implements Mergeable
+class MergeProp implements Mergeable, Onceable
 {
-    use MergesProps;
+    use MergesProps, ResolvesOnce;
 
     /**
      * The property value.

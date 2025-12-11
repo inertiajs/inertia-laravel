@@ -243,6 +243,22 @@ class ResponseFactory
     }
 
     /**
+     * Create an once property.
+     */
+    public function once(callable $value): OnceProp
+    {
+        return new OnceProp($value);
+    }
+
+    /**
+     * Create and share an once property.
+     */
+    public function shareOnce(string $key, callable $callback): OnceProp
+    {
+        return tap(new OnceProp($callback), fn ($prop) => $this->share($key, $prop));
+    }
+
+    /**
      * Find the component or fail.
      *
      * @throws \Inertia\ComponentNotFoundException

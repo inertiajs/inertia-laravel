@@ -158,4 +158,16 @@ class MergePropTest extends TestCase
         $this->assertSame(['categories', 'companies', 'tags', 'comments'], $mergeProp->prependsAtPaths());
         $this->assertSame(['users.id', 'items.uid', 'companies.id', 'tags.name'], $mergeProp->matchesOn());
     }
+
+    public function test_is_onceable(): void
+    {
+        $mergeProp = (new MergeProp(fn () => []))
+            ->once()
+            ->as('custom-key')
+            ->until(60);
+
+        $this->assertTrue($mergeProp->shouldResolveOnce());
+        $this->assertSame('custom-key', $mergeProp->getKey());
+        $this->assertNotNull($mergeProp->expiresAt());
+    }
 }
