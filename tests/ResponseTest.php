@@ -1061,6 +1061,23 @@ class ResponseTest extends TestCase
         $this->assertFalse(isset($page->props->user));
     }
 
+    public function test_string_function_names_are_not_invoked_as_callables(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+
+        $response = new Response('User/Edit', [
+            'always' => new AlwaysProp('date'),
+            'merge' => new MergeProp('trim'),
+        ], 'app', '123');
+
+        /** @var JsonResponse $response */
+        $response = $response->toResponse($request);
+        $page = $response->getOriginalContent()->getData()['page'];
+
+        $this->assertSame('date', $page['props']['always']);
+        $this->assertSame('trim', $page['props']['merge']);
+    }
+
     public function test_inertia_responsable_objects(): void
     {
         $request = Request::create('/user/123', 'GET');

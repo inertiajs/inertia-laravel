@@ -20,6 +20,7 @@ use Inertia\Support\Header;
 class Response implements Responsable
 {
     use Macroable;
+    use ResolvesCallables;
 
     /**
      * The name of the root component.
@@ -421,7 +422,7 @@ class Response implements Responsable
             ])->first(fn ($class) => $value instanceof $class);
 
             if ($resolveViaApp) {
-                $value = App::call($value);
+                $value = $this->resolveCallable($value);
             }
 
             $currentKey = $parentKey ? $parentKey.'.'.$key : $key;
