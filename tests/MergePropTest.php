@@ -23,6 +23,13 @@ class MergePropTest extends TestCase
         $this->assertSame(['key' => 'value'], $mergeProp());
     }
 
+    public function test_string_function_names_are_not_invoked(): void
+    {
+        $mergeProp = new MergeProp('date');
+
+        $this->assertSame('date', $mergeProp());
+    }
+
     public function test_can_resolve_bindings_when_invoked(): void
     {
         $mergeProp = new MergeProp(function (Request $request) {

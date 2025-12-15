@@ -3,7 +3,6 @@
 namespace Inertia;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\App;
 use Inertia\Support\Header;
 
 /**
@@ -16,7 +15,7 @@ use Inertia\Support\Header;
  */
 class ScrollProp implements Mergeable
 {
-    use MergesProps;
+    use MergesProps, ResolvesCallables;
 
     /**
      * The property value.
@@ -125,6 +124,6 @@ class ScrollProp implements Mergeable
             return $this->resolved;
         }
 
-        return $this->resolved = is_callable($this->value) ? App::call($this->value) : $this->value;
+        return $this->resolved = $this->resolveCallable($this->value);
     }
 }
