@@ -1,8 +1,16 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v1.3.3...1.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v1.3.4...1.x)
 
 - Nothing yet!
+
+## [v1.3.4](https://github.com/inertiajs/inertia-laravel/compare/v1.3.3...v1.3.4) - 2025-12-15
+
+### What's Changed
+
+* Check if prop value is callable and not a string by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/798
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v1.3.3...v1.3.4
 
 ## [v1.3.3](https://github.com/inertiajs/inertia-laravel/compare/v1.3.2...v1.3.3) - 2025-06-06
 
