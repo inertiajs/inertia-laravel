@@ -3,32 +3,37 @@
 namespace Inertia;
 
 use Closure;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
-use Inertia\Support\Header;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\App;
 use GuzzleHttp\Promise\PromiseInterface;
-use Illuminate\Support\Traits\Macroable;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Responsable;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceResponse;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Response as ResponseFactory;
+use Illuminate\Support\Str;
+use Illuminate\Support\Traits\Macroable;
+use Inertia\Support\Header;
 
 class Response implements Responsable
 {
     use Macroable;
+    use ResolvesCallables;
 
     protected $component;
+
     protected $props;
+
     protected $rootView;
+
     protected $version;
+
     protected $viewData = [];
 
     /**
-     * @param array|Arrayable $props
+     * @param  array|Arrayable  $props
      */
     public function __construct(string $component, array $props, string $rootView = 'app', string $version = '')
     {
@@ -39,8 +44,7 @@ class Response implements Responsable
     }
 
     /**
-     * @param string|array $key
-     *
+     * @param  string|array  $key
      * @return $this
      */
     public function with($key, $value = null): self
@@ -55,8 +59,7 @@ class Response implements Responsable
     }
 
     /**
-     * @param string|array $key
-     *
+     * @param  string|array  $key
      * @return $this
      */
     public function withViewData($key, $value = null): self
@@ -80,8 +83,7 @@ class Response implements Responsable
     /**
      * Create an HTTP response that represents the object.
      *
-     * @param Request $request
-     *
+     * @param  Request  $request
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function toResponse($request)
@@ -155,11 +157,11 @@ class Response implements Responsable
             }
 
             if ($value instanceof LazyProp) {
-                $value = App::call($value);
+                $value = $this->resolveCallable($value);
             }
 
             if ($value instanceof AlwaysProp) {
-                $value = App::call($value);
+                $value = $this->resolveCallable($value);
             }
 
             if ($value instanceof PromiseInterface) {

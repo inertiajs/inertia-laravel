@@ -16,6 +16,13 @@ class LazyPropTest extends TestCase
         $this->assertSame('A lazy value', $lazyProp());
     }
 
+    public function test_string_function_names_are_not_invoked(): void
+    {
+        $lazyProp = new LazyProp('date');
+
+        $this->assertSame('date', $lazyProp());
+    }
+
     public function test_can_resolve_bindings_when_invoked(): void
     {
         $lazyProp = new LazyProp(function (Request $request) {

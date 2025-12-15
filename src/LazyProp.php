@@ -2,10 +2,10 @@
 
 namespace Inertia;
 
-use Illuminate\Support\Facades\App;
-
 class LazyProp
 {
+    use ResolvesCallables;
+
     protected $callback;
 
     public function __construct(callable $callback)
@@ -15,6 +15,6 @@ class LazyProp
 
     public function __invoke()
     {
-        return App::call($this->callback);
+        return $this->resolveCallable($this->callback);
     }
 }

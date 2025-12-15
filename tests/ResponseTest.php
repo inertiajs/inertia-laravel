@@ -2,20 +2,20 @@
 
 namespace Inertia\Tests;
 
-use Mockery;
-use Inertia\LazyProp;
-use Inertia\Response;
-use Inertia\AlwaysProp;
-use Illuminate\View\View;
-use Illuminate\Http\Request;
-use Illuminate\Support\Fluent;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Collection;
-use Inertia\Tests\Stubs\FakeResource;
-use Illuminate\Http\Response as BaseResponse;
-use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
+use Illuminate\Http\Response as BaseResponse;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Fluent;
+use Illuminate\View\View;
+use Inertia\AlwaysProp;
+use Inertia\LazyProp;
+use Inertia\Response;
+use Inertia\Tests\Stubs\FakeResource;
+use Mockery;
 
 class ResponseTest extends TestCase
 {
@@ -345,6 +345,21 @@ class ResponseTest extends TestCase
         $this->assertSame('The email field is required.', $page->props->errors->name);
         $this->assertSame('Taylor Otwell', $page->props->data->name);
         $this->assertFalse(isset($page->props->user));
+    }
+
+    public function test_string_function_names_are_not_invoked_as_callables(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+
+        $response = new Response('User/Edit', [
+            'always' => new AlwaysProp('date'),
+        ], 'app', '123');
+
+        /** @var JsonResponse $response */
+        $response = $response->toResponse($request);
+        $page = $response->getOriginalContent()->getData()['page'];
+
+        $this->assertSame('date', $page['props']['always']);
     }
 
     public function test_top_level_dot_props_get_unpacked(): void
