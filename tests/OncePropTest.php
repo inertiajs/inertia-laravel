@@ -26,6 +26,13 @@ class OncePropTest extends TestCase
         $this->assertSame('A once prop value', $onceProp());
     }
 
+    public function test_string_function_names_are_not_invoked(): void
+    {
+        $onceProp = new OnceProp('date');
+
+        $this->assertSame('date', $onceProp());
+    }
+
     public function test_can_resolve_bindings_when_invoked(): void
     {
         $onceProp = new OnceProp(function (Request $request) {

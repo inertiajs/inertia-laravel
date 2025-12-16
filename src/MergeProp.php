@@ -2,11 +2,9 @@
 
 namespace Inertia;
 
-use Illuminate\Support\Facades\App;
-
 class MergeProp implements Mergeable, Onceable
 {
-    use MergesProps, ResolvesOnce;
+    use MergesProps, ResolvesCallables, ResolvesOnce;
 
     /**
      * The property value.
@@ -37,6 +35,6 @@ class MergeProp implements Mergeable, Onceable
      */
     public function __invoke()
     {
-        return is_callable($this->value) ? App::call($this->value) : $this->value;
+        return $this->resolveCallable($this->value);
     }
 }

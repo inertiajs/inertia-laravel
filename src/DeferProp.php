@@ -2,11 +2,9 @@
 
 namespace Inertia;
 
-use Illuminate\Support\Facades\App;
-
 class DeferProp implements IgnoreFirstLoad, Mergeable, Onceable
 {
-    use MergesProps, ResolvesOnce;
+    use MergesProps, ResolvesCallables, ResolvesOnce;
 
     /**
      * The callback to resolve the property.
@@ -54,6 +52,6 @@ class DeferProp implements IgnoreFirstLoad, Mergeable, Onceable
      */
     public function __invoke()
     {
-        return App::call($this->callback);
+        return $this->resolveCallable($this->callback);
     }
 }

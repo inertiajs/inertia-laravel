@@ -2,13 +2,13 @@
 
 namespace Inertia;
 
-use Illuminate\Support\Facades\App;
-
 /**
  * @deprecated Use OptionalProp instead for clearer semantics.
  */
 class LazyProp implements IgnoreFirstLoad
 {
+    use ResolvesCallables;
+
     /**
      * The callback to resolve the property.
      *
@@ -31,6 +31,6 @@ class LazyProp implements IgnoreFirstLoad
      */
     public function __invoke()
     {
-        return App::call($this->callback);
+        return $this->resolveCallable($this->callback);
     }
 }

@@ -2,11 +2,9 @@
 
 namespace Inertia;
 
-use Illuminate\Support\Facades\App;
-
 class OnceProp implements Onceable
 {
-    use ResolvesOnce;
+    use ResolvesCallables, ResolvesOnce;
 
     /**
      * The callback to resolve the property.
@@ -31,6 +29,6 @@ class OnceProp implements Onceable
      */
     public function __invoke()
     {
-        return App::call($this->callback);
+        return $this->resolveCallable($this->callback);
     }
 }
