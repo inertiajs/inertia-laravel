@@ -138,7 +138,21 @@ class Middleware
             $response->setStatusCode(303);
         }
 
+        if ($response->isRedirect()) {
+            $this->reflash($request);
+        }
+
         return $response;
+    }
+
+    /**
+     * Reflash the session data for the next request.
+     */
+    protected function reflash(Request $request): void
+    {
+        if ($flashed = Inertia::getFlashed($request)) {
+            $request->session()->flash(SessionKey::FlashData->value, $flashed);
+        }
     }
 
     /**

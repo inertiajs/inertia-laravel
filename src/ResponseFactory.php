@@ -2,8 +2,10 @@
 
 namespace Inertia;
 
+use BackedEnum;
 use Closure;
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Redirect;
@@ -12,8 +14,10 @@ use Illuminate\Support\Facades\Response as BaseResponse;
 use Illuminate\Support\Traits\Macroable;
 use Inertia\Support\Header;
 use InvalidArgumentException;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirect;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
+use UnitEnum;
 
 class ResponseFactory
 {
@@ -154,7 +158,7 @@ class ResponseFactory
      */
     public function clearHistory(): void
     {
-        session(['inertia.clear_history' => true]);
+        session([SessionKey::ClearHistory->value => true]);
     }
 
     /**
@@ -308,5 +312,56 @@ class ResponseFactory
         }
 
         return $url instanceof SymfonyRedirect ? $url : Redirect::away($url);
+    }
+
+    /**
+     * Flash data to be included with the next response. Unlike regular props,
+     * flash data is not persisted in the browser's history state, making it
+     * ideal for one-time notifications like toasts or highlights.
+     *
+     * @param  \BackedEnum|\UnitEnum|string|array<string, mixed>  $key
+     */
+    public function flash(BackedEnum|UnitEnum|string|array $key, mixed $value = null): self
+    {
+        $flash = $key;
+
+        if (! is_array($key)) {
+            $key = match (true) {
+                $key instanceof BackedEnum => $key->value,
+                $key instanceof UnitEnum => $key->name,
+                default => $key,
+            };
+
+            $flash = [$key => $value];
+        }
+
+        session()->now(SessionKey::FlashData->value, [
+            ...$this->getFlashed(),
+            ...$flash,
+        ]);
+
+        return $this;
+    }
+
+    /**
+     * Create a new redirect response to the previous location.
+     *
+     * @param  array<string, string>  $headers
+     */
+    public function back(int $status = 302, array $headers = [], mixed $fallback = false): RedirectResponse
+    {
+        return Redirect::back($status, $headers, $fallback);
+    }
+
+    /**
+     * Retrieve the flashed data from the session.
+     *
+     * @return array<string, mixed>
+     */
+    public function getFlashed(?HttpRequest $request = null): array
+    {
+        $request ??= request();
+
+        return $request->hasSession() ? $request->session()->get(SessionKey::FlashData->value, []) : [];
     }
 }
