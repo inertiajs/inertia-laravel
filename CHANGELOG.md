@@ -1,8 +1,17 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.15...2.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.16...2.x)
 
 - Nothing!
+
+## [v2.0.16](https://github.com/inertiajs/inertia-laravel/compare/v2.0.15...v2.0.16) - 2025-12-17
+
+### What's Changed
+
+* Add test for deferred metadata on subsequent request by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/799
+* Support for Flash Data by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/797
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.15...v2.0.16
 
 ## [v2.0.15](https://github.com/inertiajs/inertia-laravel/compare/v2.0.14...v2.0.15) - 2025-12-15
 
