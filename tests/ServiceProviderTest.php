@@ -56,7 +56,6 @@ class ServiceProviderTest extends TestCase
 
         $route = Route::middleware(['web', ExampleMiddleware::class, 'throttle:api'])
             ->delete('/foo', fn () => 'ok')
-
             ->name('delete-foo');
 
         // Resolve Kernel to register middleware groups...
