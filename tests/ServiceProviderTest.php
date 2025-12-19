@@ -47,18 +47,12 @@ class ServiceProviderTest extends TestCase
         $this->assertEquals(['component' => 'User/Edit', 'props' => ['user' => ['name' => 'Jonathan']]], $inertiaRoute->defaults);
     }
 
-    public function test_redirect_responses_from_exceptions_are_converted_to_303(): void
+    public function test_inertia_middleware_is_prioritized_after_start_session(): void
     {
-        RateLimiter::for('api', fn () => Limit::perMinute(1)->response(fn () => back()));
-
-        // Set application key for cookie encryption and CSRF middleware.
-        config(['app.key' => 'base64:'.base64_encode(random_bytes(32))]);
-
         $route = Route::middleware(['web', ExampleMiddleware::class, 'throttle:api'])
-            ->delete('/foo', fn () => 'ok')
-            ->name('delete-foo');
+            ->delete('/foo', fn () => 'ok');
 
-        // Resolve Kernel to register middleware groups...
+        // Resolve Kernel to register middleware groups
         app(Kernel::class);
 
         $middleware = app(Router::class)->resolveMiddleware($route->gatherMiddleware());
@@ -80,22 +74,27 @@ class ServiceProviderTest extends TestCase
             $inertiaIndex < $throttleIndex,
             'Inertia middleware must run before ThrottleRequests middleware.'
         );
+    }
 
-        $firstResponse = $this
+    public function test_redirect_response_from_rate_limiter_is_converted_to_303(): void
+    {
+        RateLimiter::for('api', fn () => Limit::perMinute(1)->response(fn () => back()));
+
+        // Needed for the web middleware
+        config(['app.key' => 'base64:'.base64_encode(random_bytes(32))]);
+
+        Route::middleware(['web', ExampleMiddleware::class, 'throttle:api'])
+            ->delete('/foo', fn () => 'ok');
+
+        $this
             ->from('/bar')
-            ->delete('/foo', [], [
-                'X-Inertia' => 'true',
-            ]);
+            ->delete('/foo', [], ['X-Inertia' => 'true'])
+            ->assertOk();
 
-        $firstResponse->assertOk();
-
-        $secondResponse = $this
+        $this
             ->from('/bar')
-            ->delete('/foo', [], [
-                'X-Inertia' => 'true',
-            ]);
-
-        $secondResponse->assertRedirect('/bar');
-        $secondResponse->assertStatus(303);
+            ->delete('/foo', [], ['X-Inertia' => 'true'])
+            ->assertRedirect('/bar')
+            ->assertStatus(303);
     }
 }
