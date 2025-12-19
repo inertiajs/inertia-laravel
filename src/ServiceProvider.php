@@ -2,8 +2,10 @@
 
 namespace Inertia;
 
+use Illuminate\Foundation\Http\Kernel;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
+use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use Illuminate\Testing\TestResponse;
 use Illuminate\View\FileViewFinder;
@@ -57,10 +59,22 @@ class ServiceProvider extends BaseServiceProvider
     public function boot(): void
     {
         $this->registerConsoleCommands();
+        $this->configureMiddlewarePriority();
 
         $this->publishes([
             __DIR__.'/../config/inertia.php' => config_path('inertia.php'),
         ]);
+    }
+
+    /**
+     * Configure middleware priority to ensure Inertia can intercept
+     * redirect responses from other middleware (like throttle).
+     */
+    protected function configureMiddlewarePriority(): void
+    {
+        $this->app->afterResolving(Kernel::class, function (Kernel $kernel) {
+            $kernel->addToMiddlewarePriorityAfter(StartSession::class, Middleware::class);
+        });
     }
 
     /**
