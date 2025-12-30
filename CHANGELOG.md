@@ -1,8 +1,20 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.16...2.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.17...2.x)
 
 - Nothing!
+
+## [v2.0.17](https://github.com/inertiajs/inertia-laravel/compare/v2.0.16...v2.0.17) - 2025-12-30
+
+### What's Changed
+
+* Fix flash data loss on non-Inertia redirects by [@TomKita](https://github.com/TomKita) in https://github.com/inertiajs/inertia-laravel/pull/802
+
+### New Contributors
+
+* [@TomKita](https://github.com/TomKita) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/802
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.16...v2.0.17
 
 ## [v2.0.16](https://github.com/inertiajs/inertia-laravel/compare/v2.0.15...v2.0.16) - 2025-12-17
 
