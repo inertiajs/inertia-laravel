@@ -407,6 +407,27 @@ class MiddlewareTest extends TestCase
         ]);
     }
 
+    public function test_flash_data_is_preserved_on_non_inertia_redirect(): void
+    {
+        Route::middleware([StartSession::class, Middleware::class])->get('/action', function () {
+            Inertia::flash('message', 'Success!');
+
+            return redirect('/dashboard');
+        });
+
+        Route::middleware([StartSession::class, Middleware::class])->get('/dashboard', function () {
+            return Inertia::render('Dashboard');
+        });
+
+        $response = $this->get('/action');
+        $response->assertRedirect('/dashboard');
+
+        $response = $this->get('/dashboard', ['X-Inertia' => 'true']);
+        $response->assertJson([
+            'flash' => ['message' => 'Success!'],
+        ]);
+    }
+
     /**
      * @param  array<string, mixed>  $shared
      */
