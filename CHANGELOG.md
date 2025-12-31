@@ -1,8 +1,16 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.17...2.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.18...2.x)
 
 - Nothing!
+
+## [v2.0.18](https://github.com/inertiajs/inertia-laravel/compare/v2.0.17...v2.0.18) - 2025-12-31
+
+### What's Changed
+
+* Add test helpers for Flash Data by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/804
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.17...v2.0.18
 
 ## [v2.0.17](https://github.com/inertiajs/inertia-laravel/compare/v2.0.16...v2.0.17) - 2025-12-30
 
