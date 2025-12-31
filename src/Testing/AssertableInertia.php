@@ -231,7 +231,7 @@ class AssertableInertia extends AssertableJson
     /**
      * Assert that the Flash Data contains the given key, optionally with the expected value.
      */
-    public function flash(string $key, mixed $expected = null): self
+    public function hasFlash(string $key, mixed $expected = null): self
     {
         PHPUnit::assertTrue(
             Arr::has($this->flash, $key),

@@ -400,9 +400,9 @@ class AssertableInertiaTest extends TestCase
         );
 
         $response->assertInertia(function (AssertableInertia $inertia) {
-            $inertia->flash('message');
-            $inertia->flash('message', 'Hello World');
-            $inertia->flash('notification.type', 'success');
+            $inertia->hasFlash('message');
+            $inertia->hasFlash('message', 'Hello World');
+            $inertia->hasFlash('notification.type', 'success');
             $inertia->missingFlash('other');
             $inertia->missingFlash('notification.other');
         });
@@ -415,7 +415,7 @@ class AssertableInertiaTest extends TestCase
         $this->expectException(AssertionFailedError::class);
         $this->expectExceptionMessage('Inertia Flash Data is missing key [message].');
 
-        $response->assertInertia(fn (AssertableInertia $inertia) => $inertia->flash('message'));
+        $response->assertInertia(fn (AssertableInertia $inertia) => $inertia->hasFlash('message'));
     }
 
     public function test_the_flash_assertion_fails_when_value_does_not_match(): void
@@ -428,7 +428,7 @@ class AssertableInertiaTest extends TestCase
         $this->expectException(AssertionFailedError::class);
         $this->expectExceptionMessage('Inertia Flash Data [message] does not match expected value.');
 
-        $response->assertInertia(fn (AssertableInertia $inertia) => $inertia->flash('message', 'Different'));
+        $response->assertInertia(fn (AssertableInertia $inertia) => $inertia->hasFlash('message', 'Different'));
     }
 
     public function test_the_missing_flash_assertion_fails_when_key_exists(): void
@@ -459,6 +459,6 @@ class AssertableInertiaTest extends TestCase
         });
 
         $this->get('/action')->assertRedirect('/dashboard');
-        $this->get('/dashboard')->assertInertia(fn (AssertableInertia $inertia) => $inertia->flash('message', 'Success!'));
+        $this->get('/dashboard')->assertInertia(fn (AssertableInertia $inertia) => $inertia->hasFlash('message', 'Success!'));
     }
 }
