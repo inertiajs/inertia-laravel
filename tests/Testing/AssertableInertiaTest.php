@@ -2,6 +2,7 @@
 
 namespace Inertia\Tests\Testing;
 
+use Illuminate\Session\Middleware\StartSession;
 use Inertia\Inertia;
 use Inertia\Testing\AssertableInertia;
 use Inertia\Tests\TestCase;
@@ -384,5 +385,60 @@ class AssertableInertiaTest extends TestCase
         });
 
         $this->assertSame(4, $called);
+    }
+
+    public function test_the_flash_data_can_be_asserted(): void
+    {
+        $response = $this->makeMockRequest(
+            fn () => Inertia::render('foo')->flash([
+                'message' => 'Hello World',
+                'notification' => ['type' => 'success'],
+            ]),
+            [StartSession::class]
+        );
+
+        $response->assertInertia(function (AssertableInertia $inertia) {
+            $inertia->flash('message');
+            $inertia->flash('message', 'Hello World');
+            $inertia->flash('notification.type', 'success');
+            $inertia->missingFlash('other');
+            $inertia->missingFlash('notification.other');
+        });
+    }
+
+    public function test_the_flash_assertion_fails_when_key_is_missing(): void
+    {
+        $response = $this->makeMockRequest(Inertia::render('foo'));
+
+        $this->expectException(AssertionFailedError::class);
+        $this->expectExceptionMessage('Inertia Flash Data is missing key [message].');
+
+        $response->assertInertia(fn (AssertableInertia $inertia) => $inertia->flash('message'));
+    }
+
+    public function test_the_flash_assertion_fails_when_value_does_not_match(): void
+    {
+        $response = $this->makeMockRequest(
+            fn () => Inertia::render('foo')->flash('message', 'Hello World'),
+            [StartSession::class]
+        );
+
+        $this->expectException(AssertionFailedError::class);
+        $this->expectExceptionMessage('Inertia Flash Data [message] does not match expected value.');
+
+        $response->assertInertia(fn (AssertableInertia $inertia) => $inertia->flash('message', 'Different'));
+    }
+
+    public function test_the_missing_flash_assertion_fails_when_key_exists(): void
+    {
+        $response = $this->makeMockRequest(
+            fn () => Inertia::render('foo')->flash('message', 'Hello World'),
+            [StartSession::class]
+        );
+
+        $this->expectException(AssertionFailedError::class);
+        $this->expectExceptionMessage('Inertia Flash Data has unexpected key [message].');
+
+        $response->assertInertia(fn (AssertableInertia $inertia) => $inertia->missingFlash('message'));
     }
 }
