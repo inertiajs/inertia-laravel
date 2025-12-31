@@ -3,7 +3,9 @@
 namespace Inertia\Tests\Testing;
 
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Inertia\Middleware;
 use Inertia\Testing\AssertableInertia;
 use Inertia\Tests\TestCase;
 use PHPUnit\Framework\AssertionFailedError;
@@ -394,7 +396,7 @@ class AssertableInertiaTest extends TestCase
                 'message' => 'Hello World',
                 'notification' => ['type' => 'success'],
             ]),
-            [StartSession::class]
+            StartSession::class
         );
 
         $response->assertInertia(function (AssertableInertia $inertia) {
@@ -420,7 +422,7 @@ class AssertableInertiaTest extends TestCase
     {
         $response = $this->makeMockRequest(
             fn () => Inertia::render('foo')->flash('message', 'Hello World'),
-            [StartSession::class]
+            StartSession::class
         );
 
         $this->expectException(AssertionFailedError::class);
@@ -433,12 +435,30 @@ class AssertableInertiaTest extends TestCase
     {
         $response = $this->makeMockRequest(
             fn () => Inertia::render('foo')->flash('message', 'Hello World'),
-            [StartSession::class]
+            StartSession::class
         );
 
         $this->expectException(AssertionFailedError::class);
         $this->expectExceptionMessage('Inertia Flash Data has unexpected key [message].');
 
         $response->assertInertia(fn (AssertableInertia $inertia) => $inertia->missingFlash('message'));
+    }
+
+    public function test_the_flash_data_is_available_after_redirect(): void
+    {
+        $middleware = [StartSession::class, Middleware::class];
+
+        Route::middleware($middleware)->get('/action', function () {
+            Inertia::flash('message', 'Success!');
+
+            return redirect('/dashboard');
+        });
+
+        Route::middleware($middleware)->get('/dashboard', function () {
+            return Inertia::render('Dashboard');
+        });
+
+        $this->get('/action')->assertRedirect('/dashboard');
+        $this->get('/dashboard')->assertInertia(fn (AssertableInertia $inertia) => $inertia->flash('message', 'Success!'));
     }
 }
