@@ -13,9 +13,12 @@ class BundleDetector
     {
         return collect([
             config('inertia.ssr.bundle'),
-            base_path('bootstrap/ssr/ssr.mjs'),
             base_path('bootstrap/ssr/ssr.js'),
+            base_path('bootstrap/ssr/app.js'),
+            base_path('bootstrap/ssr/ssr.mjs'),
+            base_path('bootstrap/ssr/app.mjs'),
             public_path('js/ssr.js'),
+            public_path('js/app.js'),
         ])->filter()->first(function ($path) {
             return file_exists($path);
         });

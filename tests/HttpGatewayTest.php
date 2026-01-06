@@ -20,9 +20,29 @@ class HttpGatewayTest extends TestCase
         parent::setUp();
 
         $this->gateway = new HttpGateway;
-        $this->renderUrl = $this->gateway->getUrl('render');
+        $this->renderUrl = $this->gateway->getProductionUrl('/render');
 
         Http::preventStrayRequests();
+    }
+
+    protected function tearDown(): void
+    {
+        $this->removeHotFile();
+
+        parent::tearDown();
+    }
+
+    protected function createHotFile(string $url = 'http://localhost:5173'): void
+    {
+        file_put_contents(public_path('hot'), $url);
+    }
+
+    protected function removeHotFile(): void
+    {
+        $hotFile = public_path('hot');
+        if (file_exists($hotFile)) {
+            unlink($hotFile);
+        }
     }
 
     public function test_it_returns_null_when_ssr_is_disabled(): void
@@ -134,7 +154,7 @@ class HttpGatewayTest extends TestCase
     public function test_health_check_the_ssr_server(): void
     {
         Http::fake([
-            $this->gateway->getUrl('health') => Http::sequence()
+            $this->gateway->getProductionUrl('/health') => Http::sequence()
                 ->push(status: 200)
                 ->push(status: 500)
                 ->pushResponse(self::rejectionForFailedConnection()),
@@ -143,5 +163,25 @@ class HttpGatewayTest extends TestCase
         $this->assertTrue($this->gateway->isHealthy());
         $this->assertFalse($this->gateway->isHealthy());
         $this->assertFalse($this->gateway->isHealthy());
+    }
+
+    public function test_it_uses_vite_hot_url_when_running_hot(): void
+    {
+        config(['inertia.ssr.enabled' => true]);
+
+        $this->createHotFile('http://localhost:5173');
+
+        Http::fake([
+            'http://localhost:5173/__inertia_ssr' => Http::response(json_encode([
+                'head' => ['<title>Hot SSR</title>'],
+                'body' => '<div id="app">Hot Response</div>',
+            ])),
+        ]);
+
+        $response = $this->gateway->dispatch(['page' => self::EXAMPLE_PAGE_OBJECT]);
+
+        $this->assertNotNull($response);
+        $this->assertEquals('<title>Hot SSR</title>', $response->head);
+        $this->assertEquals('<div id="app">Hot Response</div>', $response->body);
     }
 }
