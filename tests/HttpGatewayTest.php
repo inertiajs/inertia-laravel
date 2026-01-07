@@ -184,4 +184,31 @@ class HttpGatewayTest extends TestCase
         $this->assertEquals('<title>Hot SSR</title>', $response->head);
         $this->assertEquals('<div id="app">Hot Response</div>', $response->body);
     }
+
+    public function test_it_uses_vite_hot_url_even_when_bundle_file_exists(): void
+    {
+        config([
+            'inertia.ssr.enabled' => true,
+            'inertia.ssr.bundle' => __DIR__.'/Stubs/ssr-bundle.js',
+        ]);
+
+        $this->createHotFile('http://localhost:5173');
+
+        Http::fake([
+            'http://localhost:5173/__inertia_ssr' => Http::response(json_encode([
+                'head' => ['<title>Hot SSR</title>'],
+                'body' => '<div id="app">Hot Response</div>',
+            ])),
+            $this->renderUrl => Http::response(json_encode([
+                'head' => ['<title>Production SSR</title>'],
+                'body' => '<div id="app">Production Response</div>',
+            ])),
+        ]);
+
+        $response = $this->gateway->dispatch(['page' => self::EXAMPLE_PAGE_OBJECT]);
+
+        $this->assertNotNull($response);
+        $this->assertEquals('<title>Hot SSR</title>', $response->head);
+        $this->assertEquals('<div id="app">Hot Response</div>', $response->body);
+    }
 }
