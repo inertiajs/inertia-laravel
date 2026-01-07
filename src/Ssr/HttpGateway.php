@@ -23,8 +23,7 @@ class HttpGateway implements Gateway, HasHealthCheck
 
         $isHot = Vite::isRunningHot();
 
-        // Production SSR requires bundle to exist
-        if (! $isHot && ! $this->shouldDispatch()) {
+        if (! $isHot && $this->shouldEnsureBundleExists() && ! $this->bundleExists()) {
             return null;
         }
 
@@ -53,14 +52,6 @@ class HttpGateway implements Gateway, HasHealthCheck
     }
 
     /**
-     * Determine if the page should be dispatched to the SSR engine.
-     */
-    protected function shouldDispatch(): bool
-    {
-        return $this->shouldDispatchWithoutBundle() || $this->bundleExists();
-    }
-
-    /**
      * Determine if the SSR feature is enabled.
      */
     protected function ssrIsEnabled(): bool
@@ -85,11 +76,11 @@ class HttpGateway implements Gateway, HasHealthCheck
     }
 
     /**
-     * Determine if dispatch should proceed without bundle detection.
+     * Determine if the bundle existence should be ensured.
      */
-    protected function shouldDispatchWithoutBundle(): bool
+    protected function shouldEnsureBundleExists(): bool
     {
-        return ! config('inertia.ssr.ensure_bundle_exists', true);
+        return config('inertia.ssr.ensure_bundle_exists', true);
     }
 
     /**
