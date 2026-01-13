@@ -13,9 +13,9 @@ use Inertia\Support\Header;
  *
  * @template T
  */
-class ScrollProp implements Mergeable
+class ScrollProp implements Deferrable, Mergeable
 {
-    use MergesProps, ResolvesCallables;
+    use DefersProps, MergesProps, ResolvesCallables;
 
     /**
      * The property value.

@@ -2,9 +2,9 @@
 
 namespace Inertia;
 
-class DeferProp implements IgnoreFirstLoad, Mergeable, Onceable
+class DeferProp implements Deferrable, IgnoreFirstLoad, Mergeable, Onceable
 {
-    use MergesProps, ResolvesCallables, ResolvesOnce;
+    use DefersProps, MergesProps, ResolvesCallables, ResolvesOnce;
 
     /**
      * The callback to resolve the property.
@@ -30,6 +30,7 @@ class DeferProp implements IgnoreFirstLoad, Mergeable, Onceable
     public function __construct(callable $callback, ?string $group = null)
     {
         $this->callback = $callback;
+        $this->deferred = true;
         $this->group = $group;
     }
 
@@ -38,11 +39,11 @@ class DeferProp implements IgnoreFirstLoad, Mergeable, Onceable
      * are loaded together in a single request, allowing for efficient
      * batching of related deferred data.
      *
-     * @return string|null
+     * @return string
      */
     public function group()
     {
-        return $this->group;
+        return $this->group ?? 'default';
     }
 
     /**
