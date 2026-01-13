@@ -12,7 +12,7 @@ interface Deferrable
     /**
      * Get the defer group for this property.
      *
-     * @return string|null
+     * @return string
      */
     public function group();
 }

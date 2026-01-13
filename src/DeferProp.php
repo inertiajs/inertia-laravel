@@ -35,9 +35,11 @@ class DeferProp implements Deferrable, IgnoreFirstLoad, Mergeable, Onceable
     }
 
     /**
-     * Get the defer group for this property.
+     * Get the defer group for this property. Properties with the same group
+     * are loaded together in a single request, allowing for efficient
+     * batching of related deferred data.
      *
-     * @return string|null
+     * @return string
      */
     public function group()
     {
