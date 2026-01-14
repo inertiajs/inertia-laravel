@@ -13,6 +13,7 @@ use Illuminate\Support\ViewErrorBag;
 use Inertia\AlwaysProp;
 use Inertia\Inertia;
 use Inertia\Middleware;
+use Inertia\SessionKey;
 use Inertia\Tests\Stubs\CustomUrlResolverMiddleware;
 use Inertia\Tests\Stubs\ExampleMiddleware;
 use Inertia\Tests\Stubs\WithAllErrorsMiddleware;
@@ -442,5 +443,25 @@ class MiddlewareTest extends TestCase
                 return Inertia::render('User/Edit', ['user' => ['name' => 'Jonathan']])->toResponse($request);
             });
         });
+    }
+
+    public function test_flash_data_is_preserved_on_inertia_location_responses(): void
+    {
+        Route::middleware([StartSession::class, Middleware::class])
+            ->get('/external-redirect', function () {
+                Inertia::flash('status', 'Redirecting to external site...');
+
+                return Inertia::location('https://google.com');
+            });
+
+        $response = $this->get('/external-redirect', ['X-Inertia' => 'true']);
+
+        $response->assertStatus(409);
+        $response->assertHeader('X-Inertia-Location', 'https://google.com');
+
+        $this->assertEquals(
+            ['status' => 'Redirecting to external site...'],
+            session(SessionKey::FlashData->value)
+        );
     }
 }

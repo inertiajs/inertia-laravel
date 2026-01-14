@@ -122,7 +122,7 @@ class Middleware
         $response = $next($request);
         $response->headers->set('Vary', Header::INERTIA);
 
-        if ($response->isRedirect()) {
+        if ($response->isRedirect() || $response->getStatusCode() === 409) {
             $this->reflash($request);
         }
 
