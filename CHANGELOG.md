@@ -1,8 +1,16 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.18...2.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.19...2.x)
 
 - Nothing!
+
+## [v2.0.19](https://github.com/inertiajs/inertia-laravel/compare/v2.0.18...v2.0.19) - 2026-01-13
+
+### What's Changed
+
+* [2.x] Allow `ScrollProp` to be deferred by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/806
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.18...v2.0.19
 
 ## [v2.0.18](https://github.com/inertiajs/inertia-laravel/compare/v2.0.17...v2.0.18) - 2025-12-31
 
