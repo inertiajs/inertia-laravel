@@ -3,7 +3,6 @@
 namespace Inertia;
 
 use BackedEnum;
-use Carbon\CarbonInterval;
 use Closure;
 use GuzzleHttp\Promise\PromiseInterface;
 use Illuminate\Contracts\Support\Arrayable;
@@ -72,13 +71,6 @@ class Response implements Responsable
      * @var array<string, mixed>
      */
     protected $viewData = [];
-
-    /**
-     * The cache duration settings.
-     *
-     * @var array<int, mixed>
-     */
-    protected $cacheFor = [];
 
     /**
      * The URL resolver callback.
@@ -158,19 +150,6 @@ class Response implements Responsable
     }
 
     /**
-     * Set the cache duration for the response.
-     *
-     * @param  string|array<int, mixed>  $cacheFor
-     * @return $this
-     */
-    public function cache(string|array $cacheFor): self
-    {
-        $this->cacheFor = is_array($cacheFor) ? $cacheFor : [$cacheFor];
-
-        return $this;
-    }
-
-    /**
      * Add flash data to the response.
      *
      * @param  \BackedEnum|\UnitEnum|string|array<string, mixed>  $key
@@ -204,7 +183,6 @@ class Response implements Responsable
             ],
             $this->resolveMergeProps($request),
             $this->resolveDeferredProps($request),
-            $this->resolveCacheDirections($request),
             $this->resolveScrollProps($request),
             $this->resolveOnceProps($request),
             $this->resolveFlashData($request),
@@ -471,28 +449,6 @@ class Response implements Responsable
         }
 
         return $props;
-    }
-
-    /**
-     * Resolve the cache directions for the response.
-     *
-     * @return array<string, mixed>
-     */
-    public function resolveCacheDirections(Request $request): array
-    {
-        if (count($this->cacheFor) === 0) {
-            return [];
-        }
-
-        return [
-            'cache' => collect($this->cacheFor)->map(function ($value) {
-                if ($value instanceof CarbonInterval) {
-                    return $value->totalSeconds;
-                }
-
-                return intval($value);
-            }),
-        ];
     }
 
     /**
