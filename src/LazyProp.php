@@ -5,9 +5,9 @@ namespace Inertia;
 /**
  * @deprecated Use OptionalProp instead for clearer semantics.
  */
-class LazyProp implements IgnoreFirstLoad
+class LazyProp implements IgnoreFirstLoad, Optionable
 {
-    use ResolvesCallables;
+    use ResolvesCallables, OptionalProps;
 
     /**
      * The callback to resolve the property.
@@ -21,6 +21,7 @@ class LazyProp implements IgnoreFirstLoad
      */
     public function __construct(callable $callback)
     {
+        $this->optional = true;
         $this->callback = $callback;
     }
 

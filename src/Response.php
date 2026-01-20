@@ -274,7 +274,8 @@ class Response implements Responsable
         if (! $this->isPartial($request)) {
             return array_filter($props, static function ($prop) {
                 return ! ($prop instanceof IgnoreFirstLoad)
-                    && ! ($prop instanceof Deferrable && $prop->shouldDefer());
+                    && ! ($prop instanceof Deferrable && $prop->shouldDefer())
+                    && ! ($prop instanceof Optionable && $prop->isOptional());
             });
         }
 
@@ -707,7 +708,7 @@ class Response implements Responsable
 
         $scrollProps = $this->getMergePropsForRequest($request, false)
             ->filter(fn (Mergeable $prop) => $prop instanceof ScrollProp)
-            ->reject(fn (ScrollProp $prop) => ! $isPartial && $prop->shouldDefer())
+            ->reject(fn (ScrollProp $prop) => ! $isPartial && ($prop->shouldDefer() || $prop->isOptional()))
             ->mapWithKeys(fn (ScrollProp $prop, string $key) => [$key => [
                 ...$prop->metadata(),
                 'reset' => in_array($key, $resetProps),

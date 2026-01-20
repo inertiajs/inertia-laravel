@@ -2,9 +2,9 @@
 
 namespace Inertia;
 
-class OptionalProp implements IgnoreFirstLoad, Onceable
+class OptionalProp implements IgnoreFirstLoad, Onceable, Optionable
 {
-    use ResolvesCallables, ResolvesOnce;
+    use ResolvesCallables, ResolvesOnce, OptionalProps;
 
     /**
      * The callback to resolve the property.
@@ -22,6 +22,7 @@ class OptionalProp implements IgnoreFirstLoad, Onceable
      */
     public function __construct(callable $callback)
     {
+        $this->optional = true;
         $this->callback = $callback;
     }
 

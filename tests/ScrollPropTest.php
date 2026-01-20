@@ -248,4 +248,53 @@ class ScrollPropTest extends TestCase
         $this->assertArrayNotHasKey('users', $page['props']);
         $this->assertSame(['custom-group' => ['users']], $page['deferredProps']);
     }
+
+    public function test_optional_scroll_prop_is_excluded_from_initial_request(): void
+    {
+        $request = Request::create('/users', 'GET');
+
+        $response = new Response(
+            'Users/Index',
+            [
+                'users' => (new ScrollProp(fn () => User::query()->paginate(15)))->optional(),
+            ],
+            'app',
+            '123'
+        );
+
+        /** @var BaseResponse $response */
+        $response = $response->toResponse($request);
+        $view = $response->getOriginalContent();
+        $page = $view->getData()['page'];
+
+        $this->assertArrayNotHasKey('users', $page['props']);
+        $this->assertArrayNotHasKey('scrollProps', $page);
+    }
+
+    public function test_optional_scroll_prop_is_resolved_on_partial_request(): void
+    {
+        $request = Request::create('/users', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'Users/Index']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'users']);
+
+        $response = new Response(
+            'Users/Index',
+            [
+                'users' => (new ScrollProp(fn () => User::query()->paginate(15)))->optional(),
+            ],
+            'app',
+            '123'
+        );
+
+        /** @var JsonResponse $response */
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertObjectHasProperty('users', $page->props);
+        $this->assertCount(15, $page->props->users->data);
+        $this->assertObjectHasProperty('scrollProps', $page);
+        $this->assertEquals('page', $page->scrollProps->users->pageName);
+        $this->assertContains('users.data', $page->mergeProps);
+    }
 }
