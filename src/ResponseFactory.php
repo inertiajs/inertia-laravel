@@ -15,7 +15,6 @@ use Illuminate\Support\Traits\Macroable;
 use Inertia\Support\Header;
 use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirect;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use UnitEnum;
 
@@ -303,15 +302,15 @@ class ResponseFactory
     /**
      * Create an Inertia location response.
      *
-     * @param  string|\Symfony\Component\HttpFoundation\RedirectResponse  $url
+     * @param  string|RedirectResponse  $url
      */
     public function location($url): SymfonyResponse
     {
         if (Request::inertia()) {
-            return BaseResponse::make('', 409, [Header::LOCATION => $url instanceof SymfonyRedirect ? $url->getTargetUrl() : $url]);
+            return BaseResponse::make('', 409, [Header::LOCATION => $url instanceof RedirectResponse ? $url->getTargetUrl() : $url]);
         }
 
-        return $url instanceof SymfonyRedirect ? $url : Redirect::away($url);
+        return $url instanceof RedirectResponse ? $url : Redirect::away($url);
     }
 
     /**
