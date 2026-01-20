@@ -23,6 +23,13 @@ class AlwaysPropTest extends TestCase
         $this->assertSame('An always value', $alwaysProp());
     }
 
+    public function test_string_function_names_are_not_invoked(): void
+    {
+        $alwaysProp = new AlwaysProp('date');
+
+        $this->assertSame('date', $alwaysProp());
+    }
+
     public function test_can_accept_callables(): void
     {
         $callable = new class

@@ -626,6 +626,28 @@ class ResponseTest extends TestCase
         $this->assertSame('123', $page->version);
     }
 
+    public function test_xhr_response_with_deferred_props_includes_deferred_metadata(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $response = new Response('User/Edit', [
+            'user' => ['name' => 'Jonathan'],
+            'results' => new DeferProp(fn () => ['data' => ['item1', 'item2']], 'default'),
+        ], 'app', '123');
+        /** @var JsonResponse $response */
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertSame('User/Edit', $page->component);
+        $this->assertSame('Jonathan', $page->props->user->name);
+        $this->assertFalse(property_exists($page->props, 'results'));
+        $this->assertSame('/user/123', $page->url);
+        $this->assertSame('123', $page->version);
+        $this->assertEquals((object) ['default' => ['results']], $page->deferredProps);
+    }
+
     public function test_resource_response(): void
     {
         $request = Request::create('/user/123', 'GET');
@@ -1059,6 +1081,23 @@ class ResponseTest extends TestCase
         $this->assertSame('The email field is required.', $page->props->errors->name);
         $this->assertSame('Taylor Otwell', $page->props->data->name);
         $this->assertFalse(isset($page->props->user));
+    }
+
+    public function test_string_function_names_are_not_invoked_as_callables(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+
+        $response = new Response('User/Edit', [
+            'always' => new AlwaysProp('date'),
+            'merge' => new MergeProp('trim'),
+        ], 'app', '123');
+
+        /** @var JsonResponse $response */
+        $response = $response->toResponse($request);
+        $page = $response->getOriginalContent()->getData()['page'];
+
+        $this->assertSame('date', $page['props']['always']);
+        $this->assertSame('trim', $page['props']['merge']);
     }
 
     public function test_inertia_responsable_objects(): void

@@ -1,8 +1,53 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.14...2.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.19...2.x)
 
 - Nothing!
+
+## [v2.0.19](https://github.com/inertiajs/inertia-laravel/compare/v2.0.18...v2.0.19) - 2026-01-13
+
+### What's Changed
+
+* [2.x] Allow `ScrollProp` to be deferred by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/806
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.18...v2.0.19
+
+## [v2.0.18](https://github.com/inertiajs/inertia-laravel/compare/v2.0.17...v2.0.18) - 2025-12-31
+
+### What's Changed
+
+* Add test helpers for Flash Data by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/804
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.17...v2.0.18
+
+## [v2.0.17](https://github.com/inertiajs/inertia-laravel/compare/v2.0.16...v2.0.17) - 2025-12-30
+
+### What's Changed
+
+* Fix flash data loss on non-Inertia redirects by [@TomKita](https://github.com/TomKita) in https://github.com/inertiajs/inertia-laravel/pull/802
+
+### New Contributors
+
+* [@TomKita](https://github.com/TomKita) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/802
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.16...v2.0.17
+
+## [v2.0.16](https://github.com/inertiajs/inertia-laravel/compare/v2.0.15...v2.0.16) - 2025-12-17
+
+### What's Changed
+
+* Add test for deferred metadata on subsequent request by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/799
+* Support for Flash Data by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/797
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.15...v2.0.16
+
+## [v2.0.15](https://github.com/inertiajs/inertia-laravel/compare/v2.0.14...v2.0.15) - 2025-12-15
+
+### What's Changed
+
+* Check if prop value is callable and not a string by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/798
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.14...v2.0.15
 
 ## [v2.0.14](https://github.com/inertiajs/inertia-laravel/compare/v2.0.13...v2.0.14) - 2025-12-10
 

@@ -16,6 +16,13 @@ class OptionalPropTest extends TestCase
         $this->assertSame('A lazy value', $optionalProp());
     }
 
+    public function test_string_function_names_are_not_invoked(): void
+    {
+        $optionalProp = new OptionalProp('date');
+
+        $this->assertSame('date', $optionalProp());
+    }
+
     public function test_can_resolve_bindings_when_invoked(): void
     {
         $optionalProp = new OptionalProp(function (Request $request) {

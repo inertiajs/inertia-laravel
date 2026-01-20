@@ -122,6 +122,10 @@ class Middleware
         $response = $next($request);
         $response->headers->set('Vary', Header::INERTIA);
 
+        if ($response->isRedirect()) {
+            $this->reflash($request);
+        }
+
         if (! $request->header(Header::INERTIA)) {
             return $response;
         }
@@ -139,6 +143,16 @@ class Middleware
         }
 
         return $response;
+    }
+
+    /**
+     * Reflash the session data for the next request.
+     */
+    protected function reflash(Request $request): void
+    {
+        if ($flashed = Inertia::getFlashed($request)) {
+            $request->session()->flash(SessionKey::FlashData->value, $flashed);
+        }
     }
 
     /**

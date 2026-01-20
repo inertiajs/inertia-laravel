@@ -635,4 +635,82 @@ class ResponseFactoryTest extends TestCase
             ],
         ]);
     }
+
+    public function test_flash_data_is_flashed_to_session_on_redirect(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->post('/flash-test', function () {
+            return Inertia::flash(['message' => 'Success!'])->back();
+        });
+
+        $response = $this->post('/flash-test', [], [
+            'X-Inertia' => 'true',
+        ]);
+
+        $response->assertRedirect();
+        $this->assertEquals(['message' => 'Success!'], session('inertia.flash_data'));
+    }
+
+    public function test_render_with_flash_includes_flash_in_page(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->post('/flash-test', function () {
+            return Inertia::flash('type', 'success')
+                ->render('User/Edit', ['user' => 'Jonathan'])
+                ->flash(['message' => 'User updated!']);
+        });
+
+        $response = $this->post('/flash-test', [], [
+            'X-Inertia' => 'true',
+        ]);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Edit',
+            'props' => [
+                'user' => 'Jonathan',
+            ],
+            'flash' => [
+                'message' => 'User updated!',
+                'type' => 'success',
+            ],
+        ]);
+
+        // Flash data should not persist in session after being included in response
+        $this->assertNull(session('inertia.flash_data'));
+    }
+
+    public function test_render_without_flash_does_not_include_flash_key(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/no-flash', function () {
+            return Inertia::render('User/Edit', ['user' => 'Jonathan']);
+        });
+
+        $response = $this->get('/no-flash', [
+            'X-Inertia' => 'true',
+        ]);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Edit',
+        ]);
+        $response->assertJsonMissing(['flash']);
+    }
+
+    public function test_multiple_flash_calls_are_merged(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->post('/create', function () {
+            Inertia::flash('foo', 'value1');
+            Inertia::flash('bar', 'value2');
+
+            return Inertia::render('User/Show');
+        });
+
+        $response = $this->post('/create', [], ['X-Inertia' => 'true']);
+
+        $response->assertJson([
+            'flash' => [
+                'foo' => 'value1',
+                'bar' => 'value2',
+            ],
+        ]);
+    }
 }

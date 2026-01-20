@@ -2,6 +2,7 @@
 
 namespace Inertia;
 
+use BackedEnum;
 use Closure;
 use GuzzleHttp\Promise\PromiseInterface;
 use Illuminate\Contracts\Support\Arrayable;
@@ -15,10 +16,12 @@ use Illuminate\Support\Facades\Response as ResponseFactory;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
 use Inertia\Support\Header;
+use UnitEnum;
 
 class Response implements Responsable
 {
     use Macroable;
+    use ResolvesCallables;
 
     /**
      * The name of the root component.
@@ -91,7 +94,7 @@ class Response implements Responsable
         $this->props = $props;
         $this->rootView = $rootView;
         $this->version = $version;
-        $this->clearHistory = session()->pull('inertia.clear_history', false);
+        $this->clearHistory = session()->pull(SessionKey::ClearHistory->value, false);
         $this->encryptHistory = $encryptHistory;
         $this->urlResolver = $urlResolver;
     }
@@ -147,6 +150,19 @@ class Response implements Responsable
     }
 
     /**
+     * Add flash data to the response.
+     *
+     * @param  \BackedEnum|\UnitEnum|string|array<string, mixed>  $key
+     * @return $this
+     */
+    public function flash(BackedEnum|UnitEnum|string|array $key, mixed $value = null): self
+    {
+        Inertia::flash($key, $value);
+
+        return $this;
+    }
+
+    /**
      * Create an HTTP response that represents the object.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -169,6 +185,7 @@ class Response implements Responsable
             $this->resolveDeferredProps($request),
             $this->resolveScrollProps($request),
             $this->resolveOnceProps($request),
+            $this->resolveFlashData($request),
         );
 
         if ($request->header(Header::INERTIA)) {
@@ -234,7 +251,8 @@ class Response implements Responsable
     {
         if (! $this->isPartial($request)) {
             return array_filter($props, static function ($prop) {
-                return ! ($prop instanceof IgnoreFirstLoad);
+                return ! ($prop instanceof IgnoreFirstLoad)
+                    && ! ($prop instanceof Deferrable && $prop->shouldDefer());
             });
         }
 
@@ -399,7 +417,7 @@ class Response implements Responsable
             ])->first(fn ($class) => $value instanceof $class);
 
             if ($resolveViaApp) {
-                $value = App::call($value);
+                $value = $this->resolveCallable($value);
             }
 
             $currentKey = $parentKey ? $parentKey.'.'.$key : $key;
@@ -603,9 +621,13 @@ class Response implements Responsable
 
         $deferredProps = collect($this->props)
             ->filter(function ($prop) {
-                return $prop instanceof DeferProp;
+                return $prop instanceof Deferrable && $prop->shouldDefer();
             })
-            ->reject(function (DeferProp $prop, string $key) use ($exceptOnceProps) {
+            ->reject(function (Deferrable $prop, string $key) use ($exceptOnceProps) {
+                if (! $prop instanceof Onceable) {
+                    return false;
+                }
+
                 if (! $prop->shouldResolveOnce()) {
                     return false;
                 }
@@ -616,7 +638,7 @@ class Response implements Responsable
 
                 return in_array($prop->getKey() ?? $key, $exceptOnceProps);
             })
-            ->map(function ($prop, $key) {
+            ->map(function (Deferrable $prop, $key) {
                 return [
                     'key' => $key,
                     'group' => $prop->group(),
@@ -637,9 +659,11 @@ class Response implements Responsable
     public function resolveScrollProps(Request $request): array
     {
         $resetProps = $this->getResetProps($request);
+        $isPartial = $this->isPartial($request);
 
         $scrollProps = $this->getMergePropsForRequest($request, false)
             ->filter(fn (Mergeable $prop) => $prop instanceof ScrollProp)
+            ->reject(fn (ScrollProp $prop) => ! $isPartial && $prop->shouldDefer())
             ->mapWithKeys(fn (ScrollProp $prop, string $key) => [$key => [
                 ...$prop->metadata(),
                 'reset' => in_array($key, $resetProps),
@@ -665,6 +689,18 @@ class Response implements Responsable
             ]]);
 
         return $onceProps->isNotEmpty() ? ['onceProps' => $onceProps->toArray()] : [];
+    }
+
+    /**
+     * Resolve flash data from the session.
+     *
+     * @return array<string, mixed>
+     */
+    protected function resolveFlashData(Request $request): array
+    {
+        $flash = Inertia::getFlashed($request);
+
+        return $flash ? ['flash' => $flash] : [];
     }
 
     /**
