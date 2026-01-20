@@ -2,10 +2,10 @@
 
 namespace Inertia;
 
-use Illuminate\Support\Facades\App;
-
-class OptionalProp implements IgnoreFirstLoad
+class OptionalProp implements IgnoreFirstLoad, Onceable
 {
+    use ResolvesCallables, ResolvesOnce;
+
     /**
      * The callback to resolve the property.
      *
@@ -32,6 +32,6 @@ class OptionalProp implements IgnoreFirstLoad
      */
     public function __invoke()
     {
-        return App::call($this->callback);
+        return $this->resolveCallable($this->callback);
     }
 }

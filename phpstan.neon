@@ -6,8 +6,6 @@ parameters:
 	paths:
 		- src
 		- tests
-	excludePaths:
-		- src/Testing/Concerns
 	ignoreErrors:
 		- '#Call to an undefined method.*TestResponse.*::assertInertia\(\)#'
 		- '#Call to an undefined method.*TestResponse.*::inertiaPage\(\)#'

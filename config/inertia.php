@@ -64,6 +64,8 @@ return [
 
     ],
 
+    'use_script_element_for_initial_page' => (bool) env('INERTIA_USE_SCRIPT_ELEMENT_FOR_INITIAL_PAGE', false),
+
     /*
     |--------------------------------------------------------------------------
     | Testing

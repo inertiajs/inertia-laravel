@@ -35,11 +35,14 @@ abstract class TestCase extends Orchestra
     }
 
     /**
+     * @param  class-string|array<int, class-string>  $middleware
      * @return TestResponse<Response>
      */
-    protected function makeMockRequest(mixed $view): TestResponse
+    protected function makeMockRequest(mixed $view, string|array $middleware = []): TestResponse
     {
-        app('router')->get('/example-url', function () use ($view) {
+        $middleware = is_array($middleware) ? $middleware : [$middleware];
+
+        app('router')->middleware($middleware)->get('/example-url', function () use ($view) {
             return is_callable($view) ? $view() : $view;
         });
 

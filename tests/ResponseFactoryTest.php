@@ -15,12 +15,13 @@ use Inertia\AlwaysProp;
 use Inertia\ComponentNotFoundException;
 use Inertia\DeferProp;
 use Inertia\Inertia;
-use Inertia\LazyProp;
 use Inertia\MergeProp;
+use Inertia\OnceProp;
 use Inertia\OptionalProp;
 use Inertia\ResponseFactory;
 use Inertia\Tests\Enums\IntBackedEnum;
 use Inertia\Tests\Enums\StringBackedEnum;
+use Inertia\Tests\Enums\UnitEnum;
 use Inertia\Tests\Stubs\ExampleInertiaPropsProvider;
 use Inertia\Tests\Stubs\ExampleMiddleware;
 use InvalidArgumentException;
@@ -265,16 +266,6 @@ class ResponseFactoryTest extends TestCase
         $this->assertSame([], Inertia::getShared());
     }
 
-    public function test_can_create_lazy_prop(): void
-    {
-        $factory = new ResponseFactory;
-        $lazyProp = $factory->lazy(function () {
-            return 'A lazy value';
-        });
-
-        $this->assertInstanceOf(LazyProp::class, $lazyProp);
-    }
-
     public function test_can_create_deferred_prop(): void
     {
         $factory = new ResponseFactory;
@@ -345,6 +336,56 @@ class ResponseFactoryTest extends TestCase
         });
 
         $this->assertInstanceOf(OptionalProp::class, $optionalProp);
+    }
+
+    public function test_can_create_scroll_prop(): void
+    {
+        $factory = new ResponseFactory;
+        $data = ['item1', 'item2'];
+
+        $scrollProp = $factory->scroll($data);
+
+        $this->assertInstanceOf(\Inertia\ScrollProp::class, $scrollProp);
+        $this->assertSame($data, $scrollProp());
+    }
+
+    public function test_can_create_scroll_prop_with_metadata_provider(): void
+    {
+        $factory = new ResponseFactory;
+        $data = ['item1', 'item2'];
+        $metadataProvider = new \Inertia\ScrollMetadata('custom', 1, 3, 2);
+
+        $scrollProp = $factory->scroll($data, 'data', $metadataProvider);
+
+        $this->assertInstanceOf(\Inertia\ScrollProp::class, $scrollProp);
+        $this->assertSame($data, $scrollProp());
+        $this->assertEquals([
+            'pageName' => 'custom',
+            'previousPage' => 1,
+            'nextPage' => 3,
+            'currentPage' => 2,
+        ], $scrollProp->metadata());
+    }
+
+    public function test_can_create_once_prop(): void
+    {
+        $factory = new ResponseFactory;
+        $onceProp = $factory->once(function () {
+            return 'A once value';
+        });
+
+        $this->assertInstanceOf(OnceProp::class, $onceProp);
+    }
+
+    public function test_can_create_deferred_and_once_prop(): void
+    {
+        $factory = new ResponseFactory;
+        $deferredProp = $factory->defer(function () {
+            return 'A deferred + once value';
+        })->once();
+
+        $this->assertInstanceOf(DeferProp::class, $deferredProp);
+        $this->assertTrue($deferredProp->shouldResolveOnce());
     }
 
     public function test_can_create_always_prop(): void
@@ -497,6 +538,20 @@ class ResponseFactoryTest extends TestCase
     {
         $response = (new ResponseFactory)->render(StringBackedEnum::UsersIndex);
         $this->assertInstanceOf(\Inertia\Response::class, $response);
+
+        /** @phpstan-ignore-next-line */
+        $getComponent = fn () => $this->component;
+        $this->assertSame('UsersPage/Index', $getComponent->call($response));
+    }
+
+    public function test_render_accepts_unit_enum(): void
+    {
+        $response = (new ResponseFactory)->render(UnitEnum::Index);
+        $this->assertInstanceOf(\Inertia\Response::class, $response);
+
+        /** @phpstan-ignore-next-line */
+        $getComponent = fn () => $this->component;
+        $this->assertSame('Index', $getComponent->call($response));
     }
 
     public function test_render_throws_for_non_string_backed_enum(): void
@@ -504,5 +559,178 @@ class ResponseFactoryTest extends TestCase
         $factory = new ResponseFactory;
         $this->expectException(InvalidArgumentException::class);
         $factory->render(IntBackedEnum::Zero);
+    }
+
+    public function test_share_once_shares_a_once_prop(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            Inertia::shareOnce('settings', fn () => ['theme' => 'dark']);
+
+            return Inertia::render('User/Edit');
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Edit',
+            'props' => [
+                'settings' => ['theme' => 'dark'],
+            ],
+            'onceProps' => [
+                'settings' => [
+                    'prop' => 'settings',
+                    'expiresAt' => null,
+                ],
+            ],
+        ]);
+    }
+
+    public function test_share_once_is_chainable(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            $prop = Inertia::shareOnce('settings', fn () => ['theme' => 'dark'])
+                ->as('app-settings')
+                ->until(60);
+
+            $this->assertInstanceOf(OnceProp::class, $prop);
+
+            return Inertia::render('User/Edit');
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertSuccessful();
+        $data = $response->json();
+
+        $this->assertArrayHasKey('onceProps', $data);
+        $this->assertArrayHasKey('app-settings', $data['onceProps']);
+        $this->assertEquals('settings', $data['onceProps']['app-settings']['prop']);
+        $this->assertNotNull($data['onceProps']['app-settings']['expiresAt']);
+    }
+
+    public function test_forcefully_refreshing_a_once_prop_includes_it_in_once_props(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            return Inertia::render('User/Edit', [
+                'settings' => Inertia::once(fn () => ['theme' => 'dark'])->fresh(),
+            ]);
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Edit',
+            'props' => [
+                'settings' => ['theme' => 'dark'],
+            ],
+            'onceProps' => [
+                'settings' => ['prop' => 'settings', 'expiresAt' => null],
+            ],
+        ]);
+    }
+
+    public function test_once_prop_is_included_in_once_props_by_default(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            return Inertia::render('User/Edit', [
+                'settings' => Inertia::once(fn () => ['theme' => 'dark']),
+            ]);
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Edit',
+            'props' => [
+                'settings' => ['theme' => 'dark'],
+            ],
+            'onceProps' => [
+                'settings' => [
+                    'prop' => 'settings',
+                    'expiresAt' => null,
+                ],
+            ],
+        ]);
+    }
+
+    public function test_flash_data_is_flashed_to_session_on_redirect(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->post('/flash-test', function () {
+            return Inertia::flash(['message' => 'Success!'])->back();
+        });
+
+        $response = $this->post('/flash-test', [], [
+            'X-Inertia' => 'true',
+        ]);
+
+        $response->assertRedirect();
+        $this->assertEquals(['message' => 'Success!'], session('inertia.flash_data'));
+    }
+
+    public function test_render_with_flash_includes_flash_in_page(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->post('/flash-test', function () {
+            return Inertia::flash('type', 'success')
+                ->render('User/Edit', ['user' => 'Jonathan'])
+                ->flash(['message' => 'User updated!']);
+        });
+
+        $response = $this->post('/flash-test', [], [
+            'X-Inertia' => 'true',
+        ]);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Edit',
+            'props' => [
+                'user' => 'Jonathan',
+            ],
+            'flash' => [
+                'message' => 'User updated!',
+                'type' => 'success',
+            ],
+        ]);
+
+        // Flash data should not persist in session after being included in response
+        $this->assertNull(session('inertia.flash_data'));
+    }
+
+    public function test_render_without_flash_does_not_include_flash_key(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/no-flash', function () {
+            return Inertia::render('User/Edit', ['user' => 'Jonathan']);
+        });
+
+        $response = $this->get('/no-flash', [
+            'X-Inertia' => 'true',
+        ]);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Edit',
+        ]);
+        $response->assertJsonMissing(['flash']);
+    }
+
+    public function test_multiple_flash_calls_are_merged(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->post('/create', function () {
+            Inertia::flash('foo', 'value1');
+            Inertia::flash('bar', 'value2');
+
+            return Inertia::render('User/Show');
+        });
+
+        $response = $this->post('/create', [], ['X-Inertia' => 'true']);
+
+        $response->assertJson([
+            'flash' => [
+                'foo' => 'value1',
+                'bar' => 'value2',
+            ],
+        ]);
     }
 }

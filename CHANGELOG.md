@@ -1,8 +1,156 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.4...2.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.19...2.x)
 
 - Nothing!
+
+## [v2.0.19](https://github.com/inertiajs/inertia-laravel/compare/v2.0.18...v2.0.19) - 2026-01-13
+
+### What's Changed
+
+* [2.x] Allow `ScrollProp` to be deferred by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/806
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.18...v2.0.19
+
+## [v2.0.18](https://github.com/inertiajs/inertia-laravel/compare/v2.0.17...v2.0.18) - 2025-12-31
+
+### What's Changed
+
+* Add test helpers for Flash Data by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/804
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.17...v2.0.18
+
+## [v2.0.17](https://github.com/inertiajs/inertia-laravel/compare/v2.0.16...v2.0.17) - 2025-12-30
+
+### What's Changed
+
+* Fix flash data loss on non-Inertia redirects by [@TomKita](https://github.com/TomKita) in https://github.com/inertiajs/inertia-laravel/pull/802
+
+### New Contributors
+
+* [@TomKita](https://github.com/TomKita) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/802
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.16...v2.0.17
+
+## [v2.0.16](https://github.com/inertiajs/inertia-laravel/compare/v2.0.15...v2.0.16) - 2025-12-17
+
+### What's Changed
+
+* Add test for deferred metadata on subsequent request by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/799
+* Support for Flash Data by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/797
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.15...v2.0.16
+
+## [v2.0.15](https://github.com/inertiajs/inertia-laravel/compare/v2.0.14...v2.0.15) - 2025-12-15
+
+### What's Changed
+
+* Check if prop value is callable and not a string by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/798
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.14...v2.0.15
+
+## [v2.0.14](https://github.com/inertiajs/inertia-laravel/compare/v2.0.13...v2.0.14) - 2025-12-10
+
+### What's Changed
+
+* Exclude loaded once props from deferred metadata by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/796
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.13...v2.0.14
+
+## [v2.0.13](https://github.com/inertiajs/inertia-laravel/compare/v2.0.12...v2.0.13) - 2025-12-10
+
+### What's Changed
+
+* Include `onceProps` metadata for `fresh` props by [@skryukov](https://github.com/skryukov) in https://github.com/inertiajs/inertia-laravel/pull/794
+
+### New Contributors
+
+* [@skryukov](https://github.com/skryukov) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/794
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.12...v2.0.13
+
+## [v2.0.12](https://github.com/inertiajs/inertia-laravel/compare/v2.0.11...v2.0.12) - 2025-12-09
+
+### What's Changed
+
+* Ability to use `<script>` element for initial page data by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/788
+* Support for `once()` props by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/793
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.11...v2.0.12
+
+## [v2.0.11](https://github.com/inertiajs/inertia-laravel/compare/v2.0.10...v2.0.11) - 2025-11-26
+
+### What's Changed
+
+* Add PHP 8.5 to test matrix by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/787
+* Support for multiple validation errors per field by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/784
+* Handle array inputs in reloadOnly and reloadExcept by [@hosmelq](https://github.com/hosmelq) in https://github.com/inertiajs/inertia-laravel/pull/792
+* Handle Connection Exceptions During Health Checks by [@Magnesium38](https://github.com/Magnesium38) in https://github.com/inertiajs/inertia-laravel/pull/786
+
+### New Contributors
+
+* [@Magnesium38](https://github.com/Magnesium38) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/786
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.10...v2.0.11
+
+## [v2.0.10](https://github.com/inertiajs/inertia-laravel/compare/v2.0.9...v2.0.10) - 2025-09-28
+
+### What's Changed
+
+* Include `scrollProps` metadata when prop is requested to reset by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/781
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.9...v2.0.10
+
+## [v2.0.9](https://github.com/inertiajs/inertia-laravel/compare/v2.0.8...v2.0.9) - 2025-09-26
+
+### What's Changed
+
+* Add docblock to Inertia Facade for `scroll` by [@joetannenbaum](https://github.com/joetannenbaum) in https://github.com/inertiajs/inertia-laravel/pull/780
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.8...v2.0.9
+
+## [v2.0.8](https://github.com/inertiajs/inertia-laravel/compare/v2.0.7...v2.0.8) - 2025-09-26
+
+### What's Changed
+
+* More fine-grained control for `Inertia::merge()` and a new `Inertia::scroll()` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/774
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.7...v2.0.8
+
+## [v2.0.7](https://github.com/inertiajs/inertia-laravel/compare/v2.0.6...v2.0.7) - 2025-09-24
+
+### What's Changed
+
+* Added `loadDeferredProps()` method to `AssertableInertia` class by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/779
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.6...v2.0.7
+
+## [v2.0.6](https://github.com/inertiajs/inertia-laravel/compare/v2.0.5...v2.0.6) - 2025-08-26
+
+### What's Changed
+
+* Add encrypt history middleware that follows laravel naming conventions by [@taylorotwell](https://github.com/taylorotwell) in https://github.com/inertiajs/inertia-laravel/pull/773
+
+### New Contributors
+
+* [@taylorotwell](https://github.com/taylorotwell) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/773
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.5...v2.0.6
+
+## [v2.0.5](https://github.com/inertiajs/inertia-laravel/compare/v2.0.4...v2.0.5) - 2025-08-12
+
+### What's Changed
+
+* [2.x] Improve inertia helper docblock by [@mtlukaszczyk](https://github.com/mtlukaszczyk) in https://github.com/inertiajs/inertia-laravel/pull/766
+* [2.x] Introduce `ProvidesInertiaProp` interface by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/746
+* [2.x] Introduce ProvidesInertiaProps interface by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/769
+* Introduce PHPStan + improve DocBlocks by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/768
+
+### New Contributors
+
+* [@mtlukaszczyk](https://github.com/mtlukaszczyk) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/766
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.4...v2.0.5
 
 ## [v2.0.4](https://github.com/inertiajs/inertia-laravel/compare/v2.0.3...v2.0.4) - 2025-07-15
 

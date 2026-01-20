@@ -2,7 +2,10 @@
 
 namespace Inertia\Tests\Testing;
 
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Inertia\Middleware;
 use Inertia\Testing\AssertableInertia;
 use Inertia\Tests\TestCase;
 use PHPUnit\Framework\AssertionFailedError;
@@ -219,13 +222,43 @@ class AssertableInertiaTest extends TestCase
         $this->assertTrue($called);
     }
 
-    public function test_lazy_props_can_be_evaluated(): void
+    public function test_optional_props_can_be_evaluated(): void
     {
         $response = $this->makeMockRequest(
             Inertia::render('foo', [
                 'foo' => 'bar',
-                'lazy1' => Inertia::lazy(fn () => 'baz'),
-                'lazy2' => Inertia::lazy(fn () => 'qux'),
+                'optional1' => Inertia::optional(fn () => 'baz'),
+                'optional2' => Inertia::optional(fn () => 'qux'),
+            ])
+        );
+
+        $called = false;
+
+        $response->assertInertia(function ($inertia) use (&$called) {
+            $inertia->where('foo', 'bar');
+            $inertia->missing('optional1');
+            $inertia->missing('optional2');
+
+            $result = $inertia->reloadOnly('optional1', function ($inertia) use (&$called) {
+                $inertia->missing('foo');
+                $inertia->where('optional1', 'baz');
+                $inertia->missing('optional2');
+                $called = true;
+            });
+
+            $this->assertSame($result, $inertia);
+        });
+
+        $this->assertTrue($called);
+    }
+
+    public function test_optional_props_can_be_evaluated_with_except(): void
+    {
+        $response = $this->makeMockRequest(
+            Inertia::render('foo', [
+                'foo' => 'bar',
+                'lazy1' => Inertia::optional(fn () => 'baz'),
+                'lazy2' => Inertia::optional(fn () => 'qux'),
             ])
         );
 
@@ -236,7 +269,7 @@ class AssertableInertiaTest extends TestCase
             $inertia->missing('lazy1');
             $inertia->missing('lazy2');
 
-            $result = $inertia->reloadOnly('lazy1', function ($inertia) use (&$called) {
+            $result = $inertia->reloadOnly(['lazy1'], function ($inertia) use (&$called) {
                 $inertia->missing('foo');
                 $inertia->where('lazy1', 'baz');
                 $inertia->missing('lazy2');
@@ -254,8 +287,8 @@ class AssertableInertiaTest extends TestCase
         $response = $this->makeMockRequest(
             Inertia::render('foo', [
                 'foo' => 'bar',
-                'lazy1' => Inertia::lazy(fn () => 'baz'),
-                'lazy2' => Inertia::lazy(fn () => 'qux'),
+                'optional1' => Inertia::optional(fn () => 'baz'),
+                'optional2' => Inertia::optional(fn () => 'qux'),
             ])
         );
 
@@ -263,10 +296,38 @@ class AssertableInertiaTest extends TestCase
 
         $response->assertInertia(function (AssertableInertia $inertia) use (&$called) {
             $inertia->where('foo', 'bar');
+            $inertia->missing('optional1');
+            $inertia->missing('optional2');
+
+            $inertia->reloadExcept('optional1', function ($inertia) use (&$called) {
+                $inertia->where('foo', 'bar');
+                $inertia->missing('optional1');
+                $inertia->where('optional2', 'qux');
+                $called = true;
+            });
+        });
+
+        $this->assertTrue($called);
+    }
+
+    public function test_lazy_props_can_be_evaluated_with_except_when_except_is_array(): void
+    {
+        $response = $this->makeMockRequest(
+            Inertia::render('foo', [
+                'foo' => 'bar',
+                'lazy1' => Inertia::optional(fn () => 'baz'),
+                'lazy2' => Inertia::optional(fn () => 'qux'),
+            ])
+        );
+
+        $called = false;
+
+        $response->assertInertia(function ($inertia) use (&$called) {
+            $inertia->where('foo', 'bar');
             $inertia->missing('lazy1');
             $inertia->missing('lazy2');
 
-            $inertia->reloadExcept('lazy1', function ($inertia) use (&$called) {
+            $inertia->reloadExcept(['lazy1'], function ($inertia) use (&$called) {
                 $inertia->where('foo', 'bar');
                 $inertia->missing('lazy1');
                 $inertia->where('lazy2', 'qux');
@@ -275,5 +336,129 @@ class AssertableInertiaTest extends TestCase
         });
 
         $this->assertTrue($called);
+    }
+
+    public function test_assert_against_deferred_props(): void
+    {
+        $response = $this->makeMockRequest(
+            Inertia::render('foo', [
+                'foo' => 'bar',
+                'deferred1' => Inertia::defer(fn () => 'baz'),
+                'deferred2' => Inertia::defer(fn () => 'qux', 'custom'),
+                'deferred3' => Inertia::defer(fn () => 'quux', 'custom'),
+            ])
+        );
+
+        $called = 0;
+
+        $response->assertInertia(function (AssertableInertia $inertia) use (&$called) {
+            $inertia->where('foo', 'bar');
+            $inertia->missing('deferred1');
+            $inertia->missing('deferred2');
+            $inertia->missing('deferred3');
+
+            $inertia->loadDeferredProps(function (AssertableInertia $inertia) use (&$called) {
+                $inertia->where('deferred1', 'baz');
+                $inertia->where('deferred2', 'qux');
+                $inertia->where('deferred3', 'quux');
+                $called++;
+            });
+
+            $inertia->loadDeferredProps('default', function (AssertableInertia $inertia) use (&$called) {
+                $inertia->where('deferred1', 'baz');
+                $inertia->missing('deferred2');
+                $inertia->missing('deferred3');
+                $called++;
+            });
+
+            $inertia->loadDeferredProps('custom', function (AssertableInertia $inertia) use (&$called) {
+                $inertia->missing('deferred1');
+                $inertia->where('deferred2', 'qux');
+                $inertia->where('deferred3', 'quux');
+                $called++;
+            });
+
+            $inertia->loadDeferredProps(['default', 'custom'], function (AssertableInertia $inertia) use (&$called) {
+                $inertia->where('deferred1', 'baz');
+                $inertia->where('deferred2', 'qux');
+                $inertia->where('deferred3', 'quux');
+                $called++;
+            });
+        });
+
+        $this->assertSame(4, $called);
+    }
+
+    public function test_the_flash_data_can_be_asserted(): void
+    {
+        $response = $this->makeMockRequest(
+            fn () => Inertia::render('foo')->flash([
+                'message' => 'Hello World',
+                'notification' => ['type' => 'success'],
+            ]),
+            StartSession::class
+        );
+
+        $response->assertInertia(function (AssertableInertia $inertia) {
+            $inertia->hasFlash('message');
+            $inertia->hasFlash('message', 'Hello World');
+            $inertia->hasFlash('notification.type', 'success');
+            $inertia->missingFlash('other');
+            $inertia->missingFlash('notification.other');
+        });
+    }
+
+    public function test_the_flash_assertion_fails_when_key_is_missing(): void
+    {
+        $response = $this->makeMockRequest(Inertia::render('foo'));
+
+        $this->expectException(AssertionFailedError::class);
+        $this->expectExceptionMessage('Inertia Flash Data is missing key [message].');
+
+        $response->assertInertia(fn (AssertableInertia $inertia) => $inertia->hasFlash('message'));
+    }
+
+    public function test_the_flash_assertion_fails_when_value_does_not_match(): void
+    {
+        $response = $this->makeMockRequest(
+            fn () => Inertia::render('foo')->flash('message', 'Hello World'),
+            StartSession::class
+        );
+
+        $this->expectException(AssertionFailedError::class);
+        $this->expectExceptionMessage('Inertia Flash Data [message] does not match expected value.');
+
+        $response->assertInertia(fn (AssertableInertia $inertia) => $inertia->hasFlash('message', 'Different'));
+    }
+
+    public function test_the_missing_flash_assertion_fails_when_key_exists(): void
+    {
+        $response = $this->makeMockRequest(
+            fn () => Inertia::render('foo')->flash('message', 'Hello World'),
+            StartSession::class
+        );
+
+        $this->expectException(AssertionFailedError::class);
+        $this->expectExceptionMessage('Inertia Flash Data has unexpected key [message].');
+
+        $response->assertInertia(fn (AssertableInertia $inertia) => $inertia->missingFlash('message'));
+    }
+
+    public function test_the_flash_data_is_available_after_redirect(): void
+    {
+        $middleware = [StartSession::class, Middleware::class];
+
+        Route::middleware($middleware)->get('/action', function () {
+            Inertia::flash('message', 'Success!');
+
+            return redirect('/dashboard');
+        });
+
+        Route::middleware($middleware)->get('/dashboard', function () {
+            return Inertia::render('Dashboard');
+        });
+
+        $this->get('/action')->assertRedirect('/dashboard');
+        $this->get('/dashboard')->assertInertia(fn (AssertableInertia $inertia) => $inertia->hasFlash('message', 'Success!'));
     }
 }

@@ -9,7 +9,7 @@ interface ProvidesInertiaProperties
      * to dynamically provide properties that will be serialized and sent
      * to the frontend.
      *
-     * @return array<string, mixed>
+     * @return iterable<string, mixed>
      */
     public function toInertiaProperties(RenderContext $context): iterable;
 }
