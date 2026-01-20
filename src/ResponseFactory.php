@@ -265,10 +265,21 @@ class ResponseFactory
     /**
      * Create an Inertia response.
      *
+     * @param  BackedEnum|UnitEnum|string  $component
      * @param  array<array-key, mixed>|\Illuminate\Contracts\Support\Arrayable<array-key, mixed>|ProvidesInertiaProperties  $props
      */
-    public function render(string $component, $props = []): Response
+    public function render($component, $props = []): Response
     {
+        $component = match (true) {
+            $component instanceof BackedEnum => $component->value,
+            $component instanceof UnitEnum => $component->name,
+            default => $component,
+        };
+
+        if (! is_string($component)) {
+            throw new InvalidArgumentException('Component argument must be of type string or a string BackedEnum');
+        }
+
         if (config('inertia.ensure_pages_exist', false)) {
             $this->findComponentOrFail($component);
         }
