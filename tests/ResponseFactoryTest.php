@@ -15,7 +15,6 @@ use Inertia\AlwaysProp;
 use Inertia\ComponentNotFoundException;
 use Inertia\DeferProp;
 use Inertia\Inertia;
-use Inertia\LazyProp;
 use Inertia\MergeProp;
 use Inertia\OnceProp;
 use Inertia\OptionalProp;
@@ -261,16 +260,6 @@ class ResponseFactoryTest extends TestCase
         $this->assertSame(['foo' => 'bar'], Inertia::getShared());
         Inertia::flushShared();
         $this->assertSame([], Inertia::getShared());
-    }
-
-    public function test_can_create_lazy_prop(): void
-    {
-        $factory = new ResponseFactory;
-        $lazyProp = $factory->lazy(function () {
-            return 'A lazy value';
-        });
-
-        $this->assertInstanceOf(LazyProp::class, $lazyProp);
     }
 
     public function test_can_create_deferred_prop(): void

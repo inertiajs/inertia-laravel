@@ -429,7 +429,6 @@ class Response implements Responsable
 
             $resolveViaApp = collect([
                 Closure::class,
-                LazyProp::class,
                 OptionalProp::class,
                 DeferProp::class,
                 AlwaysProp::class,
@@ -651,7 +650,7 @@ class Response implements Responsable
     }
 
     /**
-     * Resolve deferred props configuration for client-side lazy loading.
+     * Resolve deferred props configuration for client-side loading.
      *
      * @return array<string, mixed>
      */
