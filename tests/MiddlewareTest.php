@@ -15,6 +15,7 @@ use Inertia\Inertia;
 use Inertia\Middleware;
 use Inertia\Tests\Stubs\CustomUrlResolverMiddleware;
 use Inertia\Tests\Stubs\ExampleMiddleware;
+use Inertia\Tests\Stubs\WithAllErrorsMiddleware;
 use LogicException;
 use PHPUnit\Framework\Attributes\After;
 
@@ -168,11 +169,11 @@ class MiddlewareTest extends TestCase
         $this->withoutExceptionHandling()->get('/');
     }
 
-    public function test_validation_errors_are_returned_in_the_correct_format(): void
+    public function test_validation_errors_are_mapped_to_strings_by_default(): void
     {
         Session::put('errors', (new ViewErrorBag)->put('default', new MessageBag([
-            'name' => 'The name field is required.',
-            'email' => 'Not a valid email address.',
+            'name' => ['The name field is required.'],
+            'email' => ['Not a valid email address.', 'Another email error.'],
         ])));
 
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
@@ -181,6 +182,27 @@ class MiddlewareTest extends TestCase
             $this->assertIsObject($errors);
             $this->assertSame('The name field is required.', $errors->name);
             $this->assertSame('Not a valid email address.', $errors->email);
+        });
+
+        $this->withoutExceptionHandling()->get('/');
+    }
+
+    public function test_validation_errors_can_remain_multiple_per_field(): void
+    {
+        Session::put('errors', (new ViewErrorBag)->put('default', new MessageBag([
+            'name' => ['The name field is required.'],
+            'email' => ['Not a valid email address.', 'Another email error.'],
+        ])));
+
+        Route::middleware([StartSession::class, WithAllErrorsMiddleware::class])->get('/', function () {
+            $errors = Inertia::getShared('errors')();
+
+            $this->assertIsObject($errors);
+            $this->assertSame(['The name field is required.'], $errors->name);
+            $this->assertSame(
+                ['Not a valid email address.', 'Another email error.'],
+                $errors->email
+            );
         });
 
         $this->withoutExceptionHandling()->get('/');
@@ -307,6 +329,103 @@ class MiddlewareTest extends TestCase
         $response = $this->get('/');
         $response->assertOk();
         $response->assertViewHas('page.version', hash('xxh128', $contents));
+    }
+
+    public function test_middleware_share_once(): void
+    {
+        $middleware = new class extends Middleware
+        {
+            public function shareOnce(Request $request): array
+            {
+                return [
+                    'permissions' => fn () => ['admin' => true],
+                    'settings' => Inertia::once(fn () => ['theme' => 'dark'])
+                        ->as('app-settings')
+                        ->until(60),
+                ];
+            }
+        };
+
+        Route::middleware(StartSession::class)->get('/', function (Request $request) use ($middleware) {
+            return $middleware->handle($request, function ($request) {
+                return Inertia::render('User/Edit')->toResponse($request);
+            });
+        });
+
+        $response = $this->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'props' => [
+                'permissions' => ['admin' => true],
+                'settings' => ['theme' => 'dark'],
+            ],
+            'onceProps' => [
+                'permissions' => ['prop' => 'permissions', 'expiresAt' => null],
+                'app-settings' => ['prop' => 'settings'],
+            ],
+        ]);
+        $this->assertNotNull($response->json('onceProps.app-settings.expiresAt'));
+    }
+
+    public function test_middleware_share_and_share_once_are_merged(): void
+    {
+        $middleware = new class extends Middleware
+        {
+            public function share(Request $request): array
+            {
+                return array_merge(parent::share($request), [
+                    'flash' => fn () => ['message' => 'Hello'],
+                ]);
+            }
+
+            public function shareOnce(Request $request): array
+            {
+                return array_merge(parent::shareOnce($request), [
+                    'permissions' => fn () => ['admin' => true],
+                ]);
+            }
+        };
+
+        Route::middleware(StartSession::class)->get('/', function (Request $request) use ($middleware) {
+            return $middleware->handle($request, function ($request) {
+                return Inertia::render('User/Edit')->toResponse($request);
+            });
+        });
+
+        $response = $this->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'props' => [
+                'flash' => ['message' => 'Hello'],
+                'permissions' => ['admin' => true],
+            ],
+            'onceProps' => [
+                'permissions' => ['prop' => 'permissions', 'expiresAt' => null],
+            ],
+        ]);
+    }
+
+    public function test_flash_data_is_preserved_on_non_inertia_redirect(): void
+    {
+        Route::middleware([StartSession::class, Middleware::class])->get('/action', function () {
+            Inertia::flash('message', 'Success!');
+
+            return redirect('/dashboard');
+        });
+
+        Route::middleware([StartSession::class, Middleware::class])->get('/dashboard', function () {
+            return Inertia::render('Dashboard');
+        });
+
+        $response = $this->get('/action');
+        $response->assertRedirect('/dashboard');
+
+        $response = $this->get('/dashboard', ['X-Inertia' => 'true']);
+        $response->assertJson([
+            'flash' => ['message' => 'Success!'],
+        ]);
     }
 
     /**

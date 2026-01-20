@@ -2,10 +2,10 @@
 
 namespace Inertia;
 
-use Illuminate\Support\Facades\App;
-
 class AlwaysProp
 {
+    use ResolvesCallables;
+
     /**
      * The property value.
      *
@@ -34,6 +34,6 @@ class AlwaysProp
      */
     public function __invoke()
     {
-        return is_callable($this->value) ? App::call($this->value) : $this->value;
+        return $this->resolveCallable($this->value);
     }
 }
