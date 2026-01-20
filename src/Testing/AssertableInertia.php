@@ -56,6 +56,13 @@ class AssertableInertia extends AssertableJson
     private $deferredProps;
 
     /**
+     * The Flash Data (if any).
+     *
+     * @var array<string, mixed>
+     */
+    private $flash;
+
+    /**
      * Create an AssertableInertia instance from a test response.
      *
      * @param  TestResponse<Response>  $response
@@ -84,6 +91,7 @@ class AssertableInertia extends AssertableJson
         $instance->encryptHistory = $page['encryptHistory'];
         $instance->clearHistory = $page['clearHistory'];
         $instance->deferredProps = $page['deferredProps'] ?? [];
+        $instance->flash = $page['flash'] ?? [];
 
         return $instance;
     }
@@ -192,7 +200,9 @@ class AssertableInertia extends AssertableJson
     public function reloadOnly(array|string $only, ?Closure $callback = null): self
     {
         return $this->reload(only: $only, callback: function (AssertableInertia $assertable) use ($only, $callback) {
-            $assertable->hasAll(explode(',', $only));
+            $props = is_array($only) ? $only : explode(',', $only);
+
+            $assertable->hasAll($props);
 
             if ($callback) {
                 $callback($assertable);
@@ -208,12 +218,48 @@ class AssertableInertia extends AssertableJson
     public function reloadExcept(array|string $except, ?Closure $callback = null): self
     {
         return $this->reload(except: $except, callback: function (AssertableInertia $assertable) use ($except, $callback) {
-            $assertable->missingAll(explode(',', $except));
+            $props = is_array($except) ? $except : explode(',', $except);
+
+            $assertable->missingAll($props);
 
             if ($callback) {
                 $callback($assertable);
             }
         });
+    }
+
+    /**
+     * Assert that the Flash Data contains the given key, optionally with the expected value.
+     */
+    public function hasFlash(string $key, mixed $expected = null): self
+    {
+        PHPUnit::assertTrue(
+            Arr::has($this->flash, $key),
+            sprintf('Inertia Flash Data is missing key [%s].', $key)
+        );
+
+        if (func_num_args() > 1) {
+            PHPUnit::assertSame(
+                $expected,
+                Arr::get($this->flash, $key),
+                sprintf('Inertia Flash Data [%s] does not match expected value.', $key)
+            );
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that the Flash Data does not contain the given key.
+     */
+    public function missingFlash(string $key): self
+    {
+        PHPUnit::assertFalse(
+            Arr::has($this->flash, $key),
+            sprintf('Inertia Flash Data has unexpected key [%s].', $key)
+        );
+
+        return $this;
     }
 
     /**
@@ -230,6 +276,7 @@ class AssertableInertia extends AssertableJson
             'version' => $this->version,
             'encryptHistory' => $this->encryptHistory,
             'clearHistory' => $this->clearHistory,
+            'flash' => $this->flash,
         ];
     }
 }

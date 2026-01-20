@@ -17,6 +17,13 @@ class DeferPropTest extends TestCase
         $this->assertSame('default', $deferProp->group());
     }
 
+    public function test_string_function_names_are_not_invoked(): void
+    {
+        $deferProp = new DeferProp('date');
+
+        $this->assertSame('date', $deferProp());
+    }
+
     public function test_can_invoke_and_merge(): void
     {
         $deferProp = (new DeferProp(function () {
@@ -33,5 +40,15 @@ class DeferPropTest extends TestCase
         });
 
         $this->assertInstanceOf(Request::class, $deferProp());
+    }
+
+    public function test_is_onceable(): void
+    {
+        $deferProp = (new DeferProp(fn () => 'value'))
+            ->once(as: 'custom-key', until: 60);
+
+        $this->assertTrue($deferProp->shouldResolveOnce());
+        $this->assertSame('custom-key', $deferProp->getKey());
+        $this->assertNotNull($deferProp->expiresAt());
     }
 }
