@@ -2,7 +2,11 @@
 
 namespace Inertia\Tests;
 
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response as BaseResponse;
 use Inertia\ProvidesScrollMetadata;
+use Inertia\Response;
 use Inertia\ScrollProp;
 use Inertia\Support\Header;
 use Inertia\Tests\Stubs\User;
@@ -171,5 +175,77 @@ class ScrollPropTest extends TestCase
         $scrollProp = new ScrollProp('date');
 
         $this->assertSame('date', $scrollProp());
+    }
+
+    public function test_deferred_scroll_prop_is_excluded_from_initial_request(): void
+    {
+        $request = Request::create('/users', 'GET');
+
+        $response = new Response(
+            'Users/Index',
+            [
+                'users' => (new ScrollProp(fn () => User::query()->paginate(15)))->defer(),
+            ],
+            'app',
+            '123'
+        );
+
+        /** @var BaseResponse $response */
+        $response = $response->toResponse($request);
+        $view = $response->getOriginalContent();
+        $page = $view->getData()['page'];
+
+        $this->assertArrayNotHasKey('users', $page['props']);
+        $this->assertSame(['default' => ['users']], $page['deferredProps']);
+        $this->assertArrayNotHasKey('scrollProps', $page);
+    }
+
+    public function test_deferred_scroll_prop_is_resolved_on_partial_request(): void
+    {
+        $request = Request::create('/users', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'Users/Index']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'users']);
+
+        $response = new Response(
+            'Users/Index',
+            [
+                'users' => (new ScrollProp(fn () => User::query()->paginate(15)))->defer(),
+            ],
+            'app',
+            '123'
+        );
+
+        /** @var JsonResponse $response */
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertObjectHasProperty('users', $page->props);
+        $this->assertCount(15, $page->props->users->data);
+        $this->assertObjectHasProperty('scrollProps', $page);
+        $this->assertEquals('page', $page->scrollProps->users->pageName);
+        $this->assertContains('users.data', $page->mergeProps);
+    }
+
+    public function test_deferred_scroll_prop_can_have_custom_group(): void
+    {
+        $request = Request::create('/users', 'GET');
+
+        $response = new Response(
+            'Users/Index',
+            [
+                'users' => (new ScrollProp(fn () => User::query()->paginate(15)))->defer('custom-group'),
+            ],
+            'app',
+            '123'
+        );
+
+        /** @var BaseResponse $response */
+        $response = $response->toResponse($request);
+        $view = $response->getOriginalContent();
+        $page = $view->getData()['page'];
+
+        $this->assertArrayNotHasKey('users', $page['props']);
+        $this->assertSame(['custom-group' => ['users']], $page['deferredProps']);
     }
 }
