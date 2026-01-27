@@ -16,13 +16,6 @@ class DeferProp implements Deferrable, IgnoreFirstLoad, Mergeable, Onceable
     protected $callback;
 
     /**
-     * The defer group.
-     *
-     * @var string|null
-     */
-    protected $group;
-
-    /**
      * Create a new deferred property instance. Deferred properties are excluded
      * from the initial page load and only evaluated when requested by the
      * frontend, improving initial page performance.
@@ -30,20 +23,7 @@ class DeferProp implements Deferrable, IgnoreFirstLoad, Mergeable, Onceable
     public function __construct(callable $callback, ?string $group = null)
     {
         $this->callback = $callback;
-        $this->deferred = true;
-        $this->group = $group;
-    }
-
-    /**
-     * Get the defer group for this property. Properties with the same group
-     * are loaded together in a single request, allowing for efficient
-     * batching of related deferred data.
-     *
-     * @return string
-     */
-    public function group()
-    {
-        return $this->group ?? 'default';
+        $this->defer($group);
     }
 
     /**

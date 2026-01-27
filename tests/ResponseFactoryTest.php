@@ -15,13 +15,16 @@ use Inertia\AlwaysProp;
 use Inertia\ComponentNotFoundException;
 use Inertia\DeferProp;
 use Inertia\Inertia;
-use Inertia\LazyProp;
 use Inertia\MergeProp;
 use Inertia\OnceProp;
 use Inertia\OptionalProp;
 use Inertia\ResponseFactory;
+use Inertia\Tests\Enums\IntBackedEnum;
+use Inertia\Tests\Enums\StringBackedEnum;
+use Inertia\Tests\Enums\UnitEnum;
 use Inertia\Tests\Stubs\ExampleInertiaPropsProvider;
 use Inertia\Tests\Stubs\ExampleMiddleware;
+use InvalidArgumentException;
 
 class ResponseFactoryTest extends TestCase
 {
@@ -261,16 +264,6 @@ class ResponseFactoryTest extends TestCase
         $this->assertSame(['foo' => 'bar'], Inertia::getShared());
         Inertia::flushShared();
         $this->assertSame([], Inertia::getShared());
-    }
-
-    public function test_can_create_lazy_prop(): void
-    {
-        $factory = new ResponseFactory;
-        $lazyProp = $factory->lazy(function () {
-            return 'A lazy value';
-        });
-
-        $this->assertInstanceOf(LazyProp::class, $lazyProp);
     }
 
     public function test_can_create_deferred_prop(): void
@@ -539,6 +532,33 @@ class ResponseFactoryTest extends TestCase
 
         $response = (new ResponseFactory)->render('foo');
         $this->assertInstanceOf(\Inertia\Response::class, $response);
+    }
+
+    public function test_render_accepts_backed_enum(): void
+    {
+        $response = (new ResponseFactory)->render(StringBackedEnum::UsersIndex);
+        $this->assertInstanceOf(\Inertia\Response::class, $response);
+
+        /** @phpstan-ignore-next-line */
+        $getComponent = fn () => $this->component;
+        $this->assertSame('UsersPage/Index', $getComponent->call($response));
+    }
+
+    public function test_render_accepts_unit_enum(): void
+    {
+        $response = (new ResponseFactory)->render(UnitEnum::Index);
+        $this->assertInstanceOf(\Inertia\Response::class, $response);
+
+        /** @phpstan-ignore-next-line */
+        $getComponent = fn () => $this->component;
+        $this->assertSame('Index', $getComponent->call($response));
+    }
+
+    public function test_render_throws_for_non_string_backed_enum(): void
+    {
+        $factory = new ResponseFactory;
+        $this->expectException(InvalidArgumentException::class);
+        $factory->render(IntBackedEnum::Zero);
     }
 
     public function test_share_once_shares_a_once_prop(): void
