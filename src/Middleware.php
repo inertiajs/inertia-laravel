@@ -35,7 +35,7 @@ class Middleware
      *
      * @var array<int, string>
      */
-    protected $ssrExcept = [];
+    protected $withoutSsr = [];
 
     /**
      * Determine the current asset version.
@@ -128,10 +128,10 @@ class Middleware
             Inertia::resolveUrlUsing($urlResolver);
         }
 
-        $gateway = app(Gateway::class);
+        $ssrGateway = app(Gateway::class);
 
-        if (! empty($this->ssrExcept) && $gateway instanceof ExcludesSsrPaths) {
-            $gateway->except($this->ssrExcept);
+        if (! empty($this->withoutSsr) && $ssrGateway instanceof ExcludesSsrPaths) {
+            $ssrGateway->except($this->withoutSsr);
         }
 
         $response = $next($request);

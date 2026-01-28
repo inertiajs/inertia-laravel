@@ -11,7 +11,7 @@ class SsrExceptMiddleware extends Middleware
      *
      * @var array<int, string>
      */
-    protected $ssrExcept = [
+    protected $withoutSsr = [
         'admin/*',
         'nova/*',
     ];
