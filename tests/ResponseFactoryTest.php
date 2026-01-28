@@ -19,6 +19,7 @@ use Inertia\MergeProp;
 use Inertia\OnceProp;
 use Inertia\OptionalProp;
 use Inertia\ResponseFactory;
+use Inertia\Ssr\HttpGateway;
 use Inertia\Tests\Enums\IntBackedEnum;
 use Inertia\Tests\Enums\StringBackedEnum;
 use Inertia\Tests\Enums\UnitEnum;
@@ -732,5 +733,20 @@ class ResponseFactoryTest extends TestCase
                 'bar' => 'value2',
             ],
         ]);
+    }
+
+    public function test_without_ssr_registers_paths_with_gateway(): void
+    {
+        Inertia::withoutSsr(['admin/*', 'nova/*']);
+
+        $this->assertContains('admin/*', app(HttpGateway::class)->getExcludedPaths());
+        $this->assertContains('nova/*', app(HttpGateway::class)->getExcludedPaths());
+    }
+
+    public function test_without_ssr_accepts_string(): void
+    {
+        Inertia::withoutSsr('admin/*');
+
+        $this->assertContains('admin/*', app(HttpGateway::class)->getExcludedPaths());
     }
 }
