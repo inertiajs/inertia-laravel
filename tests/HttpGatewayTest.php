@@ -19,7 +19,7 @@ class HttpGatewayTest extends TestCase
     {
         parent::setUp();
 
-        $this->gateway = new HttpGateway;
+        $this->gateway = app(HttpGateway::class);
         $this->renderUrl = $this->gateway->getProductionUrl('/render');
 
         Http::preventStrayRequests();
@@ -210,5 +210,83 @@ class HttpGatewayTest extends TestCase
         $this->assertNotNull($response);
         $this->assertEquals('<title>Hot SSR</title>', $response->head);
         $this->assertEquals('<div id="app">Hot Response</div>', $response->body);
+    }
+
+    public function test_it_returns_null_when_path_is_excluded_from_ssr(): void
+    {
+        config([
+            'inertia.ssr.enabled' => true,
+            'inertia.ssr.bundle' => __DIR__.'/Stubs/ssr-bundle.js',
+        ]);
+
+        $this->gateway->except(['admin/*']);
+
+        $this->get('/admin/dashboard');
+
+        $this->assertNull($this->gateway->dispatch(['page' => self::EXAMPLE_PAGE_OBJECT]));
+    }
+
+    public function test_it_dispatches_when_path_is_not_excluded_from_ssr(): void
+    {
+        config([
+            'inertia.ssr.enabled' => true,
+            'inertia.ssr.bundle' => __DIR__.'/Stubs/ssr-bundle.js',
+        ]);
+
+        Http::fake([
+            $this->renderUrl => Http::response(json_encode([
+                'head' => ['<title>SSR Test</title>'],
+                'body' => '<div id="app">SSR Response</div>',
+            ])),
+        ]);
+
+        $this->gateway->except(['admin/*']);
+
+        $this->get('/users');
+
+        $this->assertNotNull($this->gateway->dispatch(['page' => self::EXAMPLE_PAGE_OBJECT]));
+    }
+
+    public function test_it_returns_null_when_full_url_is_excluded_from_ssr(): void
+    {
+        config([
+            'inertia.ssr.enabled' => true,
+            'inertia.ssr.bundle' => __DIR__.'/Stubs/ssr-bundle.js',
+        ]);
+
+        $this->gateway->except(['http://localhost/admin/*']);
+
+        $this->get('/admin/dashboard');
+
+        $this->assertNull($this->gateway->dispatch(['page' => self::EXAMPLE_PAGE_OBJECT]));
+    }
+
+    public function test_except_accepts_string(): void
+    {
+        config([
+            'inertia.ssr.enabled' => true,
+            'inertia.ssr.bundle' => __DIR__.'/Stubs/ssr-bundle.js',
+        ]);
+
+        $this->gateway->except('admin/*');
+
+        $this->get('/admin/dashboard');
+
+        $this->assertNull($this->gateway->dispatch(['page' => self::EXAMPLE_PAGE_OBJECT]));
+    }
+
+    public function test_except_can_be_called_multiple_times(): void
+    {
+        config([
+            'inertia.ssr.enabled' => true,
+            'inertia.ssr.bundle' => __DIR__.'/Stubs/ssr-bundle.js',
+        ]);
+
+        $this->gateway->except('admin/*');
+        $this->gateway->except(['nova/*', 'filament/*']);
+
+        $this->get('/nova/resources');
+
+        $this->assertNull($this->gateway->dispatch(['page' => self::EXAMPLE_PAGE_OBJECT]));
     }
 }
