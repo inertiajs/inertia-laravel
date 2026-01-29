@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response as BaseResponse;
 use Illuminate\Support\Traits\Macroable;
 use Inertia\Support\Header;
+use Inertia\Support\SessionKey;
 use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirect;
@@ -158,7 +159,7 @@ class ResponseFactory
      */
     public function clearHistory(): void
     {
-        session([SessionKey::ClearHistory->value => true]);
+        session([SessionKey::CLEAR_HISTORY => true]);
     }
 
     /**
@@ -336,7 +337,7 @@ class ResponseFactory
             $flash = [$key => $value];
         }
 
-        session()->now(SessionKey::FlashData->value, [
+        session()->now(SessionKey::FLASH_DATA, [
             ...$this->getFlashed(),
             ...$flash,
         ]);
@@ -363,6 +364,6 @@ class ResponseFactory
     {
         $request ??= request();
 
-        return $request->hasSession() ? $request->session()->get(SessionKey::FlashData->value, []) : [];
+        return $request->hasSession() ? $request->session()->get(SessionKey::FLASH_DATA, []) : [];
     }
 }
