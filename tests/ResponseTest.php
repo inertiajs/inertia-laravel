@@ -1650,4 +1650,171 @@ class ResponseTest extends TestCase
 
         $this->assertSame('/users?page=1&sort=name', $page->url);
     }
+
+    public function test_deferred_props_from_provides_inertia_properties_are_included_in_deferred_props_metadata(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+
+        $response = new Response('User/Edit', [
+            'user' => ['name' => 'Jonathan'],
+            new class implements ProvidesInertiaProperties
+            {
+                public function toInertiaProperties(RenderContext $context): iterable
+                {
+                    return [
+                        'foo' => new DeferProp(fn () => 'bar', 'default'),
+                    ];
+                }
+            },
+        ], 'app', '123');
+        /** @var BaseResponse $response */
+        $response = $response->toResponse($request);
+        $view = $response->getOriginalContent();
+        $page = $view->getData()['page'];
+
+        $this->assertSame('Jonathan', $page['props']['user']['name']);
+        $this->assertArrayNotHasKey('foo', $page['props']);
+        $this->assertSame([
+            'default' => ['foo'],
+        ], $page['deferredProps']);
+    }
+
+    public function test_deferred_props_from_provides_inertia_properties_with_multiple_groups(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+
+        $response = new Response('User/Edit', [
+            'user' => ['name' => 'Jonathan'],
+            new class implements ProvidesInertiaProperties
+            {
+                public function toInertiaProperties(RenderContext $context): iterable
+                {
+                    return [
+                        'foo' => new DeferProp(fn () => 'foo value', 'default'),
+                        'bar' => new DeferProp(fn () => 'bar value', 'custom'),
+                    ];
+                }
+            },
+        ], 'app', '123');
+        /** @var BaseResponse $response */
+        $response = $response->toResponse($request);
+        $view = $response->getOriginalContent();
+        $page = $view->getData()['page'];
+
+        $this->assertSame('Jonathan', $page['props']['user']['name']);
+        $this->assertArrayNotHasKey('foo', $page['props']);
+        $this->assertArrayNotHasKey('bar', $page['props']);
+        $this->assertSame([
+            'default' => ['foo'],
+            'custom' => ['bar'],
+        ], $page['deferredProps']);
+    }
+
+    public function test_deferred_props_from_provides_inertia_properties_can_be_loaded_via_partial_request(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'User/Edit']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'foo']);
+
+        $response = new Response('User/Edit', [
+            'user' => ['name' => 'Jonathan'],
+            new class implements ProvidesInertiaProperties
+            {
+                public function toInertiaProperties(RenderContext $context): iterable
+                {
+                    return [
+                        'foo' => new DeferProp(fn () => 'bar', 'default'),
+                    ];
+                }
+            },
+        ], 'app', '123');
+        /** @var JsonResponse $response */
+        $response = $response->toResponse($request);
+        $page = $response->getData(true);
+
+        $this->assertSame('bar', $page['props']['foo']);
+        $this->assertArrayNotHasKey('user', $page['props']);
+    }
+
+    public function test_merge_props_from_provides_inertia_properties_are_included_in_merge_props_metadata(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+
+        $response = new Response('User/Edit', [
+            'user' => ['name' => 'Jonathan'],
+            new class implements ProvidesInertiaProperties
+            {
+                public function toInertiaProperties(RenderContext $context): iterable
+                {
+                    return [
+                        'foo' => new MergeProp('foo value'),
+                    ];
+                }
+            },
+        ], 'app', '123');
+        /** @var BaseResponse $response */
+        $response = $response->toResponse($request);
+        $view = $response->getOriginalContent();
+        $page = $view->getData()['page'];
+
+        $this->assertSame('Jonathan', $page['props']['user']['name']);
+        $this->assertSame('foo value', $page['props']['foo']);
+        $this->assertSame(['foo'], $page['mergeProps']);
+    }
+
+    public function test_once_props_from_provides_inertia_properties_are_included_in_once_props_metadata(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+
+        $response = new Response('User/Edit', [
+            'user' => ['name' => 'Jonathan'],
+            new class implements ProvidesInertiaProperties
+            {
+                public function toInertiaProperties(RenderContext $context): iterable
+                {
+                    return [
+                        'foo' => Inertia::once(fn () => 'bar'),
+                    ];
+                }
+            },
+        ], 'app', '123');
+        /** @var BaseResponse $response */
+        $response = $response->toResponse($request);
+        $view = $response->getOriginalContent();
+        $page = $view->getData()['page'];
+
+        $this->assertSame('Jonathan', $page['props']['user']['name']);
+        $this->assertSame('bar', $page['props']['foo']);
+        $this->assertSame(['foo' => ['prop' => 'foo', 'expiresAt' => null]], $page['onceProps']);
+    }
+
+    public function test_deferred_merge_props_from_provides_inertia_properties_include_both_metadata(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+
+        $response = new Response('User/Edit', [
+            'user' => ['name' => 'Jonathan'],
+            new class implements ProvidesInertiaProperties
+            {
+                public function toInertiaProperties(RenderContext $context): iterable
+                {
+                    return [
+                        'foo' => (new DeferProp(fn () => 'foo value', 'default'))->merge(),
+                    ];
+                }
+            },
+        ], 'app', '123');
+        /** @var BaseResponse $response */
+        $response = $response->toResponse($request);
+        $view = $response->getOriginalContent();
+        $page = $view->getData()['page'];
+
+        $this->assertSame('Jonathan', $page['props']['user']['name']);
+        $this->assertArrayNotHasKey('foo', $page['props']);
+        $this->assertSame([
+            'default' => ['foo'],
+        ], $page['deferredProps']);
+        $this->assertSame(['foo'], $page['mergeProps']);
+    }
 }
