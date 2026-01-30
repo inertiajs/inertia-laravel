@@ -191,6 +191,8 @@ class Response implements Responsable
      */
     public function toResponse($request)
     {
+        $this->props = $this->resolveInertiaPropsProviders($this->props, $request);
+
         $props = $this->resolveProperties($request, $this->props);
 
         $page = array_merge(
@@ -225,7 +227,6 @@ class Response implements Responsable
      */
     public function resolveProperties(Request $request, array $props): array
     {
-        $props = $this->resolveInertiaPropsProviders($props, $request);
         $props = $this->resolvePartialProperties($props, $request);
         $props = $this->resolveOnceProperties($props, $request);
         $props = $this->resolveArrayableProperties($props, $request);
