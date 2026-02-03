@@ -34,7 +34,13 @@ class HttpGateway implements Gateway, HasHealthCheck
         try {
             $response = Http::post($url, $page);
 
-            if ($response->failed() || ! $data = $response->json()) {
+            if ($response->failed()) {
+                $this->handleSsrFailure($page, $response->json());
+
+                return null;
+            }
+
+            if (! $data = $response->json()) {
                 return null;
             }
 
@@ -43,11 +49,53 @@ class HttpGateway implements Gateway, HasHealthCheck
                 $data['body'] ?? ''
             );
         } catch (Exception $e) {
-            if ($e instanceof StrayRequestException) {
+            if ($e instanceof StrayRequestException || $e instanceof SsrException) {
                 throw $e;
             }
 
+            $this->handleSsrFailure($page, [
+                'error' => $e->getMessage(),
+                'type' => 'connection',
+            ]);
+
             return null;
+        }
+    }
+
+    /**
+     * Handle an SSR rendering failure.
+     *
+     * @param  array<string, mixed>  $page
+     * @param  array<string, mixed>|null  $error
+     *
+     * @throws SsrException
+     */
+    protected function handleSsrFailure(array $page, ?array $error): void
+    {
+        $event = new SsrRenderFailed(
+            page: $page,
+            error: $error['error'] ?? 'Unknown SSR error',
+            type: SsrErrorType::fromString($error['type'] ?? null),
+            hint: $error['hint'] ?? null,
+            browserApi: $error['browserApi'] ?? null,
+            stack: $error['stack'] ?? null,
+            sourceLocation: $error['sourceLocation'] ?? null,
+        );
+
+        // Dispatch the event so users can listen for SSR failures
+        SsrRenderFailed::dispatch(
+            $event->page,
+            $event->error,
+            $event->type,
+            $event->hint,
+            $event->browserApi,
+            $event->stack,
+            $event->sourceLocation,
+        );
+
+        // Throw an exception if configured (useful for E2E testing)
+        if (config('inertia.ssr.throw_on_error', false)) {
+            throw SsrException::fromEvent($event);
         }
     }
 

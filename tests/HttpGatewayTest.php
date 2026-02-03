@@ -6,8 +6,12 @@ use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Promise\Create;
 use GuzzleHttp\Promise\PromiseInterface;
 use GuzzleHttp\Psr7\Request;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
 use Inertia\Ssr\HttpGateway;
+use Inertia\Ssr\SsrErrorType;
+use Inertia\Ssr\SsrException;
+use Inertia\Ssr\SsrRenderFailed;
 
 class HttpGatewayTest extends TestCase
 {
@@ -210,5 +214,153 @@ class HttpGatewayTest extends TestCase
         $this->assertNotNull($response);
         $this->assertEquals('<title>Hot SSR</title>', $response->head);
         $this->assertEquals('<div id="app">Hot Response</div>', $response->body);
+    }
+
+    public function test_it_dispatches_event_when_ssr_fails(): void
+    {
+        Event::fake([SsrRenderFailed::class]);
+
+        config([
+            'inertia.ssr.enabled' => true,
+            'inertia.ssr.bundle' => __DIR__.'/Stubs/ssr-bundle.js',
+        ]);
+
+        Http::fake([
+            $this->renderUrl => Http::response(json_encode([
+                'error' => 'window is not defined',
+                'type' => 'browser-api',
+                'hint' => 'Wrap in lifecycle hook',
+                'browserApi' => 'window',
+            ]), 500),
+        ]);
+
+        $this->assertNull($this->gateway->dispatch(self::EXAMPLE_PAGE_OBJECT));
+
+        Event::assertDispatched(SsrRenderFailed::class, function (SsrRenderFailed $event) {
+            return $event->error === 'window is not defined'
+                && $event->type === SsrErrorType::BrowserApi
+                && $event->hint === 'Wrap in lifecycle hook'
+                && $event->browserApi === 'window'
+                && $event->component() === 'Foo/Bar';
+        });
+    }
+
+    public function test_it_handles_connection_errors_gracefully(): void
+    {
+        Event::fake([SsrRenderFailed::class]);
+
+        config([
+            'inertia.ssr.enabled' => true,
+            'inertia.ssr.bundle' => __DIR__.'/Stubs/ssr-bundle.js',
+        ]);
+
+        Http::fake([
+            $this->renderUrl => self::rejectionForFailedConnection(),
+        ]);
+
+        $this->assertNull($this->gateway->dispatch(self::EXAMPLE_PAGE_OBJECT));
+
+        Event::assertDispatched(SsrRenderFailed::class, function (SsrRenderFailed $event) {
+            return $event->type === SsrErrorType::Connection
+                && str_contains($event->error, 'Connection refused');
+        });
+    }
+
+    public function test_it_throws_exception_when_throw_on_error_is_enabled(): void
+    {
+        Event::fake([SsrRenderFailed::class]);
+
+        config([
+            'inertia.ssr.enabled' => true,
+            'inertia.ssr.bundle' => __DIR__.'/Stubs/ssr-bundle.js',
+            'inertia.ssr.throw_on_error' => true,
+        ]);
+
+        Http::fake([
+            $this->renderUrl => Http::response(json_encode([
+                'error' => 'window is not defined',
+                'type' => 'browser-api',
+                'hint' => 'Wrap in lifecycle hook',
+                'browserApi' => 'window',
+                'sourceLocation' => 'resources/js/Pages/Dashboard.vue:10:5',
+            ]), 500),
+        ]);
+
+        $this->expectException(SsrException::class);
+        $this->expectExceptionMessage('SSR render failed for component [Foo/Bar]: window is not defined');
+
+        $this->gateway->dispatch(self::EXAMPLE_PAGE_OBJECT);
+    }
+
+    public function test_ssr_exception_contains_error_details(): void
+    {
+        Event::fake([SsrRenderFailed::class]);
+
+        config([
+            'inertia.ssr.enabled' => true,
+            'inertia.ssr.bundle' => __DIR__.'/Stubs/ssr-bundle.js',
+            'inertia.ssr.throw_on_error' => true,
+        ]);
+
+        Http::fake([
+            $this->renderUrl => Http::response(json_encode([
+                'error' => 'window is not defined',
+                'type' => 'browser-api',
+                'hint' => 'Wrap in lifecycle hook',
+                'browserApi' => 'window',
+                'sourceLocation' => 'resources/js/Pages/Dashboard.vue:10:5',
+            ]), 500),
+        ]);
+
+        try {
+            $this->gateway->dispatch(self::EXAMPLE_PAGE_OBJECT);
+            $this->fail('Expected SsrException was not thrown');
+        } catch (SsrException $e) {
+            $this->assertEquals('Foo/Bar', $e->component());
+            $this->assertSame(SsrErrorType::BrowserApi, $e->type());
+            $this->assertEquals('Wrap in lifecycle hook', $e->hint());
+            $this->assertEquals('resources/js/Pages/Dashboard.vue:10:5', $e->sourceLocation());
+            $this->assertStringContainsString('at resources/js/Pages/Dashboard.vue:10:5', $e->getMessage());
+        }
+    }
+
+    public function test_it_throws_exception_on_connection_error_when_throw_on_error_is_enabled(): void
+    {
+        Event::fake([SsrRenderFailed::class]);
+
+        config([
+            'inertia.ssr.enabled' => true,
+            'inertia.ssr.bundle' => __DIR__.'/Stubs/ssr-bundle.js',
+            'inertia.ssr.throw_on_error' => true,
+        ]);
+
+        Http::fake([
+            $this->renderUrl => self::rejectionForFailedConnection(),
+        ]);
+
+        $this->expectException(SsrException::class);
+        $this->expectExceptionMessage('Connection refused');
+
+        $this->gateway->dispatch(self::EXAMPLE_PAGE_OBJECT);
+    }
+
+    public function test_it_does_not_throw_exception_when_throw_on_error_is_disabled(): void
+    {
+        Event::fake([SsrRenderFailed::class]);
+
+        config([
+            'inertia.ssr.enabled' => true,
+            'inertia.ssr.bundle' => __DIR__.'/Stubs/ssr-bundle.js',
+            'inertia.ssr.throw_on_error' => false,
+        ]);
+
+        Http::fake([
+            $this->renderUrl => Http::response(json_encode([
+                'error' => 'window is not defined',
+                'type' => 'browser-api',
+            ]), 500),
+        ]);
+
+        $this->assertNull($this->gateway->dispatch(self::EXAMPLE_PAGE_OBJECT));
     }
 }
