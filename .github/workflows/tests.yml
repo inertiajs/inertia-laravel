@@ -46,7 +46,7 @@ jobs:
           coverage: none
 
       - name: Remove Larastan
-        run: composer remove --dev larastan/larastan
+        run: composer remove --dev larastan/larastan --no-update
 
       - name: Set Minimum PHP 8.1 Versions
         uses: nick-fields/retry@v3
