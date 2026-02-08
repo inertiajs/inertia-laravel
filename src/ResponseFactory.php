@@ -4,8 +4,11 @@ namespace Inertia;
 
 use BackedEnum;
 use Closure;
+use Illuminate\Contracts\Debug\ExceptionHandler;
+use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request as HttpRequest;
+use Illuminate\Routing\Router;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Redirect;
@@ -314,6 +317,31 @@ class ResponseFactory
         }
 
         return $url instanceof SymfonyRedirect ? $url : Redirect::away($url);
+    }
+
+    /**
+     * Register a callback to handle HTTP exceptions for Inertia requests.
+     */
+    public function handleExceptionsUsing(callable $callback): void
+    {
+        /** @var \Illuminate\Foundation\Exceptions\Handler $handler */
+        $handler = app(ExceptionHandler::class);
+
+        $handler->respondUsing(function ($response, $e, $request) use ($callback) {
+            $result = $callback(new ExceptionResponse(
+                $e,
+                $request,
+                $response,
+                app(Router::class),
+                app(Kernel::class),
+            ));
+
+            if ($result instanceof ExceptionResponse) {
+                return $result->toResponse($request);
+            }
+
+            return $result ?? $response;
+        });
     }
 
     /**
