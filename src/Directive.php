@@ -23,10 +23,10 @@ class Directive
 
             if ($__inertiaSsrResponse) {
                 echo $__inertiaSsrResponse->body;
-            } elseif (config(\'inertia.use_script_element_for_initial_page\')) {
-                ?><script data-page="'.$id.'" type="application/json">{!! json_encode($page) !!}</script><div id="'.$id.'"></div><?php
-            } else {
+            } elseif (config(\'inertia.pages.use_data_attribute_for_initial_page\')) {
                 ?><div id="'.$id.'" data-page="{{ json_encode($page) }}"></div><?php
+            } else {
+                ?><script data-page="'.$id.'" type="application/json">{!! json_encode($page) !!}</script><div id="'.$id.'"></div><?php
             }
         ?>';
 

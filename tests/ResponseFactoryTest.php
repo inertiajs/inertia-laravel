@@ -518,7 +518,7 @@ class ResponseFactoryTest extends TestCase
 
     public function test_will_throw_exception_if_component_does_not_exist_when_ensuring_is_enabled(): void
     {
-        config()->set('inertia.ensure_pages_exist', true);
+        config()->set('inertia.pages.ensure_pages_exist', true);
 
         $this->expectException(ComponentNotFoundException::class);
         $this->expectExceptionMessage('Inertia page component [foo] not found.');
@@ -528,7 +528,7 @@ class ResponseFactoryTest extends TestCase
 
     public function test_will_not_throw_exception_if_component_does_not_exist_when_ensuring_is_disabled(): void
     {
-        config()->set('inertia.ensure_pages_exist', false);
+        config()->set('inertia.pages.ensure_pages_exist', false);
 
         $response = (new ResponseFactory)->render('foo');
         $this->assertInstanceOf(\Inertia\Response::class, $response);
