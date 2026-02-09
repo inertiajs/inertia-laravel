@@ -29,6 +29,22 @@ return [
 
         // 'bundle' => base_path('bootstrap/ssr/ssr.mjs'),
 
+        /*
+        |--------------------------------------------------------------------------
+        | SSR Error Handling
+        |--------------------------------------------------------------------------
+        |
+        | When SSR rendering fails, Inertia gracefully falls back to client-side
+        | rendering. Set throw_on_error to true to throw an exception instead.
+        | This is useful for E2E testing where you want SSR errors to fail loudly.
+        |
+        | You can also listen for the Inertia\Ssr\SsrRenderFailed event to handle
+        | failures in your own way (e.g., logging, error tracking service).
+        |
+        */
+
+        'throw_on_error' => (bool) env('INERTIA_SSR_THROW_ON_ERROR', false),
+
     ],
 
     /*
