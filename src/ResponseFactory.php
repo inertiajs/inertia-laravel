@@ -281,7 +281,7 @@ class ResponseFactory
             throw new InvalidArgumentException('Component argument must be of type string or a string BackedEnum');
         }
 
-        if (config('inertia.ensure_pages_exist', false)) {
+        if (config('inertia.pages.ensure_pages_exist', false)) {
             $this->findComponentOrFail($component);
         }
 
