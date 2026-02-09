@@ -26,52 +26,42 @@ class Response implements Responsable
 
     /**
      * The name of the root component.
-     *
-     * @var string
      */
-    protected $component;
+    protected string $component;
 
     /**
      * The page props.
      *
      * @var array<string, mixed>
      */
-    protected $props;
+    protected array $props;
 
     /**
      * The name of the root view.
-     *
-     * @var string
      */
-    protected $rootView;
+    protected string $rootView;
 
     /**
      * The asset version.
-     *
-     * @var string
      */
-    protected $version;
+    protected string $version;
 
     /**
      * Indicates if the browser history should be cleared.
-     *
-     * @var bool
      */
-    protected $clearHistory;
+    protected bool $clearHistory;
 
     /**
      * Indicates if the browser history should be encrypted.
-     *
-     * @var bool
      */
-    protected $encryptHistory;
+    protected bool $encryptHistory;
 
     /**
      * The view data.
      *
      * @var array<string, mixed>
      */
-    protected $viewData = [];
+    protected array $viewData = [];
 
     /**
      * The URL resolver callback.

@@ -102,20 +102,16 @@ trait MergesProps
 
     /**
      * Determine if the property should be appended at the root level.
-     *
-     * @return bool
      */
-    public function appendsAtRoot()
+    public function appendsAtRoot(): bool
     {
         return $this->append && $this->mergesAtRoot();
     }
 
     /**
      * Determine if the property should be prepended at the root level.
-     *
-     * @return bool
      */
-    public function prependsAtRoot()
+    public function prependsAtRoot(): bool
     {
         return ! $this->append && $this->mergesAtRoot();
     }

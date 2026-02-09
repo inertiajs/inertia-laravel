@@ -6,17 +6,13 @@ class Response
 {
     /**
      * The HTML head content from server-side rendering.
-     *
-     * @var string
      */
-    public $head;
+    public string $head;
 
     /**
      * The HTML body content from server-side rendering.
-     *
-     * @var string
      */
-    public $body;
+    public string $body;
 
     /**
      * Create a new SSR response instance.

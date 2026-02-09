@@ -10,19 +10,15 @@ class MergeProp implements Mergeable, Onceable
      * The property value.
      *
      * Merged with existing client-side data during partial reloads.
-     *
-     * @var mixed
      */
-    protected $value;
+    protected mixed $value;
 
     /**
      * Create a new merge property instance. Merge properties are combined
      * with existing client-side data during partial reloads instead of
      * completely replacing the property value.
-     *
-     * @param  mixed  $value
      */
-    public function __construct($value)
+    public function __construct(mixed $value)
     {
         $this->value = $value;
         $this->merge = true;
@@ -30,10 +26,8 @@ class MergeProp implements Mergeable, Onceable
 
     /**
      * Resolve the property value.
-     *
-     * @return mixed
      */
-    public function __invoke()
+    public function __invoke(): mixed
     {
         return $this->resolveCallable($this->value);
     }

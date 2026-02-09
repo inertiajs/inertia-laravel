@@ -15,52 +15,42 @@ class AssertableInertia extends AssertableJson
 {
     /**
      * The Inertia component name for this page.
-     *
-     * @var string
      */
-    private $component;
+    private string $component;
 
     /**
      * The current page URL.
-     *
-     * @var string
      */
-    private $url;
+    private string $url;
 
     /**
      * The current asset version.
-     *
-     * @var string|null
      */
-    private $version;
+    private ?string $version;
 
     /**
      * Whether history state should be encrypted.
-     *
-     * @var bool
      */
-    private $encryptHistory;
+    private bool $encryptHistory;
 
     /**
      * Whether history should be cleared.
-     *
-     * @var bool
      */
-    private $clearHistory;
+    private bool $clearHistory;
 
     /**
      * The deferred props (if any).
      *
      * @var array<string, array<int, string>>
      */
-    private $deferredProps;
+    private array $deferredProps;
 
     /**
      * The Flash Data (if any).
      *
      * @var array<string, mixed>
      */
-    private $flash;
+    private array $flash;
 
     /**
      * Create an AssertableInertia instance from a test response.
@@ -98,10 +88,8 @@ class AssertableInertia extends AssertableJson
 
     /**
      * Assert that the page uses the given component.
-     *
-     * @param  bool|null  $shouldExist
      */
-    public function component(?string $value = null, $shouldExist = null): self
+    public function component(?string $value = null, ?bool $shouldExist = null): self
     {
         PHPUnit::assertSame($value, $this->component, 'Unexpected Inertia page component.');
 

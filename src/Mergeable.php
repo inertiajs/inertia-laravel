@@ -6,45 +6,35 @@ interface Mergeable
 {
     /**
      * Mark the property for merging.
-     *
-     * @return static
      */
-    public function merge();
+    public function merge(): static;
 
     /**
      * Determine if the property should be merged.
-     *
-     * @return bool
      */
-    public function shouldMerge();
+    public function shouldMerge(): bool;
 
     /**
      * Determine if the property should be deep merged.
-     *
-     * @return bool
      */
-    public function shouldDeepMerge();
+    public function shouldDeepMerge(): bool;
 
     /**
      * Get the properties to match on for merging.
      *
      * @return array<int, string>
      */
-    public function matchesOn();
+    public function matchesOn(): array;
 
     /**
      * Determine if the property should be appended at the root level.
-     *
-     * @return bool
      */
-    public function appendsAtRoot();
+    public function appendsAtRoot(): bool;
 
     /**
      * Determine if the property should be prepended at the root level.
-     *
-     * @return bool
      */
-    public function prependsAtRoot();
+    public function prependsAtRoot(): bool;
 
     /**
      * Get the paths to append when merging.

@@ -9,12 +9,10 @@ class TestResponseMacros
 {
     /**
      * Register the 'assertInertia' macro for TestResponse.
-     *
-     * @return Closure
      */
-    public function assertInertia()
+    public function assertInertia(): Closure
     {
-        return function (?Closure $callback = null) {
+        return function (?Closure $callback = null): self {
             /** @phpstan-ignore-next-line */
             $assert = AssertableInertia::fromTestResponse($this);
 
@@ -30,12 +28,10 @@ class TestResponseMacros
 
     /**
      * Register the 'inertiaPage' macro for TestResponse.
-     *
-     * @return Closure
      */
-    public function inertiaPage()
+    public function inertiaPage(): Closure
     {
-        return function () {
+        return function (): array {
             /** @phpstan-ignore-next-line */
             return AssertableInertia::fromTestResponse($this)->toArray();
         };
@@ -43,12 +39,10 @@ class TestResponseMacros
 
     /**
      * Register the 'inertiaProps' macro for TestResponse.
-     *
-     * @return Closure
      */
-    public function inertiaProps()
+    public function inertiaProps(): Closure
     {
-        return function (?string $propName = null) {
+        return function (?string $propName = null): mixed {
             /** @phpstan-ignore-next-line */
             $page = AssertableInertia::fromTestResponse($this)->toArray();
 

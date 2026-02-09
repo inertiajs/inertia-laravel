@@ -24,10 +24,8 @@ class OnceProp implements Onceable
 
     /**
      * Resolve the property value.
-     *
-     * @return mixed
      */
-    public function __invoke()
+    public function __invoke(): mixed
     {
         return $this->resolveCallable($this->callback);
     }

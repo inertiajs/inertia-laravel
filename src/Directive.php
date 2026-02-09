@@ -8,10 +8,8 @@ class Directive
      * Compile the "@inertia" Blade directive. This directive renders the
      * Inertia root element with the page data, handling both client-side
      * rendering and SSR fallback scenarios.
-     *
-     * @param  string  $expression
      */
-    public static function compile($expression = ''): string
+    public static function compile(string $expression = ''): string
     {
         $id = trim(trim($expression), "\'\"") ?: 'app';
 
@@ -37,10 +35,8 @@ class Directive
      * Compile the "@inertiaHead" Blade directive. This directive renders the
      * head content for SSR responses, including meta tags, title, and other
      * head elements from the server-side render.
-     *
-     * @param  string  $expression
      */
-    public static function compileHead($expression = ''): string
+    public static function compileHead(string $expression = ''): string
     {
         $template = '<?php
             if (!isset($__inertiaSsrDispatched)) {

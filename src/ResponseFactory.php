@@ -26,45 +26,35 @@ class ResponseFactory
 
     /**
      * The name of the root view.
-     *
-     * @var string
      */
-    protected $rootView = 'app';
+    protected string $rootView = 'app';
 
     /**
      * The shared properties.
      *
      * @var array<string, mixed>
      */
-    protected $sharedProps = [];
+    protected array $sharedProps = [];
 
     /**
      * The asset version.
-     *
-     * @var Closure|string|null
      */
-    protected $version;
+    protected Closure|string|null $version = null;
 
     /**
      * Indicates if the browser history should be cleared.
-     *
-     * @var bool
      */
-    protected $clearHistory = false;
+    protected bool $clearHistory = false;
 
     /**
      * Indicates if the browser history should be encrypted.
-     *
-     * @var bool|null
      */
-    protected $encryptHistory;
+    protected ?bool $encryptHistory = null;
 
     /**
      * The URL resolver callback.
-     *
-     * @var Closure|null
      */
-    protected $urlResolver;
+    protected ?Closure $urlResolver = null;
 
     /**
      * Set the root view template for Inertia responses. This template
@@ -82,9 +72,8 @@ class ResponseFactory
      * state, flash messages, etc.
      *
      * @param  string|array<array-key, mixed>|\Illuminate\Contracts\Support\Arrayable<array-key, mixed>|\Inertia\ProvidesInertiaProperties  $key
-     * @param  mixed  $value
      */
-    public function share($key, $value = null): void
+    public function share($key, mixed $value = null): void
     {
         if (is_array($key)) {
             $this->sharedProps = array_merge($this->sharedProps, $key);
@@ -101,11 +90,8 @@ class ResponseFactory
      * Get the shared data for a given key. Returns all shared data if
      * no key is provided, or the value for a specific key with an
      * optional default fallback.
-     *
-     * @param  mixed  $default
-     * @return mixed
      */
-    public function getShared(?string $key = null, $default = null)
+    public function getShared(?string $key = null, mixed $default = null): mixed
     {
         if ($key) {
             return Arr::get($this->sharedProps, $key, $default);
@@ -116,20 +102,16 @@ class ResponseFactory
 
     /**
      * Flush all shared data.
-     *
-     * @return void
      */
-    public function flushShared()
+    public function flushShared(): void
     {
         $this->sharedProps = [];
     }
 
     /**
      * Set the asset version.
-     *
-     * @param  \Closure|string|null  $version
      */
-    public function version($version): void
+    public function version(\Closure|string|null $version): void
     {
         $this->version = $version;
     }
@@ -164,10 +146,8 @@ class ResponseFactory
 
     /**
      * Encrypt the browser history.
-     *
-     * @param  bool  $encrypt
      */
-    public function encryptHistory($encrypt = true): void
+    public function encryptHistory(bool $encrypt = true): void
     {
         $this->encryptHistory = $encrypt;
     }
@@ -190,30 +170,24 @@ class ResponseFactory
 
     /**
      * Create a merge property.
-     *
-     * @param  mixed  $value
      */
-    public function merge($value): MergeProp
+    public function merge(mixed $value): MergeProp
     {
         return new MergeProp($value);
     }
 
     /**
      * Create a deep merge property.
-     *
-     * @param  mixed  $value
      */
-    public function deepMerge($value): MergeProp
+    public function deepMerge(mixed $value): MergeProp
     {
         return (new MergeProp($value))->deepMerge();
     }
 
     /**
      * Create an always property.
-     *
-     * @param  mixed  $value
      */
-    public function always($value): AlwaysProp
+    public function always(mixed $value): AlwaysProp
     {
         return new AlwaysProp($value);
     }

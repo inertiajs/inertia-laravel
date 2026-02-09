@@ -6,10 +6,8 @@ class BundleDetector
 {
     /**
      * Detect and return the path to the SSR bundle file.
-     *
-     * @return string|null
      */
-    public function detect()
+    public function detect(): ?string
     {
         return collect([
             config('inertia.ssr.bundle'),
