@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Response as ResponseFactory;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
 use Inertia\Support\Header;
+use Inertia\Support\SessionKey;
 use UnitEnum;
 
 class Response implements Responsable
@@ -94,7 +95,7 @@ class Response implements Responsable
         $this->props = $props;
         $this->rootView = $rootView;
         $this->version = $version;
-        $this->clearHistory = session()->pull(SessionKey::ClearHistory->value, false);
+        $this->clearHistory = session()->pull(SessionKey::CLEAR_HISTORY, false);
         $this->encryptHistory = $encryptHistory;
         $this->urlResolver = $urlResolver;
     }

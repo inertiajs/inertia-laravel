@@ -119,7 +119,7 @@ class AssertableInertiaTest extends TestCase
         );
 
         config()->set('inertia.testing.ensure_pages_exist', true);
-        config()->set('inertia.testing.page_paths', [realpath(__DIR__)]);
+        config()->set('inertia.pages.paths', [realpath(__DIR__)]);
         $this->expectException(AssertionFailedError::class);
         $this->expectExceptionMessage('Inertia page component file [fixtures/ExamplePage] does not exist.');
 
@@ -135,7 +135,7 @@ class AssertableInertiaTest extends TestCase
         );
 
         config()->set('inertia.testing.ensure_pages_exist', true);
-        config()->set('inertia.testing.page_extensions', ['bin', 'exe', 'svg']);
+        config()->set('inertia.pages.extensions', ['bin', 'exe', 'svg']);
         $this->expectException(AssertionFailedError::class);
         $this->expectExceptionMessage('Inertia page component file [fixtures/ExamplePage] does not exist.');
 

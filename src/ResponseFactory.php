@@ -15,6 +15,7 @@ use Illuminate\Support\Traits\Macroable;
 use Inertia\Ssr\ExcludesSsrPaths;
 use Inertia\Ssr\Gateway;
 use Inertia\Support\Header;
+use Inertia\Support\SessionKey;
 use InvalidArgumentException;
 use LogicException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -160,7 +161,7 @@ class ResponseFactory
      */
     public function clearHistory(): void
     {
-        session([SessionKey::ClearHistory->value => true]);
+        session([SessionKey::CLEAR_HISTORY => true]);
     }
 
     /**
@@ -298,7 +299,7 @@ class ResponseFactory
             throw new InvalidArgumentException('Component argument must be of type string or a string BackedEnum');
         }
 
-        if (config('inertia.ensure_pages_exist', false)) {
+        if (config('inertia.pages.ensure_pages_exist', false)) {
             $this->findComponentOrFail($component);
         }
 
@@ -354,7 +355,7 @@ class ResponseFactory
             $flash = [$key => $value];
         }
 
-        session()->now(SessionKey::FlashData->value, [
+        session()->now(SessionKey::FLASH_DATA, [
             ...$this->getFlashed(),
             ...$flash,
         ]);
@@ -381,6 +382,6 @@ class ResponseFactory
     {
         $request ??= request();
 
-        return $request->hasSession() ? $request->session()->get(SessionKey::FlashData->value, []) : [];
+        return $request->hasSession() ? $request->session()->get(SessionKey::FLASH_DATA, []) : [];
     }
 }

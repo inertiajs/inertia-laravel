@@ -31,7 +31,7 @@ abstract class TestCase extends Orchestra
 
         Inertia::setRootView('welcome');
         config()->set('inertia.testing.ensure_pages_exist', false);
-        config()->set('inertia.testing.page_paths', [realpath(__DIR__)]);
+        config()->set('inertia.pages.paths', [realpath(__DIR__)]);
     }
 
     /**
