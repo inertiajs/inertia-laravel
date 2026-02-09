@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Session\Store;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\MessageBag;
+use Inertia\Ssr\ExcludesSsrPaths;
+use Inertia\Ssr\Gateway;
 use Inertia\Support\Header;
 use Inertia\Support\SessionKey;
 use Symfony\Component\HttpFoundation\Response;
@@ -28,6 +30,13 @@ class Middleware
      * @var bool
      */
     protected $withAllErrors = false;
+
+    /**
+     * The paths that should be excluded from server-side rendering.
+     *
+     * @var array<int, string>
+     */
+    protected $withoutSsr = [];
 
     /**
      * Determine the current asset version.
@@ -118,6 +127,12 @@ class Middleware
 
         if ($urlResolver = $this->urlResolver()) {
             Inertia::resolveUrlUsing($urlResolver);
+        }
+
+        $ssrGateway = app(Gateway::class);
+
+        if (! empty($this->withoutSsr) && $ssrGateway instanceof ExcludesSsrPaths) {
+            $ssrGateway->except($this->withoutSsr);
         }
 
         $response = $next($request);

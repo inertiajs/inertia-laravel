@@ -22,6 +22,7 @@ class ServiceProvider extends BaseServiceProvider
      */
     public function register(): void
     {
+        $this->app->singleton(HttpGateway::class);
         $this->app->singleton(ResponseFactory::class);
         $this->app->bind(Gateway::class, HttpGateway::class);
 

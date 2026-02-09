@@ -12,9 +12,12 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response as BaseResponse;
 use Illuminate\Support\Traits\Macroable;
+use Inertia\Ssr\ExcludesSsrPaths;
+use Inertia\Ssr\Gateway;
 use Inertia\Support\Header;
 use Inertia\Support\SessionKey;
 use InvalidArgumentException;
+use LogicException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use UnitEnum;
@@ -169,6 +172,22 @@ class ResponseFactory
     public function encryptHistory($encrypt = true): void
     {
         $this->encryptHistory = $encrypt;
+    }
+
+    /**
+     * Exclude the given paths from server-side rendering.
+     *
+     * @param  array<int, string>|string  $paths
+     */
+    public function withoutSsr(array|string $paths): void
+    {
+        $gateway = app(Gateway::class);
+
+        if (! $gateway instanceof ExcludesSsrPaths) {
+            throw new LogicException('The configured SSR gateway does not support excluding paths from server-side rendering.');
+        }
+
+        $gateway->except($paths);
     }
 
     /**

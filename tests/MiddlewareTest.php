@@ -13,8 +13,10 @@ use Illuminate\Support\ViewErrorBag;
 use Inertia\AlwaysProp;
 use Inertia\Inertia;
 use Inertia\Middleware;
+use Inertia\Ssr\HttpGateway;
 use Inertia\Tests\Stubs\CustomUrlResolverMiddleware;
 use Inertia\Tests\Stubs\ExampleMiddleware;
+use Inertia\Tests\Stubs\SsrExceptMiddleware;
 use Inertia\Tests\Stubs\WithAllErrorsMiddleware;
 use LogicException;
 use PHPUnit\Framework\Attributes\After;
@@ -426,6 +428,22 @@ class MiddlewareTest extends TestCase
         $response->assertJson([
             'flash' => ['message' => 'Success!'],
         ]);
+    }
+
+    public function test_middleware_registers_ssr_except_paths(): void
+    {
+        $middleware = new SsrExceptMiddleware;
+
+        Route::middleware(StartSession::class)->get('/admin/dashboard', function (Request $request) use ($middleware) {
+            return $middleware->handle($request, function ($request) {
+                return Inertia::render('Admin/Dashboard')->toResponse($request);
+            });
+        });
+
+        $this->get('/admin/dashboard');
+
+        $this->assertContains('admin/*', app(HttpGateway::class)->getExcludedPaths());
+        $this->assertContains('nova/*', app(HttpGateway::class)->getExcludedPaths());
     }
 
     /**
