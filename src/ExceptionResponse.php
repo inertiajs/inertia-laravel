@@ -43,15 +43,18 @@ class ExceptionResponse implements Responsable
     }
 
     /**
-     * @param  class-string<Middleware>|null  $middlewareClass
+     * @param  class-string<Middleware>  $middlewareClass
      */
-    public function withSharedData(?string $middlewareClass = null): static
+    public function usingMiddleware(string $middlewareClass): static
+    {
+        $this->middlewareClass = $middlewareClass;
+
+        return $this;
+    }
+
+    public function withSharedData(): static
     {
         $this->includeSharedData = true;
-
-        if ($middlewareClass) {
-            $this->middlewareClass = $middlewareClass;
-        }
 
         return $this;
     }

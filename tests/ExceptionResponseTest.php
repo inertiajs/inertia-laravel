@@ -112,7 +112,8 @@ class ExceptionResponseTest extends TestCase
     {
         Inertia::handleExceptionsUsing(function (ExceptionResponse $response) {
             return $response->render('Error', ['status' => $response->statusCode()])
-                ->withSharedData(Stubs\HttpExceptionMiddleware::class);
+                ->usingMiddleware(Stubs\HttpExceptionMiddleware::class)
+                ->withSharedData();
         });
 
         Route::middleware([StartSession::class, Middleware::class])->get('/', function () {
