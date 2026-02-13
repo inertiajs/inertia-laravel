@@ -342,9 +342,13 @@ class ResponseFactory
      */
     public function handleExceptionsUsing(callable $callback): void
     {
-        /** @var \Illuminate\Foundation\Exceptions\Handler $handler */
         $handler = app(ExceptionHandler::class);
 
+        if (! $handler instanceof ExceptionHandler) {
+            return;
+        }
+
+        /** @var \Illuminate\Foundation\Exceptions\Handler $handler */
         $handler->respondUsing(function ($response, $e, $request) use ($callback) {
             $result = $callback(new ExceptionResponse(
                 $e,
