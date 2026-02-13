@@ -4,9 +4,10 @@ namespace Inertia;
 
 use BackedEnum;
 use Closure;
-use Illuminate\Contracts\Debug\ExceptionHandler;
+use Illuminate\Contracts\Debug\ExceptionHandler as ExceptionHandlerContract;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Arr;
@@ -342,13 +343,19 @@ class ResponseFactory
      */
     public function handleExceptionsUsing(callable $callback): void
     {
-        $handler = app(ExceptionHandler::class);
+        $handler = app(ExceptionHandlerContract::class);
 
         if (! $handler instanceof ExceptionHandler) {
-            return;
+            if (app()->runningInConsole()) {
+                return;
+            }
+
+            if (! method_exists($handler, 'respondUsing')) {
+                throw new LogicException('The bound exception handler does not have a `respondUsing` method.');
+            }
         }
 
-        /** @var \Illuminate\Foundation\Exceptions\Handler $handler */
+        /** @var ExceptionHandler $handler */
         $handler->respondUsing(function ($response, $e, $request) use ($callback) {
             $result = $callback(new ExceptionResponse(
                 $e,
