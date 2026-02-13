@@ -1,8 +1,23 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.19...2.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.20...2.x)
 
 - Nothing!
+
+## [v2.0.20](https://github.com/inertiajs/inertia-laravel/compare/v2.0.19...v2.0.20) - 2026-02-13
+
+### What's Changed
+
+* Removed duplicate import of RedirectResponse by [@kitro](https://github.com/kitro) in https://github.com/inertiajs/inertia-laravel/pull/813
+* [2.x] Add `assertInertiaFlash` and `assertInertiaFlashMissing` test response macros by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/827
+* Fix inertia prop modifiers being ignored in provider classes by [@TimKunze96](https://github.com/TimKunze96) in https://github.com/inertiajs/inertia-laravel/pull/821
+
+### New Contributors
+
+* [@kitro](https://github.com/kitro) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/813
+* [@TimKunze96](https://github.com/TimKunze96) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/821
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.19...v2.0.20
 
 ## [v2.0.19](https://github.com/inertiajs/inertia-laravel/compare/v2.0.18...v2.0.19) - 2026-01-13
 
