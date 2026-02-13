@@ -233,18 +233,9 @@ class AssertableInertia extends AssertableJson
      */
     public function hasFlash(string $key, mixed $expected = null): self
     {
-        PHPUnit::assertTrue(
-            Arr::has($this->flash, $key),
-            sprintf('Inertia Flash Data is missing key [%s].', $key)
-        );
-
-        if (func_num_args() > 1) {
-            PHPUnit::assertSame(
-                $expected,
-                Arr::get($this->flash, $key),
-                sprintf('Inertia Flash Data [%s] does not match expected value.', $key)
-            );
-        }
+        func_num_args() > 1
+            ? static::assertFlashHas($this->flash, $key, $expected)
+            : static::assertFlashHas($this->flash, $key);
 
         return $this;
     }
@@ -254,12 +245,43 @@ class AssertableInertia extends AssertableJson
      */
     public function missingFlash(string $key): self
     {
-        PHPUnit::assertFalse(
-            Arr::has($this->flash, $key),
-            sprintf('Inertia Flash Data has unexpected key [%s].', $key)
-        );
+        static::assertFlashMissing($this->flash, $key);
 
         return $this;
+    }
+
+    /**
+     * Assert that the given flash data array contains the given key, optionally with the expected value.
+     *
+     * @param  array<string, mixed>  $flash
+     */
+    public static function assertFlashHas(array $flash, string $key, mixed $expected = null): void
+    {
+        PHPUnit::assertTrue(
+            Arr::has($flash, $key),
+            sprintf('Inertia Flash Data is missing key [%s].', $key)
+        );
+
+        if (func_num_args() > 2) {
+            PHPUnit::assertSame(
+                $expected,
+                Arr::get($flash, $key),
+                sprintf('Inertia Flash Data [%s] does not match expected value.', $key)
+            );
+        }
+    }
+
+    /**
+     * Assert that the given flash data array does not contain the given key.
+     *
+     * @param  array<string, mixed>  $flash
+     */
+    public static function assertFlashMissing(array $flash, string $key): void
+    {
+        PHPUnit::assertFalse(
+            Arr::has($flash, $key),
+            sprintf('Inertia Flash Data has unexpected key [%s].', $key)
+        );
     }
 
     /**
