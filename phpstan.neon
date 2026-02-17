@@ -8,6 +8,8 @@ parameters:
 		- tests
 	ignoreErrors:
 		- '#Call to an undefined method.*TestResponse.*::assertInertia\(\)#'
+		- '#Call to an undefined method.*TestResponse.*::assertInertiaFlash\(\)#'
+		- '#Call to an undefined method.*TestResponse.*::assertInertiaFlashMissing\(\)#'
 		- '#Call to an undefined method.*TestResponse.*::inertiaPage\(\)#'
 		- '#Call to an undefined method.*TestResponse.*::inertiaProps\(\)#'
 		- '#Call to an undefined.*method.*Request::inertia\(\)#'

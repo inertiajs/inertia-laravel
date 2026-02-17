@@ -2,10 +2,14 @@
 
 namespace Inertia\Tests\Testing;
 
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Illuminate\Testing\TestResponse;
 use Inertia\Inertia;
+use Inertia\Middleware;
 use Inertia\Tests\TestCase;
+use PHPUnit\Framework\AssertionFailedError;
 
 class TestResponseMacrosTest extends TestCase
 {
@@ -76,5 +80,67 @@ class TestResponseMacrosTest extends TestCase
 
         $this->assertSame('qux', $response->inertiaProps('bar.baz'));
         $this->assertSame('John', $response->inertiaProps('users.0.name'));
+    }
+
+    public function test_it_can_assert_flash_data_on_redirect_responses(): void
+    {
+        $middleware = [StartSession::class, Middleware::class];
+
+        Route::middleware($middleware)->post('/users', function () {
+            return Inertia::flash([
+                'message' => 'User created!',
+                'notification' => ['type' => 'success'],
+            ])->back();
+        });
+
+        $this->post('/users')
+            ->assertRedirect()
+            ->assertInertiaFlash('message')
+            ->assertInertiaFlash('message', 'User created!')
+            ->assertInertiaFlash('notification.type', 'success')
+            ->assertInertiaFlashMissing('error')
+            ->assertInertiaFlashMissing('notification.other');
+    }
+
+    public function test_assert_has_inertia_flash_fails_when_key_is_missing(): void
+    {
+        $middleware = [StartSession::class, Middleware::class];
+
+        Route::middleware($middleware)->post('/users', function () {
+            return Inertia::flash('message', 'Hello')->back();
+        });
+
+        $this->expectException(AssertionFailedError::class);
+        $this->expectExceptionMessage('Inertia Flash Data is missing key [other].');
+
+        $this->post('/users')->assertInertiaFlash('other');
+    }
+
+    public function test_assert_has_inertia_flash_fails_when_value_does_not_match(): void
+    {
+        $middleware = [StartSession::class, Middleware::class];
+
+        Route::middleware($middleware)->post('/users', function () {
+            return Inertia::flash('message', 'Hello')->back();
+        });
+
+        $this->expectException(AssertionFailedError::class);
+        $this->expectExceptionMessage('Inertia Flash Data [message] does not match expected value.');
+
+        $this->post('/users')->assertInertiaFlash('message', 'Different');
+    }
+
+    public function test_assert_missing_inertia_flash_fails_when_key_exists(): void
+    {
+        $middleware = [StartSession::class, Middleware::class];
+
+        Route::middleware($middleware)->post('/users', function () {
+            return Inertia::flash('message', 'Hello')->back();
+        });
+
+        $this->expectException(AssertionFailedError::class);
+        $this->expectExceptionMessage('Inertia Flash Data has unexpected key [message].');
+
+        $this->post('/users')->assertInertiaFlashMissing('message');
     }
 }
