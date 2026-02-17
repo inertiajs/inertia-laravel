@@ -4,7 +4,7 @@ namespace Inertia\Testing;
 
 use Closure;
 use Illuminate\Support\Arr;
-use Inertia\SessionKey;
+use Inertia\Support\SessionKey;
 
 class TestResponseMacros
 {
@@ -66,7 +66,7 @@ class TestResponseMacros
     {
         return function (string $key, mixed $expected = null) {
             /** @phpstan-ignore-next-line */
-            $flash = $this->session()->get(SessionKey::FlashData->value, []);
+            $flash = $this->session()->get(SessionKey::FLASH_DATA, []);
 
             func_num_args() > 1
                 ? AssertableInertia::assertFlashHas($flash, $key, $expected)
@@ -85,7 +85,7 @@ class TestResponseMacros
     {
         return function (string $key) {
             /** @phpstan-ignore-next-line */
-            $flash = $this->session()->get(SessionKey::FlashData->value, []);
+            $flash = $this->session()->get(SessionKey::FLASH_DATA, []);
 
             AssertableInertia::assertFlashMissing($flash, $key);
 
