@@ -60,6 +60,13 @@ class Response implements Responsable
     protected $clearHistory;
 
     /**
+     * Indicates if the URL fragment should be retained across redirects.
+     *
+     * @var bool
+     */
+    protected $retainFragment;
+
+    /**
      * Indicates if the browser history should be encrypted.
      *
      * @var bool
@@ -103,6 +110,7 @@ class Response implements Responsable
         $this->rootView = $rootView;
         $this->version = $version;
         $this->clearHistory = session()->pull(SessionKey::ClearHistory->value, false);
+        $this->retainFragment = session()->pull(SessionKey::RetainFragment->value, false);
         $this->encryptHistory = $encryptHistory;
         $this->urlResolver = $urlResolver;
     }
@@ -204,6 +212,7 @@ class Response implements Responsable
                 'clearHistory' => $this->clearHistory,
                 'encryptHistory' => $this->encryptHistory,
             ],
+            $this->retainFragment ? ['retainFragment' => true] : [],
             $this->resolveMergeProps($request),
             $this->resolveDeferredProps($request),
             $this->resolveCacheDirections($request),

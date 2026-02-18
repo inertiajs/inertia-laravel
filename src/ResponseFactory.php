@@ -161,6 +161,14 @@ class ResponseFactory
     }
 
     /**
+     * Retain the URL fragment across the next redirect.
+     */
+    public function retainFragment(): void
+    {
+        session([SessionKey::RetainFragment->value => true]);
+    }
+
+    /**
      * Encrypt the browser history.
      *
      * @param  bool  $encrypt

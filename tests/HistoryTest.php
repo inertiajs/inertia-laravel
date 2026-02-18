@@ -162,4 +162,58 @@ class HistoryTest extends TestCase
         $response->assertSuccessful();
         $response->assertContent('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;errors&quot;:{}},&quot;url&quot;:&quot;\/users&quot;,&quot;version&quot;:&quot;&quot;,&quot;clearHistory&quot;:true,&quot;encryptHistory&quot;:false}"></div>');
     }
+
+    public function test_the_fragment_is_not_retained_by_default(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            return Inertia::render('User/Edit');
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', [
+            'X-Inertia' => 'true',
+        ]);
+
+        $response->assertSuccessful();
+        $response->assertJsonMissing([
+            'retainFragment' => true,
+        ]);
+    }
+
+    public function test_the_fragment_can_be_retained_via_inertia_facade(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            Inertia::retainFragment();
+
+            return redirect('/users');
+        });
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/users', function () {
+            return Inertia::render('User/Edit');
+        });
+
+        $this->followingRedirects();
+
+        $response = $this->withoutExceptionHandling()->get('/');
+
+        $response->assertSuccessful();
+        $this->assertStringContainsString('"retainFragment":true', $response->content());
+    }
+
+    public function test_the_fragment_can_be_retained_via_redirect_macro(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            return redirect('/users')->retainingFragment(); /** @phpstan-ignore method.notFound */
+        });
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/users', function () {
+            return Inertia::render('User/Edit');
+        });
+
+        $this->followingRedirects();
+
+        $response = $this->withoutExceptionHandling()->get('/');
+
+        $response->assertSuccessful();
+        $this->assertStringContainsString('"retainFragment":true', $response->content());
+    }
 }

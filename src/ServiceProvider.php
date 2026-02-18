@@ -2,6 +2,7 @@
 
 namespace Inertia;
 
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
@@ -29,6 +30,7 @@ class ServiceProvider extends BaseServiceProvider
         );
 
         $this->registerBladeDirectives();
+        $this->registerRedirectMacro();
         $this->registerRequestMacro();
         $this->registerRouterMacro();
         $this->registerTestingMacros();
@@ -91,6 +93,19 @@ class ServiceProvider extends BaseServiceProvider
             Commands\StopSsr::class,
             Commands\CheckSsr::class,
         ]);
+    }
+
+    /**
+     * Add a 'retainingFragment' method to redirect responses that signals
+     * the frontend to retain the URL fragment across the redirect.
+     */
+    protected function registerRedirectMacro(): void
+    {
+        RedirectResponse::macro('retainingFragment', function () {
+            inertia()->retainFragment();
+
+            return $this;
+        });
     }
 
     /**
