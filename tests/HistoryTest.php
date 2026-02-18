@@ -191,12 +191,16 @@ class HistoryTest extends TestCase
             return Inertia::render('User/Edit');
         });
 
-        $this->followingRedirects();
+        $this->withoutExceptionHandling()->get('/');
 
-        $response = $this->withoutExceptionHandling()->get('/');
+        $response = $this->withoutExceptionHandling()->get('/users', [
+            'X-Inertia' => 'true',
+        ]);
 
         $response->assertSuccessful();
-        $this->assertStringContainsString('"retainFragment":true', $response->content());
+        $response->assertJson([
+            'retainFragment' => true,
+        ]);
     }
 
     public function test_the_fragment_can_be_retained_via_redirect_macro(): void
@@ -209,11 +213,15 @@ class HistoryTest extends TestCase
             return Inertia::render('User/Edit');
         });
 
-        $this->followingRedirects();
+        $this->withoutExceptionHandling()->get('/');
 
-        $response = $this->withoutExceptionHandling()->get('/');
+        $response = $this->withoutExceptionHandling()->get('/users', [
+            'X-Inertia' => 'true',
+        ]);
 
         $response->assertSuccessful();
-        $this->assertStringContainsString('"retainFragment":true', $response->content());
+        $response->assertJson([
+            'retainFragment' => true,
+        ]);
     }
 }
