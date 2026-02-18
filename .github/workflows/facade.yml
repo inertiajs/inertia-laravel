@@ -4,13 +4,11 @@ on:
   push:
     branches:
       - "master"
+      - "3.x"
 
 jobs:
   update:
     runs-on: ubuntu-22.04
-
-    strategy:
-      fail-fast: true
 
     name: Facade DocBlocks
 
