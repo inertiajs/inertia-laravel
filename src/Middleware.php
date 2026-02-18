@@ -158,7 +158,7 @@ class Middleware
             $response->setStatusCode(303);
         }
 
-        if ($isRedirect && $this->redirectHasFragment($response)) {
+        if ($isRedirect && $this->redirectHasFragment($response) && ! $request->prefetch()) {
             $response = $this->onRedirectWithFragment($request, $response);
         }
 

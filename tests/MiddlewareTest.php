@@ -485,6 +485,20 @@ class MiddlewareTest extends TestCase
         $response->assertHeader('X-Inertia-Redirect', $this->baseUrl.'/article#section');
     }
 
+    public function test_redirect_with_hash_fragment_is_not_intercepted_for_prefetch_requests(): void
+    {
+        Route::middleware([StartSession::class, Middleware::class])->get('/action', function () {
+            return redirect('/article#section');
+        });
+
+        $response = $this->get('/action', [
+            'X-Inertia' => 'true',
+            'Purpose' => 'prefetch',
+        ]);
+
+        $response->assertRedirect($this->baseUrl.'/article#section');
+    }
+
     public function test_middleware_registers_ssr_except_paths(): void
     {
         $middleware = new SsrExceptMiddleware;
