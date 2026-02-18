@@ -10,9 +10,9 @@ enum SessionKey: string
     case ClearHistory = 'inertia.clear_history';
 
     /**
-     * Session key for retaining the URL fragment across redirects.
+     * Session key for preserving the URL fragment across redirects.
      */
-    case RetainFragment = 'inertia.retain_fragment';
+    case PreserveFragment = 'inertia.preserve_fragment';
 
     /**
      * Session key for flash data.

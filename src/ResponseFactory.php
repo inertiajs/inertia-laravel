@@ -161,11 +161,11 @@ class ResponseFactory
     }
 
     /**
-     * Retain the URL fragment across the next redirect.
+     * Preserve the URL fragment across the next redirect.
      */
-    public function retainFragment(): void
+    public function preserveFragment(): void
     {
-        session([SessionKey::RetainFragment->value => true]);
+        session([SessionKey::PreserveFragment->value => true]);
     }
 
     /**

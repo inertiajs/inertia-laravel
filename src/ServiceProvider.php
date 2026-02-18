@@ -96,13 +96,13 @@ class ServiceProvider extends BaseServiceProvider
     }
 
     /**
-     * Add a 'retainingFragment' method to redirect responses that signals
-     * the frontend to retain the URL fragment across the redirect.
+     * Add a 'preserveFragment' method to redirect responses that signals
+     * the frontend to preserve the URL fragment across the redirect.
      */
     protected function registerRedirectMacro(): void
     {
-        RedirectResponse::macro('retainingFragment', function () {
-            inertia()->retainFragment();
+        RedirectResponse::macro('preserveFragment', function () {
+            inertia()->preserveFragment();
 
             return $this;
         });

@@ -163,7 +163,7 @@ class HistoryTest extends TestCase
         $response->assertContent('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;errors&quot;:{}},&quot;url&quot;:&quot;\/users&quot;,&quot;version&quot;:&quot;&quot;,&quot;clearHistory&quot;:true,&quot;encryptHistory&quot;:false}"></div>');
     }
 
-    public function test_the_fragment_is_not_retained_by_default(): void
+    public function test_the_fragment_is_not_preserved_by_default(): void
     {
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
             return Inertia::render('User/Edit');
@@ -175,14 +175,14 @@ class HistoryTest extends TestCase
 
         $response->assertSuccessful();
         $response->assertJsonMissing([
-            'retainFragment' => true,
+            'preserveFragment' => true,
         ]);
     }
 
-    public function test_the_fragment_can_be_retained_via_inertia_facade(): void
+    public function test_the_fragment_can_be_preserved_via_inertia_facade(): void
     {
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
-            Inertia::retainFragment();
+            Inertia::preserveFragment();
 
             return redirect('/users');
         });
@@ -199,14 +199,14 @@ class HistoryTest extends TestCase
 
         $response->assertSuccessful();
         $response->assertJson([
-            'retainFragment' => true,
+            'preserveFragment' => true,
         ]);
     }
 
-    public function test_the_fragment_can_be_retained_via_redirect_macro(): void
+    public function test_the_fragment_can_be_preserved_via_redirect_macro(): void
     {
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
-            return redirect('/users')->retainingFragment(); /** @phpstan-ignore method.notFound */
+            return redirect('/users')->preserveFragment(); /** @phpstan-ignore method.notFound */
         });
 
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/users', function () {
@@ -221,7 +221,7 @@ class HistoryTest extends TestCase
 
         $response->assertSuccessful();
         $response->assertJson([
-            'retainFragment' => true,
+            'preserveFragment' => true,
         ]);
     }
 }
