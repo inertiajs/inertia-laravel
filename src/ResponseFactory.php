@@ -4,16 +4,24 @@ namespace Inertia;
 
 use BackedEnum;
 use Closure;
+use Illuminate\Contracts\Debug\ExceptionHandler as ExceptionHandlerContract;
+use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Request as HttpRequest;
+use Illuminate\Routing\Router;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response as BaseResponse;
 use Illuminate\Support\Traits\Macroable;
+use Inertia\Ssr\ExcludesSsrPaths;
+use Inertia\Ssr\Gateway;
 use Inertia\Support\Header;
+use Inertia\Support\SessionKey;
 use InvalidArgumentException;
+use LogicException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use UnitEnum;
@@ -157,7 +165,7 @@ class ResponseFactory
      */
     public function clearHistory(): void
     {
-        session([SessionKey::ClearHistory->value => true]);
+        session([SessionKey::CLEAR_HISTORY => true]);
     }
 
     /**
@@ -179,13 +187,19 @@ class ResponseFactory
     }
 
     /**
-     * Create a lazy property.
+     * Exclude the given paths from server-side rendering.
      *
-     * @deprecated Use `optional` instead.
+     * @param  array<int, string>|string  $paths
      */
-    public function lazy(callable $callback): LazyProp
+    public function withoutSsr(array|string $paths): void
     {
-        return new LazyProp($callback);
+        $gateway = app(Gateway::class);
+
+        if (! $gateway instanceof ExcludesSsrPaths) {
+            throw new LogicException('The configured SSR gateway does not support excluding paths from server-side rendering.');
+        }
+
+        $gateway->except($paths);
     }
 
     /**
@@ -282,11 +296,22 @@ class ResponseFactory
     /**
      * Create an Inertia response.
      *
+     * @param  BackedEnum|UnitEnum|string  $component
      * @param  array<array-key, mixed>|\Illuminate\Contracts\Support\Arrayable<array-key, mixed>|ProvidesInertiaProperties  $props
      */
-    public function render(string $component, $props = []): Response
+    public function render($component, $props = []): Response
     {
-        if (config('inertia.ensure_pages_exist', false)) {
+        $component = match (true) {
+            $component instanceof BackedEnum => $component->value,
+            $component instanceof UnitEnum => $component->name,
+            default => $component,
+        };
+
+        if (! is_string($component)) {
+            throw new InvalidArgumentException('Component argument must be of type string or a string BackedEnum');
+        }
+
+        if (config('inertia.pages.ensure_pages_exist', false)) {
             $this->findComponentOrFail($component);
         }
 
@@ -322,6 +347,42 @@ class ResponseFactory
     }
 
     /**
+     * Register a callback to handle HTTP exceptions for Inertia requests.
+     */
+    public function handleExceptionsUsing(callable $callback): void
+    {
+        /** @var mixed $handler */
+        $handler = app(ExceptionHandlerContract::class);
+
+        if (! $handler instanceof ExceptionHandler) {
+            if (app()->runningInConsole()) {
+                return;
+            }
+
+            if (! method_exists($handler, 'respondUsing')) {
+                throw new LogicException('The bound exception handler does not have a `respondUsing` method.');
+            }
+        }
+
+        /** @var ExceptionHandler $handler */
+        $handler->respondUsing(function ($response, $e, $request) use ($callback) {
+            $result = $callback(new ExceptionResponse(
+                $e,
+                $request,
+                $response,
+                app(Router::class),
+                app(Kernel::class),
+            ));
+
+            if ($result instanceof ExceptionResponse) {
+                return $result->toResponse($request);
+            }
+
+            return $result ?? $response;
+        });
+    }
+
+    /**
      * Flash data to be included with the next response. Unlike regular props,
      * flash data is not persisted in the browser's history state, making it
      * ideal for one-time notifications like toasts or highlights.
@@ -342,7 +403,7 @@ class ResponseFactory
             $flash = [$key => $value];
         }
 
-        session()->now(SessionKey::FlashData->value, [
+        session()->now(SessionKey::FLASH_DATA, [
             ...$this->getFlashed(),
             ...$flash,
         ]);
@@ -369,6 +430,6 @@ class ResponseFactory
     {
         $request ??= request();
 
-        return $request->hasSession() ? $request->session()->get(SessionKey::FlashData->value, []) : [];
+        return $request->hasSession() ? $request->session()->get(SessionKey::FLASH_DATA, []) : [];
     }
 }

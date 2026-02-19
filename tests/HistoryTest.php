@@ -160,7 +160,7 @@ class HistoryTest extends TestCase
         ]);
 
         $response->assertSuccessful();
-        $response->assertContent('<div id="app" data-page="{&quot;component&quot;:&quot;User\/Edit&quot;,&quot;props&quot;:{&quot;errors&quot;:{}},&quot;url&quot;:&quot;\/users&quot;,&quot;version&quot;:&quot;&quot;,&quot;clearHistory&quot;:true,&quot;encryptHistory&quot;:false}"></div>');
+        $response->assertContent('<script data-page="app" type="application/json">{"component":"User\/Edit","props":{"errors":{}},"url":"\/users","version":"","clearHistory":true,"encryptHistory":false}</script><div id="app"></div>');
     }
 
     public function test_the_fragment_is_not_preserved_by_default(): void

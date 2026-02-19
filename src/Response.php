@@ -3,7 +3,6 @@
 namespace Inertia;
 
 use BackedEnum;
-use Carbon\CarbonInterval;
 use Closure;
 use GuzzleHttp\Promise\PromiseInterface;
 use Illuminate\Contracts\Support\Arrayable;
@@ -17,6 +16,7 @@ use Illuminate\Support\Facades\Response as ResponseFactory;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
 use Inertia\Support\Header;
+use Inertia\Support\SessionKey;
 use UnitEnum;
 
 class Response implements Responsable
@@ -81,13 +81,6 @@ class Response implements Responsable
     protected $viewData = [];
 
     /**
-     * The cache duration settings.
-     *
-     * @var array<int, mixed>
-     */
-    protected $cacheFor = [];
-
-    /**
      * The URL resolver callback.
      */
     protected ?Closure $urlResolver = null;
@@ -109,8 +102,8 @@ class Response implements Responsable
         $this->props = $props;
         $this->rootView = $rootView;
         $this->version = $version;
-        $this->clearHistory = session()->pull(SessionKey::ClearHistory->value, false);
-        $this->preserveFragment = session()->pull(SessionKey::PreserveFragment->value, false);
+        $this->clearHistory = session()->pull(SessionKey::CLEAR_HISTORY, false);
+        $this->clearHistory = session()->pull(SessionKey::PRESERVE_FRAGMENT, false);
         $this->encryptHistory = $encryptHistory;
         $this->urlResolver = $urlResolver;
     }
@@ -166,19 +159,6 @@ class Response implements Responsable
     }
 
     /**
-     * Set the cache duration for the response.
-     *
-     * @param  string|array<int, mixed>  $cacheFor
-     * @return $this
-     */
-    public function cache(string|array $cacheFor): self
-    {
-        $this->cacheFor = is_array($cacheFor) ? $cacheFor : [$cacheFor];
-
-        return $this;
-    }
-
-    /**
      * Add flash data to the response.
      *
      * @param  \BackedEnum|\UnitEnum|string|array<string, mixed>  $key
@@ -215,7 +195,6 @@ class Response implements Responsable
             $this->preserveFragment ? ['preserveFragment' => true] : [],
             $this->resolveMergeProps($request),
             $this->resolveDeferredProps($request),
-            $this->resolveCacheDirections($request),
             $this->resolveScrollProps($request),
             $this->resolveOnceProps($request),
             $this->resolveFlashData($request),
@@ -439,7 +418,6 @@ class Response implements Responsable
 
             $resolveViaApp = collect([
                 Closure::class,
-                LazyProp::class,
                 OptionalProp::class,
                 DeferProp::class,
                 AlwaysProp::class,
@@ -482,28 +460,6 @@ class Response implements Responsable
         }
 
         return $props;
-    }
-
-    /**
-     * Resolve the cache directions for the response.
-     *
-     * @return array<string, mixed>
-     */
-    public function resolveCacheDirections(Request $request): array
-    {
-        if (count($this->cacheFor) === 0) {
-            return [];
-        }
-
-        return [
-            'cache' => collect($this->cacheFor)->map(function ($value) {
-                if ($value instanceof CarbonInterval) {
-                    return $value->totalSeconds;
-                }
-
-                return intval($value);
-            }),
-        ];
     }
 
     /**
@@ -661,7 +617,7 @@ class Response implements Responsable
     }
 
     /**
-     * Resolve deferred props configuration for client-side lazy loading.
+     * Resolve deferred props configuration for client-side loading.
      *
      * @return array<string, mixed>
      */

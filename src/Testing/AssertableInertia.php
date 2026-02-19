@@ -107,7 +107,7 @@ class AssertableInertia extends AssertableJson
 
         if ($shouldExist || (is_null($shouldExist) && config('inertia.testing.ensure_pages_exist', true))) {
             try {
-                app('inertia.testing.view-finder')->find($value);
+                app('inertia.view-finder')->find($value);
             } catch (InvalidArgumentException $exception) {
                 PHPUnit::fail(sprintf('Inertia page component file [%s] does not exist.', $value));
             }
