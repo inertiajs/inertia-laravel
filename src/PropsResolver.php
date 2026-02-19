@@ -16,6 +16,20 @@ class PropsResolver
     use ResolvesCallables;
 
     /**
+     * The current request instance.
+     *
+     * @var \Illuminate\Http\Request
+     */
+    protected $request;
+
+    /**
+     * The component being rendered.
+     *
+     * @var string
+     */
+    protected $component;
+
+    /**
      * Whether this is a partial request for the given component.
      *
      * @var bool
@@ -109,10 +123,10 @@ class PropsResolver
     /**
      * Create a new props resolver instance.
      */
-    public function __construct(
-        protected Request $request,
-        protected string $component,
-    ) {
+    public function __construct(Request $request, string $component)
+    {
+        $this->request = $request;
+        $this->component = $component;
         $this->isPartial = $request->header(Header::PARTIAL_COMPONENT) === $component;
         $this->isInertia = (bool) $request->header(Header::INERTIA);
         $this->only = $this->parseHeader(Header::PARTIAL_ONLY);
@@ -154,28 +168,35 @@ class PropsResolver
             $path = $prefix === '' ? $key : "{$prefix}.{$key}";
             $prop = $value;
 
-            // On partial requests, only include props that match the requested
-            // paths. AlwaysProp and children of resolved values bypass this.
+            // On partial requests, we only include props that match the paths
+            // specified in the request headers. AlwaysProp instances and the
+            // children of already-resolved values bypass this filter.
             if (! $this->shouldIncludeInPartialResponse($prop, $path, $parentWasResolved)) {
                 continue;
             }
 
             $value = $this->resolveValue($prop, $path, $props);
 
-            // A closure may return a prop type — unwrap one more level.
+            // A closure may return a prop type instead of a plain value. When
+            // this happens, we unwrap it one more level so the prop type can
+            // participate in filtering and metadata collection below.
             if ($value !== $prop && $this->isPropType($value)) {
                 $prop = $value;
                 $value = $this->resolveValue($prop, $path, $props);
             }
 
             // On initial page loads, certain props are excluded from the response
-            // but still contribute metadata (deferred groups, merge config, etc.).
+            // but still contribute metadata such as deferred groups, merge
+            // strategies, and once-prop configuration.
             if (! $this->isPartial && $this->excludeFromInitialResponse($prop, $path)) {
                 continue;
             }
 
             $this->collectMetadata($prop, $path);
 
+            // When the resolved value is an array, we recurse into it. If the
+            // original prop was not already an array (e.g. a closure that
+            // returned one), its children bypass partial filtering.
             $result[$key] = is_array($value)
                 ? $this->resolveProps($value, $path, $parentWasResolved || ! is_array($prop))
                 : $value;
@@ -234,25 +255,27 @@ class PropsResolver
 
     /**
      * Determine if a prop should be excluded from the initial page response.
-     * Each exclusion type records its metadata before the prop is excluded.
+     * Each exclusion type collects its metadata before the prop is removed.
      */
     protected function excludeFromInitialResponse(mixed $prop, string $path): bool
     {
         // OptionalProp and DeferProp implement IgnoreFirstLoad and are never
-        // sent on the initial page load. They may still contribute deferred,
-        // merge, and once metadata.
+        // sent on the initial page load. They still contribute deferred,
+        // merge, and once metadata for the client to act on.
         if ($prop instanceof IgnoreFirstLoad) {
             return $this->excludeIgnoredProp($prop, $path);
         }
 
-        // ScrollProp and other Deferrable types are excluded when configured
-        // to defer, and contribute deferred and merge metadata.
+        // ScrollProp and other Deferrable types may be configured to defer
+        // their initial load. They contribute deferred-group and merge
+        // metadata so the client knows to request them separately.
         if ($prop instanceof Deferrable && $prop->shouldDefer()) {
             return $this->excludeDeferredProp($prop, $path);
         }
 
-        // Once-props that the client reports as already loaded are excluded
-        // to avoid sending the same data twice.
+        // Once-props that the client has already loaded are excluded on
+        // subsequent Inertia visits to avoid sending duplicate data.
+        // The client tracks loaded once-props via the except-once header.
         if ($this->isInertia && $this->wasAlreadyLoadedByClient($prop, $path)) {
             return $this->excludeAlreadyLoadedProp($prop, $path);
         }
@@ -261,8 +284,8 @@ class PropsResolver
     }
 
     /**
-     * Exclude an IgnoreFirstLoad prop (OptionalProp, DeferProp) from the
-     * initial response, recording its deferred, merge, and once metadata.
+     * Exclude an IgnoreFirstLoad prop from the initial response while
+     * collecting its deferred, merge, and once metadata.
      */
     protected function excludeIgnoredProp(mixed $prop, string $path): bool
     {
@@ -283,8 +306,8 @@ class PropsResolver
     }
 
     /**
-     * Exclude a deferred prop from the initial response, recording
-     * its deferred and merge metadata.
+     * Exclude a deferred prop from the initial response while
+     * collecting its deferred-group and merge metadata.
      */
     protected function excludeDeferredProp(Deferrable $prop, string $path): bool
     {
@@ -298,7 +321,8 @@ class PropsResolver
     }
 
     /**
-     * Exclude a once-prop that the client has already loaded.
+     * Exclude a once-prop that the client has already loaded while
+     * preserving its once metadata for the client.
      */
     protected function excludeAlreadyLoadedProp(mixed $prop, string $path): bool
     {
@@ -344,10 +368,10 @@ class PropsResolver
         }
 
         if ($value instanceof Responsable) {
-            $_response = $value->toResponse($this->request);
+            $response = $value->toResponse($this->request);
 
-            if (method_exists($_response, 'getData')) {
-                $value = $_response->getData(true);
+            if (method_exists($response, 'getData')) {
+                $value = $response->getData(true);
             }
         }
 
@@ -355,8 +379,8 @@ class PropsResolver
     }
 
     /**
-     * Determine if the value is a prop type that may need
-     * filtering or metadata collection.
+     * Determine if the value is a prop type that requires
+     * further filtering or metadata collection.
      */
     protected function isPropType(mixed $value): bool
     {
