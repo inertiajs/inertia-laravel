@@ -173,7 +173,7 @@ class ResponseFactory
      */
     public function preserveFragment(): void
     {
-        session([SessionKey::PRESERVE_FRAGMENT => true]);
+        session([SessionKey::PreserveFragment->value => true]);
     }
 
     /**
