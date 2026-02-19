@@ -103,7 +103,7 @@ class Response implements Responsable
         $this->rootView = $rootView;
         $this->version = $version;
         $this->clearHistory = session()->pull(SessionKey::CLEAR_HISTORY, false);
-        $this->clearHistory = session()->pull(SessionKey::PRESERVE_FRAGMENT, false);
+        $this->preserveFragment = session()->pull(SessionKey::PRESERVE_FRAGMENT, false);
         $this->encryptHistory = $encryptHistory;
         $this->urlResolver = $urlResolver;
     }
