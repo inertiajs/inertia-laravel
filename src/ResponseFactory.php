@@ -343,6 +343,7 @@ class ResponseFactory
      */
     public function handleExceptionsUsing(callable $callback): void
     {
+        /** @var mixed $handler */
         $handler = app(ExceptionHandlerContract::class);
 
         if (! $handler instanceof ExceptionHandler) {
