@@ -144,8 +144,6 @@ class PropsResolver
      */
     public function resolve(array $props): array
     {
-        $props = $this->resolvePropertyProviders($props);
-
         return [
             $this->resolveProps($this->unpackDotProps($props)),
             $this->buildMetadata(),
@@ -198,11 +196,12 @@ class PropsResolver
     /**
      * Recursively resolve the props tree, collecting metadata along the way.
      *
-     * @param  array<string, mixed>  $props
+     * @param  array<array-key, mixed>  $props
      * @return array<string, mixed>
      */
     protected function resolveProps(array $props, string $prefix = '', bool $parentWasResolved = false): array
     {
+        $props = $this->resolvePropertyProviders($props);
         $result = [];
 
         foreach ($props as $key => $value) {

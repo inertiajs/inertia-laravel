@@ -7,7 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response as BaseResponse;
 use Inertia\Inertia;
 use Inertia\MergeProp;
+use Inertia\ProvidesInertiaProperties;
 use Inertia\ProvidesScrollMetadata;
+use Inertia\RenderContext;
 use Inertia\Response;
 use Inertia\ScrollProp;
 
@@ -31,6 +33,71 @@ class PropsResolverTest extends TestCase
         ]);
 
         $this->assertSame('Jonathan', $page['props']['auth']['user']);
+    }
+
+    public function test_nested_provides_inertia_properties_is_resolved(): void
+    {
+        $page = $this->makePage(Request::create('/'), [
+            'auth' => [
+                new class implements ProvidesInertiaProperties
+                {
+                    public function toInertiaProperties(RenderContext $context): iterable
+                    {
+                        return ['user' => 'Jonathan', 'role' => 'admin'];
+                    }
+                },
+                'team' => 'Inertia',
+            ],
+        ]);
+
+        $this->assertSame('Jonathan', $page['props']['auth']['user']);
+        $this->assertSame('admin', $page['props']['auth']['role']);
+        $this->assertSame('Inertia', $page['props']['auth']['team']);
+    }
+
+    public function test_nested_provides_inertia_properties_with_prop_types(): void
+    {
+        $page = $this->makePage(Request::create('/'), [
+            'auth' => [
+                new class implements ProvidesInertiaProperties
+                {
+                    public function toInertiaProperties(RenderContext $context): iterable
+                    {
+                        return [
+                            'user' => 'Jonathan',
+                            'permissions' => Inertia::optional(fn () => ['manage-users']),
+                        ];
+                    }
+                },
+            ],
+        ]);
+
+        $this->assertSame('Jonathan', $page['props']['auth']['user']);
+        $this->assertArrayNotHasKey('permissions', $page['props']['auth']);
+    }
+
+    public function test_nested_provides_inertia_properties_with_prop_types_on_partial_request(): void
+    {
+        $page = $this->makePage(
+            $this->makePartialRequest('auth.permissions'),
+            [
+                'auth' => [
+                    new class implements ProvidesInertiaProperties
+                    {
+                        public function toInertiaProperties(RenderContext $context): iterable
+                        {
+                            return [
+                                'user' => 'Jonathan',
+                                'permissions' => Inertia::optional(fn () => ['manage-users']),
+                            ];
+                        }
+                    },
+                ],
+            ],
+        );
+
+        $this->assertArrayNotHasKey('user', $page['props']['auth']);
+        $this->assertSame(['manage-users'], $page['props']['auth']['permissions']);
     }
 
     public function test_nested_always_prop_is_resolved(): void
