@@ -69,7 +69,7 @@ class PropsResolver
      *
      * @var array<int, string>
      */
-    protected $exceptOnce;
+    protected $loadedOnceProps;
 
     /**
      * The deferred props grouped by their defer group.
@@ -127,31 +127,72 @@ class PropsResolver
     {
         $this->request = $request;
         $this->component = $component;
+
         $this->isPartial = $request->header(Header::PARTIAL_COMPONENT) === $component;
         $this->isInertia = (bool) $request->header(Header::INERTIA);
         $this->only = $this->parseHeader(Header::PARTIAL_ONLY);
         $this->except = $this->parseHeader(Header::PARTIAL_EXCEPT);
         $this->resetProps = $this->parseHeader(Header::RESET) ?? [];
-        $this->exceptOnce = $this->parseHeader(Header::EXCEPT_ONCE_PROPS) ?? [];
+        $this->loadedOnceProps = $this->parseHeader(Header::EXCEPT_ONCE_PROPS) ?? [];
     }
 
     /**
-     * Resolve the given props into a ResolvedProps instance.
+     * Resolve the given props and collect their metadata.
      *
-     * @param  array<string, mixed>  $props
+     * @param  array<array-key, mixed>  $props
+     * @return array{array<string, mixed>, array<string, mixed>}
      */
-    public function resolve(array $props): ResolvedProps
+    public function resolve(array $props): array
     {
-        return new ResolvedProps(
-            props: $this->resolveProps($this->unpackDotProps($props)),
-            deferredProps: $this->deferredProps,
-            mergeProps: $this->mergeProps,
-            prependProps: $this->prependProps,
-            deepMergeProps: $this->deepMergeProps,
-            matchPropsOn: $this->matchPropsOn,
-            scrollProps: $this->scrollProps,
-            onceProps: $this->onceProps,
-        );
+        $props = $this->resolvePropertyProviders($props);
+
+        return [
+            $this->resolveProps($this->unpackDotProps($props)),
+            $this->buildMetadata(),
+        ];
+    }
+
+    /**
+     * Resolve ProvidesInertiaProperties instances into keyed props.
+     *
+     * @param  array<array-key, mixed>  $props
+     * @return array<string, mixed>
+     */
+    protected function resolvePropertyProviders(array $props): array
+    {
+        $result = [];
+
+        $context = new RenderContext($this->component, $this->request);
+
+        foreach ($props as $key => $value) {
+            if (is_numeric($key) && $value instanceof ProvidesInertiaProperties) {
+                /** @var array<string, mixed> $provided */
+                $provided = collect($value->toInertiaProperties($context))->all();
+                $result = array_merge($result, $provided);
+            } else {
+                $result[$key] = $value;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Build the non-empty metadata arrays for the page response.
+     *
+     * @return array<string, mixed>
+     */
+    protected function buildMetadata(): array
+    {
+        return array_filter([
+            'mergeProps' => $this->mergeProps,
+            'prependProps' => $this->prependProps,
+            'deepMergeProps' => $this->deepMergeProps,
+            'matchPropsOn' => $this->matchPropsOn,
+            'deferredProps' => $this->deferredProps,
+            'scrollProps' => $this->scrollProps,
+            'onceProps' => $this->onceProps,
+        ], fn ($value) => count($value) > 0);
     }
 
     /**
@@ -224,30 +265,12 @@ class PropsResolver
      */
     protected function pathMatchesPartialRequest(string $path): bool
     {
-        if ($this->only !== null) {
-            $matched = false;
-
-            foreach ($this->only as $onlyPath) {
-                if ($path === $onlyPath
-                    || str_starts_with($onlyPath, "{$path}.")
-                    || str_starts_with($path, "{$onlyPath}.")
-                ) {
-                    $matched = true;
-                    break;
-                }
-            }
-
-            if (! $matched) {
-                return false;
-            }
+        if ($this->only !== null && ! $this->matchesOnly($path) && ! $this->leadsToOnly($path)) {
+            return false;
         }
 
-        if ($this->except !== null) {
-            foreach ($this->except as $exceptPath) {
-                if ($path === $exceptPath || str_starts_with($path, "{$exceptPath}.")) {
-                    return false;
-                }
-            }
+        if ($this->except !== null && $this->matchesExcept($path)) {
+            return false;
         }
 
         return true;
@@ -339,7 +362,7 @@ class PropsResolver
         return $prop instanceof Onceable
             && $prop->shouldResolveOnce()
             && ! $prop->shouldBeRefreshed()
-            && in_array($prop->getKey() ?? $path, $this->exceptOnce);
+            && in_array($prop->getKey() ?? $path, $this->loadedOnceProps);
     }
 
     /**
@@ -487,30 +510,57 @@ class PropsResolver
      */
     protected function isIncludedInPartialMetadata(string $path): bool
     {
-        if ($this->only !== null) {
-            $matched = false;
-
-            foreach ($this->only as $onlyPath) {
-                if ($path === $onlyPath || str_starts_with($path, "{$onlyPath}.")) {
-                    $matched = true;
-                    break;
-                }
-            }
-
-            if (! $matched) {
-                return false;
-            }
+        if ($this->only !== null && ! $this->matchesOnly($path)) {
+            return false;
         }
 
-        if ($this->except !== null) {
-            foreach ($this->except as $exceptPath) {
-                if ($path === $exceptPath || str_starts_with($path, "{$exceptPath}.")) {
-                    return false;
-                }
-            }
+        if ($this->except !== null && $this->matchesExcept($path)) {
+            return false;
         }
 
         return true;
+    }
+
+    /**
+     * Determine if the path matches or is a descendant of an "only" filter path.
+     */
+    protected function matchesOnly(string $path): bool
+    {
+        foreach ($this->only as $onlyPath) {
+            if ($path === $onlyPath || str_starts_with($path, "{$onlyPath}.")) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Determine if the path is an ancestor of an "only" filter path.
+     */
+    protected function leadsToOnly(string $path): bool
+    {
+        foreach ($this->only as $onlyPath) {
+            if (str_starts_with($onlyPath, "{$path}.")) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Determine if the path matches or is a descendant of an "except" filter path.
+     */
+    protected function matchesExcept(string $path): bool
+    {
+        foreach ($this->except as $exceptPath) {
+            if ($path === $exceptPath || str_starts_with($path, "{$exceptPath}.")) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

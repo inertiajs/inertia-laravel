@@ -166,21 +166,19 @@ class Response implements Responsable
      */
     public function toResponse($request)
     {
-        $props = $this->resolveInertiaPropsProviders($this->props, $request);
-
         $resolver = new PropsResolver($request, $this->component);
-        $resolved = $resolver->resolve($props);
+        [$resolvedProps, $resolvedMetadata] = $resolver->resolve($this->props);
 
         $page = array_merge(
             [
                 'component' => $this->component,
-                'props' => $resolved->props,
+                'props' => $resolvedProps,
                 'url' => $this->getUrl($request),
                 'version' => $this->version,
                 'clearHistory' => $this->clearHistory,
                 'encryptHistory' => $this->encryptHistory,
             ],
-            $resolved->metadata(),
+            $resolvedMetadata,
             $this->resolveFlashData($request),
         );
 
@@ -189,32 +187,6 @@ class Response implements Responsable
         }
 
         return ResponseFactory::view($this->rootView, $this->viewData + ['page' => $page]);
-    }
-
-    /**
-     * Resolve the ProvidesInertiaProperties props.
-     *
-     * @param  array<array-key, mixed>  $props
-     * @return array<string, mixed>
-     */
-    public function resolveInertiaPropsProviders(array $props, Request $request): array
-    {
-        $newProps = [];
-
-        $renderContext = new RenderContext($this->component, $request);
-
-        foreach ($props as $key => $value) {
-            if (is_numeric($key) && $value instanceof ProvidesInertiaProperties) {
-                // Pipe into a Collection to leverage Collection::getArrayableItems()
-                /** @var array<string, mixed> $inertiaProps */
-                $inertiaProps = collect($value->toInertiaProperties($renderContext))->all();
-                $newProps = array_merge($newProps, $inertiaProps);
-            } else {
-                $newProps[$key] = $value;
-            }
-        }
-
-        return $newProps;
     }
 
     /**
@@ -227,22 +199,6 @@ class Response implements Responsable
         $flash = Inertia::getFlashed($request);
 
         return $flash ? ['flash' => $flash] : [];
-    }
-
-    /**
-     * Determine if the request is an Inertia request.
-     */
-    public function isInertia(Request $request): bool
-    {
-        return (bool) $request->header(Header::INERTIA);
-    }
-
-    /**
-     * Determine if the request is a partial request.
-     */
-    public function isPartial(Request $request): bool
-    {
-        return $request->header(Header::PARTIAL_COMPONENT) === $this->component;
     }
 
     /**
