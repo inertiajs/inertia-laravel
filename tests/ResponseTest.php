@@ -917,6 +917,66 @@ class ResponseTest extends TestCase
         $this->assertSame('123', $page->version);
     }
 
+    public function test_nested_closures_are_resolved(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+
+        $response = new Response('User/Edit', [
+            'auth' => [
+                'user' => fn () => ['name' => 'Jonathan'],
+                'token' => 'value',
+            ],
+        ], 'app', '123');
+
+        /** @var BaseResponse $response */
+        $response = $response->toResponse($request);
+        $view = $response->getOriginalContent();
+        $page = $view->getData()['page'];
+
+        $this->assertSame('Jonathan', $page['props']['auth']['user']['name']);
+        $this->assertSame('value', $page['props']['auth']['token']);
+    }
+
+    public function test_double_nested_closures_are_resolved(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+
+        $response = new Response('User/Edit', [
+            'auth' => fn () => [
+                'user' => fn () => ['name' => 'Jonathan'],
+                'token' => 'value',
+            ],
+        ], 'app', '123');
+
+        /** @var BaseResponse $response */
+        $response = $response->toResponse($request);
+        $view = $response->getOriginalContent();
+        $page = $view->getData()['page'];
+
+        $this->assertSame('Jonathan', $page['props']['auth']['user']['name']);
+        $this->assertSame('value', $page['props']['auth']['token']);
+    }
+
+    public function test_nested_optional_prop_inside_closure_is_excluded(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+
+        $response = new Response('User/Edit', [
+            'auth' => fn () => [
+                'user' => ['name' => 'Jonathan'],
+                'pending' => Inertia::optional(fn () => 'secret'),
+            ],
+        ], 'app', '123');
+
+        /** @var BaseResponse $response */
+        $response = $response->toResponse($request);
+        $view = $response->getOriginalContent();
+        $page = $view->getData()['page'];
+
+        $this->assertSame('Jonathan', $page['props']['auth']['user']['name']);
+        $this->assertArrayNotHasKey('pending', $page['props']['auth']);
+    }
+
     public function test_nested_partial_props(): void
     {
         $request = Request::create('/user/123', 'GET');

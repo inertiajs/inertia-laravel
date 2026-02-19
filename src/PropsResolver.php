@@ -1,0 +1,564 @@
+<?php
+
+namespace Inertia;
+
+use Closure;
+use GuzzleHttp\Promise\PromiseInterface;
+use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Contracts\Support\Responsable;
+use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\App;
+use Inertia\Support\Header;
+
+class PropsResolver
+{
+    use ResolvesCallables;
+
+    /**
+     * Whether this is a partial request for the given component.
+     *
+     * @var bool
+     */
+    protected $isPartial;
+
+    /**
+     * Whether this is an Inertia request.
+     *
+     * @var bool
+     */
+    protected $isInertia;
+
+    /**
+     * The props to include in the partial response.
+     *
+     * @var array<int, string>|null
+     */
+    protected $only;
+
+    /**
+     * The props to exclude from the partial response.
+     *
+     * @var array<int, string>|null
+     */
+    protected $except;
+
+    /**
+     * The props that should have their merge state reset.
+     *
+     * @var array<int, string>
+     */
+    protected $resetProps;
+
+    /**
+     * The once-props that the client has already loaded.
+     *
+     * @var array<int, string>
+     */
+    protected $exceptOnce;
+
+    /**
+     * The deferred props grouped by their defer group.
+     *
+     * @var array<string, array<int, string>>
+     */
+    protected $deferredProps = [];
+
+    /**
+     * The props that should be appended to existing client-side data.
+     *
+     * @var array<int, string>
+     */
+    protected $mergeProps = [];
+
+    /**
+     * The props that should be prepended to existing client-side data.
+     *
+     * @var array<int, string>
+     */
+    protected $prependProps = [];
+
+    /**
+     * The props that should be deep merged with existing client-side data.
+     *
+     * @var array<int, string>
+     */
+    protected $deepMergeProps = [];
+
+    /**
+     * The key matching strategies for mergeable props.
+     *
+     * @var array<int, string>
+     */
+    protected $matchPropsOn = [];
+
+    /**
+     * The scroll pagination metadata for each scroll prop.
+     *
+     * @var array<string, array<string, mixed>>
+     */
+    protected $scrollProps = [];
+
+    /**
+     * The once-prop metadata for each once prop.
+     *
+     * @var array<string, array<string, mixed>>
+     */
+    protected $onceProps = [];
+
+    /**
+     * Create a new props resolver instance.
+     */
+    public function __construct(
+        protected Request $request,
+        protected string $component,
+    ) {
+        $this->isPartial = $request->header(Header::PARTIAL_COMPONENT) === $component;
+        $this->isInertia = (bool) $request->header(Header::INERTIA);
+        $this->only = $this->parseHeader(Header::PARTIAL_ONLY);
+        $this->except = $this->parseHeader(Header::PARTIAL_EXCEPT);
+        $this->resetProps = $this->parseHeader(Header::RESET) ?? [];
+        $this->exceptOnce = $this->parseHeader(Header::EXCEPT_ONCE_PROPS) ?? [];
+    }
+
+    /**
+     * Resolve the given props into a ResolvedProps instance.
+     *
+     * @param  array<string, mixed>  $props
+     */
+    public function resolve(array $props): ResolvedProps
+    {
+        return new ResolvedProps(
+            props: $this->resolveProps($this->unpackDotProps($props)),
+            deferredProps: $this->deferredProps,
+            mergeProps: $this->mergeProps,
+            prependProps: $this->prependProps,
+            deepMergeProps: $this->deepMergeProps,
+            matchPropsOn: $this->matchPropsOn,
+            scrollProps: $this->scrollProps,
+            onceProps: $this->onceProps,
+        );
+    }
+
+    /**
+     * Recursively resolve the props tree, collecting metadata along the way.
+     *
+     * @param  array<string, mixed>  $props
+     * @return array<string, mixed>
+     */
+    protected function resolveProps(array $props, string $prefix = '', bool $parentWasResolved = false): array
+    {
+        $result = [];
+
+        foreach ($props as $key => $value) {
+            $path = $prefix === '' ? $key : "{$prefix}.{$key}";
+            $prop = $value;
+
+            // On partial requests, only include props that match the requested
+            // paths. AlwaysProp and children of resolved values bypass this.
+            if (! $this->shouldIncludeInPartialResponse($prop, $path, $parentWasResolved)) {
+                continue;
+            }
+
+            $value = $this->resolveValue($prop, $path, $props);
+
+            // A closure may return a prop type — unwrap one more level.
+            if ($value !== $prop && $this->isPropType($value)) {
+                $prop = $value;
+                $value = $this->resolveValue($prop, $path, $props);
+            }
+
+            // On initial page loads, certain props are excluded from the response
+            // but still contribute metadata (deferred groups, merge config, etc.).
+            if (! $this->isPartial && $this->excludeFromInitialResponse($prop, $path)) {
+                continue;
+            }
+
+            $this->collectMetadata($prop, $path);
+
+            $result[$key] = is_array($value)
+                ? $this->resolveProps($value, $path, $parentWasResolved || ! is_array($prop))
+                : $value;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Determine if a prop should be included in a partial response. AlwaysProp
+     * and children of already-resolved values bypass partial filtering.
+     */
+    protected function shouldIncludeInPartialResponse(mixed $prop, string $path, bool $parentWasResolved): bool
+    {
+        if (! $this->isPartial || $prop instanceof AlwaysProp || $parentWasResolved) {
+            return true;
+        }
+
+        return $this->pathMatchesPartialRequest($path);
+    }
+
+    /**
+     * Determine if the given path matches the current partial request using
+     * bidirectional prefix matching on the only/except headers.
+     */
+    protected function pathMatchesPartialRequest(string $path): bool
+    {
+        if ($this->only !== null) {
+            $matched = false;
+
+            foreach ($this->only as $onlyPath) {
+                if ($path === $onlyPath
+                    || str_starts_with($onlyPath, "{$path}.")
+                    || str_starts_with($path, "{$onlyPath}.")
+                ) {
+                    $matched = true;
+                    break;
+                }
+            }
+
+            if (! $matched) {
+                return false;
+            }
+        }
+
+        if ($this->except !== null) {
+            foreach ($this->except as $exceptPath) {
+                if ($path === $exceptPath || str_starts_with($path, "{$exceptPath}.")) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Determine if a prop should be excluded from the initial page response.
+     * Each exclusion type records its metadata before the prop is excluded.
+     */
+    protected function excludeFromInitialResponse(mixed $prop, string $path): bool
+    {
+        // OptionalProp and DeferProp implement IgnoreFirstLoad and are never
+        // sent on the initial page load. They may still contribute deferred,
+        // merge, and once metadata.
+        if ($prop instanceof IgnoreFirstLoad) {
+            return $this->excludeIgnoredProp($prop, $path);
+        }
+
+        // ScrollProp and other Deferrable types are excluded when configured
+        // to defer, and contribute deferred and merge metadata.
+        if ($prop instanceof Deferrable && $prop->shouldDefer()) {
+            return $this->excludeDeferredProp($prop, $path);
+        }
+
+        // Once-props that the client reports as already loaded are excluded
+        // to avoid sending the same data twice.
+        if ($this->isInertia && $this->wasAlreadyLoadedByClient($prop, $path)) {
+            return $this->excludeAlreadyLoadedProp($prop, $path);
+        }
+
+        return false;
+    }
+
+    /**
+     * Exclude an IgnoreFirstLoad prop (OptionalProp, DeferProp) from the
+     * initial response, recording its deferred, merge, and once metadata.
+     */
+    protected function excludeIgnoredProp(mixed $prop, string $path): bool
+    {
+        if ($prop instanceof Deferrable && $prop->shouldDefer()
+            && ! $this->wasAlreadyLoadedByClient($prop, $path)) {
+            $this->collectDeferredPropMetadata($path, $prop);
+        }
+
+        if ($prop instanceof Mergeable && $prop->shouldMerge()) {
+            $this->collectMergeableMetadata($path, $prop);
+        }
+
+        if ($prop instanceof Onceable && $prop->shouldResolveOnce()) {
+            $this->collectOnceMetadata($path, $prop);
+        }
+
+        return true;
+    }
+
+    /**
+     * Exclude a deferred prop from the initial response, recording
+     * its deferred and merge metadata.
+     */
+    protected function excludeDeferredProp(Deferrable $prop, string $path): bool
+    {
+        $this->collectDeferredPropMetadata($path, $prop);
+
+        if ($prop instanceof Mergeable && $prop->shouldMerge()) {
+            $this->collectMergeableMetadata($path, $prop);
+        }
+
+        return true;
+    }
+
+    /**
+     * Exclude a once-prop that the client has already loaded.
+     */
+    protected function excludeAlreadyLoadedProp(mixed $prop, string $path): bool
+    {
+        $this->collectOnceMetadata($path, $prop);
+
+        return true;
+    }
+
+    /**
+     * Determine if a once-prop has already been loaded by the client.
+     */
+    protected function wasAlreadyLoadedByClient(mixed $prop, string $path): bool
+    {
+        return $prop instanceof Onceable
+            && $prop->shouldResolveOnce()
+            && ! $prop->shouldBeRefreshed()
+            && in_array($prop->getKey() ?? $path, $this->exceptOnce);
+    }
+
+    /**
+     * Resolve a single prop value through the resolution pipeline.
+     *
+     * @param  array<string, mixed>  $siblings
+     */
+    protected function resolveValue(mixed $value, string $path, array $siblings): mixed
+    {
+        if ($value instanceof ScrollProp) {
+            $value->configureMergeIntent($this->request);
+        }
+
+        $value = $this->resolveCallable($value);
+
+        if ($value instanceof ProvidesInertiaProperty) {
+            $value = $value->toInertiaProperty(new PropertyContext($path, $siblings, $this->request));
+        }
+
+        if ($value instanceof Arrayable) {
+            $value = $value->toArray();
+        }
+
+        if ($value instanceof PromiseInterface) {
+            $value = $value->wait();
+        }
+
+        if ($value instanceof Responsable) {
+            $_response = $value->toResponse($this->request);
+
+            if (method_exists($_response, 'getData')) {
+                $value = $_response->getData(true);
+            }
+        }
+
+        return $value;
+    }
+
+    /**
+     * Determine if the value is a prop type that may need
+     * filtering or metadata collection.
+     */
+    protected function isPropType(mixed $value): bool
+    {
+        return $value instanceof AlwaysProp
+            || $value instanceof Deferrable
+            || $value instanceof IgnoreFirstLoad
+            || $value instanceof Mergeable
+            || $value instanceof Onceable;
+    }
+
+    /**
+     * Collect metadata for a prop that will be included in the response.
+     */
+    protected function collectMetadata(mixed $prop, string $path): void
+    {
+        if ($prop instanceof Mergeable && $prop->shouldMerge()) {
+            $this->collectMergeableMetadata($path, $prop);
+        }
+
+        if ($prop instanceof ScrollProp) {
+            $this->collectScrollMetadata($path, $prop);
+        }
+
+        if ($prop instanceof Onceable && $prop->shouldResolveOnce()) {
+            $this->collectOnceMetadata($path, $prop);
+        }
+    }
+
+    /**
+     * Collect the deferred prop and its group.
+     */
+    protected function collectDeferredPropMetadata(string $path, Deferrable $prop): void
+    {
+        $this->deferredProps[$prop->group()][] = $path;
+    }
+
+    /**
+     * Collect the merge strategy for a mergeable prop.
+     */
+    protected function collectMergeableMetadata(string $path, Mergeable $prop): void
+    {
+        if (in_array($path, $this->resetProps)) {
+            return;
+        }
+
+        if ($this->isPartial && ! $this->isIncludedInPartialMetadata($path)) {
+            return;
+        }
+
+        if ($prop->shouldDeepMerge()) {
+            $this->deepMergeProps[] = $path;
+        } elseif ($prop->appendsAtRoot()) {
+            $this->mergeProps[] = $path;
+        } elseif ($prop->prependsAtRoot()) {
+            $this->prependProps[] = $path;
+        } else {
+            foreach ($prop->appendsAtPaths() as $appendPath) {
+                $this->mergeProps[] = "{$path}.{$appendPath}";
+            }
+            foreach ($prop->prependsAtPaths() as $prependPath) {
+                $this->prependProps[] = "{$path}.{$prependPath}";
+            }
+        }
+
+        foreach ($prop->matchesOn() as $strategy) {
+            $this->matchPropsOn[] = "{$path}.{$strategy}";
+        }
+    }
+
+    /**
+     * Collect scroll pagination metadata.
+     *
+     * @param  ScrollProp<mixed>  $prop
+     */
+    protected function collectScrollMetadata(string $path, ScrollProp $prop): void
+    {
+        $this->scrollProps[$path] = [
+            ...$prop->metadata(),
+            'reset' => in_array($path, $this->resetProps),
+        ];
+    }
+
+    /**
+     * Collect once-prop metadata.
+     */
+    protected function collectOnceMetadata(string $path, mixed $prop): void
+    {
+        if (! $prop instanceof Onceable || ! $prop->shouldResolveOnce()) {
+            return;
+        }
+
+        if ($this->isPartial && ! $this->isIncludedInPartialMetadata($path)) {
+            return;
+        }
+
+        $this->onceProps[$prop->getKey() ?? $path] = [
+            'prop' => $path,
+            'expiresAt' => $prop->expiresAt(),
+        ];
+    }
+
+    /**
+     * Determine if the path should contribute metadata during a partial request.
+     */
+    protected function isIncludedInPartialMetadata(string $path): bool
+    {
+        if ($this->only !== null) {
+            $matched = false;
+
+            foreach ($this->only as $onlyPath) {
+                if ($path === $onlyPath || str_starts_with($path, "{$onlyPath}.")) {
+                    $matched = true;
+                    break;
+                }
+            }
+
+            if (! $matched) {
+                return false;
+            }
+        }
+
+        if ($this->except !== null) {
+            foreach ($this->except as $exceptPath) {
+                if ($path === $exceptPath || str_starts_with($path, "{$exceptPath}.")) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Unpack top-level dot-notation keys into nested arrays.
+     *
+     * @param  array<array-key, mixed>  $props
+     * @return array<array-key, mixed>
+     */
+    protected function unpackDotProps(array $props): array
+    {
+        foreach ($props as $key => $value) {
+            if (! is_string($key) || ! str_contains($key, '.')) {
+                continue;
+            }
+
+            if ($value instanceof Closure) {
+                $value = App::call($value);
+            }
+
+            if ($value instanceof Arrayable) {
+                $value = $value->toArray();
+            }
+
+            $this->ensurePathIsTraversable($props, $key);
+            Arr::set($props, $key, $value);
+            unset($props[$key]);
+        }
+
+        return $props;
+    }
+
+    /**
+     * Resolve closures and Arrayable values along the intermediate segments
+     * of a dot-notation path so that Arr::set can nest into them.
+     *
+     * @param  array<array-key, mixed>  $props
+     */
+    protected function ensurePathIsTraversable(array &$props, string $dotKey): void
+    {
+        $segments = explode('.', $dotKey);
+        array_pop($segments);
+
+        $current = &$props;
+
+        foreach ($segments as $segment) {
+            if (! isset($current[$segment])) {
+                return;
+            }
+
+            if ($current[$segment] instanceof Closure) {
+                $current[$segment] = App::call($current[$segment]);
+            }
+
+            if ($current[$segment] instanceof Arrayable) {
+                $current[$segment] = $current[$segment]->toArray();
+            }
+
+            if (! is_array($current[$segment])) {
+                return;
+            }
+
+            $current = &$current[$segment];
+        }
+    }
+
+    /**
+     * Parse a comma-separated header value into an array.
+     *
+     * @return array<int, string>|null
+     */
+    protected function parseHeader(string $key): ?array
+    {
+        return array_filter(explode(',', $this->request->header($key, ''))) ?: null;
+    }
+}
