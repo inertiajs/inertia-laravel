@@ -786,6 +786,147 @@ class PropsResolverTest extends TestCase
         $this->assertArrayNotHasKey('deferredProps', $page);
     }
 
+    public function test_dot_notation_prop_merges_into_existing_nested_structure(): void
+    {
+        $page = $this->makePage(Request::create('/'), [
+            'auth' => [
+                'user' => [
+                    'name' => 'Jonathan Reinink',
+                    'email' => 'jonathan@example.com',
+                ],
+            ],
+            'auth.user.permissions' => fn () => ['edit-posts', 'delete-posts'],
+        ]);
+
+        $this->assertSame('Jonathan Reinink', $page['props']['auth']['user']['name']);
+        $this->assertSame('jonathan@example.com', $page['props']['auth']['user']['email']);
+        $this->assertSame(['edit-posts', 'delete-posts'], $page['props']['auth']['user']['permissions']);
+        $this->assertArrayNotHasKey('auth.user.permissions', $page['props']);
+    }
+
+    public function test_dot_notation_prop_merges_when_parent_is_a_closure(): void
+    {
+        $page = $this->makePage(Request::create('/'), [
+            'auth' => fn () => [
+                'user' => [
+                    'name' => 'Jonathan Reinink',
+                    'email' => 'jonathan@example.com',
+                ],
+            ],
+            'auth.user.permissions' => fn () => ['edit-posts', 'delete-posts'],
+        ]);
+
+        $this->assertSame('Jonathan Reinink', $page['props']['auth']['user']['name']);
+        $this->assertSame('jonathan@example.com', $page['props']['auth']['user']['email']);
+        $this->assertSame(['edit-posts', 'delete-posts'], $page['props']['auth']['user']['permissions']);
+    }
+
+    public function test_dot_notation_optional_prop_is_excluded_from_initial_load(): void
+    {
+        $page = $this->makePage(Request::create('/'), [
+            'auth' => [
+                'user' => [
+                    'name' => 'Jonathan Reinink',
+                    'email' => 'jonathan@example.com',
+                ],
+            ],
+            'auth.user.permissions' => Inertia::optional(fn () => ['edit-posts', 'delete-posts']),
+        ]);
+
+        $this->assertSame('Jonathan Reinink', $page['props']['auth']['user']['name']);
+        $this->assertSame('jonathan@example.com', $page['props']['auth']['user']['email']);
+        $this->assertArrayNotHasKey('permissions', $page['props']['auth']['user']);
+        $this->assertArrayNotHasKey('auth.user.permissions', $page['props']);
+    }
+
+    public function test_dot_notation_optional_prop_is_included_on_partial_request(): void
+    {
+        $page = $this->makePage($this->makePartialRequest('auth.user.permissions'), [
+            'auth' => [
+                'user' => [
+                    'name' => 'Jonathan Reinink',
+                    'email' => 'jonathan@example.com',
+                ],
+            ],
+            'auth.user.permissions' => Inertia::optional(fn () => ['edit-posts', 'delete-posts']),
+        ]);
+
+        $this->assertSame(['edit-posts', 'delete-posts'], $page['props']['auth']['user']['permissions']);
+        $this->assertArrayNotHasKey('auth.user.permissions', $page['props']);
+    }
+
+    public function test_optional_props_inside_indexed_arrays_are_resolved_on_partial_request(): void
+    {
+        $page = $this->makePage($this->makePartialRequest('foos'), [
+            'foos' => [
+                [
+                    'name' => 'First',
+                    'bar' => Inertia::optional(fn () => 'expensive-data-1'),
+                ],
+                [
+                    'name' => 'Second',
+                    'bar' => Inertia::optional(fn () => 'expensive-data-2'),
+                ],
+            ],
+        ]);
+
+        $this->assertSame('First', $page['props']['foos'][0]['name']);
+        $this->assertSame('expensive-data-1', $page['props']['foos'][0]['bar']);
+        $this->assertSame('Second', $page['props']['foos'][1]['name']);
+        $this->assertSame('expensive-data-2', $page['props']['foos'][1]['bar']);
+    }
+
+    public function test_optional_props_inside_indexed_arrays_are_excluded_from_initial_load(): void
+    {
+        $page = $this->makePage(Request::create('/'), [
+            'foos' => [
+                [
+                    'name' => 'First',
+                    'bar' => Inertia::optional(fn () => 'expensive-data'),
+                ],
+            ],
+        ]);
+
+        $this->assertSame('First', $page['props']['foos'][0]['name']);
+        $this->assertArrayNotHasKey('bar', $page['props']['foos'][0]);
+    }
+
+    public function test_deferred_props_inside_closure_are_excluded_from_initial_load(): void
+    {
+        $page = $this->makePage(Request::create('/'), [
+            'auth' => fn () => [
+                'user' => [
+                    'name' => 'Jonathan Reinink',
+                    'email' => 'jonathan@example.com',
+                ],
+                'notifications' => Inertia::defer(fn () => ['You have a new follower']),
+                'roles' => Inertia::defer(fn () => ['admin']),
+            ],
+        ]);
+
+        $this->assertSame('Jonathan Reinink', $page['props']['auth']['user']['name']);
+        $this->assertArrayNotHasKey('notifications', $page['props']['auth']);
+        $this->assertArrayNotHasKey('roles', $page['props']['auth']);
+        $this->assertSame(['default' => ['auth.notifications', 'auth.roles']], $page['deferredProps']);
+    }
+
+    public function test_deferred_props_inside_closure_are_resolved_on_partial_request(): void
+    {
+        $page = $this->makePage($this->makePartialRequest('auth.notifications,auth.roles'), [
+            'auth' => fn () => [
+                'user' => [
+                    'name' => 'Jonathan Reinink',
+                    'email' => 'jonathan@example.com',
+                ],
+                'notifications' => Inertia::defer(fn () => ['You have a new follower']),
+                'roles' => Inertia::defer(fn () => ['admin']),
+            ],
+        ]);
+
+        $this->assertSame(['You have a new follower'], $page['props']['auth']['notifications']);
+        $this->assertSame(['admin'], $page['props']['auth']['roles']);
+    }
+
     /**
      * Resolve the given props through the Inertia response and return the page data.
      *
