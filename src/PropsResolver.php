@@ -158,12 +158,13 @@ class PropsResolver
      */
     protected function resolvePropertyProviders(array $props): array
     {
+        $context = null;
         $result = [];
-
-        $context = new RenderContext($this->component, $this->request);
 
         foreach ($props as $key => $value) {
             if (is_numeric($key) && $value instanceof ProvidesInertiaProperties) {
+                $context ??= new RenderContext($this->component, $this->request);
+
                 /** @var array<string, mixed> $provided */
                 $provided = collect($value->toInertiaProperties($context))->all();
                 $result = array_merge($result, $provided);
