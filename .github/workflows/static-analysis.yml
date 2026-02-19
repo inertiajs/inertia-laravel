@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - "2.x"
+      - "3.x"
   pull_request:
 
 permissions:

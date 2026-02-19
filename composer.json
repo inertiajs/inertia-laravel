@@ -48,7 +48,7 @@
     "scripts": {
         "test": "phpunit",
         "lint": "pint",
-        "analyze": "phpstan analyze --memory-limit=256M"
+        "analyze": "phpstan analyze --memory-limit=512M"
     },
     "extra": {
         "laravel": {
