@@ -4,17 +4,18 @@ on:
   push:
   pull_request:
   schedule:
-    - cron: "0 0 * * *"
+    - cron: '0 0 * * *'
 
 jobs:
   tests:
     runs-on: ubuntu-24.04
+
     strategy:
       fail-fast: true
       matrix:
         php: [8.1, 8.2, 8.3, 8.4, 8.5]
-        laravel: [10, 11, 12]
-        stability: ["prefer-lowest", "prefer-stable"]
+        laravel: [10, 11, 12, '13']
+        stability: [prefer-lowest, prefer-stable]
         exclude:
           - php: 8.5
             laravel: 10
@@ -24,8 +25,13 @@ jobs:
             laravel: 11
           - php: 8.1
             laravel: 12
+          - laravel: '13'
+            php: 8.1
+          - laravel: '13'
+            php: 8.2
 
     name: PHP ${{ matrix.php }} - Laravel ${{ matrix.laravel }} (w/ ${{ matrix.stability }})
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -41,7 +47,7 @@ jobs:
 
       - name: Remove PHPStan on PHP 8.1 and Laravel 10
         run: composer remove --dev larastan/larastan
-        if: matrix.php == 8.1 || matrix.laravel == 10
+        if: 'matrix.php == 8.1 || matrix.laravel == 10'
 
       - name: Set Minimum PHP 8.1 Versions
         uses: nick-fields/retry@v3
@@ -50,7 +56,7 @@ jobs:
           max_attempts: 5
           command: |
             composer require vlucas/phpdotenv:^5.3.1 --${{ matrix.stability }} --no-update --no-interaction
-        if: matrix.php >= 8.1 && matrix.stability == 'prefer-lowest'
+        if: "matrix.php >= 8.1 && matrix.stability == 'prefer-lowest'"
 
       - name: Set Minimum PHP 8.2 Versions
         uses: nick-fields/retry@v3
@@ -59,7 +65,7 @@ jobs:
           max_attempts: 5
           command: |
             composer require nesbot/carbon:^2.62.1 --dev --${{ matrix.stability }} --no-update --no-interaction
-        if: matrix.php >= 8.2 && matrix.stability == 'prefer-lowest' && matrix.laravel < 12
+        if: "matrix.php >= 8.2 && matrix.stability == 'prefer-lowest' && matrix.laravel < 12"
 
       - name: Set Minimum PHP 8.2 Versions and Laravel > 11
         uses: nick-fields/retry@v3
@@ -68,7 +74,7 @@ jobs:
           max_attempts: 5
           command: |
             composer require "orchestra/testbench:^9.2|^10.0" --dev --${{ matrix.stability }} --no-update --no-interaction
-        if: matrix.php >= 8.2 && matrix.stability == 'prefer-lowest' && matrix.laravel >= 11
+        if: "matrix.php >= 8.2 && matrix.stability == 'prefer-lowest' && matrix.laravel >= 11"
 
       - name: Set Laravel version
         uses: nick-fields/retry@v3
