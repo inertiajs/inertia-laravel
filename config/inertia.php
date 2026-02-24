@@ -106,6 +106,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Expose Shared Prop Keys
+    |--------------------------------------------------------------------------
+    |
+    | When enabled, each page response includes a `sharedProps` metadata key
+    | listing the top-level prop keys that were registered via `Inertia::share`.
+    | The frontend can use this to carry shared props over during instant visits.
+    |
+    */
+
+    'expose_shared_prop_keys' => true,
+
+    /*
+    |--------------------------------------------------------------------------
     | History
     |--------------------------------------------------------------------------
     |

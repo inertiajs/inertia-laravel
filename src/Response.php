@@ -81,19 +81,29 @@ class Response implements Responsable
     protected ?Closure $urlResolver = null;
 
     /**
+     * The shared properties (before merge with page props).
+     *
+     * @var array<array-key, mixed|\Inertia\ProvidesInertiaProperties>
+     */
+    protected array $sharedProps = [];
+
+    /**
      * Create a new Inertia response instance.
      *
+     * @param  array<array-key, mixed|\Inertia\ProvidesInertiaProperties>  $sharedProps
      * @param  array<array-key, mixed|\Inertia\ProvidesInertiaProperties>  $props
      */
     public function __construct(
         string $component,
+        array $sharedProps,
         array $props,
         string $rootView = 'app',
         string $version = '',
         bool $encryptHistory = false,
-        ?Closure $urlResolver = null
+        ?Closure $urlResolver = null,
     ) {
         $this->component = $component;
+        $this->sharedProps = $sharedProps;
         $this->props = $props;
         $this->rootView = $rootView;
         $this->version = $version;
@@ -175,7 +185,7 @@ class Response implements Responsable
     public function toResponse($request)
     {
         $resolver = new PropsResolver($request, $this->component);
-        [$resolvedProps, $resolvedMetadata] = $resolver->resolve($this->props);
+        [$resolvedProps, $resolvedMetadata] = $resolver->resolve($this->sharedProps, $this->props);
 
         $page = array_merge(
             [

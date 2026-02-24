@@ -735,6 +735,211 @@ class ResponseFactoryTest extends TestCase
         ]);
     }
 
+    public function test_shared_props_tracking_can_be_disabled(): void
+    {
+        config()->set('inertia.expose_shared_prop_keys', false);
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            Inertia::share('app_name', 'My App');
+
+            return Inertia::render('User/Edit');
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertSuccessful();
+        $data = $response->json();
+        $this->assertArrayNotHasKey('sharedProps', $data);
+        $this->assertSame('My App', $data['props']['app_name']);
+    }
+
+    public function test_shared_props_metadata_includes_keys_from_middleware_share(): void
+    {
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            return Inertia::render('User/Edit', [
+                'user' => ['name' => 'Jonathan'],
+            ]);
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Edit',
+            'props' => [
+                'user' => ['name' => 'Jonathan'],
+            ],
+            'sharedProps' => ['errors'],
+        ]);
+    }
+
+    public function test_shared_props_metadata_includes_keys_from_inertia_share(): void
+    {
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            Inertia::share('app_name', 'My App');
+
+            return Inertia::render('User/Edit');
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'sharedProps' => ['errors', 'app_name'],
+        ]);
+    }
+
+    public function test_shared_props_metadata_includes_dot_notation_keys_as_top_level(): void
+    {
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            Inertia::share('auth.user', ['name' => 'Jonathan']);
+
+            return Inertia::render('User/Edit');
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'sharedProps' => ['errors', 'auth'],
+        ]);
+    }
+
+    public function test_shared_props_metadata_includes_keys_from_share_once(): void
+    {
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            Inertia::shareOnce('permissions', fn () => ['admin' => true]);
+
+            return Inertia::render('User/Edit');
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'props' => [
+                'permissions' => ['admin' => true],
+            ],
+            'sharedProps' => ['errors', 'permissions'],
+        ]);
+    }
+
+    public function test_shared_props_metadata_includes_keys_from_provides_inertia_properties(): void
+    {
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            Inertia::share(new ExampleInertiaPropsProvider([
+                'app_name' => 'My App',
+                'locale' => 'en',
+            ]));
+
+            return Inertia::render('User/Edit');
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'props' => [
+                'app_name' => 'My App',
+                'locale' => 'en',
+            ],
+            'sharedProps' => ['errors', 'app_name', 'locale'],
+        ]);
+    }
+
+    public function test_shared_props_metadata_includes_page_specific_override_keys(): void
+    {
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            Inertia::share('auth', ['user' => null]);
+
+            return Inertia::render('User/Edit', [
+                'auth' => ['user' => ['name' => 'Jonathan']],
+            ]);
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'props' => [
+                'auth' => ['user' => ['name' => 'Jonathan']],
+            ],
+            'sharedProps' => ['errors', 'auth'],
+        ]);
+    }
+
+    public function test_shared_props_metadata_with_multiple_share_calls(): void
+    {
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            Inertia::share('app_name', 'My App');
+            Inertia::share('locale', 'en');
+            Inertia::shareOnce('permissions', fn () => ['admin' => true]);
+
+            return Inertia::render('User/Edit');
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'sharedProps' => ['errors', 'app_name', 'locale', 'permissions'],
+        ]);
+    }
+
+    public function test_shared_props_metadata_with_array_share(): void
+    {
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            Inertia::share([
+                'flash' => fn () => ['message' => 'Hello'],
+                'auth' => fn () => ['user' => ['name' => 'Jonathan']],
+            ]);
+
+            return Inertia::render('User/Edit');
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'sharedProps' => ['errors', 'flash', 'auth'],
+        ]);
+    }
+
+    public function test_shared_props_metadata_includes_already_loaded_once_props(): void
+    {
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            Inertia::shareOnce('permissions', fn () => ['admin' => true]);
+
+            return Inertia::render('User/Edit');
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', [
+            'X-Inertia' => 'true',
+            'X-Inertia-Except-Once-Props' => 'permissions',
+        ]);
+
+        $response->assertSuccessful();
+        $data = $response->json();
+
+        // The once-prop value should be excluded from props since the client already has it
+        $this->assertArrayNotHasKey('permissions', $data['props']);
+
+        // But its key should still appear in the sharedProps metadata
+        $this->assertContains('permissions', $data['sharedProps']);
+
+        // And its onceProps metadata should also be preserved
+        $this->assertArrayHasKey('permissions', $data['onceProps']);
+    }
+
     public function test_without_ssr_registers_paths_with_gateway(): void
     {
         Inertia::withoutSsr(['admin/*', 'nova/*']);

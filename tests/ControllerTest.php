@@ -30,6 +30,7 @@ class ControllerTest extends TestCase
             'version' => '',
             'encryptHistory' => false,
             'clearHistory' => false,
+            'sharedProps' => ['errors'],
         ]);
     }
 }
