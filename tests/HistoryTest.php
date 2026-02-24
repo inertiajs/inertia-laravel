@@ -162,4 +162,66 @@ class HistoryTest extends TestCase
         $response->assertSuccessful();
         $response->assertContent('<script data-page="app" type="application/json">{"component":"User\/Edit","props":{"errors":{}},"url":"\/users","version":"","clearHistory":true,"encryptHistory":false}</script><div id="app"></div>');
     }
+
+    public function test_the_fragment_is_not_preserved_by_default(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            return Inertia::render('User/Edit');
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', [
+            'X-Inertia' => 'true',
+        ]);
+
+        $response->assertSuccessful();
+        $response->assertJsonMissing([
+            'preserveFragment' => true,
+        ]);
+    }
+
+    public function test_the_fragment_can_be_preserved_via_inertia_facade(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            Inertia::preserveFragment();
+
+            return redirect('/users');
+        });
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/users', function () {
+            return Inertia::render('User/Edit');
+        });
+
+        $this->withoutExceptionHandling()->get('/');
+
+        $response = $this->withoutExceptionHandling()->get('/users', [
+            'X-Inertia' => 'true',
+        ]);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'preserveFragment' => true,
+        ]);
+    }
+
+    public function test_the_fragment_can_be_preserved_via_redirect_macro(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () {
+            return redirect('/users')->preserveFragment(); /** @phpstan-ignore method.notFound */
+        });
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/users', function () {
+            return Inertia::render('User/Edit');
+        });
+
+        $this->withoutExceptionHandling()->get('/');
+
+        $response = $this->withoutExceptionHandling()->get('/users', [
+            'X-Inertia' => 'true',
+        ]);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'preserveFragment' => true,
+        ]);
+    }
 }

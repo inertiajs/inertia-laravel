@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static void share(string|array<array-key, mixed>|\Illuminate\Contracts\Support\Arrayable<array-key, mixed>|\Inertia\ProvidesInertiaProperties $key, mixed $value = null)
  * @method static mixed getShared(string|null $key = null, mixed $default = null)
  * @method static void clearHistory()
+ * @method static void preserveFragment()
  * @method static void encryptHistory($encrypt = true)
  * @method static void flushShared()
  * @method static void version(\Closure|string|null $version)

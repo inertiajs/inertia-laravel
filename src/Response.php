@@ -55,6 +55,13 @@ class Response implements Responsable
     protected $clearHistory;
 
     /**
+     * Indicates if the URL fragment should be preserved across redirects.
+     *
+     * @var bool
+     */
+    protected $preserveFragment;
+
+    /**
      * Indicates if the browser history should be encrypted.
      *
      * @var bool
@@ -91,6 +98,7 @@ class Response implements Responsable
         $this->rootView = $rootView;
         $this->version = $version;
         $this->clearHistory = session()->pull(SessionKey::CLEAR_HISTORY, false);
+        $this->preserveFragment = session()->pull(SessionKey::PRESERVE_FRAGMENT, false);
         $this->encryptHistory = $encryptHistory;
         $this->urlResolver = $urlResolver;
     }
@@ -180,6 +188,7 @@ class Response implements Responsable
             ],
             $resolvedMetadata,
             $this->resolveFlashData($request),
+            $this->resolvePreserveFragment($request),
         );
 
         if ($request->header(Header::INERTIA)) {
@@ -199,6 +208,16 @@ class Response implements Responsable
         $flash = Inertia::getFlashed($request);
 
         return $flash ? ['flash' => $flash] : [];
+    }
+
+    /**
+     * Resolve the preserve fragment flag from the session.
+     *
+     * @return array<string, mixed>
+     */
+    protected function resolvePreserveFragment(Request $request): array
+    {
+        return $this->preserveFragment ? ['preserveFragment' => true] : [];
     }
 
     /**

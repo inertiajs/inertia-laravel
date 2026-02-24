@@ -138,7 +138,7 @@ class Middleware
         $response = $next($request);
         $response->headers->set('Vary', Header::INERTIA);
 
-        if ($response->isRedirect()) {
+        if ($isRedirect = $response->isRedirect()) {
             $this->reflash($request);
         }
 
@@ -158,7 +158,19 @@ class Middleware
             $response->setStatusCode(303);
         }
 
+        if ($isRedirect && $this->redirectHasFragment($response) && ! $request->prefetch()) {
+            $response = $this->onRedirectWithFragment($request, $response);
+        }
+
         return $response;
+    }
+
+    /**
+     * Determine if the redirect response contains a URL fragment.
+     */
+    protected function redirectHasFragment(Response $response): bool
+    {
+        return str_contains($response->headers->get('Location', ''), '#');
     }
 
     /**
@@ -177,6 +189,16 @@ class Middleware
     public function onEmptyResponse(Request $request, Response $response): Response
     {
         return Redirect::back();
+    }
+
+    /**
+     * Handle redirects with URL fragments.
+     */
+    public function onRedirectWithFragment(Request $request, Response $response): Response
+    {
+        return response('', 409, [
+            Header::REDIRECT => $response->headers->get('Location'),
+        ]);
     }
 
     /**

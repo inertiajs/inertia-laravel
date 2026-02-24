@@ -20,6 +20,11 @@ class Header
     public const LOCATION = 'X-Inertia-Location';
 
     /**
+     * Header for hash fragment redirects.
+     */
+    public const REDIRECT = 'X-Inertia-Redirect';
+
+    /**
      * Header for the current asset version.
      */
     public const VERSION = 'X-Inertia-Version';
