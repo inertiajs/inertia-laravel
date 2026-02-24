@@ -13,4 +13,9 @@ class SessionKey
      * Session key for flash data.
      */
     public const FLASH_DATA = 'inertia.flash_data';
+
+    /**
+     * Session key for preserving the URL fragment.
+     */
+    public const PRESERVE_FRAGMENT = 'inertia.preserve_fragment';
 }
