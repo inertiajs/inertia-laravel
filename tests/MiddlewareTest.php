@@ -430,6 +430,75 @@ class MiddlewareTest extends TestCase
         ]);
     }
 
+    public function test_redirect_with_hash_fragment_returns_409_for_inertia_requests(): void
+    {
+        Route::middleware([StartSession::class, Middleware::class])->get('/action', function () {
+            return redirect('/article#section');
+        });
+
+        $response = $this->get('/action', [
+            'X-Inertia' => 'true',
+        ]);
+
+        $response->assertStatus(409);
+        $response->assertHeader('X-Inertia-Redirect', $this->baseUrl.'/article#section');
+        self::assertEmpty($response->getContent());
+    }
+
+    public function test_redirect_without_hash_fragment_is_not_intercepted(): void
+    {
+        Route::middleware([StartSession::class, Middleware::class])->post('/action', function () {
+            return redirect('/article');
+        });
+
+        $response = $this->post('/action', [], [
+            'X-Inertia' => 'true',
+        ]);
+
+        $response->assertRedirect('/article');
+        $response->assertStatus(302);
+    }
+
+    public function test_redirect_with_hash_fragment_is_not_intercepted_for_non_inertia_requests(): void
+    {
+        Route::middleware([StartSession::class, Middleware::class])->get('/action', function () {
+            return redirect('/article#section');
+        });
+
+        $response = $this->get('/action');
+
+        $response->assertRedirect($this->baseUrl.'/article#section');
+        $response->assertStatus(302);
+    }
+
+    public function test_post_redirect_with_hash_fragment_returns_409_for_inertia_requests(): void
+    {
+        Route::middleware([StartSession::class, Middleware::class])->post('/action', function () {
+            return redirect('/article#section');
+        });
+
+        $response = $this->post('/action', [], [
+            'X-Inertia' => 'true',
+        ]);
+
+        $response->assertStatus(409);
+        $response->assertHeader('X-Inertia-Redirect', $this->baseUrl.'/article#section');
+    }
+
+    public function test_redirect_with_hash_fragment_is_not_intercepted_for_prefetch_requests(): void
+    {
+        Route::middleware([StartSession::class, Middleware::class])->get('/action', function () {
+            return redirect('/article#section');
+        });
+
+        $response = $this->get('/action', [
+            'X-Inertia' => 'true',
+            'Purpose' => 'prefetch',
+        ]);
+
+        $response->assertRedirect($this->baseUrl.'/article#section');
+    }
+
     public function test_middleware_registers_ssr_except_paths(): void
     {
         $middleware = new SsrExceptMiddleware;
