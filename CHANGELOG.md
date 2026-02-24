@@ -1,8 +1,21 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.20...2.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.21...2.x)
 
 - Nothing!
+
+## [v2.0.21](https://github.com/inertiajs/inertia-laravel/compare/v2.0.20...v2.0.21) - 2026-02-24
+
+### What's Changed
+
+* [2.x] Supports Laravel 13 by [@crynobone](https://github.com/crynobone) in https://github.com/inertiajs/inertia-laravel/pull/822
+* Add Boost Guidelines & Skills by [@pushpak1300](https://github.com/pushpak1300) in https://github.com/inertiajs/inertia-laravel/pull/828
+
+### New Contributors
+
+* [@pushpak1300](https://github.com/pushpak1300) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/828
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.20...v2.0.21
 
 ## [v2.0.20](https://github.com/inertiajs/inertia-laravel/compare/v2.0.19...v2.0.20) - 2026-02-13
 
