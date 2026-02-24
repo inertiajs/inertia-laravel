@@ -57,9 +57,9 @@ class ResponseTest extends TestCase
         $this->assertSame('Jonathan', $page['props']['user']['name']);
         $this->assertSame('/user/123', $page['url']);
         $this->assertSame('123', $page['version']);
-        $this->assertFalse($page['clearHistory']);
-        $this->assertFalse($page['encryptHistory']);
-        $this->assertSame('<script data-page="app" type="application/json">{"component":"User\/Edit","props":{"user":{"name":"Jonathan"}},"url":"\/user\/123","version":"123","clearHistory":false,"encryptHistory":false}</script><div id="app"></div>', $view->render());
+        $this->assertArrayNotHasKey('clearHistory', $page);
+        $this->assertArrayNotHasKey('encryptHistory', $page);
+        $this->assertSame('<script data-page="app" type="application/json">{"component":"User\/Edit","props":{"user":{"name":"Jonathan"}},"url":"\/user\/123","version":"123"}</script><div id="app"></div>', $view->render());
     }
 
     public function test_server_response_with_deferred_prop(): void
@@ -93,9 +93,9 @@ class ResponseTest extends TestCase
         $this->assertSame([
             'default' => ['foo'],
         ], $page['deferredProps']);
-        $this->assertFalse($page['clearHistory']);
-        $this->assertFalse($page['encryptHistory']);
-        $this->assertSame('<script data-page="app" type="application/json">{"component":"User\/Edit","props":{"user":{"name":"Jonathan"}},"url":"\/user\/123","version":"123","clearHistory":false,"encryptHistory":false,"deferredProps":{"default":["foo"]}}</script><div id="app"></div>', $view->render());
+        $this->assertArrayNotHasKey('clearHistory', $page);
+        $this->assertArrayNotHasKey('encryptHistory', $page);
+        $this->assertSame('<script data-page="app" type="application/json">{"component":"User\/Edit","props":{"user":{"name":"Jonathan"}},"url":"\/user\/123","version":"123","deferredProps":{"default":["foo"]}}</script><div id="app"></div>', $view->render());
     }
 
     public function test_server_response_with_deferred_prop_and_multiple_groups(): void
@@ -136,9 +136,9 @@ class ResponseTest extends TestCase
             'default' => ['foo', 'bar'],
             'custom' => ['baz'],
         ], $page['deferredProps']);
-        $this->assertFalse($page['clearHistory']);
-        $this->assertFalse($page['encryptHistory']);
-        $this->assertSame('<script data-page="app" type="application/json">{"component":"User\/Edit","props":{"user":{"name":"Jonathan"}},"url":"\/user\/123","version":"123","clearHistory":false,"encryptHistory":false,"deferredProps":{"default":["foo","bar"],"custom":["baz"]}}</script><div id="app"></div>', $view->render());
+        $this->assertArrayNotHasKey('clearHistory', $page);
+        $this->assertArrayNotHasKey('encryptHistory', $page);
+        $this->assertSame('<script data-page="app" type="application/json">{"component":"User\/Edit","props":{"user":{"name":"Jonathan"}},"url":"\/user\/123","version":"123","deferredProps":{"default":["foo","bar"],"custom":["baz"]}}</script><div id="app"></div>', $view->render());
     }
 
     /**
@@ -244,9 +244,9 @@ class ResponseTest extends TestCase
             'foo',
             'bar',
         ], $page['mergeProps']);
-        $this->assertFalse($page['clearHistory']);
-        $this->assertFalse($page['encryptHistory']);
-        $this->assertSame('<script data-page="app" type="application/json">{"component":"User\/Edit","props":{"user":{"name":"Jonathan"},"foo":"foo value","bar":"bar value"},"url":"\/user\/123","version":"123","clearHistory":false,"encryptHistory":false,"mergeProps":["foo","bar"]}</script><div id="app"></div>', $view->render());
+        $this->assertArrayNotHasKey('clearHistory', $page);
+        $this->assertArrayNotHasKey('encryptHistory', $page);
+        $this->assertSame('<script data-page="app" type="application/json">{"component":"User\/Edit","props":{"user":{"name":"Jonathan"},"foo":"foo value","bar":"bar value"},"url":"\/user\/123","version":"123","mergeProps":["foo","bar"]}</script><div id="app"></div>', $view->render());
     }
 
     public function test_server_response_with_merge_props_that_should_prepend(): void
@@ -278,9 +278,9 @@ class ResponseTest extends TestCase
         $this->assertSame('123', $page['version']);
         $this->assertSame(['bar'], $page['mergeProps']);
         $this->assertSame(['foo'], $page['prependProps']);
-        $this->assertFalse($page['clearHistory']);
-        $this->assertFalse($page['encryptHistory']);
-        $this->assertSame('<script data-page="app" type="application/json">{"component":"User\/Edit","props":{"user":{"name":"Jonathan"},"foo":"foo value","bar":"bar value"},"url":"\/user\/123","version":"123","clearHistory":false,"encryptHistory":false,"mergeProps":["bar"],"prependProps":["foo"]}</script><div id="app"></div>', $view->render());
+        $this->assertArrayNotHasKey('clearHistory', $page);
+        $this->assertArrayNotHasKey('encryptHistory', $page);
+        $this->assertSame('<script data-page="app" type="application/json">{"component":"User\/Edit","props":{"user":{"name":"Jonathan"},"foo":"foo value","bar":"bar value"},"url":"\/user\/123","version":"123","mergeProps":["bar"],"prependProps":["foo"]}</script><div id="app"></div>', $view->render());
     }
 
     public function test_server_response_with_merge_props_that_has_nested_paths_to_append_and_prepend(): void
@@ -313,9 +313,9 @@ class ResponseTest extends TestCase
         $this->assertSame(['foo.data'], $page['mergeProps']);
         $this->assertSame(['bar.data.items'], $page['prependProps']);
         $this->assertArrayNotHasKey('matchPropsOn', $page);
-        $this->assertFalse($page['clearHistory']);
-        $this->assertFalse($page['encryptHistory']);
-        $this->assertSame('<script data-page="app" type="application/json">{"component":"User\/Edit","props":{"user":{"name":"Jonathan"},"foo":{"data":[{"id":1},{"id":2}]},"bar":{"data":{"items":[{"uuid":1},{"uuid":2}]}}},"url":"\/user\/123","version":"123","clearHistory":false,"encryptHistory":false,"mergeProps":["foo.data"],"prependProps":["bar.data.items"]}</script><div id="app"></div>', $view->render());
+        $this->assertArrayNotHasKey('clearHistory', $page);
+        $this->assertArrayNotHasKey('encryptHistory', $page);
+        $this->assertSame('<script data-page="app" type="application/json">{"component":"User\/Edit","props":{"user":{"name":"Jonathan"},"foo":{"data":[{"id":1},{"id":2}]},"bar":{"data":{"items":[{"uuid":1},{"uuid":2}]}}},"url":"\/user\/123","version":"123","mergeProps":["foo.data"],"prependProps":["bar.data.items"]}</script><div id="app"></div>', $view->render());
     }
 
     public function test_server_response_with_merge_props_that_has_nested_paths_to_append_and_prepend_with_match_on_strategies(): void
@@ -348,9 +348,9 @@ class ResponseTest extends TestCase
         $this->assertSame(['foo.data'], $page['mergeProps']);
         $this->assertSame(['bar.data.items'], $page['prependProps']);
         $this->assertSame(['foo.data.id', 'bar.data.items.uuid'], $page['matchPropsOn']);
-        $this->assertFalse($page['clearHistory']);
-        $this->assertFalse($page['encryptHistory']);
-        $this->assertSame('<script data-page="app" type="application/json">{"component":"User\/Edit","props":{"user":{"name":"Jonathan"},"foo":{"data":[{"id":1},{"id":2}]},"bar":{"data":{"items":[{"uuid":1},{"uuid":2}]}}},"url":"\/user\/123","version":"123","clearHistory":false,"encryptHistory":false,"mergeProps":["foo.data"],"prependProps":["bar.data.items"],"matchPropsOn":["foo.data.id","bar.data.items.uuid"]}</script><div id="app"></div>', $view->render());
+        $this->assertArrayNotHasKey('clearHistory', $page);
+        $this->assertArrayNotHasKey('encryptHistory', $page);
+        $this->assertSame('<script data-page="app" type="application/json">{"component":"User\/Edit","props":{"user":{"name":"Jonathan"},"foo":{"data":[{"id":1},{"id":2}]},"bar":{"data":{"items":[{"uuid":1},{"uuid":2}]}}},"url":"\/user\/123","version":"123","mergeProps":["foo.data"],"prependProps":["bar.data.items"],"matchPropsOn":["foo.data.id","bar.data.items.uuid"]}</script><div id="app"></div>', $view->render());
     }
 
     public function test_server_response_with_deep_merge_props(): void
@@ -384,9 +384,9 @@ class ResponseTest extends TestCase
             'foo',
             'bar',
         ], $page['deepMergeProps']);
-        $this->assertFalse($page['clearHistory']);
-        $this->assertFalse($page['encryptHistory']);
-        $this->assertSame('<script data-page="app" type="application/json">{"component":"User\/Edit","props":{"user":{"name":"Jonathan"},"foo":"foo value","bar":"bar value"},"url":"\/user\/123","version":"123","clearHistory":false,"encryptHistory":false,"deepMergeProps":["foo","bar"]}</script><div id="app"></div>', $view->render());
+        $this->assertArrayNotHasKey('clearHistory', $page);
+        $this->assertArrayNotHasKey('encryptHistory', $page);
+        $this->assertSame('<script data-page="app" type="application/json">{"component":"User\/Edit","props":{"user":{"name":"Jonathan"},"foo":"foo value","bar":"bar value"},"url":"\/user\/123","version":"123","deepMergeProps":["foo","bar"]}</script><div id="app"></div>', $view->render());
     }
 
     public function test_server_response_with_match_on_props(): void
@@ -425,9 +425,9 @@ class ResponseTest extends TestCase
             'foo.foo-key',
             'bar.bar-key',
         ], $page['matchPropsOn']);
-        $this->assertFalse($page['clearHistory']);
-        $this->assertFalse($page['encryptHistory']);
-        $this->assertSame('<script data-page="app" type="application/json">{"component":"User\/Edit","props":{"user":{"name":"Jonathan"},"foo":"foo value","bar":"bar value"},"url":"\/user\/123","version":"123","clearHistory":false,"encryptHistory":false,"deepMergeProps":["foo","bar"],"matchPropsOn":["foo.foo-key","bar.bar-key"]}</script><div id="app"></div>', $view->render());
+        $this->assertArrayNotHasKey('clearHistory', $page);
+        $this->assertArrayNotHasKey('encryptHistory', $page);
+        $this->assertSame('<script data-page="app" type="application/json">{"component":"User\/Edit","props":{"user":{"name":"Jonathan"},"foo":"foo value","bar":"bar value"},"url":"\/user\/123","version":"123","deepMergeProps":["foo","bar"],"matchPropsOn":["foo.foo-key","bar.bar-key"]}</script><div id="app"></div>', $view->render());
     }
 
     public function test_server_response_with_defer_and_merge_props(): void
@@ -466,9 +466,9 @@ class ResponseTest extends TestCase
             'foo',
             'bar',
         ], $page['mergeProps']);
-        $this->assertFalse($page['clearHistory']);
-        $this->assertFalse($page['encryptHistory']);
-        $this->assertSame('<script data-page="app" type="application/json">{"component":"User\/Edit","props":{"user":{"name":"Jonathan"},"bar":"bar value"},"url":"\/user\/123","version":"123","clearHistory":false,"encryptHistory":false,"mergeProps":["foo","bar"],"deferredProps":{"default":["foo"]}}</script><div id="app"></div>', $view->render());
+        $this->assertArrayNotHasKey('clearHistory', $page);
+        $this->assertArrayNotHasKey('encryptHistory', $page);
+        $this->assertSame('<script data-page="app" type="application/json">{"component":"User\/Edit","props":{"user":{"name":"Jonathan"},"bar":"bar value"},"url":"\/user\/123","version":"123","mergeProps":["foo","bar"],"deferredProps":{"default":["foo"]}}</script><div id="app"></div>', $view->render());
     }
 
     public function test_server_response_with_defer_and_deep_merge_props(): void
@@ -507,9 +507,9 @@ class ResponseTest extends TestCase
             'foo',
             'bar',
         ], $page['deepMergeProps']);
-        $this->assertFalse($page['clearHistory']);
-        $this->assertFalse($page['encryptHistory']);
-        $this->assertSame('<script data-page="app" type="application/json">{"component":"User\/Edit","props":{"user":{"name":"Jonathan"},"bar":"bar value"},"url":"\/user\/123","version":"123","clearHistory":false,"encryptHistory":false,"deepMergeProps":["foo","bar"],"deferredProps":{"default":["foo"]}}</script><div id="app"></div>', $view->render());
+        $this->assertArrayNotHasKey('clearHistory', $page);
+        $this->assertArrayNotHasKey('encryptHistory', $page);
+        $this->assertSame('<script data-page="app" type="application/json">{"component":"User\/Edit","props":{"user":{"name":"Jonathan"},"bar":"bar value"},"url":"\/user\/123","version":"123","deepMergeProps":["foo","bar"],"deferredProps":{"default":["foo"]}}</script><div id="app"></div>', $view->render());
     }
 
     public function test_exclude_merge_props_from_partial_only_response(): void
@@ -1316,10 +1316,10 @@ class ResponseTest extends TestCase
         $this->assertSame('bar', $page['props']['foo']);
         $this->assertSame('/user/123', $page['url']);
         $this->assertSame('123', $page['version']);
-        $this->assertFalse($page['clearHistory']);
-        $this->assertFalse($page['encryptHistory']);
+        $this->assertArrayNotHasKey('clearHistory', $page);
+        $this->assertArrayNotHasKey('encryptHistory', $page);
         $this->assertSame(['foo' => ['prop' => 'foo', 'expiresAt' => null]], $page['onceProps']);
-        $this->assertSame('<script data-page="app" type="application/json">{"component":"User\/Edit","props":{"foo":"bar"},"url":"\/user\/123","version":"123","clearHistory":false,"encryptHistory":false,"onceProps":{"foo":{"prop":"foo","expiresAt":null}}}</script><div id="app"></div>', $view->render());
+        $this->assertSame('<script data-page="app" type="application/json">{"component":"User\/Edit","props":{"foo":"bar"},"url":"\/user\/123","version":"123","onceProps":{"foo":{"prop":"foo","expiresAt":null}}}</script><div id="app"></div>', $view->render());
     }
 
     public function test_fresh_once_props_are_included_on_initial_page_load(): void
