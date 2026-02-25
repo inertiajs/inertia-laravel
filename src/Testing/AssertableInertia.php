@@ -78,8 +78,6 @@ class AssertableInertia extends AssertableJson
             PHPUnit::assertArrayHasKey('props', $page);
             PHPUnit::assertArrayHasKey('url', $page);
             PHPUnit::assertArrayHasKey('version', $page);
-            PHPUnit::assertArrayHasKey('encryptHistory', $page);
-            PHPUnit::assertArrayHasKey('clearHistory', $page);
         } catch (AssertionFailedError $e) {
             PHPUnit::fail('Not a valid Inertia response.');
         }
@@ -88,8 +86,8 @@ class AssertableInertia extends AssertableJson
         $instance->component = $page['component'];
         $instance->url = $page['url'];
         $instance->version = $page['version'];
-        $instance->encryptHistory = $page['encryptHistory'];
-        $instance->clearHistory = $page['clearHistory'];
+        $instance->encryptHistory = isset($page['encryptHistory']);
+        $instance->clearHistory = isset($page['clearHistory']);
         $instance->deferredProps = $page['deferredProps'] ?? [];
         $instance->flash = $page['flash'] ?? [];
 
@@ -291,14 +289,16 @@ class AssertableInertia extends AssertableJson
      */
     public function toArray()
     {
-        return [
-            'component' => $this->component,
-            'props' => $this->prop(),
-            'url' => $this->url,
-            'version' => $this->version,
-            'encryptHistory' => $this->encryptHistory,
-            'clearHistory' => $this->clearHistory,
-            'flash' => $this->flash,
-        ];
+        return array_merge(
+            [
+                'component' => $this->component,
+                'props' => $this->prop(),
+                'url' => $this->url,
+                'version' => $this->version,
+                'flash' => $this->flash,
+            ],
+            $this->encryptHistory ? ['encryptHistory' => true] : [],
+            $this->clearHistory ? ['clearHistory' => true] : [],
+        );
     }
 }

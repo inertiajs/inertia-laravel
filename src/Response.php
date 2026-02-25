@@ -193,10 +193,10 @@ class Response implements Responsable
                 'props' => $resolvedProps,
                 'url' => $this->getUrl($request),
                 'version' => $this->version,
-                'clearHistory' => $this->clearHistory,
-                'encryptHistory' => $this->encryptHistory,
             ],
             $resolvedMetadata,
+            $this->resolveClearHistory($request),
+            $this->resolveEncryptHistory($request),
             $this->resolveFlashData($request),
             $this->resolvePreserveFragment($request),
         );
@@ -206,6 +206,26 @@ class Response implements Responsable
         }
 
         return ResponseFactory::view($this->rootView, $this->viewData + ['page' => $page]);
+    }
+
+    /**
+     * Resolve the clear history flag.
+     *
+     * @return array<string, mixed>
+     */
+    protected function resolveClearHistory(Request $request): array
+    {
+        return $this->clearHistory ? ['clearHistory' => true] : [];
+    }
+
+    /**
+     * Resolve the encrypt history flag.
+     *
+     * @return array<string, mixed>
+     */
+    protected function resolveEncryptHistory(Request $request): array
+    {
+        return $this->encryptHistory ? ['encryptHistory' => true] : [];
     }
 
     /**

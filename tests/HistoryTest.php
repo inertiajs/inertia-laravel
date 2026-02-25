@@ -22,11 +22,8 @@ class HistoryTest extends TestCase
         ]);
 
         $response->assertSuccessful();
-        $response->assertJson([
-            'component' => 'User/Edit',
-            'encryptHistory' => false,
-            'clearHistory' => false,
-        ]);
+        $response->assertJsonMissing(['encryptHistory' => true]);
+        $response->assertJsonMissing(['clearHistory' => true]);
     }
 
     public function test_the_history_can_be_encrypted(): void
@@ -116,10 +113,7 @@ class HistoryTest extends TestCase
         ]);
 
         $response->assertSuccessful();
-        $response->assertJson([
-            'component' => 'User/Edit',
-            'encryptHistory' => false,
-        ]);
+        $response->assertJsonMissing(['encryptHistory' => true]);
     }
 
     public function test_the_history_can_be_cleared(): void
@@ -160,7 +154,7 @@ class HistoryTest extends TestCase
         ]);
 
         $response->assertSuccessful();
-        $response->assertContent('<script data-page="app" type="application/json">{"component":"User\/Edit","props":{"errors":{}},"url":"\/users","version":"","clearHistory":true,"encryptHistory":false,"sharedProps":["errors"]}</script><div id="app"></div>');
+        $response->assertContent('<script data-page="app" type="application/json">{"component":"User\/Edit","props":{"errors":{}},"url":"\/users","version":"","sharedProps":["errors"],"clearHistory":true}</script><div id="app"></div>');
     }
 
     public function test_the_fragment_is_not_preserved_by_default(): void

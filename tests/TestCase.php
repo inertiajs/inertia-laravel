@@ -14,7 +14,7 @@ abstract class TestCase extends Orchestra
     /**
      * Example Page Objects.
      */
-    protected const EXAMPLE_PAGE_OBJECT = ['component' => 'Foo/Bar', 'props' => ['foo' => 'bar'], 'url' => '/test', 'version' => '', 'encryptHistory' => false, 'clearHistory' => false];
+    protected const EXAMPLE_PAGE_OBJECT = ['component' => 'Foo/Bar', 'props' => ['foo' => 'bar'], 'url' => '/test', 'version' => ''];
 
     protected function getPackageProviders($app): array
     {
