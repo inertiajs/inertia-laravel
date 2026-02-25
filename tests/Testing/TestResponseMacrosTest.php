@@ -51,8 +51,8 @@ class TestResponseMacrosTest extends TestCase
             $this->assertSame(['bar' => 'baz'], $page['props']);
             $this->assertSame('/example-url', $page['url']);
             $this->assertSame('', $page['version']);
-            $this->assertFalse($page['encryptHistory']);
-            $this->assertFalse($page['clearHistory']);
+            $this->assertArrayNotHasKey('encryptHistory', $page);
+            $this->assertArrayNotHasKey('clearHistory', $page);
         });
     }
 

@@ -55,7 +55,7 @@ class DirectiveTest extends TestCase
     {
         Config::set(['inertia.ssr.enabled' => false]);
 
-        $html = '<script data-page="app" type="application/json">{"component":"Foo\/Bar","props":{"foo":"bar"},"url":"\/test","version":"","encryptHistory":false,"clearHistory":false}</script><div id="app"></div>';
+        $html = '<script data-page="app" type="application/json">{"component":"Foo\/Bar","props":{"foo":"bar"},"url":"\/test","version":""}</script><div id="app"></div>';
 
         $this->assertSame($html, $this->renderView('@inertia', ['page' => self::EXAMPLE_PAGE_OBJECT]));
         $this->assertSame($html, $this->renderView('@inertia()', ['page' => self::EXAMPLE_PAGE_OBJECT]));
@@ -77,7 +77,7 @@ class DirectiveTest extends TestCase
     {
         Config::set(['inertia.ssr.enabled' => false]);
 
-        $html = '<script data-page="foo" type="application/json">{"component":"Foo\/Bar","props":{"foo":"bar"},"url":"\/test","version":"","encryptHistory":false,"clearHistory":false}</script><div id="foo"></div>';
+        $html = '<script data-page="foo" type="application/json">{"component":"Foo\/Bar","props":{"foo":"bar"},"url":"\/test","version":""}</script><div id="foo"></div>';
 
         $this->assertSame($html, $this->renderView('@inertia(foo)', ['page' => self::EXAMPLE_PAGE_OBJECT]));
         $this->assertSame($html, $this->renderView("@inertia('foo')", ['page' => self::EXAMPLE_PAGE_OBJECT]));
