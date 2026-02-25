@@ -935,7 +935,7 @@ class PropsResolverTest extends TestCase
      */
     protected function makePage(Request $request, array $props): array
     {
-        $response = new Response('TestComponent', $props, 'app', '123');
+        $response = new Response('TestComponent', [], $props, 'app', '123');
         $response = $response->toResponse($request);
 
         if ($response instanceof JsonResponse) {

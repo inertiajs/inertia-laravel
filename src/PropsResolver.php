@@ -121,6 +121,13 @@ class PropsResolver
     protected $onceProps = [];
 
     /**
+     * The top-level keys of shared props.
+     *
+     * @var array<int, string>
+     */
+    protected $sharedPropKeys = [];
+
+    /**
      * Create a new props resolver instance.
      */
     public function __construct(Request $request, string $component)
@@ -137,17 +144,45 @@ class PropsResolver
     }
 
     /**
-     * Resolve the given props and collect their metadata.
+     * Resolve the given shared and page props, collecting their metadata.
      *
-     * @param  array<array-key, mixed>  $props
+     * @param  array<array-key, mixed|\Inertia\ProvidesInertiaProperties>  $shared
+     * @param  array<array-key, mixed|\Inertia\ProvidesInertiaProperties>  $props
      * @return array{array<string, mixed>, array<string, mixed>}
      */
-    public function resolve(array $props): array
+    public function resolve(array $shared, array $props): array
     {
+        $props = array_merge($this->resolveSharedProps($shared), $props);
+
         return [
             $this->resolveProps($this->unpackDotProps($props)),
             $this->buildMetadata(),
         ];
+    }
+
+    /**
+     * Resolve shared property providers and collect shared prop keys.
+     *
+     * @param  array<array-key, mixed|\Inertia\ProvidesInertiaProperties>  $shared
+     * @return array<string, mixed>
+     */
+    protected function resolveSharedProps(array $shared): array
+    {
+        $resolved = $this->resolvePropertyProviders($shared);
+
+        if (! config('inertia.expose_shared_prop_keys', true)) {
+            return $resolved;
+        }
+
+        foreach (array_keys($resolved) as $key) {
+            $this->sharedPropKeys[] = str_contains((string) $key, '.')
+                ? strstr((string) $key, '.', true)
+                : (string) $key;
+        }
+
+        $this->sharedPropKeys = array_values(array_unique($this->sharedPropKeys));
+
+        return $resolved;
     }
 
     /**
@@ -184,6 +219,7 @@ class PropsResolver
     protected function buildMetadata(): array
     {
         return array_filter([
+            'sharedProps' => $this->sharedPropKeys,
             'mergeProps' => $this->mergeProps,
             'prependProps' => $this->prependProps,
             'deepMergeProps' => $this->deepMergeProps,

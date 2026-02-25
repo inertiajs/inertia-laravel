@@ -183,6 +183,7 @@ class ScrollPropTest extends TestCase
 
         $response = new Response(
             'Users/Index',
+            [],
             [
                 'users' => (new ScrollProp(fn () => User::query()->paginate(15)))->defer(),
             ],
@@ -209,6 +210,7 @@ class ScrollPropTest extends TestCase
 
         $response = new Response(
             'Users/Index',
+            [],
             [
                 'users' => (new ScrollProp(fn () => User::query()->paginate(15)))->defer(),
             ],
@@ -233,6 +235,7 @@ class ScrollPropTest extends TestCase
 
         $response = new Response(
             'Users/Index',
+            [],
             [
                 'users' => (new ScrollProp(fn () => User::query()->paginate(15)))->defer('custom-group'),
             ],

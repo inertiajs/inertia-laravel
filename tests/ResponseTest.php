@@ -30,7 +30,7 @@ class ResponseTest extends TestCase
 {
     public function test_can_macro(): void
     {
-        $response = new Response('User/Edit', []);
+        $response = new Response('User/Edit', [], []);
         $response->macro('foo', function () {
             return 'bar';
         });
@@ -44,7 +44,7 @@ class ResponseTest extends TestCase
         $request = Request::create('/user/123', 'GET');
 
         $user = ['name' => 'Jonathan'];
-        $response = new Response('User/Edit', ['user' => $user], 'app', '123');
+        $response = new Response('User/Edit', [], ['user' => $user], 'app', '123');
         /** @var BaseResponse $response */
         $response = $response->toResponse($request);
         $view = $response->getOriginalContent();
@@ -69,6 +69,7 @@ class ResponseTest extends TestCase
         $user = ['name' => 'Jonathan'];
         $response = new Response(
             'User/Edit',
+            [],
             [
                 'user' => $user,
                 'foo' => new DeferProp(function () {
@@ -105,6 +106,7 @@ class ResponseTest extends TestCase
         $user = ['name' => 'Jonathan'];
         $response = new Response(
             'User/Edit',
+            [],
             [
                 'user' => $user,
                 'foo' => new DeferProp(function () {
@@ -163,6 +165,7 @@ class ResponseTest extends TestCase
 
         $response = new Response(
             'User/Index',
+            [],
             [
                 'users' => new ScrollProp(['data' => [['id' => 1]]], 'data', new class implements ProvidesScrollMetadata
                 {
@@ -220,6 +223,7 @@ class ResponseTest extends TestCase
         $user = ['name' => 'Jonathan'];
         $response = new Response(
             'User/Edit',
+            [],
             [
                 'user' => $user,
                 'foo' => new MergeProp('foo value'),
@@ -256,6 +260,7 @@ class ResponseTest extends TestCase
         $user = ['name' => 'Jonathan'];
         $response = new Response(
             'User/Edit',
+            [],
             [
                 'user' => $user,
                 'foo' => (new MergeProp('foo value'))->prepend(),
@@ -290,6 +295,7 @@ class ResponseTest extends TestCase
         $user = ['name' => 'Jonathan'];
         $response = new Response(
             'User/Edit',
+            [],
             [
                 'user' => $user,
                 'foo' => (new MergeProp(['data' => [['id' => 1], ['id' => 2]]]))->append('data'),
@@ -325,6 +331,7 @@ class ResponseTest extends TestCase
         $user = ['name' => 'Jonathan'];
         $response = new Response(
             'User/Edit',
+            [],
             [
                 'user' => $user,
                 'foo' => (new MergeProp(['data' => [['id' => 1], ['id' => 2]]]))->append('data', 'id'),
@@ -360,6 +367,7 @@ class ResponseTest extends TestCase
         $user = ['name' => 'Jonathan'];
         $response = new Response(
             'User/Edit',
+            [],
             [
                 'user' => $user,
                 'foo' => (new MergeProp('foo value'))->deepMerge(),
@@ -396,6 +404,7 @@ class ResponseTest extends TestCase
         $user = ['name' => 'Jonathan'];
         $response = new Response(
             'User/Edit',
+            [],
             [
                 'user' => $user,
                 'foo' => (new MergeProp('foo value'))->matchOn('foo-key')->deepMerge(),
@@ -437,6 +446,7 @@ class ResponseTest extends TestCase
         $user = ['name' => 'Jonathan'];
         $response = new Response(
             'User/Edit',
+            [],
             [
                 'user' => $user,
                 'foo' => (new DeferProp(function () {
@@ -478,6 +488,7 @@ class ResponseTest extends TestCase
         $user = ['name' => 'Jonathan'];
         $response = new Response(
             'User/Edit',
+            [],
             [
                 'user' => $user,
                 'foo' => (new DeferProp(function () {
@@ -522,6 +533,7 @@ class ResponseTest extends TestCase
         $user = ['name' => 'Jonathan'];
         $response = new Response(
             'User/Edit',
+            [],
             [
                 'user' => $user,
                 'foo' => new MergeProp('foo value'),
@@ -554,6 +566,7 @@ class ResponseTest extends TestCase
         $user = ['name' => 'Jonathan'];
         $response = new Response(
             'User/Edit',
+            [],
             [
                 'user' => $user,
                 'foo' => new MergeProp('foo value'),
@@ -587,6 +600,7 @@ class ResponseTest extends TestCase
         $user = ['name' => 'Jonathan'];
         $response = new Response(
             'User/Edit',
+            [],
             [
                 'user' => $user,
                 'foo' => new MergeProp('foo value'),
@@ -614,7 +628,7 @@ class ResponseTest extends TestCase
         $request->headers->add(['X-Inertia' => 'true']);
 
         $user = (object) ['name' => 'Jonathan'];
-        $response = new Response('User/Edit', ['user' => $user], 'app', '123');
+        $response = new Response('User/Edit', [], ['user' => $user], 'app', '123');
         /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
@@ -631,7 +645,7 @@ class ResponseTest extends TestCase
         $request = Request::create('/user/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
 
-        $response = new Response('User/Edit', [
+        $response = new Response('User/Edit', [], [
             'user' => ['name' => 'Jonathan'],
             'results' => new DeferProp(fn () => ['data' => ['item1', 'item2']], 'default'),
         ], 'app', '123');
@@ -655,7 +669,7 @@ class ResponseTest extends TestCase
 
         $resource = new FakeResource(['name' => 'Jonathan']);
 
-        $response = new Response('User/Edit', ['user' => $resource], 'app', '123');
+        $response = new Response('User/Edit', [], ['user' => $resource], 'app', '123');
         /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
@@ -672,7 +686,7 @@ class ResponseTest extends TestCase
         $request = Request::create('/users', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
 
-        $response = new Response('User/Index', [
+        $response = new Response('User/Index', [], [
             'users' => fn () => [['name' => 'Jonathan']],
             'organizations' => fn () => [['name' => 'Inertia']],
         ], 'app', '123');
@@ -699,7 +713,7 @@ class ResponseTest extends TestCase
         $request->headers->add(['X-Inertia-Partial-Data' => 'users']);
         $request->headers->add(['X-Inertia-Partial-Component' => 'User/Index']);
 
-        $response = new Response('User/Index', [
+        $response = new Response('User/Index', [], [
             'users' => fn () => [['name' => 'Jonathan']],
             'organizations' => fn () => [['name' => 'Inertia']],
         ], 'app', '123');
@@ -734,7 +748,7 @@ class ResponseTest extends TestCase
             return new class($page) extends ResourceCollection {};
         };
 
-        $response = new Response('User/Index', ['users' => $callable], 'app', '123');
+        $response = new Response('User/Index', [], ['users' => $callable], 'app', '123');
         /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
@@ -789,7 +803,7 @@ class ResponseTest extends TestCase
             ];
         };
 
-        $response = new Response('User/Index', ['something' => $callable], 'app', '123');
+        $response = new Response('User/Index', [], ['something' => $callable], 'app', '123');
         /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
@@ -833,7 +847,7 @@ class ResponseTest extends TestCase
 
         $resource = FakeResource::make(['name' => 'Jonathan']);
 
-        $response = new Response('User/Edit', ['user' => $resource], 'app', '123');
+        $response = new Response('User/Edit', [], ['user' => $resource], 'app', '123');
         /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
@@ -857,7 +871,7 @@ class ResponseTest extends TestCase
             ->andReturn($user)
             ->getMock();
 
-        $response = new Response('User/Edit', ['user' => $promise], 'app', '123');
+        $response = new Response('User/Edit', [], ['user' => $promise], 'app', '123');
         /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
@@ -877,7 +891,7 @@ class ResponseTest extends TestCase
         $request->headers->add(['X-Inertia-Partial-Data' => 'partial']);
 
         $user = (object) ['name' => 'Jonathan'];
-        $response = new Response('User/Edit', ['user' => $user, 'partial' => 'partial-data'], 'app', '123');
+        $response = new Response('User/Edit', [], ['user' => $user, 'partial' => 'partial-data'], 'app', '123');
         /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
@@ -901,7 +915,7 @@ class ResponseTest extends TestCase
         $request->headers->add(['X-Inertia-Partial-Except' => 'user']);
 
         $user = (object) ['name' => 'Jonathan'];
-        $response = new Response('User/Edit', ['user' => $user, 'partial' => 'partial-data'], 'app', '123');
+        $response = new Response('User/Edit', [], ['user' => $user, 'partial' => 'partial-data'], 'app', '123');
         /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
@@ -921,7 +935,7 @@ class ResponseTest extends TestCase
     {
         $request = Request::create('/user/123', 'GET');
 
-        $response = new Response('User/Edit', [
+        $response = new Response('User/Edit', [], [
             'auth' => [
                 'user' => fn () => ['name' => 'Jonathan'],
                 'token' => 'value',
@@ -941,7 +955,7 @@ class ResponseTest extends TestCase
     {
         $request = Request::create('/user/123', 'GET');
 
-        $response = new Response('User/Edit', [
+        $response = new Response('User/Edit', [], [
             'auth' => fn () => [
                 'user' => fn () => ['name' => 'Jonathan'],
                 'token' => 'value',
@@ -961,7 +975,7 @@ class ResponseTest extends TestCase
     {
         $request = Request::create('/user/123', 'GET');
 
-        $response = new Response('User/Edit', [
+        $response = new Response('User/Edit', [], [
             'auth' => fn () => [
                 'user' => ['name' => 'Jonathan'],
                 'pending' => Inertia::optional(fn () => 'secret'),
@@ -1000,7 +1014,7 @@ class ResponseTest extends TestCase
             ],
         ];
 
-        $response = new Response('User/Edit', $props);
+        $response = new Response('User/Edit', [], $props);
         /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
@@ -1035,7 +1049,7 @@ class ResponseTest extends TestCase
             ],
         ];
 
-        $response = new Response('User/Edit', $props);
+        $response = new Response('User/Edit', [], $props);
         /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
@@ -1054,7 +1068,7 @@ class ResponseTest extends TestCase
             return 'An optional value';
         });
 
-        $response = new Response('Users', ['users' => [], 'optional' => $optionalProp], 'app', '123');
+        $response = new Response('Users', [], ['users' => [], 'optional' => $optionalProp], 'app', '123');
         /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
@@ -1074,7 +1088,7 @@ class ResponseTest extends TestCase
             return 'An optional value';
         });
 
-        $response = new Response('Users', ['users' => [], 'optional' => $optionalProp], 'app', '123');
+        $response = new Response('Users', [], ['users' => [], 'optional' => $optionalProp], 'app', '123');
         /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
@@ -1100,7 +1114,7 @@ class ResponseTest extends TestCase
             };
         });
 
-        $response = new Response('Users', ['users' => [], 'defer' => $deferProp], 'app', '123');
+        $response = new Response('Users', [], ['users' => [], 'defer' => $deferProp], 'app', '123');
         /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
@@ -1133,7 +1147,7 @@ class ResponseTest extends TestCase
             }),
         ];
 
-        $response = new Response('User/Edit', $props, 'app', '123');
+        $response = new Response('User/Edit', [], $props, 'app', '123');
         /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
@@ -1147,7 +1161,7 @@ class ResponseTest extends TestCase
     {
         $request = Request::create('/user/123', 'GET');
 
-        $response = new Response('User/Edit', [
+        $response = new Response('User/Edit', [], [
             'always' => new AlwaysProp('date'),
             'merge' => new MergeProp('trim'),
         ], 'app', '123');
@@ -1164,7 +1178,7 @@ class ResponseTest extends TestCase
     {
         $request = Request::create('/user/123', 'GET');
 
-        $response = new Response('User/Edit', [
+        $response = new Response('User/Edit', [], [
             'foo' => 'bar',
             new class implements ProvidesInertiaProperties
             {
@@ -1198,7 +1212,7 @@ class ResponseTest extends TestCase
         Inertia::share('items', ['foo']);
         Inertia::share('deep.foo.bar', ['foo']);
 
-        $response = new Response('User/Edit', [
+        $response = new Response('User/Edit', [], [
             'items' => new MergeWithSharedProp(['bar']),
             'deep' => [
                 'foo' => [
@@ -1232,7 +1246,7 @@ class ResponseTest extends TestCase
         $request = Request::create('/products/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
 
-        $response = new Response('User/Edit', $props, 'app', '123');
+        $response = new Response('User/Edit', [], $props, 'app', '123');
         /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData(true);
@@ -1260,7 +1274,7 @@ class ResponseTest extends TestCase
         $request = Request::create('/products/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
 
-        $response = new Response('User/Edit', $props, 'app', '123');
+        $response = new Response('User/Edit', [], $props, 'app', '123');
         /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData(true);
@@ -1274,7 +1288,7 @@ class ResponseTest extends TestCase
     public function test_props_can_be_added_using_the_with_method(): void
     {
         $request = Request::create('/user/123', 'GET');
-        $response = new Response('User/Edit', [], 'app', '123');
+        $response = new Response('User/Edit', [], [], 'app', '123');
 
         $response->with(['foo' => 'bar', 'baz' => 'qux'])
             ->with(['quux' => 'corge'])
@@ -1303,7 +1317,7 @@ class ResponseTest extends TestCase
     {
         $request = Request::create('/user/123', 'GET');
 
-        $response = new Response('User/Edit', ['foo' => Inertia::once(fn () => 'bar')], 'app', '123');
+        $response = new Response('User/Edit', [], ['foo' => Inertia::once(fn () => 'bar')], 'app', '123');
         /** @var BaseResponse $response */
         $response = $response->toResponse($request);
         $view = $response->getOriginalContent();
@@ -1326,7 +1340,7 @@ class ResponseTest extends TestCase
     {
         $request = Request::create('/user/123', 'GET');
 
-        $response = new Response('User/Edit', ['foo' => Inertia::once(fn () => 'bar')->fresh()], 'app', '123');
+        $response = new Response('User/Edit', [], ['foo' => Inertia::once(fn () => 'bar')->fresh()], 'app', '123');
         /** @var BaseResponse $response */
         $response = $response->toResponse($request);
         $view = $response->getOriginalContent();
@@ -1350,7 +1364,7 @@ class ResponseTest extends TestCase
         $request = Request::create('/user/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
 
-        $response = new Response('User/Edit', [
+        $response = new Response('User/Edit', [], [
             'foo' => Inertia::once(fn () => 'bar')->as('baz')->until(now()->addMinute()),
         ], 'app', '123');
         /** @var JsonResponse $response */
@@ -1372,7 +1386,7 @@ class ResponseTest extends TestCase
         $request->headers->add(['X-Inertia' => 'true']);
         $request->headers->add(['X-Inertia-Except-Once-Props' => 'foo']);
 
-        $response = new Response('User/Edit', ['foo' => Inertia::once(fn () => 'bar')], 'app', '123');
+        $response = new Response('User/Edit', [], ['foo' => Inertia::once(fn () => 'bar')], 'app', '123');
         /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
@@ -1391,7 +1405,7 @@ class ResponseTest extends TestCase
         $request = Request::create('/user/123', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
 
-        $response = new Response('User/Edit', ['foo' => Inertia::once(fn () => 'bar')], 'app', '123');
+        $response = new Response('User/Edit', [], ['foo' => Inertia::once(fn () => 'bar')], 'app', '123');
         /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
@@ -1411,7 +1425,7 @@ class ResponseTest extends TestCase
         $request->headers->add(['X-Inertia' => 'true']);
         $request->headers->add(['X-Inertia-Except-Once-Props' => 'baz']);
 
-        $response = new Response('User/Edit', ['foo' => Inertia::once(fn () => 'bar')], 'app', '123');
+        $response = new Response('User/Edit', [], ['foo' => Inertia::once(fn () => 'bar')], 'app', '123');
         /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
@@ -1433,7 +1447,7 @@ class ResponseTest extends TestCase
         $request->headers->add(['X-Inertia-Partial-Data' => 'foo']);
         $request->headers->add(['X-Inertia-Except-Once-Props' => 'foo']);
 
-        $response = new Response('User/Edit', ['foo' => Inertia::once(fn () => 'bar')], 'app', '123');
+        $response = new Response('User/Edit', [], ['foo' => Inertia::once(fn () => 'bar')], 'app', '123');
         /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
@@ -1455,7 +1469,7 @@ class ResponseTest extends TestCase
         $request->headers->add(['X-Inertia-Partial-Data' => 'foo']);
         $request->headers->add(['X-Inertia-Except-Once-Props' => 'foo']);
 
-        $response = new Response('User/Edit', [
+        $response = new Response('User/Edit', [], [
             'foo' => Inertia::once(fn () => 'bar'),
             'baz' => Inertia::once(fn () => 'qux'),
         ], 'app', '123');
@@ -1483,7 +1497,7 @@ class ResponseTest extends TestCase
         $request->headers->add(['X-Inertia-Partial-Except' => 'foo']);
         $request->headers->add(['X-Inertia-Except-Once-Props' => 'foo']);
 
-        $response = new Response('User/Edit', [
+        $response = new Response('User/Edit', [], [
             'foo' => Inertia::once(fn () => 'bar'),
             'baz' => Inertia::once(fn () => 'qux'),
         ], 'app', '123');
@@ -1509,7 +1523,7 @@ class ResponseTest extends TestCase
         $request->headers->add(['X-Inertia' => 'true']);
         $request->headers->add(['X-Inertia-Except-Once-Props' => 'foo']);
 
-        $response = new Response('User/Edit', ['foo' => Inertia::once(fn () => 'bar')->fresh()], 'app', '123');
+        $response = new Response('User/Edit', [], ['foo' => Inertia::once(fn () => 'bar')->fresh()], 'app', '123');
         /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
@@ -1531,7 +1545,7 @@ class ResponseTest extends TestCase
         $request->headers->add(['X-Inertia' => 'true']);
         $request->headers->add(['X-Inertia-Except-Once-Props' => 'foo,baz']);
 
-        $response = new Response('User/Edit', [
+        $response = new Response('User/Edit', [], [
             'foo' => Inertia::once(fn () => 'bar')->fresh(),
             'baz' => Inertia::once(fn () => 'qux'),
         ], 'app', '123');
@@ -1558,7 +1572,7 @@ class ResponseTest extends TestCase
         $request->headers->add(['X-Inertia' => 'true']);
         $request->headers->add(['X-Inertia-Except-Once-Props' => 'defer']);
 
-        $response = new Response('User/Edit', [
+        $response = new Response('User/Edit', [], [
             'defer' => Inertia::defer(fn () => 'value')->once(),
         ], 'app', '123');
         /** @var JsonResponse $response */
@@ -1585,7 +1599,7 @@ class ResponseTest extends TestCase
         $request->headers->add(['X-Inertia-Partial-Data' => 'defer']);
         $request->headers->add(['X-Inertia-Except-Once-Props' => 'defer']);
 
-        $response = new Response('User/Edit', [
+        $response = new Response('User/Edit', [], [
             'defer' => Inertia::defer(fn () => 'value')->once(),
         ], 'app', '123');
         /** @var JsonResponse $response */
@@ -1611,7 +1625,7 @@ class ResponseTest extends TestCase
 
         $resource = new FakeResource(["\x00*\x00_invalid_key" => 'for object']);
 
-        $response = new Response('User/Edit', ['resource' => $resource], 'app', '123');
+        $response = new Response('User/Edit', [], ['resource' => $resource], 'app', '123');
         /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData(true);
@@ -1631,7 +1645,7 @@ class ResponseTest extends TestCase
         $request->headers->set('X_FORWARDED_PREFIX', '/sub/directory');
 
         $user = ['name' => 'Jonathan'];
-        $response = new Response('User/Edit', ['user' => $user], 'app', '123');
+        $response = new Response('User/Edit', [], ['user' => $user], 'app', '123');
         /** @var BaseResponse $response */
         $response = $response->toResponse($request);
         $view = $response->getOriginalContent();
@@ -1651,7 +1665,7 @@ class ResponseTest extends TestCase
         ]);
         $request->headers->add(['X-Inertia' => 'true']);
 
-        $response = new Response('Product/Show', []);
+        $response = new Response('Product/Show', [], []);
         /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
@@ -1664,7 +1678,7 @@ class ResponseTest extends TestCase
         $request = Request::create('/users/', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
 
-        $response = new Response('User/Index', []);
+        $response = new Response('User/Index', [], []);
         /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
@@ -1677,7 +1691,7 @@ class ResponseTest extends TestCase
         $request = Request::create('/users/?page=1&sort=name', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
 
-        $response = new Response('User/Index', []);
+        $response = new Response('User/Index', [], []);
         /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
@@ -1690,7 +1704,7 @@ class ResponseTest extends TestCase
         $request = Request::create('/users', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
 
-        $response = new Response('User/Index', []);
+        $response = new Response('User/Index', [], []);
         /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
@@ -1703,7 +1717,7 @@ class ResponseTest extends TestCase
         $request = Request::create('/users?page=1&sort=name', 'GET');
         $request->headers->add(['X-Inertia' => 'true']);
 
-        $response = new Response('User/Index', []);
+        $response = new Response('User/Index', [], []);
         /** @var JsonResponse $response */
         $response = $response->toResponse($request);
         $page = $response->getData();
@@ -1715,7 +1729,7 @@ class ResponseTest extends TestCase
     {
         $request = Request::create('/user/123', 'GET');
 
-        $response = new Response('User/Edit', [
+        $response = new Response('User/Edit', [], [
             'user' => ['name' => 'Jonathan'],
             new class implements ProvidesInertiaProperties
             {
@@ -1743,7 +1757,7 @@ class ResponseTest extends TestCase
     {
         $request = Request::create('/user/123', 'GET');
 
-        $response = new Response('User/Edit', [
+        $response = new Response('User/Edit', [], [
             'user' => ['name' => 'Jonathan'],
             new class implements ProvidesInertiaProperties
             {
@@ -1777,7 +1791,7 @@ class ResponseTest extends TestCase
         $request->headers->add(['X-Inertia-Partial-Component' => 'User/Edit']);
         $request->headers->add(['X-Inertia-Partial-Data' => 'foo']);
 
-        $response = new Response('User/Edit', [
+        $response = new Response('User/Edit', [], [
             'user' => ['name' => 'Jonathan'],
             new class implements ProvidesInertiaProperties
             {
@@ -1801,7 +1815,7 @@ class ResponseTest extends TestCase
     {
         $request = Request::create('/user/123', 'GET');
 
-        $response = new Response('User/Edit', [
+        $response = new Response('User/Edit', [], [
             'user' => ['name' => 'Jonathan'],
             new class implements ProvidesInertiaProperties
             {
@@ -1827,7 +1841,7 @@ class ResponseTest extends TestCase
     {
         $request = Request::create('/user/123', 'GET');
 
-        $response = new Response('User/Edit', [
+        $response = new Response('User/Edit', [], [
             'user' => ['name' => 'Jonathan'],
             new class implements ProvidesInertiaProperties
             {
@@ -1853,7 +1867,7 @@ class ResponseTest extends TestCase
     {
         $request = Request::create('/user/123', 'GET');
 
-        $response = new Response('User/Edit', [
+        $response = new Response('User/Edit', [], [
             'user' => ['name' => 'Jonathan'],
             new class implements ProvidesInertiaProperties
             {
