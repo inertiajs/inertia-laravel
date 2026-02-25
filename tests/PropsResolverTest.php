@@ -159,6 +159,32 @@ class PropsResolverTest extends TestCase
         $this->assertArrayNotHasKey('notifications', $page['props']['auth']);
     }
 
+    public function test_excluded_props_are_not_resolved_on_initial_load(): void
+    {
+        $optionalResolved = false;
+        $deferResolved = false;
+
+        $page = $this->makePage(Request::create('/'), [
+            'name' => 'Jonathan',
+            'permissions' => Inertia::optional(function () use (&$optionalResolved) {
+                $optionalResolved = true;
+
+                return ['admin'];
+            }),
+            'notifications' => Inertia::defer(function () use (&$deferResolved) {
+                $deferResolved = true;
+
+                return ['You have a new follower'];
+            }),
+        ]);
+
+        $this->assertSame('Jonathan', $page['props']['name']);
+        $this->assertArrayNotHasKey('permissions', $page['props']);
+        $this->assertArrayNotHasKey('notifications', $page['props']);
+        $this->assertFalse($optionalResolved, 'OptionalProp closure should not be resolved on initial load');
+        $this->assertFalse($deferResolved, 'DeferProp closure should not be resolved on initial load');
+    }
+
     public function test_closure_returning_optional_prop_is_excluded_from_initial_load(): void
     {
         $page = $this->makePage(Request::create('/'), [

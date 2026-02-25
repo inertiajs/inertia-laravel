@@ -252,6 +252,13 @@ class PropsResolver
                 continue;
             }
 
+            // On initial page loads, certain prop types (e.g. DeferProp,
+            // OptionalProp) are excluded before resolution to avoid
+            // executing their closures unnecessarily.
+            if (! $this->isPartial && $this->excludeFromInitialResponse($prop, $path)) {
+                continue;
+            }
+
             $value = $this->resolveValue($prop, $path, $props);
 
             // A closure may return a prop type instead of a plain value. When
@@ -259,14 +266,14 @@ class PropsResolver
             // participate in filtering and metadata collection below.
             if ($value !== $prop && $this->isPropType($value)) {
                 $prop = $value;
-                $value = $this->resolveValue($prop, $path, $props);
-            }
 
-            // On initial page loads, certain props are excluded from the response
-            // but still contribute metadata such as deferred groups, merge
-            // strategies, and once-prop configuration.
-            if (! $this->isPartial && $this->excludeFromInitialResponse($prop, $path)) {
-                continue;
+                // Check again after unwrapping: the resolved prop type may
+                // itself need to be excluded from the initial response.
+                if (! $this->isPartial && $this->excludeFromInitialResponse($prop, $path)) {
+                    continue;
+                }
+
+                $value = $this->resolveValue($prop, $path, $props);
             }
 
             $this->collectMetadata($prop, $path);
