@@ -363,4 +363,33 @@ class ResponseFactory
 
         return $request->hasSession() ? $request->session()->get(SessionKey::FlashData->value, []) : [];
     }
+
+    /**
+     * Mark once props to be refreshed on the next response. Forces the specified
+     * once props to be re-evaluated and re-sent, regardless of whether they
+     * have already been sent to the client.
+     *
+     * @param  string|array<int, string>  ...$keys
+     */
+    public function refresh(string|array ...$keys): self
+    {
+        session()->now(SessionKey::Refresh->value, array_values(array_unique([
+            ...$this->getRefreshed(),
+            ...Arr::flatten($keys),
+        ])));
+
+        return $this;
+    }
+
+    /**
+     * Retrieve the once props to refresh from the session.
+     *
+     * @return array<int, string>
+     */
+    public function getRefreshed(?HttpRequest $request = null): array
+    {
+        $request ??= request();
+
+        return $request->hasSession() ? $request->session()->get(SessionKey::Refresh->value, []) : [];
+    }
 }

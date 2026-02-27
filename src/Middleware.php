@@ -153,6 +153,10 @@ class Middleware
         if ($flashed = Inertia::getFlashed($request)) {
             $request->session()->flash(SessionKey::FlashData->value, $flashed);
         }
+
+        if ($refreshed = Inertia::getRefreshed($request)) {
+            $request->session()->flash(SessionKey::Refresh->value, $refreshed);
+        }
     }
 
     /**

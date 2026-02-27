@@ -304,18 +304,20 @@ class Response implements Responsable
      */
     public function resolveOnceProperties(array $props, Request $request): array
     {
-        if (! $this->isInertia($request) || $this->isPartial($request)) {
+        if (! $this->isInertia($request)) {
             return $props;
         }
 
+        $isPartial = $this->isPartial($request);
         $exceptOnceProps = $this->getExceptOnceProps($request);
+        $refreshedProps = Inertia::getRefreshed($request);
 
         if (count($exceptOnceProps) === 0) {
             return $props;
         }
 
         return collect($props)
-            ->reject(function ($prop, string $key) use ($exceptOnceProps) {
+            ->reject(function ($prop, string $key) use ($isPartial, $exceptOnceProps, $refreshedProps) {
                 if (! $prop instanceof Onceable) {
                     return false;
                 }
@@ -328,7 +330,17 @@ class Response implements Responsable
                     return false;
                 }
 
-                return in_array($prop->getKey() ?? $key, $exceptOnceProps);
+                $resolvedKey = $prop->getKey() ?? $key;
+
+                if (in_array($resolvedKey, $refreshedProps)) {
+                    return false;
+                }
+
+                if ($isPartial) {
+                    return false;
+                }
+
+                return in_array($resolvedKey, $exceptOnceProps);
             })
             ->all();
     }
@@ -663,12 +675,13 @@ class Response implements Responsable
         }
 
         $exceptOnceProps = $this->getExceptOnceProps($request);
+        $refreshedProps = Inertia::getRefreshed($request);
 
         $deferredProps = collect($this->props)
             ->filter(function ($prop) {
                 return $prop instanceof Deferrable && $prop->shouldDefer();
             })
-            ->reject(function (Deferrable $prop, string $key) use ($exceptOnceProps) {
+            ->reject(function (Deferrable $prop, string $key) use ($exceptOnceProps, $refreshedProps) {
                 if (! $prop instanceof Onceable) {
                     return false;
                 }
@@ -681,7 +694,13 @@ class Response implements Responsable
                     return false;
                 }
 
-                return in_array($prop->getKey() ?? $key, $exceptOnceProps);
+                $resolvedKey = $prop->getKey() ?? $key;
+
+                if (in_array($resolvedKey, $refreshedProps)) {
+                    return false;
+                }
+
+                return in_array($resolvedKey, $exceptOnceProps);
             })
             ->map(function (Deferrable $prop, $key) {
                 return [

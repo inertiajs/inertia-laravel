@@ -27,6 +27,8 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Symfony\Component\HttpFoundation\Response location(string|\Symfony\Component\HttpFoundation\RedirectResponse $url)
  * @method static \Inertia\ResponseFactory flash(string|array<string, mixed> $key, mixed $value = null)
  * @method static array<string, mixed> getFlashed(?\Illuminate\Http\Request $request = null)
+ * @method static \Inertia\ResponseFactory refresh(string|array<string> ...$keys)
+ * @method static array<int, string> getRefreshed(?\Illuminate\Http\Request $request = null)
  * @method static void macro(string $name, object|callable $macro)
  * @method static void mixin(object $mixin, bool $replace = true)
  * @method static bool hasMacro(string $name)

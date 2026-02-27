@@ -13,4 +13,9 @@ enum SessionKey: string
      * Session key for flash data.
      */
     case FlashData = 'inertia.flash_data';
+
+    /**
+     * Session key for props to refresh.
+     */
+    case Refresh = 'inertia.refresh';
 }
