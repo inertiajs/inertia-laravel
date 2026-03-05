@@ -216,7 +216,7 @@ class PropsResolverTest extends TestCase
 
         $this->assertSame('Jonathan', $page['props']['auth']['user']);
         $this->assertArrayNotHasKey('permissions', $page['props']['auth']);
-        $this->assertFalse($resolved, 'OptionalProp closure should not be resolved on initial load');
+        $this->assertFalse($resolved, 'OptionalProp closure should not be resolved on initial load'); // @phpstan-ignore method.impossibleType
     }
 
     public function test_closure_returning_defer_prop_is_excluded_from_initial_load(): void
@@ -236,7 +236,7 @@ class PropsResolverTest extends TestCase
 
         $this->assertSame('Jonathan', $page['props']['auth']['user']);
         $this->assertArrayNotHasKey('notifications', $page['props']['auth']);
-        $this->assertFalse($resolved, 'DeferProp closure should not be resolved on initial load');
+        $this->assertFalse($resolved, 'DeferProp closure should not be resolved on initial load'); // @phpstan-ignore method.impossibleType
     }
 
     public function test_closure_returning_merge_prop_resolves_with_metadata(): void
@@ -980,8 +980,8 @@ class PropsResolverTest extends TestCase
         $this->assertArrayNotHasKey('notifications', $page['props']['auth']);
         $this->assertArrayNotHasKey('roles', $page['props']['auth']);
         $this->assertSame(['default' => ['auth.notifications', 'auth.roles']], $page['deferredProps']);
-        $this->assertFalse($notificationsResolved, 'DeferProp closure should not be resolved on initial load');
-        $this->assertFalse($rolesResolved, 'DeferProp closure should not be resolved on initial load');
+        $this->assertFalse($notificationsResolved, 'DeferProp closure should not be resolved on initial load'); // @phpstan-ignore method.impossibleType
+        $this->assertFalse($rolesResolved, 'DeferProp closure should not be resolved on initial load'); // @phpstan-ignore method.impossibleType
     }
 
     public function test_deferred_props_inside_closure_are_resolved_on_partial_request(): void
