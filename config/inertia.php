@@ -82,6 +82,8 @@ return [
 
         ],
 
+        'transform' => null, // callable(string): string
+
     ],
 
     /*

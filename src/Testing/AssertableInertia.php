@@ -104,14 +104,31 @@ class AssertableInertia extends AssertableJson
         PHPUnit::assertSame($value, $this->component, 'Unexpected Inertia page component.');
 
         if ($shouldExist || (is_null($shouldExist) && config('inertia.testing.ensure_pages_exist', true))) {
+            $component = $this->transformComponentForLookup($value);
+
             try {
-                app('inertia.view-finder')->find($value);
+                app('inertia.view-finder')->find($component);
             } catch (InvalidArgumentException $exception) {
                 PHPUnit::fail(sprintf('Inertia page component file [%s] does not exist.', $value));
             }
         }
 
         return $this;
+    }
+
+    /**
+     * Transform the component name before file lookup.
+     */
+    protected function transformComponentForLookup(?string $component): ?string
+    {
+        $transform = config('inertia.pages.transform');
+
+        if (! is_callable($transform) || is_null($component)) {
+            return $component;
+        }
+
+        /** @var callable(string): string $transform */
+        return $transform($component);
     }
 
     /**

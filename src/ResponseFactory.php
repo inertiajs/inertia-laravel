@@ -286,11 +286,28 @@ class ResponseFactory
      */
     protected function findComponentOrFail(string $component): void
     {
+        $component = $this->transformComponentForLookup($component);
+
         try {
             app('inertia.view-finder')->find($component);
         } catch (InvalidArgumentException) {
             throw new ComponentNotFoundException("Inertia page component [{$component}] not found.");
         }
+    }
+
+    /**
+     * Transform the component name before file lookup.
+     */
+    protected function transformComponentForLookup(string $component): string
+    {
+        $transform = config('inertia.pages.transform');
+
+        if (! is_callable($transform)) {
+            return $component;
+        }
+
+        /** @var callable(string): string $transform */
+        return $transform($component);
     }
 
     /**

@@ -69,6 +69,28 @@ class AssertableInertiaTest extends TestCase
         });
     }
 
+    public function test_the_component_exists_on_the_filesystem_when_a_transform_callback_is_configured(): void
+    {
+        $calledWith = null;
+
+        $response = $this->makeMockRequest(
+            Inertia::render('Stubs/Example')
+        );
+
+        config()->set('inertia.testing.ensure_pages_exist', true);
+        config()->set('inertia.pages.transform', static function (string $name) use (&$calledWith): string {
+            $calledWith = $name;
+
+            return "{$name}/Page";
+        });
+
+        $response->assertInertia(function ($inertia) {
+            $inertia->component('Stubs/Example');
+        });
+
+        $this->assertSame('Stubs/Example', $calledWith);
+    }
+
     public function test_the_component_does_not_exist_on_the_filesystem(): void
     {
         $response = $this->makeMockRequest(

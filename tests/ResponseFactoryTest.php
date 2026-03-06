@@ -535,6 +535,27 @@ class ResponseFactoryTest extends TestCase
         $this->assertInstanceOf(\Inertia\Response::class, $response);
     }
 
+    public function test_can_transform_component_name_before_filesystem_lookup_when_ensuring_pages_exist(): void
+    {
+        $calledWith = null;
+
+        config()->set('inertia.pages.ensure_pages_exist', true);
+        config()->set('inertia.pages.transform', static function (string $name) use (&$calledWith): string {
+            $calledWith = $name;
+
+            return "{$name}/Page";
+        });
+
+        $response = (new ResponseFactory)->render('Stubs/Example');
+
+        $this->assertInstanceOf(\Inertia\Response::class, $response);
+        $this->assertSame('Stubs/Example', $calledWith);
+
+        /** @phpstan-ignore-next-line */
+        $getComponent = fn () => $this->component;
+        $this->assertSame('Stubs/Example', $getComponent->call($response));
+    }
+
     public function test_render_accepts_backed_enum(): void
     {
         $response = (new ResponseFactory)->render(StringBackedEnum::UsersIndex);
