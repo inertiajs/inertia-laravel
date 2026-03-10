@@ -27,7 +27,7 @@ class StopSsr extends Command
      */
     public function handle(): int
     {
-        $url = str_replace('/render', '', config('inertia.ssr.url', 'http://127.0.0.1:13714')).'/shutdown';
+        $url = rtrim(config('inertia.ssr.url', 'http://127.0.0.1:13714'), '/').'/shutdown';
 
         $ch = curl_init($url);
         curl_exec($ch);
