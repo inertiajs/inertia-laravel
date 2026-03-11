@@ -85,7 +85,7 @@ class Middleware
     /**
      * Define a callback that returns the relative URL.
      *
-     * @return \Closure|null
+     * @return Closure|null
      */
     public function urlResolver()
     {
@@ -95,7 +95,7 @@ class Middleware
     /**
      * Handle the incoming request.
      *
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
     public function handle(Request $request, Closure $next)
     {

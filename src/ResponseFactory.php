@@ -79,7 +79,7 @@ class ResponseFactory
      * included with every response, making it ideal for user authentication
      * state, flash messages, etc.
      *
-     * @param  string|array<array-key, mixed>|\Illuminate\Contracts\Support\Arrayable<array-key, mixed>|\Inertia\ProvidesInertiaProperties  $key
+     * @param  string|array<array-key, mixed>|Arrayable<array-key, mixed>|ProvidesInertiaProperties  $key
      * @param  mixed  $value
      */
     public function share($key, $value = null): void
@@ -125,7 +125,7 @@ class ResponseFactory
     /**
      * Set the asset version.
      *
-     * @param  \Closure|string|null  $version
+     * @param  Closure|string|null  $version
      */
     public function version($version): void
     {
@@ -260,7 +260,7 @@ class ResponseFactory
     /**
      * Find the component or fail.
      *
-     * @throws \Inertia\ComponentNotFoundException
+     * @throws ComponentNotFoundException
      */
     protected function findComponentOrFail(string $component): void
     {
@@ -274,7 +274,7 @@ class ResponseFactory
     /**
      * Create an Inertia response.
      *
-     * @param  array<array-key, mixed>|\Illuminate\Contracts\Support\Arrayable<array-key, mixed>|ProvidesInertiaProperties  $props
+     * @param  array<array-key, mixed>|Arrayable<array-key, mixed>|ProvidesInertiaProperties  $props
      */
     public function render(string $component, $props = []): Response
     {
@@ -318,7 +318,7 @@ class ResponseFactory
      * flash data is not persisted in the browser's history state, making it
      * ideal for one-time notifications like toasts or highlights.
      *
-     * @param  \BackedEnum|\UnitEnum|string|array<string, mixed>  $key
+     * @param  BackedEnum|UnitEnum|string|array<string, mixed>  $key
      */
     public function flash(BackedEnum|UnitEnum|string|array $key, mixed $value = null): self
     {

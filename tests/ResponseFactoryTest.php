@@ -20,6 +20,8 @@ use Inertia\MergeProp;
 use Inertia\OnceProp;
 use Inertia\OptionalProp;
 use Inertia\ResponseFactory;
+use Inertia\ScrollMetadata;
+use Inertia\ScrollProp;
 use Inertia\Tests\Stubs\ExampleInertiaPropsProvider;
 use Inertia\Tests\Stubs\ExampleMiddleware;
 
@@ -352,7 +354,7 @@ class ResponseFactoryTest extends TestCase
 
         $scrollProp = $factory->scroll($data);
 
-        $this->assertInstanceOf(\Inertia\ScrollProp::class, $scrollProp);
+        $this->assertInstanceOf(ScrollProp::class, $scrollProp);
         $this->assertSame($data, $scrollProp());
     }
 
@@ -360,11 +362,11 @@ class ResponseFactoryTest extends TestCase
     {
         $factory = new ResponseFactory;
         $data = ['item1', 'item2'];
-        $metadataProvider = new \Inertia\ScrollMetadata('custom', 1, 3, 2);
+        $metadataProvider = new ScrollMetadata('custom', 1, 3, 2);
 
         $scrollProp = $factory->scroll($data, 'data', $metadataProvider);
 
-        $this->assertInstanceOf(\Inertia\ScrollProp::class, $scrollProp);
+        $this->assertInstanceOf(ScrollProp::class, $scrollProp);
         $this->assertSame($data, $scrollProp());
         $this->assertEquals([
             'pageName' => 'custom',

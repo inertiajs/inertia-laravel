@@ -1109,7 +1109,7 @@ class ResponseTest extends TestCase
             new class implements ProvidesInertiaProperties
             {
                 /**
-                 * @return \Illuminate\Support\Collection<string, string>
+                 * @return Collection<string, string>
                  */
                 public function toInertiaProperties(RenderContext $context): iterable
                 {
@@ -1221,7 +1221,7 @@ class ResponseTest extends TestCase
             ->with(new class implements ProvidesInertiaProperties
             {
                 /**
-                 * @return \Illuminate\Support\Collection<string, string>
+                 * @return Collection<string, string>
                  */
                 public function toInertiaProperties(RenderContext $context): iterable
                 {

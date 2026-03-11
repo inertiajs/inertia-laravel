@@ -88,7 +88,7 @@ class Response implements Responsable
     /**
      * Create a new Inertia response instance.
      *
-     * @param  array<array-key, mixed|\Inertia\ProvidesInertiaProperties>  $props
+     * @param  array<array-key, mixed|ProvidesInertiaProperties>  $props
      */
     public function __construct(
         string $component,
@@ -173,7 +173,7 @@ class Response implements Responsable
     /**
      * Add flash data to the response.
      *
-     * @param  \BackedEnum|\UnitEnum|string|array<string, mixed>  $key
+     * @param  BackedEnum|UnitEnum|string|array<string, mixed>  $key
      * @return $this
      */
     public function flash(BackedEnum|UnitEnum|string|array $key, mixed $value = null): self
@@ -186,7 +186,7 @@ class Response implements Responsable
     /**
      * Create an HTTP response that represents the object.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function toResponse($request)
@@ -550,7 +550,7 @@ class Response implements Responsable
     /**
      * Get the props that should be considered for merging based on the request headers.
      *
-     * @return \Illuminate\Support\Collection<string, \Inertia\Mergeable>
+     * @return Collection<string, Mergeable>
      */
     protected function getMergePropsForRequest(Request $request, bool $rejectResetProps = true): Collection
     {
@@ -581,7 +581,7 @@ class Response implements Responsable
     /**
      * Resolve props that should be appended during merging.
      *
-     * @param  \Illuminate\Support\Collection<string, \Inertia\Mergeable>  $mergeProps
+     * @param  Collection<string, Mergeable>  $mergeProps
      * @return array<int, string>
      */
     protected function resolveAppendMergeProps(Collection $mergeProps): array
@@ -601,7 +601,7 @@ class Response implements Responsable
     /**
      * Resolve props that should be prepended during merging.
      *
-     * @param  \Illuminate\Support\Collection<string, \Inertia\Mergeable>  $mergeProps
+     * @param  Collection<string, Mergeable>  $mergeProps
      * @return array<int, string>
      */
     protected function resolvePrependMergeProps(Collection $mergeProps): array
@@ -621,7 +621,7 @@ class Response implements Responsable
     /**
      * Resolve props that should be deep merged.
      *
-     * @param  \Illuminate\Support\Collection<string, \Inertia\Mergeable>  $mergeProps
+     * @param  Collection<string, Mergeable>  $mergeProps
      * @return array<int, string>
      */
     protected function resolveDeepMergeProps(Collection $mergeProps): array
@@ -635,7 +635,7 @@ class Response implements Responsable
     /**
      * Resolve the matching keys for merge props.
      *
-     * @param  \Illuminate\Support\Collection<string, \Inertia\Mergeable>  $mergeProps
+     * @param  Collection<string, Mergeable>  $mergeProps
      * @return array<int, string>
      */
     protected function resolveMergeMatchingKeys(Collection $mergeProps): array

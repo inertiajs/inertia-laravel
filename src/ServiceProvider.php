@@ -122,7 +122,7 @@ class ServiceProvider extends BaseServiceProvider
     /**
      * Register the testing macros.
      *
-     * @throws \LogicException
+     * @throws LogicException
      */
     protected function registerTestingMacros(): void
     {
