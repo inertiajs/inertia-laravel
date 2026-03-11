@@ -1,8 +1,17 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.21...2.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.22...2.x)
 
 - Nothing!
+
+## [v2.0.22](https://github.com/inertiajs/inertia-laravel/compare/v2.0.21...v2.0.22) - 2026-03-11
+
+### What's Changed
+
+* [2.x] Prevent Boost conflict by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/838
+* [2.x] Fix SSR shutdown URL construction by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/843
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.21...v2.0.22
 
 ## [v2.0.21](https://github.com/inertiajs/inertia-laravel/compare/v2.0.20...v2.0.21) - 2026-02-24
 
