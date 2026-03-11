@@ -83,15 +83,15 @@ class Response implements Responsable
     /**
      * The shared properties (before merge with page props).
      *
-     * @var array<array-key, mixed|\Inertia\ProvidesInertiaProperties>
+     * @var array<array-key, mixed|ProvidesInertiaProperties>
      */
     protected array $sharedProps = [];
 
     /**
      * Create a new Inertia response instance.
      *
-     * @param  array<array-key, mixed|\Inertia\ProvidesInertiaProperties>  $sharedProps
-     * @param  array<array-key, mixed|\Inertia\ProvidesInertiaProperties>  $props
+     * @param  array<array-key, mixed|ProvidesInertiaProperties>  $sharedProps
+     * @param  array<array-key, mixed|ProvidesInertiaProperties>  $props
      */
     public function __construct(
         string $component,
@@ -166,7 +166,7 @@ class Response implements Responsable
     /**
      * Add flash data to the response.
      *
-     * @param  \BackedEnum|\UnitEnum|string|array<string, mixed>  $key
+     * @param  BackedEnum|UnitEnum|string|array<string, mixed>  $key
      * @return $this
      */
     public function flash(BackedEnum|UnitEnum|string|array $key, mixed $value = null): self
@@ -179,7 +179,7 @@ class Response implements Responsable
     /**
      * Create an HTTP response that represents the object.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function toResponse($request)

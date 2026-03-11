@@ -2,6 +2,7 @@
 
 namespace Inertia\Tests;
 
+use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
 use Inertia\ExceptionResponse;
@@ -88,7 +89,7 @@ class ExceptionResponseTest extends TestCase
 
     public function test_exceptions_with_shared_data(): void
     {
-        $kernel = $this->app->make(\Illuminate\Contracts\Http\Kernel::class);
+        $kernel = $this->app->make(Kernel::class);
         $kernel->appendMiddlewareToGroup('web', Stubs\HttpExceptionMiddleware::class);
 
         Inertia::handleExceptionsUsing(function (ExceptionResponse $response) {
@@ -134,7 +135,7 @@ class ExceptionResponseTest extends TestCase
 
     public function test_exceptions_without_shared_data(): void
     {
-        $kernel = $this->app->make(\Illuminate\Contracts\Http\Kernel::class);
+        $kernel = $this->app->make(Kernel::class);
         $kernel->appendMiddlewareToGroup('web', Stubs\HttpExceptionMiddleware::class);
 
         Inertia::handleExceptionsUsing(function (ExceptionResponse $response) {
@@ -169,7 +170,7 @@ class ExceptionResponseTest extends TestCase
 
     public function test_exceptions_outside_middleware_are_handled(): void
     {
-        $kernel = $this->app->make(\Illuminate\Contracts\Http\Kernel::class);
+        $kernel = $this->app->make(Kernel::class);
         $kernel->appendMiddlewareToGroup('web', Middleware::class);
 
         Inertia::handleExceptionsUsing(function (ExceptionResponse $response) {
