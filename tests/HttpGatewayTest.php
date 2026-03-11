@@ -279,6 +279,15 @@ class HttpGatewayTest extends TestCase
         $this->assertNull($this->gateway->dispatch(['page' => self::EXAMPLE_PAGE_OBJECT]));
     }
 
+    public function test_production_url_strips_trailing_slash(): void
+    {
+        config(['inertia.ssr.url' => 'http://127.0.0.1:13714/']);
+
+        $gateway = app(HttpGateway::class);
+
+        $this->assertEquals('http://127.0.0.1:13714/render', $gateway->getProductionUrl('/render'));
+    }
+
     public function test_except_can_be_called_multiple_times(): void
     {
         config([
