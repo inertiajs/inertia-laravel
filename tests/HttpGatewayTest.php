@@ -144,4 +144,13 @@ class HttpGatewayTest extends TestCase
         $this->assertFalse($this->gateway->isHealthy());
         $this->assertFalse($this->gateway->isHealthy());
     }
+
+    public function test_url_strips_trailing_slash(): void
+    {
+        config(['inertia.ssr.url' => 'http://127.0.0.1:13714/']);
+
+        $gateway = new HttpGateway;
+
+        $this->assertEquals('http://127.0.0.1:13714/render', $gateway->getUrl('/render'));
+    }
 }
