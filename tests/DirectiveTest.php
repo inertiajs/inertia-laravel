@@ -35,6 +35,8 @@ class DirectiveTest extends TestCase
         $this->compiler = new BladeCompiler($filesystem, __DIR__.'/cache/views');
         $this->compiler->directive('inertia', [Directive::class, 'compile']);
         $this->compiler->directive('inertiaHead', [Directive::class, 'compileHead']);
+        $this->compiler->directive('inertiaHeadFallback', [Directive::class, 'compileHeadFallback']);
+        $this->compiler->directive('endInertiaHeadFallback', [Directive::class, 'compileEndHeadFallback']);
     }
 
     protected function tearDown(): void
@@ -143,6 +145,69 @@ class DirectiveTest extends TestCase
             $this->renderView($view, ['page' => self::EXAMPLE_PAGE_OBJECT])
         );
 
+        $this->assertSame(1, $gateway->times);
+    }
+
+    public function test_inertia_head_fallback_renders_content_when_ssr_is_disabled(): void
+    {
+        Config::set(['inertia.ssr.enabled' => false]);
+
+        $view = '@inertiaHead @inertiaHeadFallback <title>Fallback Title</title> @endInertiaHeadFallback';
+
+        $this->assertStringContainsString(
+            '<title>Fallback Title</title>',
+            $this->renderView($view, ['page' => self::EXAMPLE_PAGE_OBJECT])
+        );
+    }
+
+    public function test_inertia_head_fallback_does_not_render_content_when_ssr_is_enabled(): void
+    {
+        Config::set(['inertia.ssr.enabled' => true]);
+
+        $view = '@inertiaHead @inertiaHeadFallback <title>Fallback Title</title> @endInertiaHeadFallback';
+        $rendered = $this->renderView($view, ['page' => self::EXAMPLE_PAGE_OBJECT]);
+
+        $this->assertStringContainsString('<title inertia>Example SSR Title</title>', $rendered);
+        $this->assertStringNotContainsString('<title>Fallback Title</title>', $rendered);
+    }
+
+    public function test_inertia_head_fallback_does_not_duplicate_ssr_dispatch(): void
+    {
+        Config::set(['inertia.ssr.enabled' => true]);
+        $this->app->instance(Gateway::class, $gateway = new FakeGateway);
+
+        $view = "@inertiaHead\n@inertiaHeadFallback\n<title>Fallback</title>\n@endInertiaHeadFallback";
+        $this->renderView($view, ['page' => self::EXAMPLE_PAGE_OBJECT]);
+
+        $this->assertSame(1, $gateway->times);
+    }
+
+    public function test_inertia_head_fallback_works_without_inertia_head_directive(): void
+    {
+        Config::set(['inertia.ssr.enabled' => false]);
+
+        $view = '@inertiaHeadFallback <title>Fallback Title</title> @endInertiaHeadFallback';
+
+        $this->assertStringContainsString(
+            '<title>Fallback Title</title>',
+            $this->renderView($view, ['page' => self::EXAMPLE_PAGE_OBJECT])
+        );
+    }
+
+    public function test_full_template_with_fallback_avoids_duplicate_title_on_ssr(): void
+    {
+        Config::set(['inertia.ssr.enabled' => true]);
+        $this->app->instance(Gateway::class, $gateway = new FakeGateway);
+
+        $view = "<!DOCTYPE html>\n<html>\n<head>\n@inertiaHead\n@inertiaHeadFallback\n<title>My App</title>\n@endInertiaHeadFallback\n</head>\n<body>\n@inertia\n</body>\n</html>";
+
+        $rendered = $this->renderView($view, ['page' => self::EXAMPLE_PAGE_OBJECT]);
+
+        // SSR title should be present
+        $this->assertStringContainsString('<title inertia>Example SSR Title</title>', $rendered);
+        // Fallback title should NOT be present
+        $this->assertStringNotContainsString('<title>My App</title>', $rendered);
+        // Only one dispatch
         $this->assertSame(1, $gateway->times);
     }
 }

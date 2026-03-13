@@ -72,6 +72,8 @@ class ServiceProvider extends BaseServiceProvider
         $this->callAfterResolving('blade.compiler', function ($blade) {
             $blade->directive('inertia', [Directive::class, 'compile']);
             $blade->directive('inertiaHead', [Directive::class, 'compileHead']);
+            $blade->directive('inertiaHeadFallback', [Directive::class, 'compileHeadFallback']);
+            $blade->directive('endInertiaHeadFallback', [Directive::class, 'compileEndHeadFallback']);
         });
     }
 

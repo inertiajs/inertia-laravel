@@ -55,4 +55,37 @@ class Directive
 
         return implode(' ', array_map('trim', explode("\n", $template)));
     }
+
+    /**
+     * Compile the "@inertiaHeadFallback" Blade directive. This opens a
+     * conditional block that only renders when SSR is not active, allowing
+     * users to provide fallback head content (e.g., a <title> tag) without
+     * causing duplicate tags when SSR is enabled.
+     *
+     * @param  string  $expression
+     */
+    public static function compileHeadFallback($expression = ''): string
+    {
+        $template = '<?php
+            if (!isset($__inertiaSsrDispatched)) {
+                $__inertiaSsrDispatched = true;
+                $__inertiaSsrResponse = app(\Inertia\Ssr\Gateway::class)->dispatch($page);
+            }
+
+            if (!$__inertiaSsrResponse) {
+        ?>';
+
+        return implode(' ', array_map('trim', explode("\n", $template)));
+    }
+
+    /**
+     * Compile the "@endInertiaHeadFallback" Blade directive. This closes
+     * the conditional block opened by "@inertiaHeadFallback".
+     *
+     * @param  string  $expression
+     */
+    public static function compileEndHeadFallback($expression = ''): string
+    {
+        return '<?php } ?>';
+    }
 }
