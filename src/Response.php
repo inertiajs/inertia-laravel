@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Response as ResponseFactory;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
+use Inertia\Ssr\SsrState;
 use Inertia\Support\Header;
 use Inertia\Support\SessionKey;
 use UnitEnum;
@@ -204,6 +205,8 @@ class Response implements Responsable
         if ($request->header(Header::INERTIA)) {
             return new JsonResponse($page, 200, [Header::INERTIA => 'true']);
         }
+
+        App::make(SsrState::class)->setPage($page);
 
         return ResponseFactory::view($this->rootView, $this->viewData + ['page' => $page]);
     }

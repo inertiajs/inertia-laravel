@@ -16,10 +16,7 @@ class Directive
         $id = trim(trim($expression), "\'\"") ?: 'app';
 
         $template = '<?php
-            if (!isset($__inertiaSsrDispatched)) {
-                $__inertiaSsrDispatched = true;
-                $__inertiaSsrResponse = app(\Inertia\Ssr\Gateway::class)->dispatch($page);
-            }
+            $__inertiaSsrResponse = app(\Inertia\Ssr\SsrState::class)->setPage($page)->dispatch();
 
             if ($__inertiaSsrResponse) {
                 echo $__inertiaSsrResponse->body;
@@ -41,10 +38,7 @@ class Directive
     public static function compileHead($expression = ''): string
     {
         $template = '<?php
-            if (!isset($__inertiaSsrDispatched)) {
-                $__inertiaSsrDispatched = true;
-                $__inertiaSsrResponse = app(\Inertia\Ssr\Gateway::class)->dispatch($page);
-            }
+            $__inertiaSsrResponse = app(\Inertia\Ssr\SsrState::class)->setPage($page)->dispatch();
 
             if ($__inertiaSsrResponse) {
                 echo $__inertiaSsrResponse->head;
