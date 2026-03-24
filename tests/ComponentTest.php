@@ -50,22 +50,22 @@ class ComponentTest extends TestCase
         $this->assertStringNotContainsString('<title>Fallback Title</title>', $rendered);
     }
 
-    public function test_body_component_renders_client_side_div_when_ssr_is_disabled(): void
+    public function test_app_component_renders_client_side_div_when_ssr_is_disabled(): void
     {
         Config::set(['inertia.ssr.enabled' => false]);
 
-        $view = '<x-inertia::body />';
+        $view = '<x-inertia::app />';
         $rendered = $this->renderView($view, ['page' => self::EXAMPLE_PAGE_OBJECT]);
 
         $this->assertStringContainsString('<div id="app"></div>', $rendered);
         $this->assertStringContainsString('data-page="app"', $rendered);
     }
 
-    public function test_body_component_renders_ssr_body_when_ssr_is_enabled(): void
+    public function test_app_component_renders_ssr_body_when_ssr_is_enabled(): void
     {
         Config::set(['inertia.ssr.enabled' => true]);
 
-        $view = '<x-inertia::body />';
+        $view = '<x-inertia::app />';
 
         $this->assertSame(
             '<p>This is some example SSR content</p>',
@@ -73,11 +73,11 @@ class ComponentTest extends TestCase
         );
     }
 
-    public function test_body_component_accepts_custom_id(): void
+    public function test_app_component_accepts_custom_id(): void
     {
         Config::set(['inertia.ssr.enabled' => false]);
 
-        $view = '<x-inertia::body id="custom" />';
+        $view = '<x-inertia::app id="custom" />';
         $rendered = $this->renderView($view, ['page' => self::EXAMPLE_PAGE_OBJECT]);
 
         $this->assertStringContainsString('<div id="custom"></div>', $rendered);
@@ -89,13 +89,13 @@ class ComponentTest extends TestCase
         Config::set(['inertia.ssr.enabled' => true]);
         $this->app->instance(Gateway::class, $gateway = new FakeGateway);
 
-        $view = '<x-inertia::head><title>Fallback</title></x-inertia::head><x-inertia::body />';
+        $view = '<x-inertia::head><title>Fallback</title></x-inertia::head><x-inertia::app />';
         $this->renderView($view, ['page' => self::EXAMPLE_PAGE_OBJECT]);
 
         $this->assertSame(1, $gateway->times);
     }
 
-    public function test_body_component_matches_directive_output_when_ssr_is_disabled(): void
+    public function test_app_component_matches_directive_output_when_ssr_is_disabled(): void
     {
         Config::set(['inertia.ssr.enabled' => false]);
 
@@ -103,12 +103,12 @@ class ComponentTest extends TestCase
 
         $this->app->forgetScopedInstances();
 
-        $component = trim($this->renderView('<x-inertia::body />', ['page' => self::EXAMPLE_PAGE_OBJECT]));
+        $component = trim($this->renderView('<x-inertia::app />', ['page' => self::EXAMPLE_PAGE_OBJECT]));
 
         $this->assertSame($directive, $component);
     }
 
-    public function test_body_component_matches_directive_output_when_ssr_is_enabled(): void
+    public function test_app_component_matches_directive_output_when_ssr_is_enabled(): void
     {
         Config::set(['inertia.ssr.enabled' => true]);
 
@@ -116,12 +116,12 @@ class ComponentTest extends TestCase
 
         $this->app->forgetScopedInstances();
 
-        $component = trim($this->renderView('<x-inertia::body />', ['page' => self::EXAMPLE_PAGE_OBJECT]));
+        $component = trim($this->renderView('<x-inertia::app />', ['page' => self::EXAMPLE_PAGE_OBJECT]));
 
         $this->assertSame($directive, $component);
     }
 
-    public function test_body_component_with_custom_id_matches_directive_output(): void
+    public function test_app_component_with_custom_id_matches_directive_output(): void
     {
         Config::set(['inertia.ssr.enabled' => false]);
 
@@ -129,7 +129,7 @@ class ComponentTest extends TestCase
 
         $this->app->forgetScopedInstances();
 
-        $component = trim($this->renderView('<x-inertia::body id="foo" />', ['page' => self::EXAMPLE_PAGE_OBJECT]));
+        $component = trim($this->renderView('<x-inertia::app id="foo" />', ['page' => self::EXAMPLE_PAGE_OBJECT]));
 
         $this->assertSame($directive, $component);
     }
