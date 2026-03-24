@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\View\Component;
 use Inertia\Ssr\SsrState;
 
-class Body extends Component
+class App extends Component
 {
     public function __construct(
         public string $id = 'app',
