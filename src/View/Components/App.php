@@ -3,6 +3,7 @@
 namespace Inertia\View\Components;
 
 use Closure;
+use Illuminate\Support\HtmlString;
 use Illuminate\View\Component;
 use Inertia\Ssr\SsrState;
 
@@ -19,10 +20,17 @@ class App extends Component
             $response = $state->dispatch();
 
             if ($response) {
-                return $response->body;
+                return new HtmlString($response->body);
             }
 
-            return '<script data-page="'.$this->id.'" type="application/json">'.json_encode($state->page).'</script><div id="'.$this->id.'"></div>';
+            return new HtmlString('<script data-page="'.$this->id.'" type="application/json">'.json_encode($state->page).'</script><div id="'.$this->id.'"></div>');
         };
+    }
+
+    public function resolveView()
+    {
+        $view = $this->render();
+
+        return fn (array $data = []) => $view($data);
     }
 }

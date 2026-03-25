@@ -3,6 +3,7 @@
 namespace Inertia\View\Components;
 
 use Closure;
+use Illuminate\Support\HtmlString;
 use Illuminate\View\Component;
 use Inertia\Ssr\SsrState;
 
@@ -14,10 +15,17 @@ class Head extends Component
             $response = app(SsrState::class)->dispatch();
 
             if ($response) {
-                return $response->head;
+                return new HtmlString($response->head);
             }
 
-            return (string) $data['slot'];
+            return new HtmlString((string) $data['slot']);
         };
+    }
+
+    public function resolveView()
+    {
+        $view = $this->render();
+
+        return fn (array $data = []) => $view($data);
     }
 }
