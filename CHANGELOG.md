@@ -1,8 +1,16 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.0.0...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.0.1...3.x)
 
 - Nothing!
+
+## [v3.0.1](https://github.com/inertiajs/inertia-laravel/compare/v3.0.0...v3.0.1) - 2026-03-25
+
+### What's Changed
+
+* [3.x] Migrate Blade components to inline syntax by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/850
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v3.0.0...v3.0.1
 
 ## [v3.0.0](https://github.com/inertiajs/inertia-laravel/compare/v2.0.21...v3.0.0) - 2026-03-24
 
