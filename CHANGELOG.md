@@ -1,8 +1,12 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.21...2.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.0.0...3.x)
 
 - Nothing!
+
+## [v3.0.0](https://github.com/inertiajs/inertia-laravel/compare/v2.0.21...v3.0.0) - 2026-03-24
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v3.0.0-beta5...v3.0.0
 
 ## [v2.0.21](https://github.com/inertiajs/inertia-laravel/compare/v2.0.20...v2.0.21) - 2026-02-24
 
