@@ -2,22 +2,27 @@
 
 namespace Inertia\View\Components;
 
-use Closure;
 use Illuminate\View\Component;
+use Inertia\Ssr\Response;
 use Inertia\Ssr\SsrState;
 
 class Head extends Component
 {
-    public function render(): Closure
+    public ?Response $response;
+
+    public function __construct()
     {
-        return function (array $data) {
-            $response = app(SsrState::class)->dispatch();
+        $this->response = app(SsrState::class)->dispatch();
+    }
 
-            if ($response) {
-                return $response->head;
-            }
-
-            return (string) $data['slot'];
-        };
+    public function render(): string
+    {
+        return <<<'blade'
+@if($response)
+{!! $response->head !!}
+@else
+{!! $slot !!}
+@endif
+blade;
     }
 }

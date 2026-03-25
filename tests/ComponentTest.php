@@ -160,6 +160,22 @@ class ComponentTest extends TestCase
         $this->assertSame($directive, $component);
     }
 
+    public function test_components_do_not_create_cached_view_files_per_request(): void
+    {
+        Config::set(['inertia.ssr.enabled' => true]);
+
+        $viewCachePath = $this->app['config']['view.compiled'];
+        $view = '<x-inertia::head><title>Fallback</title></x-inertia::head><x-inertia::app />';
+
+        $this->renderView($view, ['page' => self::EXAMPLE_PAGE_OBJECT]);
+        $cachedViews = glob($viewCachePath.'/*.php');
+
+        $this->app->forgetScopedInstances();
+
+        $this->renderView($view, ['page' => ['component' => 'Different', 'props' => ['foo' => 'bar']]]);
+        $this->assertSame($cachedViews, glob($viewCachePath.'/*.php'));
+    }
+
     public function test_ssr_state_is_scoped_and_does_not_leak_between_requests(): void
     {
         Config::set(['inertia.ssr.enabled' => true]);
