@@ -60,6 +60,10 @@ class StartSsr extends Command
             return self::INVALID;
         }
 
+        if ($runtimePath = config('inertia.ssr.runtime_path')) {
+            $runtime = $runtimePath;
+        }
+
         $this->callSilently('inertia:stop-ssr');
 
         $process = new Process([$runtime, $bundle]);

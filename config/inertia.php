@@ -29,6 +29,8 @@ return [
 
         // 'bundle' => base_path('bootstrap/ssr/ssr.mjs'),
 
+        'runtime_path' => env('INERTIA_SSR_RUNTIME_PATH'),
+
     ],
 
     /*
