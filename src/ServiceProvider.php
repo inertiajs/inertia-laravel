@@ -2,8 +2,8 @@
 
 namespace Inertia;
 
-use Illuminate\Foundation\Http\Kernel;
 use Illuminate\Contracts\Http\Kernel as HttpKernelContract;
+use Illuminate\Foundation\Http\Kernel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
