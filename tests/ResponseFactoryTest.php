@@ -535,25 +535,52 @@ class ResponseFactoryTest extends TestCase
         $this->assertInstanceOf(\Inertia\Response::class, $response);
     }
 
-    public function test_can_transform_component_name_before_filesystem_lookup_when_ensuring_pages_exist(): void
+    public function test_can_resolve_component_name_before_rendering(): void
+    {
+        $calledWith = null;
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () use (&$calledWith) {
+            Inertia::resolveComponentUsing(static function (string $name) use (&$calledWith): string {
+                $calledWith = $name;
+
+                return "{$name}/Page";
+            });
+
+            return Inertia::render('Stubs/Example');
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', [
+            'X-Inertia' => 'true',
+        ]);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'Stubs/Example/Page',
+        ]);
+        $this->assertSame('Stubs/Example', $calledWith);
+    }
+
+    public function test_resolved_component_name_is_used_for_page_existence_checks(): void
     {
         $calledWith = null;
 
         config()->set('inertia.pages.ensure_pages_exist', true);
-        config()->set('inertia.pages.transform', static function (string $name) use (&$calledWith): string {
-            $calledWith = $name;
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () use (&$calledWith) {
+            Inertia::resolveComponentUsing(static function (string $name) use (&$calledWith): string {
+                $calledWith = $name;
 
-            return "{$name}/Page";
+                return "{$name}/Page";
+            });
+
+            return Inertia::render('Stubs/Example');
         });
 
-        $response = (new ResponseFactory)->render('Stubs/Example');
+        $response = $this->withoutExceptionHandling()->get('/', [
+            'X-Inertia' => 'true',
+        ]);
 
-        $this->assertInstanceOf(\Inertia\Response::class, $response);
+        $response->assertSuccessful();
         $this->assertSame('Stubs/Example', $calledWith);
-
-        /** @phpstan-ignore-next-line */
-        $getComponent = fn () => $this->component;
-        $this->assertSame('Stubs/Example', $getComponent->call($response));
     }
 
     public function test_render_accepts_backed_enum(): void

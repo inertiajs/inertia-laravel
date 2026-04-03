@@ -73,6 +73,13 @@ class ResponseFactory
     protected $urlResolver;
 
     /**
+     * The component resolver callback.
+     *
+     * @var Closure|null
+     */
+    protected $componentResolver;
+
+    /**
      * Set the root view template for Inertia responses. This template
      * serves as the HTML wrapper that contains the Inertia root element
      * where the frontend application will be mounted.
@@ -158,6 +165,14 @@ class ResponseFactory
     public function resolveUrlUsing(?Closure $urlResolver = null): void
     {
         $this->urlResolver = $urlResolver;
+    }
+
+    /**
+     * Set the component resolver.
+     */
+    public function resolveComponentUsing(?Closure $componentResolver = null): void
+    {
+        $this->componentResolver = $componentResolver;
     }
 
     /**
@@ -286,8 +301,6 @@ class ResponseFactory
      */
     protected function findComponentOrFail(string $component): void
     {
-        $component = $this->transformComponentForLookup($component);
-
         try {
             app('inertia.view-finder')->find($component);
         } catch (InvalidArgumentException) {
@@ -296,18 +309,18 @@ class ResponseFactory
     }
 
     /**
-     * Transform the component name before file lookup.
+     * Resolve the component name.
      */
-    protected function transformComponentForLookup(string $component): string
+    protected function resolveComponent(string $component): string
     {
-        $transform = config('inertia.pages.transform');
-
-        if (! is_callable($transform)) {
+        if (! $this->componentResolver) {
             return $component;
         }
 
-        /** @var callable(string): string $transform */
-        return $transform($component);
+        return App::call($this->componentResolver, [
+            'name' => $component,
+            'component' => $component,
+        ]);
     }
 
     /**
@@ -327,6 +340,8 @@ class ResponseFactory
         if (! is_string($component)) {
             throw new InvalidArgumentException('Component argument must be of type string or a string BackedEnum');
         }
+
+        $component = $this->resolveComponent($component);
 
         if (config('inertia.pages.ensure_pages_exist', false)) {
             $this->findComponentOrFail($component);
