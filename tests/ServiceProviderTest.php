@@ -3,7 +3,7 @@
 namespace Inertia\Tests;
 
 use Illuminate\Cache\RateLimiting\Limit;
-use Illuminate\Foundation\Http\Kernel;
+use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Routing\Router;
