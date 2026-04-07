@@ -187,6 +187,20 @@ class ResponseFactory
     }
 
     /**
+     * Disable server-side rendering, optionally based on a condition.
+     */
+    public function disableSsr(Closure|bool $condition = true): void
+    {
+        $gateway = app(Gateway::class);
+
+        if (! $gateway instanceof Ssr\HttpGateway) {
+            throw new LogicException('The configured SSR gateway does not support conditionally disabling server-side rendering.');
+        }
+
+        $gateway->disableWhen($condition);
+    }
+
+    /**
      * Exclude the given paths from server-side rendering.
      *
      * @param  array<int, string>|string  $paths
