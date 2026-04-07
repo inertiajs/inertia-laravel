@@ -1,8 +1,16 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.0.1...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.0.2...3.x)
 
 - Nothing!
+
+## [v3.0.2](https://github.com/inertiajs/inertia-laravel/compare/v3.0.1...v3.0.2) - 2026-04-07
+
+### What's Changed
+
+- Update facade docblocks in https://github.com/inertiajs/inertia-laravel/commit/25fe835d0fadf988d2cd8974d4a7b64048f84eda
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v3.0.1...v3.0.2
 
 ## [v3.0.1](https://github.com/inertiajs/inertia-laravel/compare/v3.0.0...v3.0.1) - 2026-03-25
 
