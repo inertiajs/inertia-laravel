@@ -1,18 +1,17 @@
-name: facades
+name: Facades DocBlocks
 
 on:
   push:
     branches:
-      - "master"
+      - "2.x"
+      - "3.x"
+
+permissions:
+  contents: write
 
 jobs:
   update:
-    runs-on: ubuntu-22.04
-
-    strategy:
-      fail-fast: true
-
-    name: Facade DocBlocks
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -21,9 +20,9 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.2
-          tools: composer:v2
+          php-version: 8.3
           coverage: none
+          tools: composer:v2
 
       - name: Install dependencies
         uses: nick-fields/retry@v2
@@ -36,7 +35,7 @@ jobs:
         run: php -f vendor/bin/facade.php -- Inertia\\Inertia
 
       - name: Commit facade docblocks
-        uses: stefanzweifel/git-auto-commit-action@v4
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: Update facade docblocks
           file_pattern: src/
