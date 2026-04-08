@@ -12,12 +12,12 @@ use Illuminate\Support\Facades\Facade;
  * @method static void version(\Closure|string|null $version)
  * @method static string getVersion()
  * @method static void resolveUrlUsing(\Closure|null $urlResolver = null)
+ * @method static void transformComponentUsing(\Closure|null $componentTransformer = null)
  * @method static void clearHistory()
  * @method static void preserveFragment()
  * @method static void encryptHistory(bool $encrypt = true)
  * @method static void disableSsr(\Closure|bool $condition = true)
  * @method static void withoutSsr(array<int, string>|string $paths)
- * @method static void transformComponentUsing(\Closure|null $componentTransformer = null)
  * @method static \Inertia\OptionalProp optional(callable $callback)
  * @method static \Inertia\DeferProp defer(callable $callback, string $group = 'default')
  * @method static \Inertia\MergeProp merge(mixed $value)
@@ -37,7 +37,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static bool hasMacro(string $name)
  * @method static void flushMacros()
  *
- * @see ResponseFactory
+ * @see \Inertia\ResponseFactory
  */
 class Inertia extends Facade
 {
