@@ -325,8 +325,11 @@ class ResponseFactory
 
     /**
      * Transform the component name.
+     *
+     * @param  mixed  $component
+     * @return mixed
      */
-    protected function transformComponent(string $component): string
+    protected function transformComponent($component)
     {
         if (! $this->componentTransformer) {
             return $component;
@@ -343,6 +346,8 @@ class ResponseFactory
      */
     public function render($component, $props = []): Response
     {
+        $component = $this->transformComponent($component);
+
         $component = match (true) {
             $component instanceof BackedEnum => $component->value,
             $component instanceof UnitEnum => $component->name,
@@ -352,8 +357,6 @@ class ResponseFactory
         if (! is_string($component)) {
             throw new InvalidArgumentException('Component argument must be of type string or a string BackedEnum');
         }
-
-        $component = $this->transformComponent($component);
 
         if (config('inertia.pages.ensure_pages_exist', false)) {
             $this->findComponentOrFail($component);
