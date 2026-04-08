@@ -542,7 +542,7 @@ class ResponseFactoryTest extends TestCase
         $calledWith = null;
 
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () use (&$calledWith) {
-            Inertia::resolveComponentUsing(static function (string $name) use (&$calledWith): string {
+            Inertia::transformComponentUsing(static function (string $name) use (&$calledWith): string {
                 $calledWith = $name;
 
                 return "{$name}/Page";
@@ -568,7 +568,7 @@ class ResponseFactoryTest extends TestCase
 
         config()->set('inertia.pages.ensure_pages_exist', true);
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () use (&$calledWith) {
-            Inertia::resolveComponentUsing(static function (string $name) use (&$calledWith): string {
+            Inertia::transformComponentUsing(static function (string $name) use (&$calledWith): string {
                 $calledWith = $name;
 
                 return "{$name}/Page";

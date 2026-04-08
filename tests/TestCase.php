@@ -30,7 +30,7 @@ abstract class TestCase extends Orchestra
         View::addLocation(__DIR__.'/Stubs');
 
         Inertia::setRootView('welcome');
-        Inertia::resolveComponentUsing();
+        Inertia::transformComponentUsing();
         config()->set('inertia.testing.ensure_pages_exist', false);
         config()->set('inertia.pages.paths', [realpath(__DIR__)]);
     }

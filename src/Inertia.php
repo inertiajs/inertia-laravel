@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static void encryptHistory(bool $encrypt = true)
  * @method static void disableSsr(\Closure|bool $condition = true)
  * @method static void withoutSsr(array<int, string>|string $paths)
- * @method static void resolveComponentUsing(\Closure|null $componentResolver = null)
+ * @method static void transformComponentUsing(\Closure|null $componentTransformer = null)
  * @method static \Inertia\OptionalProp optional(callable $callback)
  * @method static \Inertia\DeferProp defer(callable $callback, string $group = 'default')
  * @method static \Inertia\MergeProp merge(mixed $value)

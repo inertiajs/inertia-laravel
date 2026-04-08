@@ -73,7 +73,7 @@ class AssertableInertiaTest extends TestCase
     {
         $calledWith = null;
 
-        Inertia::resolveComponentUsing(static function (string $name) use (&$calledWith): string {
+        Inertia::transformComponentUsing(static function (string $name) use (&$calledWith): string {
             $calledWith = $name;
 
             return "{$name}/Page";

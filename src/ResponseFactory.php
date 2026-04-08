@@ -74,11 +74,11 @@ class ResponseFactory
     protected $urlResolver;
 
     /**
-     * The component resolver callback.
+     * The component transformer callback.
      *
      * @var Closure|null
      */
-    protected $componentResolver;
+    protected $componentTransformer;
 
     /**
      * Set the root view template for Inertia responses. This template
@@ -169,11 +169,11 @@ class ResponseFactory
     }
 
     /**
-     * Set the component resolver.
+     * Set the component transformer.
      */
-    public function resolveComponentUsing(?Closure $componentResolver = null): void
+    public function transformComponentUsing(?Closure $componentTransformer = null): void
     {
-        $this->componentResolver = $componentResolver;
+        $this->componentTransformer = $componentTransformer;
     }
 
     /**
@@ -324,18 +324,15 @@ class ResponseFactory
     }
 
     /**
-     * Resolve the component name.
+     * Transform the component name.
      */
-    protected function resolveComponent(string $component): string
+    protected function transformComponent(string $component): string
     {
-        if (! $this->componentResolver) {
+        if (! $this->componentTransformer) {
             return $component;
         }
 
-        return App::call($this->componentResolver, [
-            'name' => $component,
-            'component' => $component,
-        ]);
+        return ($this->componentTransformer)($component) ?? $component;
     }
 
     /**
@@ -356,7 +353,7 @@ class ResponseFactory
             throw new InvalidArgumentException('Component argument must be of type string or a string BackedEnum');
         }
 
-        $component = $this->resolveComponent($component);
+        $component = $this->transformComponent($component);
 
         if (config('inertia.pages.ensure_pages_exist', false)) {
             $this->findComponentOrFail($component);
