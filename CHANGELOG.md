@@ -1,8 +1,24 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.0.2...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.0.3...3.x)
 
 - Nothing!
+
+## [v3.0.3](https://github.com/inertiajs/inertia-laravel/compare/v3.0.2...v3.0.3) - 2026-04-08
+
+### What's Changed
+
+* [3.x] Add `Inertia::disableSsr()` method by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/856
+* [3.x] Add pages transform callback by [@nhedger](https://github.com/nhedger) in https://github.com/inertiajs/inertia-laravel/pull/841
+* [3.x] Fix middleware priority by [@jlswanson28694](https://github.com/jlswanson28694) in https://github.com/inertiajs/inertia-laravel/pull/854
+* [3.x] Add SSR runtime config option by [@shaffe-fr](https://github.com/shaffe-fr) in https://github.com/inertiajs/inertia-laravel/pull/857
+
+### New Contributors
+
+* [@nhedger](https://github.com/nhedger) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/841
+* [@jlswanson28694](https://github.com/jlswanson28694) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/854
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v3.0.2...v3.0.3
 
 ## [v3.0.2](https://github.com/inertiajs/inertia-laravel/compare/v3.0.1...v3.0.2) - 2026-04-07
 
