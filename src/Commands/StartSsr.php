@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use Inertia\Ssr\BundleDetector;
 use Inertia\Ssr\SsrException;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
 
 #[AsCommand(name: 'inertia:start-ssr')]
@@ -16,7 +17,7 @@ class StartSsr extends Command
      *
      * @var string
      */
-    protected $signature = 'inertia:start-ssr {--runtime=node : The runtime to use (`node` or `bun`)}';
+    protected $signature = 'inertia:start-ssr {--runtime= : The runtime to use (e.g. `node`, `bun`, or an absolute path)}';
 
     /**
      * The console command description.
@@ -52,17 +53,17 @@ class StartSsr extends Command
             $this->warn('Using a default bundle instead: "'.$bundle.'"');
         }
 
-        $runtime = $this->option('runtime');
+        $runtime = $this->option('runtime') ?? config('inertia.ssr.runtime', 'node');
 
-        if (! in_array($runtime, ['node', 'bun'])) {
-            $this->error('Unsupported runtime: "'.$runtime.'". Supported runtimes are `node` and `bun`.');
+        if (config('inertia.ssr.ensure_runtime_exists', false) && ! (new ExecutableFinder)->find($runtime)) {
+            $this->error('SSR runtime "'.$runtime.'" could not be found.');
 
-            return self::INVALID;
+            return self::FAILURE;
         }
 
         $this->callSilently('inertia:stop-ssr');
 
-        $process = new Process([$runtime, $bundle]);
+        $process = app(Process::class, ['command' => [$runtime, $bundle]]);
         $process->setTimeout(null);
         $process->start();
 
