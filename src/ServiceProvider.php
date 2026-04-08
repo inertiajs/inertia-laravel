@@ -72,12 +72,11 @@ class ServiceProvider extends BaseServiceProvider
      */
     protected function configureMiddlewarePriority(): void
     {
-        $kernel = $this->app->make(HttpKernelContract::class);
-
-        // @phpstan-ignore-next-line
-        if ($kernel instanceof Kernel) {
-            $kernel->addToMiddlewarePriorityAfter(StartSession::class, Middleware::class);
-        }
+        $this->callAfterResolving(HttpKernelContract::class, function ($kernel) {
+            if ($kernel instanceof Kernel) {
+                $kernel->addToMiddlewarePriorityAfter(StartSession::class, Middleware::class);
+            }
+        });
     }
 
     /**
