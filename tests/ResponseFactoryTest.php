@@ -537,6 +537,54 @@ class ResponseFactoryTest extends TestCase
         $this->assertInstanceOf(\Inertia\Response::class, $response);
     }
 
+    public function test_can_resolve_component_name_before_rendering(): void
+    {
+        $calledWith = null;
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () use (&$calledWith) {
+            Inertia::transformComponentUsing(static function (string $name) use (&$calledWith): string {
+                $calledWith = $name;
+
+                return "{$name}/Page";
+            });
+
+            return Inertia::render('Stubs/Example');
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', [
+            'X-Inertia' => 'true',
+        ]);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'Stubs/Example/Page',
+        ]);
+        $this->assertSame('Stubs/Example', $calledWith);
+    }
+
+    public function test_resolved_component_name_is_used_for_page_existence_checks(): void
+    {
+        $calledWith = null;
+
+        config()->set('inertia.pages.ensure_pages_exist', true);
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/', function () use (&$calledWith) {
+            Inertia::transformComponentUsing(static function (string $name) use (&$calledWith): string {
+                $calledWith = $name;
+
+                return "{$name}/Page";
+            });
+
+            return Inertia::render('Stubs/Example');
+        });
+
+        $response = $this->withoutExceptionHandling()->get('/', [
+            'X-Inertia' => 'true',
+        ]);
+
+        $response->assertSuccessful();
+        $this->assertSame('Stubs/Example', $calledWith);
+    }
+
     public function test_render_accepts_backed_enum(): void
     {
         $response = (new ResponseFactory)->render(StringBackedEnum::UsersIndex);

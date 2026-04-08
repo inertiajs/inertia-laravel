@@ -74,6 +74,13 @@ class ResponseFactory
     protected $urlResolver;
 
     /**
+     * The component transformer callback.
+     *
+     * @var Closure|null
+     */
+    protected $componentTransformer;
+
+    /**
      * Set the root view template for Inertia responses. This template
      * serves as the HTML wrapper that contains the Inertia root element
      * where the frontend application will be mounted.
@@ -159,6 +166,14 @@ class ResponseFactory
     public function resolveUrlUsing(?Closure $urlResolver = null): void
     {
         $this->urlResolver = $urlResolver;
+    }
+
+    /**
+     * Set the component transformer.
+     */
+    public function transformComponentUsing(?Closure $componentTransformer = null): void
+    {
+        $this->componentTransformer = $componentTransformer;
     }
 
     /**
@@ -309,6 +324,21 @@ class ResponseFactory
     }
 
     /**
+     * Transform the component name.
+     *
+     * @param  mixed  $component
+     * @return mixed
+     */
+    protected function transformComponent($component)
+    {
+        if (! $this->componentTransformer) {
+            return $component;
+        }
+
+        return ($this->componentTransformer)($component) ?? $component;
+    }
+
+    /**
      * Create an Inertia response.
      *
      * @param  BackedEnum|UnitEnum|string  $component
@@ -316,6 +346,8 @@ class ResponseFactory
      */
     public function render($component, $props = []): Response
     {
+        $component = $this->transformComponent($component);
+
         $component = match (true) {
             $component instanceof BackedEnum => $component->value,
             $component instanceof UnitEnum => $component->name,
