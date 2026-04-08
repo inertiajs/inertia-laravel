@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response as BaseResponse;
 use Illuminate\Support\Traits\Macroable;
+use Inertia\Ssr\DisablesSsr;
 use Inertia\Ssr\ExcludesSsrPaths;
 use Inertia\Ssr\Gateway;
 use Inertia\Support\Header;
@@ -193,11 +194,11 @@ class ResponseFactory
     {
         $gateway = app(Gateway::class);
 
-        if (! $gateway instanceof Ssr\HttpGateway) {
-            throw new LogicException('The configured SSR gateway does not support conditionally disabling server-side rendering.');
+        if (! $gateway instanceof DisablesSsr) {
+            throw new LogicException('The configured SSR gateway does not support disabling server-side rendering conditionally.');
         }
 
-        $gateway->disableWhen($condition);
+        $gateway->disable($condition);
     }
 
     /**

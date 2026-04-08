@@ -438,7 +438,7 @@ class HttpGatewayTest extends TestCase
             'inertia.ssr.bundle' => __DIR__.'/Stubs/ssr-bundle.js',
         ]);
 
-        $this->gateway->disableWhen(true);
+        $this->gateway->disable(true);
 
         $this->assertNull($this->gateway->dispatch(['page' => self::EXAMPLE_PAGE_OBJECT]));
     }
@@ -450,7 +450,7 @@ class HttpGatewayTest extends TestCase
             'inertia.ssr.bundle' => __DIR__.'/Stubs/ssr-bundle.js',
         ]);
 
-        $this->gateway->disableWhen(fn () => true);
+        $this->gateway->disable(fn () => true);
 
         $this->assertNull($this->gateway->dispatch(['page' => self::EXAMPLE_PAGE_OBJECT]));
     }
@@ -462,7 +462,7 @@ class HttpGatewayTest extends TestCase
             'inertia.ssr.bundle' => __DIR__.'/Stubs/ssr-bundle.js',
         ]);
 
-        $this->gateway->disableWhen(false);
+        $this->gateway->disable(false);
 
         Http::fake([
             $this->renderUrl => Http::response(json_encode([

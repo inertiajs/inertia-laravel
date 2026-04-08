@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\Str;
 use Inertia\ResolvesCallables;
 
-class HttpGateway implements ExcludesSsrPaths, Gateway, HasHealthCheck
+class HttpGateway implements DisablesSsr, ExcludesSsrPaths, Gateway, HasHealthCheck
 {
     use ExcludesPaths;
     use ResolvesCallables;
@@ -85,7 +85,7 @@ class HttpGateway implements ExcludesSsrPaths, Gateway, HasHealthCheck
     /**
      * Set the condition that determines if SSR should be disabled.
      */
-    public function disableWhen(Closure|bool $condition): void
+    public function disable(Closure|bool $condition): void
     {
         $this->disabled = $condition;
     }
