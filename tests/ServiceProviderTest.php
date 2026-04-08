@@ -3,14 +3,17 @@
 namespace Inertia\Tests;
 
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Contracts\Http\Kernel as HttpKernelContract;
+use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Http\Kernel;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Middleware\ThrottleRequests;
-use Illuminate\Routing\Router;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
+use Inertia\Middleware;
+use Inertia\ServiceProvider;
 use Inertia\Tests\Stubs\ExampleMiddleware;
 
 class ServiceProviderTest extends TestCase
@@ -49,17 +52,22 @@ class ServiceProviderTest extends TestCase
 
     public function test_inertia_middleware_is_prioritized_after_start_session(): void
     {
-        $route = Route::middleware(['web', ExampleMiddleware::class, 'throttle:api'])
-            ->delete('/foo', fn () => 'ok');
+        // Simulate the production boot order where the Kernel is resolved
+        // in Application::handleRequest() BEFORE service providers boot
+        // in Kernel::sendRequestThroughRouter().
+        $app = new Application(__DIR__);
+        $app->singleton(HttpKernelContract::class, Kernel::class);
 
-        // Resolve Kernel to register middleware groups
-        app(Kernel::class);
+        /** @var Kernel $kernel */
+        $kernel = $app->make(HttpKernelContract::class);
 
-        $middleware = app(Router::class)->resolveMiddleware($route->gatherMiddleware());
+        (new ServiceProvider($app))->boot();
+
+        $middleware = $kernel->getMiddlewarePriority();
 
         $startSessionIndex = array_search(StartSession::class, $middleware);
-        $inertiaIndex = array_search(ExampleMiddleware::class, $middleware);
-        $throttleIndex = array_search(ThrottleRequests::class.':api', $middleware);
+        $inertiaIndex = array_search(Middleware::class, $middleware);
+        $throttleIndex = array_search(ThrottleRequests::class, $middleware);
 
         $this->assertNotFalse($startSessionIndex);
         $this->assertNotFalse($inertiaIndex);
@@ -67,7 +75,7 @@ class ServiceProviderTest extends TestCase
 
         $this->assertTrue(
             $startSessionIndex < $inertiaIndex,
-            'StartSession middleware must run before Inertia middleware.'
+            'Inertia middleware must run after StartSession.'
         );
 
         $this->assertTrue(

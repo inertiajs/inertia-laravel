@@ -2,6 +2,7 @@
 
 namespace Inertia;
 
+use Illuminate\Contracts\Http\Kernel as HttpKernelContract;
 use Illuminate\Foundation\Http\Kernel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -71,8 +72,10 @@ class ServiceProvider extends BaseServiceProvider
      */
     protected function configureMiddlewarePriority(): void
     {
-        $this->app->afterResolving(Kernel::class, function (Kernel $kernel) {
-            $kernel->addToMiddlewarePriorityAfter(StartSession::class, Middleware::class);
+        $this->callAfterResolving(HttpKernelContract::class, function ($kernel) {
+            if ($kernel instanceof Kernel) {
+                $kernel->addToMiddlewarePriorityAfter(StartSession::class, Middleware::class);
+            }
         });
     }
 
