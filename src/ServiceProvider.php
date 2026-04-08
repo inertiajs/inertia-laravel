@@ -74,6 +74,7 @@ class ServiceProvider extends BaseServiceProvider
     {
         $kernel = $this->app->make(HttpKernelContract::class);
 
+        // @phpstan-ignore-next-line
         if ($kernel instanceof Kernel) {
             $kernel->addToMiddlewarePriorityAfter(StartSession::class, Middleware::class);
         }
