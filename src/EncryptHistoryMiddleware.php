@@ -4,6 +4,7 @@ namespace Inertia;
 
 use Closure;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class EncryptHistoryMiddleware
 {
@@ -12,7 +13,7 @@ class EncryptHistoryMiddleware
      * enables encryption of the browser history state, providing additional
      * security for sensitive data in Inertia responses.
      *
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
     public function handle(Request $request, Closure $next)
     {

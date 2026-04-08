@@ -1,8 +1,28 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.21...2.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.0.2...3.x)
 
 - Nothing!
+
+## [v3.0.2](https://github.com/inertiajs/inertia-laravel/compare/v3.0.1...v3.0.2) - 2026-04-07
+
+### What's Changed
+
+- Update facade docblocks in https://github.com/inertiajs/inertia-laravel/commit/25fe835d0fadf988d2cd8974d4a7b64048f84eda
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v3.0.1...v3.0.2
+
+## [v3.0.1](https://github.com/inertiajs/inertia-laravel/compare/v3.0.0...v3.0.1) - 2026-03-25
+
+### What's Changed
+
+* [3.x] Migrate Blade components to inline syntax by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/850
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v3.0.0...v3.0.1
+
+## [v3.0.0](https://github.com/inertiajs/inertia-laravel/compare/v2.0.21...v3.0.0) - 2026-03-24
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v3.0.0-beta5...v3.0.0
 
 ## [v2.0.21](https://github.com/inertiajs/inertia-laravel/compare/v2.0.20...v2.0.21) - 2026-02-24
 

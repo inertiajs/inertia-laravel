@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response as BaseResponse;
 use Illuminate\Support\Traits\Macroable;
+use Inertia\Ssr\DisablesSsr;
 use Inertia\Ssr\ExcludesSsrPaths;
 use Inertia\Ssr\Gateway;
 use Inertia\Support\Header;
@@ -94,7 +95,7 @@ class ResponseFactory
      * included with every response, making it ideal for user authentication
      * state, flash messages, etc.
      *
-     * @param  string|array<array-key, mixed>|\Illuminate\Contracts\Support\Arrayable<array-key, mixed>|\Inertia\ProvidesInertiaProperties  $key
+     * @param  string|array<array-key, mixed>|Arrayable<array-key, mixed>|ProvidesInertiaProperties  $key
      * @param  mixed  $value
      */
     public function share($key, $value = null): void
@@ -140,7 +141,7 @@ class ResponseFactory
     /**
      * Set the asset version.
      *
-     * @param  \Closure|string|null  $version
+     * @param  Closure|string|null  $version
      */
     public function version($version): void
     {
@@ -199,6 +200,20 @@ class ResponseFactory
     public function encryptHistory($encrypt = true): void
     {
         $this->encryptHistory = $encrypt;
+    }
+
+    /**
+     * Disable server-side rendering, optionally based on a condition.
+     */
+    public function disableSsr(Closure|bool $condition = true): void
+    {
+        $gateway = app(Gateway::class);
+
+        if (! $gateway instanceof DisablesSsr) {
+            throw new LogicException('The configured SSR gateway does not support disabling server-side rendering conditionally.');
+        }
+
+        $gateway->disable($condition);
     }
 
     /**
@@ -297,7 +312,7 @@ class ResponseFactory
     /**
      * Find the component or fail.
      *
-     * @throws \Inertia\ComponentNotFoundException
+     * @throws ComponentNotFoundException
      */
     protected function findComponentOrFail(string $component): void
     {
@@ -327,7 +342,7 @@ class ResponseFactory
      * Create an Inertia response.
      *
      * @param  BackedEnum|UnitEnum|string  $component
-     * @param  array<array-key, mixed>|\Illuminate\Contracts\Support\Arrayable<array-key, mixed>|ProvidesInertiaProperties  $props
+     * @param  array<array-key, mixed>|Arrayable<array-key, mixed>|ProvidesInertiaProperties  $props
      */
     public function render($component, $props = []): Response
     {
@@ -420,7 +435,7 @@ class ResponseFactory
      * flash data is not persisted in the browser's history state, making it
      * ideal for one-time notifications like toasts or highlights.
      *
-     * @param  \BackedEnum|\UnitEnum|string|array<string, mixed>  $key
+     * @param  BackedEnum|UnitEnum|string|array<string, mixed>  $key
      */
     public function flash(BackedEnum|UnitEnum|string|array $key, mixed $value = null): self
     {

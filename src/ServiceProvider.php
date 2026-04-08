@@ -7,11 +7,13 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use Illuminate\Testing\TestResponse;
 use Illuminate\View\FileViewFinder;
 use Inertia\Ssr\Gateway;
 use Inertia\Ssr\HttpGateway;
+use Inertia\Ssr\SsrState;
 use Inertia\Support\Header;
 use Inertia\Testing\TestResponseMacros;
 use LogicException;
@@ -25,6 +27,7 @@ class ServiceProvider extends BaseServiceProvider
     {
         $this->app->singleton(HttpGateway::class);
         $this->app->singleton(ResponseFactory::class);
+        $this->app->scoped(SsrState::class);
         $this->app->bind(Gateway::class, HttpGateway::class);
 
         $this->mergeConfigFrom(
@@ -32,6 +35,7 @@ class ServiceProvider extends BaseServiceProvider
             'inertia'
         );
 
+        $this->registerBladeComponents();
         $this->registerBladeDirectives();
         $this->registerRedirectMacro();
         $this->registerRequestMacro();
@@ -69,6 +73,16 @@ class ServiceProvider extends BaseServiceProvider
     {
         $this->app->afterResolving(Kernel::class, function (Kernel $kernel) {
             $kernel->addToMiddlewarePriorityAfter(StartSession::class, Middleware::class);
+        });
+    }
+
+    /**
+     * Register Blade components for rendering Inertia head and body content.
+     */
+    protected function registerBladeComponents(): void
+    {
+        $this->callAfterResolving('blade.compiler', function () {
+            Blade::componentNamespace('Inertia\\View\\Components', 'inertia');
         });
     }
 
@@ -144,7 +158,7 @@ class ServiceProvider extends BaseServiceProvider
     /**
      * Register the testing macros.
      *
-     * @throws \LogicException
+     * @throws LogicException
      */
     protected function registerTestingMacros(): void
     {

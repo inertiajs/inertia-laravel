@@ -2,6 +2,7 @@
 
 namespace Inertia\Ssr;
 
+use Closure;
 use Exception;
 use Illuminate\Foundation\Http\Middleware\Concerns\ExcludesPaths;
 use Illuminate\Http\Client\StrayRequestException;
@@ -10,10 +11,12 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\Str;
+use Inertia\ResolvesCallables;
 
-class HttpGateway implements ExcludesSsrPaths, Gateway, HasHealthCheck
+class HttpGateway implements DisablesSsr, ExcludesSsrPaths, Gateway, HasHealthCheck
 {
     use ExcludesPaths;
+    use ResolvesCallables;
 
     /**
      * The paths that should be excluded from server-side rendering.
@@ -21,6 +24,11 @@ class HttpGateway implements ExcludesSsrPaths, Gateway, HasHealthCheck
      * @var array<int, string>
      */
     protected $except = [];
+
+    /**
+     * The condition that determines if SSR is disabled.
+     */
+    protected Closure|bool|null $disabled = null;
 
     /**
      * Dispatch the Inertia page to the SSR engine via HTTP.
@@ -75,6 +83,14 @@ class HttpGateway implements ExcludesSsrPaths, Gateway, HasHealthCheck
     }
 
     /**
+     * Set the condition that determines if SSR should be disabled.
+     */
+    public function disable(Closure|bool $condition): void
+    {
+        $this->disabled = $condition;
+    }
+
+    /**
      * Exclude the given paths from server-side rendering.
      *
      * @param  array<int, string>|string  $paths
@@ -126,7 +142,11 @@ class HttpGateway implements ExcludesSsrPaths, Gateway, HasHealthCheck
      */
     protected function ssrIsEnabled(Request $request): bool
     {
-        return config('inertia.ssr.enabled', true) && ! $this->inExceptArray($request);
+        $enabled = $this->disabled !== null
+            ? ! $this->resolveCallable($this->disabled)
+            : config('inertia.ssr.enabled', true);
+
+        return $enabled && ! $this->inExceptArray($request);
     }
 
     /**

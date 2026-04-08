@@ -279,6 +279,15 @@ class HttpGatewayTest extends TestCase
         $this->assertNull($this->gateway->dispatch(['page' => self::EXAMPLE_PAGE_OBJECT]));
     }
 
+    public function test_production_url_strips_trailing_slash(): void
+    {
+        config(['inertia.ssr.url' => 'http://127.0.0.1:13714/']);
+
+        $gateway = app(HttpGateway::class);
+
+        $this->assertEquals('http://127.0.0.1:13714/render', $gateway->getProductionUrl('/render'));
+    }
+
     public function test_except_can_be_called_multiple_times(): void
     {
         config([
@@ -420,6 +429,49 @@ class HttpGatewayTest extends TestCase
         $this->expectExceptionMessage('Connection refused');
 
         $this->gateway->dispatch(self::EXAMPLE_PAGE_OBJECT);
+    }
+
+    public function test_it_returns_null_when_disabled_with_boolean(): void
+    {
+        config([
+            'inertia.ssr.enabled' => true,
+            'inertia.ssr.bundle' => __DIR__.'/Stubs/ssr-bundle.js',
+        ]);
+
+        $this->gateway->disable(true);
+
+        $this->assertNull($this->gateway->dispatch(['page' => self::EXAMPLE_PAGE_OBJECT]));
+    }
+
+    public function test_it_returns_null_when_disabled_with_closure(): void
+    {
+        config([
+            'inertia.ssr.enabled' => true,
+            'inertia.ssr.bundle' => __DIR__.'/Stubs/ssr-bundle.js',
+        ]);
+
+        $this->gateway->disable(fn () => true);
+
+        $this->assertNull($this->gateway->dispatch(['page' => self::EXAMPLE_PAGE_OBJECT]));
+    }
+
+    public function test_disable_when_takes_precedence_over_config(): void
+    {
+        config([
+            'inertia.ssr.enabled' => true,
+            'inertia.ssr.bundle' => __DIR__.'/Stubs/ssr-bundle.js',
+        ]);
+
+        $this->gateway->disable(false);
+
+        Http::fake([
+            $this->renderUrl => Http::response(json_encode([
+                'head' => ['<title>SSR Test</title>'],
+                'body' => '<div id="app">SSR Response</div>',
+            ])),
+        ]);
+
+        $this->assertNotNull($this->gateway->dispatch(['page' => self::EXAMPLE_PAGE_OBJECT]));
     }
 
     public function test_it_does_not_throw_exception_when_throw_on_error_is_disabled(): void

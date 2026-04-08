@@ -18,7 +18,7 @@ class PropsResolver
     /**
      * The current request instance.
      *
-     * @var \Illuminate\Http\Request
+     * @var Request
      */
     protected $request;
 
@@ -146,8 +146,8 @@ class PropsResolver
     /**
      * Resolve the given shared and page props, collecting their metadata.
      *
-     * @param  array<array-key, mixed|\Inertia\ProvidesInertiaProperties>  $shared
-     * @param  array<array-key, mixed|\Inertia\ProvidesInertiaProperties>  $props
+     * @param  array<array-key, mixed|ProvidesInertiaProperties>  $shared
+     * @param  array<array-key, mixed|ProvidesInertiaProperties>  $props
      * @return array{array<string, mixed>, array<string, mixed>}
      */
     public function resolve(array $shared, array $props): array
@@ -163,7 +163,7 @@ class PropsResolver
     /**
      * Resolve shared property providers and collect shared prop keys.
      *
-     * @param  array<array-key, mixed|\Inertia\ProvidesInertiaProperties>  $shared
+     * @param  array<array-key, mixed|ProvidesInertiaProperties>  $shared
      * @return array<string, mixed>
      */
     protected function resolveSharedProps(array $shared): array

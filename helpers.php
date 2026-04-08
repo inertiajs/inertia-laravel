@@ -1,16 +1,21 @@
 <?php
 
+use Illuminate\Contracts\Support\Arrayable;
+use Inertia\Inertia;
+use Inertia\Response;
+use Inertia\ResponseFactory;
+
 if (! function_exists('inertia')) {
     /**
      * Inertia helper.
      *
      * @param  null|string  $component
-     * @param  array|\Illuminate\Contracts\Support\Arrayable  $props
-     * @return ($component is null ? \Inertia\ResponseFactory : \Inertia\Response)
+     * @param  array|Arrayable  $props
+     * @return ($component is null ? ResponseFactory : Response)
      */
     function inertia($component = null, $props = [])
     {
-        $instance = \Inertia\Inertia::getFacadeRoot();
+        $instance = Inertia::getFacadeRoot();
 
         if ($component) {
             return $instance->render($component, $props);
@@ -25,11 +30,11 @@ if (! function_exists('inertia_location')) {
      * Inertia location helper.
      *
      * @param  string  url
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Symfony\Component\HttpFoundation\Response
      */
     function inertia_location($url)
     {
-        $instance = \Inertia\Inertia::getFacadeRoot();
+        $instance = Inertia::getFacadeRoot();
 
         return $instance->location($url);
     }

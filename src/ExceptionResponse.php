@@ -72,7 +72,7 @@ class ExceptionResponse implements Responsable
     }
 
     /**
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      */
     public function toResponse($request): Response
     {
