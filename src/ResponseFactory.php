@@ -451,7 +451,7 @@ class ResponseFactory
             $flash = [$key => $value];
         }
 
-        session()->now(SessionKey::FLASH_DATA, [
+        session()->flash(SessionKey::FLASH_DATA, [
             ...$this->getFlashed(),
             ...$flash,
         ]);
@@ -479,5 +479,17 @@ class ResponseFactory
         $request ??= request();
 
         return $request->hasSession() ? $request->session()->get(SessionKey::FLASH_DATA, []) : [];
+    }
+
+    /**
+     * Retrieve and remove the flashed data from the session.
+     *
+     * @return array<string, mixed>
+     */
+    public function pullFlashed(?HttpRequest $request = null): array
+    {
+        $request ??= request();
+
+        return $request->hasSession() ? $request->session()->pull(SessionKey::FLASH_DATA, []) : [];
     }
 }

@@ -32,6 +32,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Inertia\ResponseFactory flash(\BackedEnum|\UnitEnum|string|array<string, mixed> $key, mixed $value = null)
  * @method static \Symfony\Component\HttpFoundation\RedirectResponse back(int $status = 302, array<string, string> $headers = [], mixed $fallback = false)
  * @method static array<string, mixed> getFlashed(\Illuminate\Http\Request|null $request = null)
+ * @method static array<string, mixed> pullFlashed(\Illuminate\Http\Request|null $request = null)
  * @method static void macro(string $name, object|callable $macro)
  * @method static void mixin(object $mixin, bool $replace = true)
  * @method static bool hasMacro(string $name)

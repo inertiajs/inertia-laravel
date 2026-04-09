@@ -66,8 +66,7 @@ class ServiceProvider extends BaseServiceProvider
     }
 
     /**
-     * Ensure redirects after PUT/PATCH/DELETE Inertia requests result
-     * in a GET request, even when other middleware short-circuits.
+     * Register the global redirect middleware for Inertia requests.
      */
     protected function pushRedirectMiddleware(): void
     {

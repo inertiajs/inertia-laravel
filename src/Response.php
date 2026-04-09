@@ -238,7 +238,7 @@ class Response implements Responsable
      */
     protected function resolveFlashData(Request $request): array
     {
-        $flash = Inertia::getFlashed($request);
+        $flash = Inertia::pullFlashed($request);
 
         return $flash ? ['flash' => $flash] : [];
     }
