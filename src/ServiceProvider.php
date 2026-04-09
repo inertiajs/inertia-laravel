@@ -2,11 +2,11 @@
 
 namespace Inertia;
 
+use Illuminate\Contracts\Http\Kernel as HttpKernelContract;
 use Illuminate\Foundation\Http\Kernel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
-use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use Illuminate\Testing\TestResponse;
@@ -58,7 +58,7 @@ class ServiceProvider extends BaseServiceProvider
     public function boot(): void
     {
         $this->registerConsoleCommands();
-        $this->configureMiddlewarePriority();
+        $this->pushRedirectMiddleware();
 
         $this->publishes([
             __DIR__.'/../config/inertia.php' => config_path('inertia.php'),
@@ -66,13 +66,14 @@ class ServiceProvider extends BaseServiceProvider
     }
 
     /**
-     * Configure middleware priority to ensure Inertia can intercept
-     * redirect responses from other middleware (like throttle).
+     * Register the global redirect middleware for Inertia requests.
      */
-    protected function configureMiddlewarePriority(): void
+    protected function pushRedirectMiddleware(): void
     {
-        $this->app->afterResolving(Kernel::class, function (Kernel $kernel) {
-            $kernel->addToMiddlewarePriorityAfter(StartSession::class, Middleware::class);
+        $this->callAfterResolving(HttpKernelContract::class, function ($kernel) {
+            if ($kernel instanceof Kernel) {
+                $kernel->pushMiddleware(Middleware\EnsureGetOnRedirect::class);
+            }
         });
     }
 

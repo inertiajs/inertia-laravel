@@ -3,14 +3,13 @@
 namespace Inertia\Tests;
 
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Contracts\Http\Kernel as HttpKernelContract;
 use Illuminate\Foundation\Http\Kernel;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Middleware\ThrottleRequests;
-use Illuminate\Routing\Router;
-use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
+use Inertia\Middleware\EnsureGetOnRedirect;
 use Inertia\Tests\Stubs\ExampleMiddleware;
 
 class ServiceProviderTest extends TestCase
@@ -47,33 +46,12 @@ class ServiceProviderTest extends TestCase
         $this->assertEquals(['component' => 'User/Edit', 'props' => ['user' => ['name' => 'Jonathan']]], $inertiaRoute->defaults);
     }
 
-    public function test_inertia_middleware_is_prioritized_after_start_session(): void
+    public function test_ensure_get_on_redirect_middleware_is_registered_globally(): void
     {
-        $route = Route::middleware(['web', ExampleMiddleware::class, 'throttle:api'])
-            ->delete('/foo', fn () => 'ok');
+        /** @var Kernel $kernel */
+        $kernel = $this->app->make(HttpKernelContract::class);
 
-        // Resolve Kernel to register middleware groups
-        app(Kernel::class);
-
-        $middleware = app(Router::class)->resolveMiddleware($route->gatherMiddleware());
-
-        $startSessionIndex = array_search(StartSession::class, $middleware);
-        $inertiaIndex = array_search(ExampleMiddleware::class, $middleware);
-        $throttleIndex = array_search(ThrottleRequests::class.':api', $middleware);
-
-        $this->assertNotFalse($startSessionIndex);
-        $this->assertNotFalse($inertiaIndex);
-        $this->assertNotFalse($throttleIndex);
-
-        $this->assertTrue(
-            $startSessionIndex < $inertiaIndex,
-            'StartSession middleware must run before Inertia middleware.'
-        );
-
-        $this->assertTrue(
-            $inertiaIndex < $throttleIndex,
-            'Inertia middleware must run before ThrottleRequests middleware.'
-        );
+        $this->assertTrue($kernel->hasMiddleware(EnsureGetOnRedirect::class));
     }
 
     public function test_redirect_response_from_rate_limiter_is_converted_to_303(): void

@@ -484,4 +484,27 @@ class AssertableInertiaTest extends TestCase
         $this->get('/action')->assertRedirect('/dashboard');
         $this->get('/dashboard')->assertInertia(fn (AssertableInertia $inertia) => $inertia->hasFlash('message', 'Success!'));
     }
+
+    public function test_the_flash_data_is_available_after_double_redirect(): void
+    {
+        $middleware = [StartSession::class, Middleware::class];
+
+        Route::middleware($middleware)->get('/action', function () {
+            Inertia::flash('message', 'Success!');
+
+            return redirect('/intermediate');
+        });
+
+        Route::middleware($middleware)->get('/intermediate', function () {
+            return redirect('/dashboard');
+        });
+
+        Route::middleware($middleware)->get('/dashboard', function () {
+            return Inertia::render('Dashboard');
+        });
+
+        $this->get('/action')->assertRedirect('/intermediate');
+        $this->get('/intermediate')->assertRedirect('/dashboard');
+        $this->get('/dashboard')->assertInertia(fn (AssertableInertia $inertia) => $inertia->hasFlash('message', 'Success!'));
+    }
 }
