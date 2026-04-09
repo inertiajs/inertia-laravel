@@ -1,8 +1,16 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.0.3...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.0.4...3.x)
 
 - Nothing!
+
+## [v3.0.4](https://github.com/inertiajs/inertia-laravel/compare/v3.0.3...v3.0.4) - 2026-04-09
+
+### What's Changed
+
+* Revert "[3.x] Fix middleware priority" by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/859
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v3.0.3...v3.0.4
 
 ## [v3.0.3](https://github.com/inertiajs/inertia-laravel/compare/v3.0.2...v3.0.3) - 2026-04-08
 
