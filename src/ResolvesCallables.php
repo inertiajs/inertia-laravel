@@ -19,6 +19,6 @@ trait ResolvesCallables
      */
     protected function useAsCallable(mixed $value): bool
     {
-        return ! is_string($value) && is_callable($value);
+        return is_object($value) && is_callable($value);
     }
 }

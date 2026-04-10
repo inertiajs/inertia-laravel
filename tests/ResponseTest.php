@@ -1100,6 +1100,24 @@ class ResponseTest extends TestCase
         $this->assertSame('trim', $page['props']['merge']);
     }
 
+    public function test_arrays_matching_callable_syntax_are_not_invoked(): void
+    {
+        $request = Request::create('/user/123', 'GET');
+
+        $response = new Response('User/Edit', [
+            'job' => [
+                'name' => 'Import',
+                'fields' => ['Context', 'comment'],
+            ],
+        ], 'app', '123');
+
+        /** @var JsonResponse $response */
+        $response = $response->toResponse($request);
+        $page = $response->getOriginalContent()->getData()['page'];
+
+        $this->assertSame(['Context', 'comment'], $page['props']['job']['fields']);
+    }
+
     public function test_inertia_responsable_objects(): void
     {
         $request = Request::create('/user/123', 'GET');
