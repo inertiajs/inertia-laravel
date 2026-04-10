@@ -1001,6 +1001,18 @@ class PropsResolverTest extends TestCase
         $this->assertSame(['admin'], $page['props']['auth']['roles']);
     }
 
+    public function test_arrays_matching_callable_syntax_are_not_invoked(): void
+    {
+        $page = $this->makePage(Request::create('/'), [
+            'job' => [
+                'name' => 'Import',
+                'fields' => ['Context', 'comment'],
+            ],
+        ]);
+
+        $this->assertSame(['Context', 'comment'], $page['props']['job']['fields']);
+    }
+
     /**
      * Resolve the given props through the Inertia response and return the page data.
      *
