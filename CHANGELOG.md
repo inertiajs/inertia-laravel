@@ -1,8 +1,16 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.23...2.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.24...2.x)
 
 - Nothing!
+
+## [v2.0.24](https://github.com/inertiajs/inertia-laravel/compare/v2.0.23...v2.0.24) - 2026-04-10
+
+### What's Changed
+
+* [2.x] Ensure callables are objects by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/863
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.23...v2.0.24
 
 ## [v2.0.23](https://github.com/inertiajs/inertia-laravel/compare/v2.0.22...v2.0.23) - 2026-04-07
 
