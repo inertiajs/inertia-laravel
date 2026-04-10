@@ -32,7 +32,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static bool hasMacro(string $name)
  * @method static void flushMacros()
  *
- * @see \Inertia\ResponseFactory
+ * @see ResponseFactory
  */
 class Inertia extends Facade
 {
