@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Inertia\Support\Header;
+use Throwable;
 
 class PropsResolver
 {
@@ -77,6 +78,13 @@ class PropsResolver
      * @var array<string, array<int, string>>
      */
     protected $deferredProps = [];
+
+    /**
+     * The deferred props that were rescued during resolution.
+     *
+     * @var array<int, string>
+     */
+    protected $rescuedProps = [];
 
     /**
      * The props that should be appended to existing client-side data.
@@ -225,6 +233,7 @@ class PropsResolver
             'deepMergeProps' => $this->deepMergeProps,
             'matchPropsOn' => $this->matchPropsOn,
             'deferredProps' => $this->deferredProps,
+            'rescuedProps' => $this->rescuedProps,
             'scrollProps' => $this->scrollProps,
             'onceProps' => $this->onceProps,
         ], fn ($value) => count($value) > 0);
@@ -419,7 +428,22 @@ class PropsResolver
             $value->configureMergeIntent($this->request);
         }
 
-        $value = $this->resolveCallable($value);
+        $shouldRescue = $value instanceof Rescuable && $value->shouldRescue();
+
+        try {
+            $value = $this->resolveCallable($value);
+        } catch (Throwable $e) {
+            if (! $shouldRescue) {
+                throw $e;
+            }
+
+            report($e);
+
+            $this->rescuedProps[] = $path;
+
+            return null;
+
+        }
 
         if ($value instanceof ProvidesInertiaProperty) {
             $value = $value->toInertiaProperty(new PropertyContext($path, $siblings, $this->request));

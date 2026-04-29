@@ -173,6 +173,20 @@ class PropsResolverTest extends TestCase
         $this->assertFalse($resolved, 'DeferProp closure should not be resolved on initial load');
     }
 
+    public function test_rescued_defer_prop_returns_null_and_metadata_on_partial_request(): void
+    {
+        $page = $this->makePage($this->makePartialRequest('auth.notifications'), [
+            'auth' => [
+                'notifications' => Inertia::defer(function () {
+                    throw new \RuntimeException('Rescue this deferred prop');
+                }, rescue: true),
+            ],
+        ]);
+
+        $this->assertNull($page['props']['auth']['notifications']);
+        $this->assertSame(['auth.notifications'], $page['rescuedProps']);
+    }
+
     public function test_excluded_props_are_not_resolved_on_initial_load(): void
     {
         $optionalResolved = false;
