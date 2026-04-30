@@ -270,6 +270,10 @@ class PropsResolver
 
             $value = $this->resolveValue($prop, $path, $props);
 
+            if (in_array($path, $this->rescuedProps)) {
+                continue;
+            }
+
             // A closure may return a prop type instead of a plain value. When
             // this happens, we unwrap it one more level so the prop type can
             // participate in filtering and metadata collection below.
@@ -432,6 +436,28 @@ class PropsResolver
 
         try {
             $value = $this->resolveCallable($value);
+
+            if ($value instanceof ProvidesInertiaProperty) {
+                $value = $value->toInertiaProperty(new PropertyContext($path, $siblings, $this->request));
+            }
+
+            if ($value instanceof Arrayable) {
+                $value = $value->toArray();
+            }
+
+            if ($value instanceof PromiseInterface) {
+                $value = $value->wait();
+            }
+
+            if ($value instanceof Responsable) {
+                $response = $value->toResponse($this->request);
+
+                if (method_exists($response, 'getData')) {
+                    $value = $response->getData(true);
+                }
+            }
+
+            return $value;
         } catch (Throwable $e) {
             if (! $shouldRescue) {
                 throw $e;
@@ -442,30 +468,7 @@ class PropsResolver
             $this->rescuedProps[] = $path;
 
             return null;
-
         }
-
-        if ($value instanceof ProvidesInertiaProperty) {
-            $value = $value->toInertiaProperty(new PropertyContext($path, $siblings, $this->request));
-        }
-
-        if ($value instanceof Arrayable) {
-            $value = $value->toArray();
-        }
-
-        if ($value instanceof PromiseInterface) {
-            $value = $value->wait();
-        }
-
-        if ($value instanceof Responsable) {
-            $response = $value->toResponse($this->request);
-
-            if (method_exists($response, 'getData')) {
-                $value = $response->getData(true);
-            }
-        }
-
-        return $value;
     }
 
     /**
