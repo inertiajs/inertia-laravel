@@ -7,7 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response as BaseResponse;
 use Inertia\Inertia;
 use Inertia\MergeProp;
+use Inertia\PropertyContext;
 use Inertia\ProvidesInertiaProperties;
+use Inertia\ProvidesInertiaProperty;
 use Inertia\ProvidesScrollMetadata;
 use Inertia\RenderContext;
 use Inertia\Response;
@@ -171,6 +173,38 @@ class PropsResolverTest extends TestCase
         $this->assertSame('Jonathan', $page['props']['auth']['user']);
         $this->assertArrayNotHasKey('notifications', $page['props']['auth']);
         $this->assertFalse($resolved, 'DeferProp closure should not be resolved on initial load');
+    }
+
+    public function test_rescued_defer_prop_is_omitted_and_metadata_on_partial_request(): void
+    {
+        $page = $this->makePage($this->makePartialRequest('auth.notifications'), [
+            'auth' => [
+                'notifications' => Inertia::defer(function () {
+                    throw new \RuntimeException('Rescue this deferred prop');
+                }, rescue: true),
+            ],
+        ]);
+
+        $this->assertArrayNotHasKey('notifications', $page['props']['auth']);
+        $this->assertSame(['auth.notifications'], $page['rescuedProps']);
+    }
+
+    public function test_rescued_defer_prop_is_omitted_when_provides_inertia_property_throws(): void
+    {
+        $page = $this->makePage($this->makePartialRequest('stats'), [
+            'stats' => Inertia::defer(function () {
+                return new class implements ProvidesInertiaProperty
+                {
+                    public function toInertiaProperty(PropertyContext $prop): mixed
+                    {
+                        throw new \RuntimeException('Failed to resolve stats');
+                    }
+                };
+            }, rescue: true),
+        ]);
+
+        $this->assertArrayNotHasKey('stats', $page['props']);
+        $this->assertSame(['stats'], $page['rescuedProps']);
     }
 
     public function test_excluded_props_are_not_resolved_on_initial_load(): void

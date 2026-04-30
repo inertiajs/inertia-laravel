@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Inertia\Support\Header;
+use Throwable;
 
 class PropsResolver
 {
@@ -77,6 +78,13 @@ class PropsResolver
      * @var array<string, array<int, string>>
      */
     protected $deferredProps = [];
+
+    /**
+     * The deferred props that were rescued during resolution.
+     *
+     * @var array<int, string>
+     */
+    protected $rescuedProps = [];
 
     /**
      * The props that should be appended to existing client-side data.
@@ -225,6 +233,7 @@ class PropsResolver
             'deepMergeProps' => $this->deepMergeProps,
             'matchPropsOn' => $this->matchPropsOn,
             'deferredProps' => $this->deferredProps,
+            'rescuedProps' => $this->rescuedProps,
             'scrollProps' => $this->scrollProps,
             'onceProps' => $this->onceProps,
         ], fn ($value) => count($value) > 0);
@@ -260,6 +269,10 @@ class PropsResolver
             }
 
             $value = $this->resolveValue($prop, $path, $props);
+
+            if (in_array($path, $this->rescuedProps)) {
+                continue;
+            }
 
             // A closure may return a prop type instead of a plain value. When
             // this happens, we unwrap it one more level so the prop type can
@@ -419,29 +432,43 @@ class PropsResolver
             $value->configureMergeIntent($this->request);
         }
 
-        $value = $this->resolveCallable($value);
+        $shouldRescue = $value instanceof Rescuable && $value->shouldRescue();
 
-        if ($value instanceof ProvidesInertiaProperty) {
-            $value = $value->toInertiaProperty(new PropertyContext($path, $siblings, $this->request));
-        }
+        try {
+            $value = $this->resolveCallable($value);
 
-        if ($value instanceof Arrayable) {
-            $value = $value->toArray();
-        }
-
-        if ($value instanceof PromiseInterface) {
-            $value = $value->wait();
-        }
-
-        if ($value instanceof Responsable) {
-            $response = $value->toResponse($this->request);
-
-            if (method_exists($response, 'getData')) {
-                $value = $response->getData(true);
+            if ($value instanceof ProvidesInertiaProperty) {
+                $value = $value->toInertiaProperty(new PropertyContext($path, $siblings, $this->request));
             }
-        }
 
-        return $value;
+            if ($value instanceof Arrayable) {
+                $value = $value->toArray();
+            }
+
+            if ($value instanceof PromiseInterface) {
+                $value = $value->wait();
+            }
+
+            if ($value instanceof Responsable) {
+                $response = $value->toResponse($this->request);
+
+                if (method_exists($response, 'getData')) {
+                    $value = $response->getData(true);
+                }
+            }
+
+            return $value;
+        } catch (Throwable $e) {
+            if (! $shouldRescue) {
+                throw $e;
+            }
+
+            report($e);
+
+            $this->rescuedProps[] = $path;
+
+            return null;
+        }
     }
 
     /**

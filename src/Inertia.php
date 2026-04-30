@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static void disableSsr(\Closure|bool $condition = true)
  * @method static void withoutSsr(array<int, string>|string $paths)
  * @method static \Inertia\OptionalProp optional(callable $callback)
- * @method static \Inertia\DeferProp defer(callable $callback, string $group = 'default')
+ * @method static \Inertia\DeferProp defer(callable $callback, string $group = 'default', bool $rescue = false)
  * @method static \Inertia\MergeProp merge(mixed $value)
  * @method static \Inertia\MergeProp deepMerge(mixed $value)
  * @method static \Inertia\AlwaysProp always(mixed $value)
