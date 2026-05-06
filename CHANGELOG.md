@@ -1,8 +1,16 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.0.6...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.1.0...3.x)
 
 - Nothing!
+
+## [v3.1.0](https://github.com/inertiajs/inertia-laravel/compare/v3.0.6...v3.1.0) - 2026-04-30
+
+### What's Changed
+
+* [3.x] Add `rescue` option to Deferred Props by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/864
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v3.0.6...v3.1.0
 
 ## [v3.0.6](https://github.com/inertiajs/inertia-laravel/compare/v3.0.5...v3.0.6) - 2026-04-10
 
