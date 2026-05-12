@@ -6,6 +6,9 @@ on:
   schedule:
     - cron: "0 0 * * *"
 
+permissions:
+  contents: read
+
 jobs:
   tests:
     runs-on: ubuntu-24.04
@@ -22,10 +25,12 @@ jobs:
     name: PHP ${{ matrix.php }} - Laravel ${{ matrix.laravel }} (w/ ${{ matrix.stability }})
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f # 2.37.0
         with:
           php-version: ${{ matrix.php }}
           extensions: dom, curl, libxml, mbstring, zip
@@ -34,14 +39,14 @@ jobs:
           coverage: none
 
       - name: Set Laravel version
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3.0.2
         with:
           timeout_minutes: 5
           max_attempts: 5
           command: composer require "laravel/framework=^${{ matrix.laravel }}" --no-interaction --no-update
 
       - name: Install dependencies
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3.0.2
         with:
           timeout_minutes: 5
           max_attempts: 5
