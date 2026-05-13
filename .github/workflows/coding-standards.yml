@@ -7,6 +7,6 @@ permissions:
 
 jobs:
   lint:
-    uses: laravel/.github/.github/workflows/coding-standards.yml@main
+    uses: laravel/.github/.github/workflows/coding-standards.yml@4bf890cc0e48724d6f2061c28f2e6ff48911adbd # main
     with:
       php: "8.3"

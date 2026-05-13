@@ -4,6 +4,9 @@ on:
   release:
     types: [released]
 
+permissions:
+  contents: write
+
 jobs:
   update:
-    uses: laravel/.github/.github/workflows/update-changelog.yml@main
+    uses: laravel/.github/.github/workflows/update-changelog.yml@4bf890cc0e48724d6f2061c28f2e6ff48911adbd # main
