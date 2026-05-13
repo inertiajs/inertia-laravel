@@ -37,7 +37,7 @@ jobs:
     name: PHP ${{ matrix.php }} - Laravel ${{ matrix.laravel }} (w/ ${{ matrix.stability }})
     steps:
       - name: Checkout code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
@@ -54,7 +54,7 @@ jobs:
         run: composer remove --dev larastan/larastan --no-update
 
       - name: Set Minimum PHP 8.1 Versions
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@v4
         with:
           timeout_minutes: 5
           max_attempts: 5
@@ -63,7 +63,7 @@ jobs:
         if: matrix.php >= 8.1 && matrix.stability == 'prefer-lowest'
 
       - name: Set Minimum PHP 8.2 Versions
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@v4
         with:
           timeout_minutes: 5
           max_attempts: 5
@@ -72,7 +72,7 @@ jobs:
         if: matrix.php >= 8.2 && matrix.stability == 'prefer-lowest' && matrix.laravel < 12
 
       - name: Set Minimum PHP 8.2 Versions and Laravel > 11
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@v4
         with:
           timeout_minutes: 5
           max_attempts: 5
@@ -81,14 +81,14 @@ jobs:
         if: matrix.php >= 8.2 && matrix.stability == 'prefer-lowest' && matrix.laravel >= 11
 
       - name: Set Laravel version
-        uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3.0.2
+        uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60 # v4.0.0
         with:
           timeout_minutes: 5
           max_attempts: 5
           command: composer require "laravel/framework=^${{ matrix.laravel }}" --no-interaction --no-update
 
       - name: Install dependencies
-        uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3.0.2
+        uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60 # v4.0.0
         with:
           timeout_minutes: 5
           max_attempts: 5
