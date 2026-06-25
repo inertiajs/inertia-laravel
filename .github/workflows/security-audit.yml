@@ -12,12 +12,11 @@ permissions:
 jobs:
   audit:
     runs-on: ubuntu-24.04
-    # Laravel 11 is unsupported, so let it report advisories without failing the workflow.
-    continue-on-error: ${{ matrix.laravel == 11 }}
     strategy:
       fail-fast: false
       matrix:
-        laravel: [11, 12, 13]
+        # Laravel 11 is unsupported and gets no advisory patches, so it is excluded.
+        laravel: [12, 13]
         stability: ["prefer-lowest", "prefer-stable"]
 
     name: Audit Laravel ${{ matrix.laravel }} (w/ ${{ matrix.stability }})
