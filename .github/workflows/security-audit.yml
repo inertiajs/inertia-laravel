@@ -1,0 +1,52 @@
+name: security-audit
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "0 0 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        # Laravel 11 is unsupported and gets no advisory patches, so it is excluded.
+        laravel: [12, 13]
+        stability: ["prefer-lowest", "prefer-stable"]
+
+    name: Audit Laravel ${{ matrix.laravel }} (w/ ${{ matrix.stability }})
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@7c071dfe9dc99bdf297fa79cb49ea005b9fcadbc # 2.37.1
+        with:
+          php-version: 8.4
+          extensions: dom, curl, libxml, mbstring, zip
+          tools: composer:v2
+          coverage: none
+
+      - name: Set Laravel version
+        uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60 # v4.0.0
+        with:
+          timeout_minutes: 5
+          max_attempts: 5
+          command: composer require "laravel/framework=^${{ matrix.laravel }}" --no-interaction --no-update
+
+      - name: Install dependencies
+        uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60 # v4.0.0
+        with:
+          timeout_minutes: 5
+          max_attempts: 5
+          command: composer update --${{ matrix.stability }} --no-interaction
+
+      - name: Run composer audit
+        run: composer audit
