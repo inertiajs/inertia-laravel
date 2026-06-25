@@ -12,6 +12,8 @@ permissions:
 jobs:
   audit:
     runs-on: ubuntu-24.04
+    # Laravel 11 is unsupported, so let it report advisories without failing the workflow.
+    continue-on-error: ${{ matrix.laravel == 11 }}
     strategy:
       fail-fast: false
       matrix:
