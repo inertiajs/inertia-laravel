@@ -212,7 +212,8 @@ class Middleware
             $session->reflash();
         }
 
-        return Inertia::location($request->fullUrl());
+        return Inertia::location($request->fullUrl())
+            ->header(Header::VERSION, Inertia::getVersion());
     }
 
     /**
