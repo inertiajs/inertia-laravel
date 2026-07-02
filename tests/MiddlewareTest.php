@@ -132,6 +132,7 @@ class MiddlewareTest extends TestCase
 
         $response->assertStatus(409);
         $response->assertHeader('X-Inertia-Location', $this->baseUrl);
+        $response->assertHeader('X-Inertia-Version', '1234');
         self::assertEmpty($response->getContent());
     }
 
