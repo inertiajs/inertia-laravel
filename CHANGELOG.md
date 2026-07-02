@@ -1,8 +1,22 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.1.0...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.1.1...3.x)
 
 - Nothing!
+
+## [v3.1.1](https://github.com/inertiajs/inertia-laravel/compare/v3.1.0...v3.1.1) - 2026-07-02
+
+### What's Changed
+
+* [3.x] Pin GitHub Actions to commit SHAs and harden CI workflows by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/865
+* Bump the github-actions group with 2 updates by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia-laravel/pull/867
+* Bump shivammathur/setup-php from 2.37.0 to 2.37.1 in the github-actions group by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia-laravel/pull/870
+* Bump the github-actions group across 1 directory with 2 updates by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia-laravel/pull/877
+* [3.x] Replace `roave/security-advisories` with `composer audit` in CI by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/879
+* Bump actions/checkout from 6.0.3 to 7.0.0 in the github-actions group by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia-laravel/pull/878
+* [3.x] Include asset version on version-mismatch location response by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/884
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v3.1.0...v3.1.1
 
 ## [v3.1.0](https://github.com/inertiajs/inertia-laravel/compare/v3.0.6...v3.1.0) - 2026-04-30
 
