@@ -220,23 +220,23 @@ class HttpGatewayTest extends TestCase
     {
         config([
             'inertia.ssr.enabled' => true,
-            'inertia.ssr.dev_url' => 'http://custom-dev-server:5173',
+            'inertia.ssr.hot_url' => 'http://custom-hot-server:5173',
         ]);
 
         $this->createHotFile('http://localhost:5173');
 
         Http::fake([
-            'http://custom-dev-server:5173/__inertia_ssr' => Http::response(json_encode([
-                    'head' => ['<title>Custom Dev SSR</title>'],
-                    'body' => '<div id="app">Custom Dev Response</div>',
+            'http://custom-hot-server:5173/__inertia_ssr' => Http::response(json_encode([
+                    'head' => ['<title>Custom Hot SSR</title>'],
+                    'body' => '<div id="app">Custom Hot Response</div>',
             ])),
         ]);
 
         $response = $this->gateway->dispatch(['page' => self::EXAMPLE_PAGE_OBJECT]);
         
         $this->assertNotNull($response);
-        $this->assertEquals('<title>Custom Dev SSR</title>', $response->head);
-        $this->assertEquals('<div id="app">Custom Dev Response</div>', $response->body);
+        $this->assertEquals('<title>Custom Hot SSR</title>', $response->head);
+        $this->assertEquals('<div id="app">Custom Hot Response</div>', $response->body);
     }
 
     public function test_it_returns_null_when_path_is_excluded_from_ssr(): void
