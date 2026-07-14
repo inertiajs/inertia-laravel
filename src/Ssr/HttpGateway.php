@@ -197,8 +197,8 @@ class HttpGateway implements DisablesSsr, ExcludesSsrPaths, Gateway, HasHealthCh
      */
     protected function getHotUrl(string $path = '/'): string
     {
-        if ($devUrl = config('inertia.ssr.hot_url', false)) {
-            return rtrim($devUrl, '/').$path;
+        if ($hotUrl = config('inertia.ssr.hot_url', false)) {
+            return rtrim($hotUrl, '/').$path;
         }
         
         return rtrim(file_get_contents(Vite::hotFile())).$path;
