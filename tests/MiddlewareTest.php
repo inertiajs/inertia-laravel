@@ -16,6 +16,7 @@ use Inertia\Middleware;
 use Inertia\Ssr\HttpGateway;
 use Inertia\Tests\Stubs\CustomUrlResolverMiddleware;
 use Inertia\Tests\Stubs\ExampleMiddleware;
+use Inertia\Tests\Stubs\PrecognitiveRequestMiddleware;
 use Inertia\Tests\Stubs\SsrExceptMiddleware;
 use Inertia\Tests\Stubs\WithAllErrorsMiddleware;
 use LogicException;
@@ -431,6 +432,77 @@ class MiddlewareTest extends TestCase
         ]);
     }
 
+    public function test_inertia_visits_are_stored_as_the_previous_url_and_route(): void
+    {
+        $this->preparePreviousLocationEndpoints();
+
+        $this->get('/initial')->assertOk();
+
+        $this->get('/users?filter=active', [
+            'X-Inertia' => 'true',
+            'X-Requested-With' => 'XMLHttpRequest',
+        ])->assertOk();
+
+        $this->assertPreviousLocation($this->baseUrl.'/users?filter=active', 'users.index');
+    }
+
+    public function test_inertia_prefetch_visits_are_not_stored_as_the_previous_url_and_route(): void
+    {
+        $this->preparePreviousLocationEndpoints();
+
+        $this->get('/initial')->assertOk();
+
+        $this->get('/users', [
+            'X-Inertia' => 'true',
+            'X-Requested-With' => 'XMLHttpRequest',
+            'Purpose' => 'prefetch',
+        ])->assertOk();
+
+        $this->assertPreviousLocation($this->baseUrl.'/initial', 'initial');
+    }
+
+    public function test_non_inertia_ajax_requests_are_not_stored_as_the_previous_url_and_route(): void
+    {
+        $this->preparePreviousLocationEndpoints();
+
+        $this->get('/initial')->assertOk();
+
+        $this->get('/users', [
+            'X-Requested-With' => 'XMLHttpRequest',
+        ])->assertOk();
+
+        $this->assertPreviousLocation($this->baseUrl.'/initial', 'initial');
+    }
+
+    public function test_non_get_inertia_requests_are_not_stored_as_the_previous_url_and_route(): void
+    {
+        $this->preparePreviousLocationEndpoints();
+
+        $this->get('/initial')->assertOk();
+
+        $this->post('/users', [], [
+            'X-Inertia' => 'true',
+            'X-Requested-With' => 'XMLHttpRequest',
+        ])->assertOk();
+
+        $this->assertPreviousLocation($this->baseUrl.'/initial', 'initial');
+    }
+
+    public function test_precognitive_inertia_requests_are_not_stored_as_the_previous_url_and_route(): void
+    {
+        $this->preparePreviousLocationEndpoints();
+
+        $this->get('/initial')->assertOk();
+
+        $this->get('/users', [
+            'X-Inertia' => 'true',
+            'X-Requested-With' => 'XMLHttpRequest',
+            'Precognition' => 'true',
+        ])->assertSuccessful();
+
+        $this->assertPreviousLocation($this->baseUrl.'/initial', 'initial');
+    }
+
     public function test_redirect_with_hash_fragment_returns_409_for_inertia_requests(): void
     {
         Route::middleware([StartSession::class, Middleware::class])->get('/action', function () {
@@ -529,6 +601,44 @@ class MiddlewareTest extends TestCase
             return $middleware->handle($request, function ($request) {
                 return Inertia::render('User/Edit', ['user' => ['name' => 'Jonathan']])->toResponse($request);
             });
+        });
+    }
+
+    private function assertPreviousLocation(string $url, string $route): void
+    {
+        $response = $this->post('/inspect-previous');
+
+        $response->assertJsonPath('url', $url);
+
+        if ($response->json('supportsRouteHistory')) {
+            $response->assertJsonPath('route', $route);
+        } else {
+            $response->assertJsonPath('route', null);
+        }
+    }
+
+    private function preparePreviousLocationEndpoints(): void
+    {
+        Route::middleware([StartSession::class, Middleware::class])->get('/initial', function () {
+            return response('Initial page');
+        })->name('initial');
+
+        Route::middleware([
+            StartSession::class,
+            PrecognitiveRequestMiddleware::class,
+            Middleware::class,
+        ])->match(['GET', 'POST'], '/users', function () {
+            return Inertia::render('Users/Index');
+        })->name('users.index');
+
+        Route::middleware(StartSession::class)->post('/inspect-previous', function (Request $request) {
+            return response()->json([
+                'url' => $request->session()->previousUrl(),
+                'route' => method_exists($request->session(), 'previousRoute')
+                    ? $request->session()->previousRoute()
+                    : null,
+                'supportsRouteHistory' => method_exists($request->session(), 'previousRoute'),
+            ]);
         });
     }
 }
