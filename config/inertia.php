@@ -141,4 +141,65 @@ return [
 
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | DevTools
+    |--------------------------------------------------------------------------
+    |
+    | Records one entry per request to disk so the DevTools Chrome extension may
+    | read it back over HTTP. Recording is limited to your local environment.
+    | See https://inertiajs.com/docs/devtools for the gate and storage options.
+    |
+    */
+
+    'devtools' => [
+
+        'enabled' => env('INERTIA_DEVTOOLS_ENABLED'),
+
+        'except' => ['telescope*', 'horizon*', '_inertia/devtools*'],
+
+        'storage' => [
+
+            'path' => storage_path('inertia-devtools'),
+
+            'ttl' => (int) env('INERTIA_DEVTOOLS_TTL_HOURS', 24),
+
+            'prune_interval' => (int) env('INERTIA_DEVTOOLS_PRUNE_INTERVAL_SECONDS', 300),
+
+            'limit' => (int) env('INERTIA_DEVTOOLS_LIMIT', 100),
+
+        ],
+
+        'middleware' => ['web'],
+
+        'gate' => env('INERTIA_DEVTOOLS_GATE'),
+
+        'redact' => [
+
+            'keys' => [
+                'password',
+                'password_confirmation',
+                'current_password',
+                'token',
+                '_token',
+                'access_token',
+                'refresh_token',
+                'secret',
+                'client_secret',
+                'api_key',
+            ],
+
+            'headers' => [
+                'cookie',
+                'set-cookie',
+                'authorization',
+                'proxy-authorization',
+                'x-xsrf-token',
+                'x-csrf-token',
+            ],
+
+        ],
+
+    ],
+
 ];

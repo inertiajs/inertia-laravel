@@ -35,6 +35,11 @@ class Header
     public const PARTIAL_COMPONENT = 'X-Inertia-Partial-Component';
 
     /**
+     * Header for Laravel Precognition validation requests.
+     */
+    public const PRECOGNITION = 'Precognition';
+
+    /**
      * Header specifying which props to include in partial reloads.
      */
     public const PARTIAL_ONLY = 'X-Inertia-Partial-Data';

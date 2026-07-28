@@ -5,6 +5,7 @@ namespace Inertia\Tests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response as BaseResponse;
+use Inertia\DevTools\RequestRecorder;
 use Inertia\Inertia;
 use Inertia\MergeProp;
 use Inertia\PropertyContext;
@@ -1045,6 +1046,64 @@ class PropsResolverTest extends TestCase
         ]);
 
         $this->assertSame(['Context', 'comment'], $page['props']['job']['fields']);
+    }
+
+    public function test_recorder_is_not_invoked_while_resolving_props_when_devtools_is_disabled(): void
+    {
+        config()->set('inertia.devtools.enabled', false);
+
+        $spy = new class extends RequestRecorder
+        {
+            public int $calls = 0;
+
+            public function propResolved(string $path, mixed $prop): void
+            {
+                $this->calls++;
+            }
+
+            public function propRescued(string $path, mixed $prop): void
+            {
+                $this->calls++;
+            }
+        };
+
+        $this->app->instance(RequestRecorder::class, $spy);
+
+        $this->makePage(Request::create('/'), [
+            'auth' => fn () => ['user' => 'Jane'],
+            'team' => 'Acme',
+        ]);
+
+        $this->assertSame(0, $spy->calls);
+    }
+
+    public function test_recorder_is_invoked_while_resolving_props_when_devtools_is_enabled(): void
+    {
+        config()->set('inertia.devtools.enabled', true);
+
+        $spy = new class extends RequestRecorder
+        {
+            public int $calls = 0;
+
+            public function propResolved(string $path, mixed $prop): void
+            {
+                $this->calls++;
+            }
+
+            public function propRescued(string $path, mixed $prop): void
+            {
+                $this->calls++;
+            }
+        };
+
+        $this->app->instance(RequestRecorder::class, $spy);
+
+        $this->makePage(Request::create('/'), [
+            'auth' => fn () => ['user' => 'Jane'],
+            'team' => 'Acme',
+        ]);
+
+        $this->assertGreaterThan(0, $spy->calls);
     }
 
     /**

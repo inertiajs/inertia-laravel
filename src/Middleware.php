@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Session\Store;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\MessageBag;
+use Inertia\DevTools\DevTools;
 use Inertia\Ssr\ExcludesSsrPaths;
 use Inertia\Ssr\Gateway;
 use Inertia\Support\Header;
@@ -109,11 +110,19 @@ class Middleware
      */
     public function handle(Request $request, Closure $next)
     {
+        $recorder = DevTools::recorder($request);
+
+        $recorder?->requestStarted($request);
+
         Inertia::version(function () use ($request) {
             return $this->version($request);
         });
 
-        Inertia::share($this->share($request));
+        $shared = $this->share($request);
+
+        Inertia::share($shared);
+
+        $recorder?->sharedPropsResolved($this, $shared);
 
         foreach ($this->shareOnce($request) as $key => $value) {
             if ($value instanceof OnceProp) {
@@ -143,6 +152,8 @@ class Middleware
         }
 
         if (! $request->header(Header::INERTIA)) {
+            $recorder?->respondedWith($request, $response);
+
             return $response;
         }
 
@@ -161,6 +172,8 @@ class Middleware
         if ($isRedirect && $this->redirectHasFragment($response) && ! $request->prefetch()) {
             $response = $this->onRedirectWithFragment($request, $response);
         }
+
+        $recorder?->respondedWith($request, $response);
 
         return $response;
     }

@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response as BaseResponse;
 use Illuminate\Support\Traits\Macroable;
+use Inertia\DevTools\DevTools;
 use Inertia\Ssr\DisablesSsr;
 use Inertia\Ssr\ExcludesSsrPaths;
 use Inertia\Ssr\Gateway;
@@ -102,12 +103,16 @@ class ResponseFactory
     {
         if (is_array($key)) {
             $this->sharedProps = array_merge($this->sharedProps, $key);
+            DevTools::recorder()?->propsShared(array_keys($key));
         } elseif ($key instanceof Arrayable) {
-            $this->sharedProps = array_merge($this->sharedProps, $key->toArray());
+            $resolved = $key->toArray();
+            $this->sharedProps = array_merge($this->sharedProps, $resolved);
+            DevTools::recorder()?->propsShared(array_keys($resolved));
         } elseif ($key instanceof ProvidesInertiaProperties) {
             $this->sharedProps = array_merge($this->sharedProps, [$key]);
         } else {
             Arr::set($this->sharedProps, $key, $value);
+            DevTools::recorder()?->propsShared([(string) $key]);
         }
     }
 
@@ -369,7 +374,7 @@ class ResponseFactory
             $props = [$props];
         }
 
-        return new Response(
+        $response = new Response(
             $component,
             $this->sharedProps,
             $props,
@@ -378,6 +383,10 @@ class ResponseFactory
             $this->encryptHistory ?? config('inertia.history.encrypt', false),
             $this->urlResolver,
         );
+
+        DevTools::recorder()?->pageRendering($component, $response, $this->sharedProps);
+
+        return $response;
     }
 
     /**
