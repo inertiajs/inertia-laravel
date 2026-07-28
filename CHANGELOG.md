@@ -1,8 +1,24 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.1.1...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.2.0...3.x)
 
 - Nothing!
+
+## [v3.2.0](https://github.com/inertiajs/inertia-laravel/compare/v3.1.1...v3.2.0) - 2026-07-28
+
+### What's Changed
+
+* [3.x] Support Guzzle 8 by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/891
+* [3.x] Custom SSR Hot URL by [@goreks-dev](https://github.com/goreks-dev) in https://github.com/inertiajs/inertia-laravel/pull/885
+* [3.x] Support for DevTools by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/892
+* Bump actions/checkout from 6.0.3 to 7.0.0 in the github-actions group by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia-laravel/pull/882
+* Bump actions/checkout from 7.0.0 to 7.0.1 in the github-actions group by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia-laravel/pull/889
+
+### New Contributors
+
+* [@goreks-dev](https://github.com/goreks-dev) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/885
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v3.1.1...v3.2.0
 
 ## [v3.1.1](https://github.com/inertiajs/inertia-laravel/compare/v3.1.0...v3.1.1) - 2026-07-02
 
