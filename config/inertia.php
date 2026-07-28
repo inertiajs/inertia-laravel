@@ -29,6 +29,8 @@ return [
 
         'url' => env('INERTIA_SSR_URL', 'http://127.0.0.1:13714'),
 
+        'hot_url' => env('INERTIA_SSR_HOT_URL'),
+
         'ensure_bundle_exists' => (bool) env('INERTIA_SSR_ENSURE_BUNDLE_EXISTS', true),
 
         // 'bundle' => base_path('bootstrap/ssr/ssr.mjs'),
