@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Response as ResponseFactory;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
+use Inertia\DevTools\DevTools;
 use Inertia\Ssr\SsrState;
 use Inertia\Support\Header;
 use Inertia\Support\SessionKey;
@@ -201,6 +202,8 @@ class Response implements Responsable
             $this->resolveFlashData($request),
             $this->resolvePreserveFragment($request),
         );
+
+        DevTools::recorder($request)?->pageRendered($request, $page, $resolvedProps);
 
         if ($request->header(Header::INERTIA)) {
             return new JsonResponse($page, 200, [Header::INERTIA => 'true']);
