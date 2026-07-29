@@ -1,8 +1,20 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.2.0...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.2.1...3.x)
 
 - Nothing!
+
+## [v3.2.1](https://github.com/inertiajs/inertia-laravel/compare/v3.2.0...v3.2.1) - 2026-07-29
+
+### What's Changed
+
+* [3.x] Fix DevTools recording under Laravel Octane by [@lazerg](https://github.com/lazerg) in https://github.com/inertiajs/inertia-laravel/pull/894
+
+### New Contributors
+
+* [@lazerg](https://github.com/lazerg) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/894
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v3.2.0...v3.2.1
 
 ## [v3.2.0](https://github.com/inertiajs/inertia-laravel/compare/v3.1.1...v3.2.0) - 2026-07-28
 
