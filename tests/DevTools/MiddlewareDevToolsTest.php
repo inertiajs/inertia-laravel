@@ -2,9 +2,13 @@
 
 namespace Inertia\Tests\DevTools;
 
+use Illuminate\Foundation\Http\Events\RequestHandled;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Route;
+use Inertia\DevTools\Data\IncomingEntry;
 use Inertia\DevTools\DevToolsHeader;
 use Inertia\DevTools\EntryStore;
 use Inertia\Inertia;
@@ -134,6 +138,25 @@ class MiddlewareDevToolsTest extends TestCase
         $this->assertNotNull($entry);
         $this->assertSame('http', $entry['__meta']['requestType']);
         $this->assertNull($entry['__meta']['component']);
+    }
+
+    public function test_recorded_entry_is_flushed_on_the_request_handled_event(): void
+    {
+        $entry = new IncomingEntry;
+        $entry->component = 'Users/Index';
+
+        $this->app->make(EntryStore::class)->record($entry);
+
+        $this->assertNull($this->latestRecordedEntry());
+
+        // Octane keeps the app instance alive, so the terminating callback never fires per request;
+        // the flush hangs off RequestHandled instead, which does fire, so dispatching it must persist.
+        event(new RequestHandled(Request::create('/'), new Response('ok')));
+
+        $saved = $this->latestRecordedEntry();
+
+        $this->assertNotNull($saved);
+        $this->assertSame('Users/Index', $saved['__meta']['component']);
     }
 
     public function test_inertia_json_response_is_not_html_injected(): void

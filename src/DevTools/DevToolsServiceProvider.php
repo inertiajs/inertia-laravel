@@ -2,6 +2,7 @@
 
 namespace Inertia\DevTools;
 
+use Illuminate\Foundation\Http\Events\RequestHandled;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -30,14 +31,16 @@ class DevToolsServiceProvider extends ServiceProvider
         // callbacks. It self-disables (every method no-ops) when devtools is off.
         $this->app->scoped(RequestRecorder::class, fn () => new RequestRecorder);
 
-        $this->app->terminating(function () {
+        // Flush on RequestHandled, not terminating(): under Octane the app instance persists,
+        // so terminating never fires per request. Resolve from the active (sandbox) container.
+        $this->app['events']->listen(RequestHandled::class, function () {
             if (! DevTools::enabled()) {
                 return;
             }
 
-            $repository = $this->app->make(EntriesRepository::class);
+            $repository = app(EntriesRepository::class);
 
-            $this->app->make(EntryStore::class)->flush($repository);
+            app(EntryStore::class)->flush($repository);
 
             $repository->pruneIfDue();
         });
