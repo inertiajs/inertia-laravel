@@ -2,6 +2,7 @@
 
 namespace Inertia\DevTools;
 
+use Illuminate\Foundation\Http\Events\RequestHandled;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -17,12 +18,12 @@ class DevToolsServiceProvider extends ServiceProvider
 
         $this->app->scoped(SourceLocator::class, fn () => new SourceLocator);
 
-        $this->app->singleton(EntriesRepository::class, function ($app) {
-            $path = $app['config']->get('inertia.devtools.storage.path');
+        $this->app->singleton(EntriesRepository::class, function () {
+            $path = config('inertia.devtools.storage.path');
 
             return new EntriesRepository(
                 path: is_string($path) ? $path : storage_path('inertia-devtools'),
-                autoPruneHours: $app['config']->integer('inertia.devtools.storage.ttl', 24),
+                autoPruneHours: config()->integer('inertia.devtools.storage.ttl', 24),
             );
         });
 
@@ -30,14 +31,17 @@ class DevToolsServiceProvider extends ServiceProvider
         // callbacks. It self-disables (every method no-ops) when devtools is off.
         $this->app->scoped(RequestRecorder::class, fn () => new RequestRecorder);
 
-        $this->app->terminating(function () {
+        // Only requests are recorded, so the entry is flushed once the request has been handled.
+        // Everything is resolved from the current container because Octane serves each request
+        // from a clone of the application, and that clone is where the entry was recorded.
+        $this->app['events']->listen(RequestHandled::class, function () {
             if (! DevTools::enabled()) {
                 return;
             }
 
-            $repository = $this->app->make(EntriesRepository::class);
+            $repository = app(EntriesRepository::class);
 
-            $this->app->make(EntryStore::class)->flush($repository);
+            app(EntryStore::class)->flush($repository);
 
             $repository->pruneIfDue();
         });
