@@ -75,21 +75,6 @@ class HttpEndpointsTest extends TestCase
             ->assertStatus(404);
     }
 
-    public function test_show_resolves_under_the_base_path_an_app_is_served_from(): void
-    {
-        $entry = $this->envelope();
-        $id = $entry['__meta']['id'];
-        $this->repo->save($id, $entry);
-
-        $this->call('GET', "/portal/_inertia/devtools/entries/{$id}", server: [
-            'SCRIPT_FILENAME' => '/var/www/app/public/index.php',
-            'SCRIPT_NAME' => '/portal/index.php',
-            'PHP_SELF' => '/portal/index.php',
-        ])
-            ->assertOk()
-            ->assertJsonPath('__meta.id', $id);
-    }
-
     public function test_show_rejects_non_entry_ids_before_lookup(): void
     {
         $this->getJson('/_inertia/devtools/entries/../secret')

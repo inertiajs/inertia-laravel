@@ -12,13 +12,6 @@ class DevToolsHeader
     public const DEVTOOLS_ID = 'X-Inertia-Devtools-Id';
 
     /**
-     * Response header carrying the path the app is served from, set only when it is not
-     * the origin root. The extension fetches the entry endpoint itself, and knows the
-     * origin but not where within it the app lives.
-     */
-    public const DEVTOOLS_BASE_PATH = 'X-Inertia-Devtools-Base-Path';
-
-    /**
      * Response header set on every response, carrying the batch root id. The client
      * forwards it as DEVTOOLS_INCOMING_PARENT on the next same-batch request so
      * follow-ups (including those after a redirect) attach to the batch root.

@@ -93,35 +93,6 @@ class MiddlewareDevToolsTest extends TestCase
         $this->assertMatchesRegularExpression('/<script data-inertia-devtools-id type="application\/json">"[A-Z0-9]+"<\/script><\/body>/', $content);
     }
 
-    public function test_the_base_path_is_reported_when_the_app_is_served_from_a_subdirectory(): void
-    {
-        Route::middleware(DevToolsRootViewMiddleware::class)->get('/devtools-html', fn () => Inertia::render('Users/Index', ['name' => 'Alice']));
-
-        $response = $this->call('GET', '/portal/devtools-html', server: [
-            'SCRIPT_FILENAME' => '/var/www/app/public/index.php',
-            'SCRIPT_NAME' => '/portal/index.php',
-            'PHP_SELF' => '/portal/index.php',
-        ]);
-
-        $response->assertOk();
-        $this->assertSame('/portal', $response->headers->get(DevToolsHeader::DEVTOOLS_BASE_PATH));
-        $this->assertMatchesRegularExpression(
-            '/<script data-inertia-devtools-id data-inertia-devtools-base-path="\/portal" type="application\/json">"[A-Z0-9]+"<\/script><\/body>/',
-            (string) $response->getContent()
-        );
-    }
-
-    public function test_no_base_path_is_reported_for_an_app_served_from_the_root_of_its_origin(): void
-    {
-        Route::middleware(DevToolsRootViewMiddleware::class)->get('/devtools-html', fn () => Inertia::render('Users/Index', ['name' => 'Alice']));
-
-        $response = $this->get('/devtools-html');
-
-        $response->assertOk();
-        $this->assertNull($response->headers->get(DevToolsHeader::DEVTOOLS_BASE_PATH));
-        $this->assertStringNotContainsString('data-inertia-devtools-base-path', (string) $response->getContent());
-    }
-
     public function test_html_responses_that_render_no_inertia_page_are_left_untouched(): void
     {
         Route::middleware(Middleware::class)->get('/devtools-plain-html', function () {
