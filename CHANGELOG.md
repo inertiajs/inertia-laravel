@@ -1,8 +1,18 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.2.1...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.3.0...3.x)
 
 - Nothing!
+
+## [v3.3.0](https://github.com/inertiajs/inertia-laravel/compare/v3.2.1...v3.3.0) - 2026-08-04
+
+### What's Changed
+
+* [3.x] Report the base path to DevTools by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/895
+* [3.x] Fix DevTools entry requests wiping flashed validation errors by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/896
+* [3.x] Preserve the original response when DevTools injects its ID tag by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/897
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v3.2.1...v3.3.0
 
 ## [v3.2.1](https://github.com/inertiajs/inertia-laravel/compare/v3.2.0...v3.2.1) - 2026-07-29
 
