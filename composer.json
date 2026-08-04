@@ -45,7 +45,7 @@
         "ext-pcntl": "Recommended when running the Inertia SSR server via the `inertia:start-ssr` artisan command."
     },
     "conflict": {
-        "laravel/boost": "<2.2.0"
+        "laravel/boost": "<2.5.0"
     },
     "scripts": {
         "test": "phpunit",
