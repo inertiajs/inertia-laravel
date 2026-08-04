@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Inertia\DevTools\Http\Authorize;
 use Inertia\DevTools\Http\EntriesController;
+use Inertia\DevTools\Http\PreserveFlashData;
 use Inertia\DevTools\Http\PreventPreviousUrlTracking;
 
 class DevToolsServiceProvider extends ServiceProvider
@@ -53,9 +54,14 @@ class DevToolsServiceProvider extends ServiceProvider
             return;
         }
 
-        // Authorize is appended last so it always runs, after any middleware the
-        // configured stack needs to resolve the user.
-        Route::middleware([PreventPreviousUrlTracking::class, ...$this->routeMiddleware(), Authorize::class])
+        $middleware = [
+            PreventPreviousUrlTracking::class,
+            ...$this->routeMiddleware(),
+            PreserveFlashData::class,
+            Authorize::class,
+        ];
+
+        Route::middleware($middleware)
             ->prefix('_inertia/devtools')
             ->group(function () {
                 Route::get('entries', [EntriesController::class, 'index']);
