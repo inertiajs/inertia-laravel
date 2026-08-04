@@ -1,8 +1,16 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.3.0...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.3.1...3.x)
 
 - Nothing!
+
+## [v3.3.1](https://github.com/inertiajs/inertia-laravel/compare/v3.3.0...v3.3.1) - 2026-08-04
+
+### What's Changed
+
+* Support Boost 2.5 by [@pushpak1300](https://github.com/pushpak1300) in https://github.com/inertiajs/inertia-laravel/pull/899
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v3.3.0...v3.3.1
 
 ## [v3.3.0](https://github.com/inertiajs/inertia-laravel/compare/v3.2.1...v3.3.0) - 2026-08-04
 
