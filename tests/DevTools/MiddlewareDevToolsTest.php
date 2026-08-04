@@ -10,6 +10,7 @@ use Inertia\DevTools\EntryStore;
 use Inertia\Inertia;
 use Inertia\Middleware;
 use Inertia\Support\Header;
+use Inertia\Testing\AssertableInertia;
 use Inertia\Tests\Stubs\DevToolsRootViewMiddleware;
 use Inertia\Tests\TestCase;
 use JsonSerializable;
@@ -91,6 +92,20 @@ class MiddlewareDevToolsTest extends TestCase
         $this->assertStringContainsString('data-inertia-devtools-id', $content);
         $this->assertStringContainsString('</body>', $content);
         $this->assertMatchesRegularExpression('/<script data-inertia-devtools-id type="application\/json">"[A-Z0-9]+"<\/script><\/body>/', $content);
+    }
+
+    public function test_an_injected_id_tag_leaves_the_page_object_assertable(): void
+    {
+        Route::middleware(DevToolsRootViewMiddleware::class)->get('/devtools-html', fn () => Inertia::render('Users/Index', ['name' => 'Alice']));
+
+        $response = $this->get('/devtools-html');
+
+        $response->assertOk();
+        $this->assertStringContainsString('data-inertia-devtools-id', (string) $response->getContent());
+
+        $response->assertInertia(fn (AssertableInertia $page) => $page
+            ->component('Users/Index')
+            ->where('name', 'Alice'));
     }
 
     public function test_the_base_path_is_reported_when_the_app_is_served_from_a_subdirectory(): void

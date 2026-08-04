@@ -3,6 +3,7 @@
 namespace Inertia\DevTools;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
 use Inertia\Response;
@@ -298,7 +299,16 @@ class RequestRecorder
 
         $tag = '<script data-inertia-devtools-id'.$basePathAttribute.' type="application/json">'.json_encode($id).'</script>';
 
+        // Illuminate's setContent() replaces the response's original value with the string it is
+        // given. For an Inertia page that value is the root view, which is where the testing
+        // assertions read the page object from, so it is put back.
+        $original = $response instanceof HttpResponse ? $response->original : null;
+
         $response->setContent(Str::replaceLast('</body>', $tag.'</body>', $content));
+
+        if ($response instanceof HttpResponse) {
+            $response->original = $original;
+        }
     }
 
     protected function resolveOutgoingParentId(bool $isPrefetch, string $id, ?string $batchId): string
