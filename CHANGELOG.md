@@ -1,8 +1,22 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.24...2.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.25...2.x)
 
 - Nothing!
+
+## [v2.0.25](https://github.com/inertiajs/inertia-laravel/compare/v2.0.24...v2.0.25) - 2026-08-04
+
+### What's Changed
+
+* [2.x] Pin GitHub Actions to commit SHAs and harden CI workflows by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/868
+* Bump the github-actions group across 1 directory with 3 updates by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia-laravel/pull/871
+* [2.x] Replace `roave/security-advisories` with `composer audit` in CI by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/880
+* Bump the github-actions group across 1 directory with 2 updates by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia-laravel/pull/876
+* Bump the github-actions group with 2 updates by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia-laravel/pull/883
+* Bump actions/checkout from 7.0.0 to 7.0.1 in the github-actions group by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia-laravel/pull/890
+* Support Boost 2.5 by [@pushpak1300](https://github.com/pushpak1300) in https://github.com/inertiajs/inertia-laravel/pull/898
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.24...v2.0.25
 
 ## [v2.0.24](https://github.com/inertiajs/inertia-laravel/compare/v2.0.23...v2.0.24) - 2026-04-10
 
