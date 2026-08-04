@@ -202,11 +202,17 @@ class RequestRecorder
         $isPrefetch = $request->prefetch();
         [$batchId, $parentOut] = $this->resolveLineage($request, $id);
 
+        $basePath = $request->getBaseUrl();
+
         $response->headers->set(DevToolsHeader::DEVTOOLS_ID, $id);
         $response->headers->set(DevToolsHeader::DEVTOOLS_OUTGOING_PARENT, $parentOut);
 
+        if ($basePath !== '') {
+            $response->headers->set(DevToolsHeader::DEVTOOLS_BASE_PATH, $basePath);
+        }
+
         if ($this->isInitialHtmlResponse($request, $response)) {
-            $this->injectDevToolsIdTag($response, $id);
+            $this->injectDevToolsIdTag($response, $id, $basePath);
         }
 
         $entry = app(IncomingEntryBuilder::class)->build($request, $response, $id, $batchId, $isPrefetch);
@@ -273,7 +279,12 @@ class RequestRecorder
         return str_contains(strtolower($contentType), 'text/html');
     }
 
-    protected function injectDevToolsIdTag(SymfonyResponse $response, string $id): void
+    /**
+     * Render the entry id into the page, along with the path the app is mounted on. A panel
+     * that attaches after the initial load has only the DOM to read, and the entry endpoint
+     * lives under that same path.
+     */
+    protected function injectDevToolsIdTag(SymfonyResponse $response, string $id, string $basePath): void
     {
         $content = $response->getContent();
 
@@ -281,7 +292,11 @@ class RequestRecorder
             return;
         }
 
-        $tag = '<script data-inertia-devtools-id type="application/json">'.json_encode($id).'</script>';
+        $basePathAttribute = $basePath === ''
+            ? ''
+            : ' data-inertia-devtools-base-path="'.e($basePath).'"';
+
+        $tag = '<script data-inertia-devtools-id'.$basePathAttribute.' type="application/json">'.json_encode($id).'</script>';
 
         $response->setContent(Str::replaceLast('</body>', $tag.'</body>', $content));
     }
