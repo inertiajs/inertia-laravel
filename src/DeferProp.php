@@ -2,9 +2,9 @@
 
 namespace Inertia;
 
-class DeferProp implements Deferrable, IgnoreFirstLoad, Mergeable, Onceable, Rescuable
+class DeferProp implements Deferrable, HasLiveUpdates, IgnoreFirstLoad, Mergeable, Onceable, Rescuable
 {
-    use DefersProps, MergesProps, ResolvesCallables, ResolvesOnce;
+    use DefersProps, MergesProps, ResolvesCallables, ResolvesOnce, SupportsLiveUpdates;
 
     /**
      * The callback to resolve the property.

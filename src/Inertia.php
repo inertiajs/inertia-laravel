@@ -24,6 +24,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Inertia\MergeProp deepMerge(mixed $value)
  * @method static \Inertia\AlwaysProp always(mixed $value)
  * @method static \Inertia\ScrollProp<mixed> scroll(mixed $value, string $wrapper = 'data', \Inertia\ProvidesScrollMetadata|callable|null $metadata = null)
+ * @method static \Inertia\LiveProp live(mixed $value, object|class-string|string|array<int, object|class-string|string>|null $on = null, string|\Illuminate\Broadcasting\Channel|array<int, string|\Illuminate\Broadcasting\Channel>|null $channel = null, int|null $throttle = null)
  * @method static \Inertia\OnceProp once(callable $value)
  * @method static \Inertia\OnceProp shareOnce(string $key, callable $callback)
  * @method static \Inertia\Response render(\BackedEnum|\UnitEnum|string $component, array<array-key, mixed>|\Illuminate\Contracts\Support\Arrayable<array-key, mixed>|\Inertia\ProvidesInertiaProperties $props = [])

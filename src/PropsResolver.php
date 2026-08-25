@@ -119,16 +119,23 @@ class PropsResolver
     /**
      * The scroll pagination metadata for each scroll prop.
      *
-     * @var array<string, array<string, mixed>>
+     * @var array<string, array{pageName: string, previousPage: int|string|null, nextPage: int|string|null, currentPage: int|string|null, reset: bool}>
      */
     protected $scrollProps = [];
 
     /**
      * The once-prop metadata for each once prop.
      *
-     * @var array<string, array<string, mixed>>
+     * @var array<string, array{prop: string, expiresAt: int|null}>
      */
     protected $onceProps = [];
+
+    /**
+     * The live update listeners for each live prop.
+     *
+     * @var array<string, array{listeners: array<int, array{channel: array{name: string, type: string}, events: array<int, string>}>, throttle?: int}>
+     */
+    protected $liveProps = [];
 
     /**
      * The top-level keys of shared props.
@@ -247,6 +254,7 @@ class PropsResolver
             'rescuedProps' => $this->rescuedProps,
             'scrollProps' => $this->scrollProps,
             'onceProps' => $this->onceProps,
+            'liveProps' => $this->liveProps,
         ], fn ($value) => count($value) > 0);
     }
 
@@ -302,7 +310,7 @@ class PropsResolver
                 $value = $this->resolveValue($prop, $path, $props);
             }
 
-            $this->collectMetadata($prop, $path);
+            $this->collectMetadata($prop, $path, $parentWasResolved);
             $this->recorder?->propResolved((string) $path, $prop);
 
             // When the resolved value is an array, we recurse into it. If the
@@ -322,11 +330,19 @@ class PropsResolver
      */
     protected function shouldIncludeInPartialResponse(mixed $prop, string $path, bool $parentWasResolved): bool
     {
-        if (! $this->isPartial || $prop instanceof AlwaysProp || $parentWasResolved) {
+        if (! $this->isPartial || $this->bypassesPartialFiltering($prop, $parentWasResolved)) {
             return true;
         }
 
         return $this->pathMatchesPartialRequest($path);
+    }
+
+    /**
+     * Determine if a prop is resolved independently of partial request filters.
+     */
+    protected function bypassesPartialFiltering(mixed $prop, bool $parentWasResolved): bool
+    {
+        return $prop instanceof AlwaysProp || $parentWasResolved;
     }
 
     /**
@@ -352,6 +368,14 @@ class PropsResolver
      */
     protected function excludeFromInitialResponse(mixed $prop, string $path): bool
     {
+        // Excluding a prop from the initial response never removes its live
+        // listeners, whichever branch below does the excluding. Both callers are
+        // guarded by [! $this->isPartial], so nothing here is ever a partial
+        // request and [$parentWasResolved] cannot apply.
+        if ($prop instanceof HasLiveUpdates && $prop->isLive()) {
+            $this->collectLiveMetadata($path, $prop, false);
+        }
+
         // OptionalProp and DeferProp implement IgnoreFirstLoad and are never
         // sent on the initial page load. They still contribute deferred,
         // merge, and once metadata for the client to act on.
@@ -494,6 +518,7 @@ class PropsResolver
         return $value instanceof AlwaysProp
             || $value instanceof Deferrable
             || $value instanceof IgnoreFirstLoad
+            || $value instanceof HasLiveUpdates
             || $value instanceof Mergeable
             || $value instanceof Onceable;
     }
@@ -501,7 +526,7 @@ class PropsResolver
     /**
      * Collect metadata for a prop that will be included in the response.
      */
-    protected function collectMetadata(mixed $prop, string $path): void
+    protected function collectMetadata(mixed $prop, string $path, bool $parentWasResolved = false): void
     {
         if ($prop instanceof Mergeable && $prop->shouldMerge()) {
             $this->collectMergeableMetadata($path, $prop);
@@ -513,6 +538,10 @@ class PropsResolver
 
         if ($prop instanceof Onceable && $prop->shouldResolveOnce()) {
             $this->collectOnceMetadata($path, $prop);
+        }
+
+        if ($prop instanceof HasLiveUpdates && $prop->isLive()) {
+            $this->collectLiveMetadata($path, $prop, $parentWasResolved);
         }
     }
 
@@ -590,6 +619,31 @@ class PropsResolver
     }
 
     /**
+     * Collect the live update listeners for a live prop. This is emitted on
+     * every response, not just the initial page load, so that a partial reload
+     * keeps the listeners of the props it refreshed up to date.
+     */
+    protected function collectLiveMetadata(string $path, HasLiveUpdates $prop, bool $parentWasResolved): void
+    {
+        // Props that resolve outside partial filters, whether because they are
+        // always props or because their parent already resolved, must refresh
+        // their listeners with them when model-bound channels or events change.
+        if ($this->isPartial
+            && ! $this->bypassesPartialFiltering($prop, $parentWasResolved)
+            && ! $this->isIncludedInPartialMetadata($path)) {
+            return;
+        }
+
+        $this->liveProps[$path] = [
+            'listeners' => $prop->liveListeners(),
+        ];
+
+        if ($prop->liveThrottle() !== null) {
+            $this->liveProps[$path]['throttle'] = $prop->liveThrottle();
+        }
+    }
+
+    /**
      * Determine if the path should contribute metadata during a partial request.
      */
     protected function isIncludedInPartialMetadata(string $path): bool
@@ -611,7 +665,7 @@ class PropsResolver
     protected function matchesOnly(string $path): bool
     {
         foreach ($this->only as $onlyPath) {
-            if ($path === $onlyPath || str_starts_with($path, "{$onlyPath}.")) {
+            if ($this->pathIsSameOrDescendant($path, $onlyPath)) {
                 return true;
             }
         }
@@ -639,12 +693,20 @@ class PropsResolver
     protected function matchesExcept(string $path): bool
     {
         foreach ($this->except as $exceptPath) {
-            if ($path === $exceptPath || str_starts_with($path, "{$exceptPath}.")) {
+            if ($this->pathIsSameOrDescendant($path, $exceptPath)) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    /**
+     * Determine if a dot path matches another path or belongs to its subtree.
+     */
+    protected function pathIsSameOrDescendant(string $path, string $parent): bool
+    {
+        return $path === $parent || str_starts_with($path, "{$parent}.");
     }
 
     /**
