@@ -12,6 +12,8 @@ use Inertia\Inertia;
 use Inertia\ProvidesInertiaProperties;
 use Inertia\RenderContext;
 use Inertia\Response;
+use Inertia\Support\Header;
+use RuntimeException;
 
 class BroadcastOrderResource extends JsonResource
 {
@@ -135,17 +137,85 @@ class BroadcastPropsTest extends TestCase
         $this->assertSame(['id' => 1, 'total' => 125], $payload['__inertia']['props']['order']);
     }
 
-    public function test_a_prop_the_resolver_omits_is_left_out_of_the_payload(): void
+    public function test_every_prop_named_in_the_payload_is_resolved(): void
     {
-        // An absent key means the client reloads that prop, which is what it did
-        // before payloads existed, so omitting one loses nothing
         $payload = $this->broadcastProps([
             'order' => ['id' => 1],
             'deferred' => Inertia::defer(fn () => 'deferred-value'),
             'optional' => Inertia::optional(fn () => 'optional-value'),
         ]);
 
+        $this->assertSame([
+            'order' => ['id' => 1],
+            'deferred' => 'deferred-value',
+            'optional' => 'optional-value',
+        ], $payload['__inertia']['props']);
+    }
+
+    public function test_a_rescued_prop_is_left_out_of_the_payload(): void
+    {
+        $payload = $this->broadcastProps([
+            'order' => ['id' => 1],
+            'stats' => Inertia::defer(function () {
+                throw new RuntimeException('Rescue this broadcast prop');
+            }, rescue: true),
+        ]);
+
         $this->assertSame(['order' => ['id' => 1]], $payload['__inertia']['props']);
+        $this->assertArrayNotHasKey('stats', $payload['__inertia']['props']);
+    }
+
+    public function test_a_once_prop_the_requesting_client_already_has_is_still_broadcast(): void
+    {
+        $request = Request::create('/orders/1', 'GET');
+        $request->headers->add([
+            Header::INERTIA => 'true',
+            Header::EXCEPT_ONCE_PROPS => 'settings',
+        ]);
+
+        $payload = $this->broadcastProps([
+            'settings' => Inertia::once(fn () => ['theme' => 'dark']),
+        ], $request);
+
+        $this->assertSame(['theme' => 'dark'], $payload['__inertia']['props']['settings']);
+    }
+
+    public function test_partial_reload_headers_do_not_filter_the_payload(): void
+    {
+        $request = Request::create('/orders/1', 'GET');
+        $request->headers->add([
+            Header::INERTIA => 'true',
+            Header::PARTIAL_COMPONENT => 'Orders/Show',
+            Header::PARTIAL_EXCEPT => 'order',
+        ]);
+
+        $payload = $this->broadcastProps([
+            'order' => ['id' => 1],
+        ], $request);
+
+        $this->assertSame(['id' => 1], $payload['__inertia']['props']['order']);
+    }
+
+    public function test_broadcasting_during_a_page_render_does_not_record_the_props_on_the_devtools_entry(): void
+    {
+        config()->set('inertia.devtools.enabled', true);
+        config()->set('inertia.devtools.except', []);
+
+        $request = Request::create('/orders/1', 'GET');
+        $request->headers->add([Header::INERTIA => 'true']);
+        $this->bindRequest($request);
+
+        $response = Inertia::render('Orders/Show', ['order' => ['id' => 1]]);
+
+        Inertia::broadcastProps(['broadcastOnlyStatus' => 'paid']);
+
+        $response->toResponse($request);
+
+        $payload = $request->attributes->get(RequestAttribute::PAYLOAD);
+
+        $this->assertIsArray($payload);
+        $this->assertArrayHasKey('order', $payload['props']);
+        $this->assertArrayNotHasKey('broadcastOnlyStatus', $payload['props']);
     }
 
     public function test_an_always_broadcast_prop_still_resolves(): void

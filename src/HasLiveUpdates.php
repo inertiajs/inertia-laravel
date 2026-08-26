@@ -21,8 +21,6 @@ interface HasLiveUpdates
 
     /**
      * Get the live-update listeners that should refresh the property.
-     * Pairing is preserved so events inferred from one channel are not also
-     * listened for on unrelated channels from another event.
      *
      * @return array<int, array{channel: array{name: string, type: string}, events: array<int, string>}>
      */

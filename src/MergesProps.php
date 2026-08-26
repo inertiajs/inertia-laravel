@@ -45,8 +45,7 @@ trait MergesProps
 
     /**
      * Mark the property for merging. A live property cannot be merged, since
-     * refreshing it would append to what is already there rather than
-     * replace it.
+     * refreshing it would append rather than replace its value.
      */
     public function merge(): static
     {

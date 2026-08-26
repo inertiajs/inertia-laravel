@@ -193,9 +193,33 @@ class PropsResolver
      * @param  array<array-key, mixed>  $props
      * @return array<array-key, mixed>
      */
-    public function resolveBroadcastProps(array $props): array
+    public function resolveBroadcastProps(array $props, string $prefix = ''): array
     {
-        return $this->resolveProps($props);
+        $props = $this->resolvePropertyProviders($props);
+        $result = [];
+
+        foreach ($props as $key => $value) {
+            $path = $prefix === '' ? $key : "{$prefix}.{$key}";
+            $prop = $value;
+
+            $value = $this->resolveValue($prop, $path, $props);
+
+            // A rescued prop resolved to null, so leave it out rather than
+            // broadcasting null over data the client already has.
+            if (in_array($path, $this->rescuedProps)) {
+                continue;
+            }
+
+            if ($value !== $prop && $this->isPropType($value)) {
+                $value = $this->resolveValue($value, $path, $props);
+            }
+
+            $result[$key] = is_array($value)
+                ? $this->resolveBroadcastProps($value, $path)
+                : $value;
+        }
+
+        return $result;
     }
 
     /**
@@ -380,10 +404,7 @@ class PropsResolver
      */
     protected function excludeFromInitialResponse(mixed $prop, string $path): bool
     {
-        // Excluding a prop from the initial response never removes its live
-        // listeners, whichever branch below does the excluding. Both callers are
-        // guarded by [! $this->isPartial], so nothing here is ever a partial
-        // request and [$parentWasResolved] cannot apply.
+        // Excluding a prop from the initial response never removes its live listeners.
         if ($prop instanceof HasLiveUpdates && $prop->isLive()) {
             $this->collectLiveMetadata($path, $prop, false);
         }
@@ -631,9 +652,8 @@ class PropsResolver
     }
 
     /**
-     * Collect the live update listeners for a live prop. This is emitted on
-     * every response, not just the initial page load, so that a partial reload
-     * keeps the listeners of the props it refreshed up to date.
+     * Collect the live update listeners for a live prop. Emitted on every
+     * response, so a partial reload keeps the listeners it refreshed up to date.
      */
     protected function collectLiveMetadata(string $path, HasLiveUpdates $prop, bool $parentWasResolved): void
     {

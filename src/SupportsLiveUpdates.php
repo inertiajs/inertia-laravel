@@ -20,8 +20,8 @@ trait SupportsLiveUpdates
     protected bool $live = false;
 
     /**
-     * The events and channels each [live] call declared. Kept per call so an
-     * explicit channel only ever applies to the events it was passed with.
+     * The events and channels each [live] call declared, kept per call so an
+     * explicit channel only applies to its own events.
      *
      * @var array<int, array{events: array<int, object|class-string|string>, channels: array<int, string|Channel>}>
      */
@@ -33,9 +33,8 @@ trait SupportsLiveUpdates
     protected ?int $liveThrottle = null;
 
     /**
-     * Mark the property as live. Live properties are refreshed with a partial
-     * reload whenever one of the given events is received. Merge properties
-     * accumulate across responses, so they cannot be live.
+     * Mark the property as live, refreshing it whenever one of the given events
+     * is received. Merge properties cannot be live.
      *
      * @param  object|class-string|string|array<int, object|class-string|string>|null  $on
      * @param  string|Channel|array<int, string|Channel>|null  $channel
@@ -74,8 +73,7 @@ trait SupportsLiveUpdates
 
     /**
      * Get the live-update listeners that should refresh the property. A channel
-     * passed to [live] overrides the ones its own events broadcast on, and
-     * nothing else, so declarations never borrow each other's channels.
+     * passed to [live] applies only to the events it was passed with.
      *
      * @return array<int, array{channel: array{name: string, type: string}, events: array<int, string>}>
      */
