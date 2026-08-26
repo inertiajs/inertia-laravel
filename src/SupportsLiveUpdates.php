@@ -35,13 +35,19 @@ trait SupportsLiveUpdates
     /**
      * Mark the property as live. Live properties are refreshed with a partial
      * reload whenever one of the given events is received, keeping the page
-     * in sync with the server without any user interaction.
+     * in sync with the server without any user interaction. Merge properties
+     * accumulate across responses, so a refresh would append to what is
+     * already there rather than replace it, and cannot be live.
      *
      * @param  object|class-string|string|array<int, object|class-string|string>|null  $on
      * @param  string|Channel|array<int, string|Channel>|null  $channel
      */
     public function live(mixed $on = null, string|Channel|array|null $channel = null, ?int $throttle = null): static
     {
+        if ($this instanceof Mergeable && $this->shouldMerge()) {
+            throw new LogicException('Live updates are not supported on merge properties.');
+        }
+
         $this->live = true;
         $this->liveDeclarations[] = ['events' => Arr::wrap($on), 'channels' => Arr::wrap($channel)];
 
@@ -121,10 +127,14 @@ trait SupportsLiveUpdates
             throw new LogicException("The [{$event}] event class does not exist. Pass an existing event class to the [on] argument, or its broadcast name as a string.");
         }
 
-        // A broadcast name can only be read from an instance. A class-string here
-        // would silently subscribe to the wrong name, so point that out up front.
+        // A broadcast name is read the same way the channels are, off an event
+        // built without its payload, which is all a fixed name needs.
         if (class_exists($event) && (new ReflectionClass($event))->hasMethod('broadcastAs')) {
-            throw new LogicException("The [{$event}] event defines a [broadcastAs] method, which can only be resolved from an instance. Pass an instance of the event to the [on] argument instead of its class name.");
+            try {
+                return (new ReflectionClass($event))->newInstanceWithoutConstructor()->broadcastAs();
+            } catch (Error) {
+                throw new LogicException("Unable to resolve the broadcast name for the [{$event}] event because it builds it from its payload. Pass an event instance to the [on] argument instead of its class name.");
+            }
         }
 
         return $event;

@@ -403,6 +403,23 @@ class ResponseFactory
     }
 
     /**
+     * Resolve props for a broadcast payload.
+     *
+     * @param  array<array-key, mixed>  $props
+     * @return array{__inertia: array{props: array<array-key, mixed>}}
+     */
+    public function broadcastProps(array $props): array
+    {
+        $resolver = new PropsResolver(request(), '');
+
+        return [
+            '__inertia' => [
+                'props' => $resolver->resolveBroadcastProps($props),
+            ],
+        ];
+    }
+
+    /**
      * Create an Inertia location response.
      *
      * @param  string|RedirectResponse  $url

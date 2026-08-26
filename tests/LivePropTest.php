@@ -94,6 +94,21 @@ class OrderRestored
     }
 }
 
+class OrderRenamed
+{
+    public function __construct(public string $name = 'order') {}
+
+    public function broadcastOn(): PrivateChannel
+    {
+        return new PrivateChannel('orders');
+    }
+
+    public function broadcastAs(): string
+    {
+        return "{$this->name}.renamed";
+    }
+}
+
 class OrderSecured
 {
     public function broadcastOn(): EncryptedPrivateChannel
@@ -230,6 +245,48 @@ class LivePropTest extends TestCase
                 ],
             ], $prop->liveListeners());
         }
+    }
+
+    public function test_a_merge_prop_cannot_be_made_live(): void
+    {
+        $prop = (new DeferProp(fn () => 'bar'))->merge();
+
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('Live updates are not supported on merge properties.');
+
+        $prop->live(on: new OrderUpdated);
+    }
+
+    public function test_a_live_prop_cannot_be_made_mergeable(): void
+    {
+        // Guarded from both sides, since the order the two are called in is
+        // the author's to choose
+        $prop = (new DeferProp(fn () => 'bar'))->live(on: new OrderUpdated);
+
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('Live updates are not supported on merge properties.');
+
+        $prop->merge();
+    }
+
+    public function test_a_deep_merge_prop_cannot_be_made_live(): void
+    {
+        $prop = (new DeferProp(fn () => 'bar'))->deepMerge();
+
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('Live updates are not supported on merge properties.');
+
+        $prop->live(on: new OrderUpdated);
+    }
+
+    public function test_a_live_prop_may_still_configure_how_it_would_merge(): void
+    {
+        // Only [merge] declares the intent, so appending at a path leaves a
+        // live prop alone until it is actually marked for merging
+        $prop = (new DeferProp(fn () => 'bar'))->live(on: new OrderUpdated)->append('items');
+
+        $this->assertTrue($prop->isLive());
+        $this->assertFalse($prop->shouldMerge());
     }
 
     public function test_the_event_class_name_is_used_as_the_event_name(): void
@@ -415,12 +472,21 @@ class LivePropTest extends TestCase
         ], $liveProp->liveListeners());
     }
 
-    public function test_an_event_class_name_that_defines_a_broadcast_name_throws(): void
+    public function test_an_event_class_name_resolves_its_own_broadcast_name(): void
     {
         $liveProp = new LiveProp('bar', OrderArchived::class, 'orders.1');
 
+        $this->assertSame(['order.archived'], $liveProp->liveListeners()[0]['events']);
+    }
+
+    public function test_an_event_class_name_whose_broadcast_name_comes_from_the_payload_throws(): void
+    {
+        // The payload is what a class name cannot supply, so the name would
+        // otherwise resolve against an uninitialised property
+        $liveProp = new LiveProp('bar', OrderRenamed::class, 'orders.1');
+
         $this->expectException(LogicException::class);
-        $this->expectExceptionMessage('The ['.OrderArchived::class.'] event defines a [broadcastAs] method, which can only be resolved from an instance.');
+        $this->expectExceptionMessage('Unable to resolve the broadcast name for the ['.OrderRenamed::class.'] event because it builds it from its payload.');
 
         $liveProp->liveListeners();
     }

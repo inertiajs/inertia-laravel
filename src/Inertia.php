@@ -28,6 +28,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Inertia\OnceProp once(callable $value)
  * @method static \Inertia\OnceProp shareOnce(string $key, callable $callback)
  * @method static \Inertia\Response render(\BackedEnum|\UnitEnum|string $component, array<array-key, mixed>|\Illuminate\Contracts\Support\Arrayable<array-key, mixed>|\Inertia\ProvidesInertiaProperties $props = [])
+ * @method static array{__inertia: array{props: array<array-key, mixed>}} broadcastProps(array<array-key, mixed> $props)
  * @method static \Symfony\Component\HttpFoundation\Response location(string|\Symfony\Component\HttpFoundation\RedirectResponse $url)
  * @method static void handleExceptionsUsing(callable $callback)
  * @method static \Inertia\ResponseFactory flash(\BackedEnum|\UnitEnum|string|array<string, mixed> $key, mixed $value = null)

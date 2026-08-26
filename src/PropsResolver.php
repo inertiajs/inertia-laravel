@@ -187,6 +187,29 @@ class PropsResolver
     }
 
     /**
+     * Resolve the given broadcast props while preserving top-level keys literally.
+     *
+     * @param  array<array-key, mixed>  $props
+     * @return array<array-key, mixed>
+     */
+    public function resolveBroadcastProps(array $props): array
+    {
+        $resolvedProps = [];
+
+        foreach ($props as $key => $value) {
+            $resolved = $this->resolveProps([$key => $value]);
+
+            // A prop the resolver skips, such as an optional or deferred one,
+            // leaves its key out of the payload, which reloads it on the client
+            if (array_key_exists($key, $resolved)) {
+                $resolvedProps[$key] = $resolved[$key];
+            }
+        }
+
+        return $resolvedProps;
+    }
+
+    /**
      * Resolve shared property providers and collect shared prop keys.
      *
      * @param  array<array-key, mixed|ProvidesInertiaProperties>  $shared
