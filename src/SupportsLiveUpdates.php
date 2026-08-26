@@ -34,10 +34,8 @@ trait SupportsLiveUpdates
 
     /**
      * Mark the property as live. Live properties are refreshed with a partial
-     * reload whenever one of the given events is received, keeping the page
-     * in sync with the server without any user interaction. Merge properties
-     * accumulate across responses, so a refresh would append to what is
-     * already there rather than replace it, and cannot be live.
+     * reload whenever one of the given events is received. Merge properties
+     * accumulate across responses, so they cannot be live.
      *
      * @param  object|class-string|string|array<int, object|class-string|string>|null  $on
      * @param  string|Channel|array<int, string|Channel>|null  $channel
