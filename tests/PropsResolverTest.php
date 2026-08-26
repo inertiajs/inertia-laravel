@@ -1106,6 +1106,37 @@ class PropsResolverTest extends TestCase
         $this->assertGreaterThan(0, $spy->calls);
     }
 
+    public function test_big_integers_are_wrapped_when_enabled(): void
+    {
+        config(['inertia.preserve_big_integers' => true]);
+
+        $page = $this->makePage(Request::create('/'), [
+            'safe' => 42,
+            'boundary' => 9007199254740991,
+            'big' => 900719925474099988,
+            'negative' => -900719925474099988,
+            'nested' => ['deep' => [900719925474099988, 2]],
+        ]);
+
+        $this->assertSame(42, $page['props']['safe']);
+        $this->assertSame(9007199254740991, $page['props']['boundary']);
+        $this->assertSame(['$bigint' => '900719925474099988'], $page['props']['big']);
+        $this->assertSame(['$bigint' => '-900719925474099988'], $page['props']['negative']);
+        $this->assertSame(['$bigint' => '900719925474099988'], $page['props']['nested']['deep'][0]);
+        $this->assertSame(2, $page['props']['nested']['deep'][1]);
+    }
+
+    public function test_big_integers_are_not_wrapped_when_disabled(): void
+    {
+        config(['inertia.preserve_big_integers' => false]);
+
+        $page = $this->makePage(Request::create('/'), [
+            'big' => 900719925474099988,
+        ]);
+
+        $this->assertSame(900719925474099988, $page['props']['big']);
+    }
+
     /**
      * Resolve the given props through the Inertia response and return the page data.
      *

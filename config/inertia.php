@@ -201,5 +201,18 @@ return [
         ],
 
     ],
+    /*
+    |--------------------------------------------------------------------------
+    | Big Integers
+    |--------------------------------------------------------------------------
+    |
+    | When enabled, integers outside JavaScript's safe integer range are
+    | wrapped as `{"$bigint": "<value>"}` so the frontend can revive them
+    | as native BigInt values instead of silently losing precision when
+    | JSON is parsed. The frontend picks this up automatically.
+    |
+    */
+
+    'preserve_big_integers' => (bool) env('INERTIA_PRESERVE_BIG_INTEGERS', false),
 
 ];
