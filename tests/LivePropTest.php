@@ -316,7 +316,7 @@ class LivePropTest extends TestCase
 
         $this->assertSame([
             [
-                'channel' => ['name' => 'orders.1', 'type' => 'private'],
+                'channel' => ['name' => 'orders.1', 'type' => 'public'],
                 'events' => [OrderUpdated::class, UserUpdated::class],
             ],
             [
@@ -375,11 +375,15 @@ class LivePropTest extends TestCase
         $this->assertSame([['channel' => ['name' => 'private-orders.1', 'type' => 'public'], 'events' => [OrderUpdated::class]]], $liveProp->liveListeners());
     }
 
-    public function test_a_bare_string_channel_is_private(): void
+    public function test_a_bare_string_channel_is_public_wherever_it_is_given(): void
     {
-        $liveProp = new LiveProp('bar', new OrderUpdated, 'orders.1');
+        // Laravel casts a channel to a string without adding a prefix, so a bare
+        // string means the same thing here as it does in [broadcastOn]
+        $given = new LiveProp('bar', new OrderUpdated, 'orders');
+        $broadcast = new LiveProp('bar', new OrderBroadcastOnString);
 
-        $this->assertSame([['channel' => ['name' => 'orders.1', 'type' => 'private'], 'events' => [OrderUpdated::class]]], $liveProp->liveListeners());
+        $this->assertSame(['name' => 'orders', 'type' => 'public'], $given->liveListeners()[0]['channel']);
+        $this->assertSame(['name' => 'orders', 'type' => 'public'], $broadcast->liveListeners()[0]['channel']);
     }
 
     public function test_can_subscribe_to_multiple_channels(): void
@@ -387,7 +391,7 @@ class LivePropTest extends TestCase
         $liveProp = new LiveProp('bar', new OrderUpdated, ['orders.1', new Channel('stats')]);
 
         $this->assertSame([
-            ['channel' => ['name' => 'orders.1', 'type' => 'private'], 'events' => [OrderUpdated::class]],
+            ['channel' => ['name' => 'orders.1', 'type' => 'public'], 'events' => [OrderUpdated::class]],
             ['channel' => ['name' => 'stats', 'type' => 'public'], 'events' => [OrderUpdated::class]],
         ], $liveProp->liveListeners());
     }
@@ -396,7 +400,7 @@ class LivePropTest extends TestCase
     {
         $liveProp = new LiveProp('bar', new OrderUpdated, 'other-orders.1');
 
-        $this->assertSame([['channel' => ['name' => 'other-orders.1', 'type' => 'private'], 'events' => [OrderUpdated::class]]], $liveProp->liveListeners());
+        $this->assertSame([['channel' => ['name' => 'other-orders.1', 'type' => 'public'], 'events' => [OrderUpdated::class]]], $liveProp->liveListeners());
     }
 
     public function test_can_listen_for_an_event_class_name(): void
@@ -405,7 +409,7 @@ class LivePropTest extends TestCase
 
         $this->assertSame([
             [
-                'channel' => ['name' => 'orders.1', 'type' => 'private'],
+                'channel' => ['name' => 'orders.1', 'type' => 'public'],
                 'events' => [OrderRestored::class],
             ],
         ], $liveProp->liveListeners());
@@ -529,7 +533,7 @@ class LivePropTest extends TestCase
 
         $this->assertSame([
             [
-                'channel' => ['name' => 'orders.1', 'type' => 'private'],
+                'channel' => ['name' => 'orders.1', 'type' => 'public'],
                 'events' => [OrderUpdated::class],
             ],
             [
@@ -553,7 +557,7 @@ class LivePropTest extends TestCase
                 'events' => [OrderUpdated::class],
             ],
             [
-                'channel' => ['name' => 'stats', 'type' => 'private'],
+                'channel' => ['name' => 'stats', 'type' => 'public'],
                 'events' => [OrderShipped::class],
             ],
         ], $prop->liveListeners());
@@ -569,20 +573,6 @@ class LivePropTest extends TestCase
                 'events' => [OrderUpdated::class],
             ],
         ], $prop->liveListeners());
-    }
-
-    public function test_a_bare_string_from_broadcast_on_is_public(): void
-    {
-        // Laravel casts these to strings and broadcasts them publicly, so
-        // resolving them as private would listen on a dead channel
-        $liveProp = new LiveProp('bar', new OrderBroadcastOnString);
-
-        $this->assertSame([
-            [
-                'channel' => ['name' => 'orders', 'type' => 'public'],
-                'events' => [OrderBroadcastOnString::class],
-            ],
-        ], $liveProp->liveListeners());
     }
 
     public function test_broadcast_on_can_mix_bare_strings_and_channel_objects(): void

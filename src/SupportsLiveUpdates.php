@@ -85,19 +85,19 @@ trait SupportsLiveUpdates
         $listeners = [];
 
         foreach ($this->liveDeclarations as $declaration) {
-            $explicit = count($declaration['channels']) > 0;
+            $hasChannels = count($declaration['channels']) > 0;
 
             foreach ($declaration['events'] as $event) {
                 $eventName = $this->resolveEventName($event);
 
-                if (! $explicit && is_string($event)) {
+                if (! $hasChannels && is_string($event)) {
                     throw new LogicException("Unable to resolve the channels for the [{$event}] event because it was given as a string. Pass the [channel] argument, or pass an event instance to the [on] argument.");
                 }
 
-                $channels = $explicit ? $declaration['channels'] : $this->channelsFromEvent($event);
+                $channels = $hasChannels ? $declaration['channels'] : $this->channelsFromEvent($event);
 
                 foreach ($channels as $channel) {
-                    $this->addLiveListener($listeners, $this->resolveChannel($channel, $explicit), [$eventName]);
+                    $this->addLiveListener($listeners, $this->resolveChannel($channel), [$eventName]);
                 }
             }
         }
@@ -179,23 +179,19 @@ trait SupportsLiveUpdates
      * prefixes follow Pusher's convention, so transports get the type separately
      * and apply their own naming.
      *
-     * @param  bool  $explicit  Whether the channel was passed to [live] rather than read from an event.
      * @return array{name: string, type: string}
      */
-    protected function resolveChannel(string|Channel|HasBroadcastChannel $channel, bool $explicit = true): array
+    protected function resolveChannel(string|Channel|HasBroadcastChannel $channel): array
     {
         if ($channel instanceof HasBroadcastChannel) {
             $channel = $channel->broadcastChannel();
         }
 
         if (is_string($channel)) {
-            // A channel passed to [live] defaults to private, because that is what
-            // events use most often. Use `new Channel(...)` to subscribe publicly.
-            // A bare string from [broadcastOn] is a different thing: Laravel's
-            // broadcaster casts those to strings and broadcasts them publicly, so
-            // resolving them as private would subscribe to a channel that never
-            // receives anything.
-            return ['name' => $channel, 'type' => $explicit ? 'private' : 'public'];
+            // Laravel's broadcaster casts a channel to a string without adding a
+            // prefix, so a bare string is a public channel wherever it is given.
+            // Use `new PrivateChannel(...)` to subscribe privately.
+            return ['name' => $channel, 'type' => 'public'];
         }
 
         $type = $this->channelType($channel);
