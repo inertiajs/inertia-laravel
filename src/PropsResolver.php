@@ -187,26 +187,15 @@ class PropsResolver
     }
 
     /**
-     * Resolve the given broadcast props while preserving top-level keys literally.
+     * Resolve the given broadcast props. Dot-notation keys stay flat and literal,
+     * since only a page response unpacks them into nested arrays.
      *
      * @param  array<array-key, mixed>  $props
      * @return array<array-key, mixed>
      */
     public function resolveBroadcastProps(array $props): array
     {
-        $resolvedProps = [];
-
-        foreach ($props as $key => $value) {
-            $resolved = $this->resolveProps([$key => $value]);
-
-            // A prop the resolver skips, such as an optional or deferred one,
-            // leaves its key out of the payload, which reloads it on the client
-            if (array_key_exists($key, $resolved)) {
-                $resolvedProps[$key] = $resolved[$key];
-            }
-        }
-
-        return $resolvedProps;
+        return $this->resolveProps($props);
     }
 
     /**
@@ -549,7 +538,7 @@ class PropsResolver
     /**
      * Collect metadata for a prop that will be included in the response.
      */
-    protected function collectMetadata(mixed $prop, string $path, bool $parentWasResolved = false): void
+    protected function collectMetadata(mixed $prop, string $path, bool $parentWasResolved): void
     {
         if ($prop instanceof Mergeable && $prop->shouldMerge()) {
             $this->collectMergeableMetadata($path, $prop);

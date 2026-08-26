@@ -9,6 +9,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Inertia\DevTools\EntryStore;
 use Inertia\DevTools\RequestAttribute;
 use Inertia\Inertia;
+use Inertia\ProvidesInertiaProperties;
+use Inertia\RenderContext;
 use Inertia\Response;
 
 class BroadcastOrderResource extends JsonResource
@@ -69,6 +71,20 @@ class BroadcastOrderUpdated
             ...Inertia::broadcastProps([
                 'status' => 'paid',
             ]),
+        ];
+    }
+}
+
+class BroadcastOrderProperties implements ProvidesInertiaProperties
+{
+    /**
+     * @return array{id: int, status: string}
+     */
+    public function toInertiaProperties(RenderContext $context): array
+    {
+        return [
+            'id' => 1,
+            'status' => 'paid',
         ];
     }
 }
@@ -174,6 +190,15 @@ class BroadcastPropsTest extends TestCase
             'order' => ['id' => 1],
             'status' => 'paid',
         ], $payload['__inertia']['props']);
+    }
+
+    public function test_a_numerically_keyed_property_provider_contributes_its_own_keys(): void
+    {
+        $payload = $this->broadcastProps([
+            new BroadcastOrderProperties,
+        ]);
+
+        $this->assertSame(['id' => 1, 'status' => 'paid'], $payload['__inertia']['props']);
     }
 
     public function test_constructing_the_broadcast_resolver_does_not_record_a_devtools_entry(): void
