@@ -2,6 +2,7 @@
 
 namespace Inertia;
 
+use Error;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\EncryptedPrivateChannel;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -90,10 +91,6 @@ trait SupportsLiveUpdates
             foreach ($declaration['events'] as $event) {
                 $eventName = $this->resolveEventName($event);
 
-                if (! $hasChannels && is_string($event)) {
-                    throw new LogicException("Unable to resolve the channels for the [{$event}] event because it was given as a string. Pass the [channel] argument, or pass an event instance to the [on] argument.");
-                }
-
                 $channels = $hasChannels ? $declaration['channels'] : $this->channelsFromEvent($event);
 
                 foreach ($channels as $channel) {
@@ -134,11 +131,36 @@ trait SupportsLiveUpdates
     }
 
     /**
-     * Gather the channels the given event broadcasts on.
+     * Gather the channels the given event broadcasts on. A class name is built
+     * without its payload, which is all an event needs when its channels do not
+     * depend on one.
+     *
+     * @param  object|class-string|string  $event
+     * @return array<int, string|Channel|HasBroadcastChannel>
+     */
+    protected function channelsFromEvent(object|string $event): array
+    {
+        if (! is_string($event)) {
+            return $this->broadcastChannels($event);
+        }
+
+        if (! class_exists($event)) {
+            throw new LogicException("Unable to resolve the channels for the [{$event}] event because it was given as a string. Pass the [channel] argument, or pass an event instance to the [on] argument.");
+        }
+
+        try {
+            return $this->broadcastChannels((new ReflectionClass($event))->newInstanceWithoutConstructor());
+        } catch (Error) {
+            throw new LogicException("Unable to resolve the channels for the [{$event}] event because it builds them from its payload. Pass an event instance to the [on] argument, or pass the [channel] argument.");
+        }
+    }
+
+    /**
+     * Read the channels off an event instance.
      *
      * @return array<int, string|Channel|HasBroadcastChannel>
      */
-    protected function channelsFromEvent(object $event): array
+    protected function broadcastChannels(object $event): array
     {
         if (! method_exists($event, 'broadcastOn')) {
             throw new LogicException('The ['.$event::class.'] event does not define a [broadcastOn] method. Pass the [channel] argument instead.');

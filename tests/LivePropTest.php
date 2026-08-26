@@ -442,12 +442,36 @@ class LivePropTest extends TestCase
         $this->assertSame(['order.updated', 'OrderUpdated'], $liveProp->liveListeners()[0]['events']);
     }
 
-    public function test_a_string_event_without_a_channel_throws(): void
+    public function test_an_event_class_name_resolves_its_own_channels(): void
     {
         $liveProp = new LiveProp('bar', OrderRestored::class);
 
+        $this->assertSame([
+            [
+                'channel' => ['name' => 'orders', 'type' => 'private'],
+                'events' => [OrderRestored::class],
+            ],
+        ], $liveProp->liveListeners());
+    }
+
+    public function test_an_event_class_name_that_builds_its_channels_from_the_payload_throws(): void
+    {
+        // The payload is what a class name cannot supply, so [OrderUpdated] would
+        // otherwise resolve to `orders.` and listen on a channel nobody broadcasts on
+        $liveProp = new LiveProp('bar', OrderUpdated::class);
+
         $this->expectException(LogicException::class);
-        $this->expectExceptionMessage('Unable to resolve the channels for the ['.OrderRestored::class.'] event because it was given as a string.');
+        $this->expectExceptionMessage('Unable to resolve the channels for the ['.OrderUpdated::class.'] event because it builds them from its payload.');
+
+        $liveProp->liveListeners();
+    }
+
+    public function test_a_broadcast_name_without_a_channel_throws(): void
+    {
+        $liveProp = new LiveProp('bar', 'order.updated');
+
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('Unable to resolve the channels for the [order.updated] event because it was given as a string.');
 
         $liveProp->liveListeners();
     }
