@@ -15,6 +15,7 @@ use Inertia\ProvidesScrollMetadata;
 use Inertia\RenderContext;
 use Inertia\Response;
 use Inertia\ScrollProp;
+use JsonSerializable;
 
 class PropsResolverTest extends TestCase
 {
@@ -1104,6 +1105,48 @@ class PropsResolverTest extends TestCase
         ]);
 
         $this->assertGreaterThan(0, $spy->calls);
+    }
+
+    public function test_it_descends_into_json_serializable_props(): void
+    {
+        $dto = new class implements JsonSerializable
+        {
+            public function jsonSerialize(): mixed
+            {
+                return ['nested' => ['name' => 'John']];
+            }
+        };
+
+        $page = $this->makePage(Request::create('/'), ['dto' => $dto]);
+
+        $this->assertSame(['nested' => ['name' => 'John']], $page['props']['dto']);
+    }
+
+    public function test_prop_types_nested_in_json_serializable_props_are_resolved(): void
+    {
+        $props = fn () => [
+            'dto' => new class implements JsonSerializable
+            {
+                public function jsonSerialize(): mixed
+                {
+                    return ['thing' => Inertia::defer(fn () => 'deferred value'), 'plain' => 1];
+                }
+            },
+        ];
+
+        $page = $this->makePage(Request::create('/'), $props());
+
+        $this->assertSame(['plain' => 1], $page['props']['dto']);
+        $this->assertSame(['default' => ['dto.thing']], $page['deferredProps']);
+
+        $request = Request::create('/');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'TestComponent']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'dto.thing']);
+
+        $page = $this->makePage($request, $props());
+
+        $this->assertSame('deferred value', $page['props']['dto']['thing']);
     }
 
     /**
