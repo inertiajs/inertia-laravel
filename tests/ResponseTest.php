@@ -4,11 +4,14 @@ namespace Inertia\Tests;
 
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Http\Response as BaseResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Fluent;
 use Illuminate\View\View;
 use Inertia\AlwaysProp;
@@ -21,6 +24,9 @@ use Inertia\ProvidesScrollMetadata;
 use Inertia\RenderContext;
 use Inertia\Response;
 use Inertia\ScrollProp;
+use Inertia\Support\SessionKey;
+use Inertia\Testing\AssertableInertia;
+use Inertia\Tests\Stubs\ExampleMiddleware;
 use Inertia\Tests\Stubs\FakeResource;
 use Inertia\Tests\Stubs\MergeWithSharedProp;
 use Mockery;
@@ -1890,5 +1896,242 @@ class ResponseTest extends TestCase
             'default' => ['foo'],
         ], $page['deferredProps']);
         $this->assertSame(['foo'], $page['mergeProps']);
+    }
+
+    public function test_close_response_for_inertia_requests(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->post('/close', function () {
+            return Inertia::close();
+        });
+
+        $response = $this->post('/close', [], [
+            'X-Inertia' => 'true',
+        ]);
+
+        $response->assertSuccessful();
+        $response->assertHeader('X-Inertia', 'true');
+        $response->assertExactJson([
+            'component' => '',
+            'props' => [],
+            'url' => '/close',
+            'version' => '',
+            'close' => true,
+        ]);
+
+        // The lifted surface reaches the close key too.
+        $response->assertInertia(fn (AssertableInertia $inertia) => $inertia->isClose());
+    }
+
+    public function test_close_response_emits_props_as_an_object(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->post('/close', function () {
+            return Inertia::close();
+        });
+
+        $response = $this->post('/close', [], [
+            'X-Inertia' => 'true',
+        ]);
+
+        $response->assertSuccessful();
+
+        // An empty PHP array encodes as `[]`, but `props` is an object everywhere else on the wire.
+        $this->assertStringContainsString('"props":{}', $response->getContent());
+    }
+
+    public function test_close_response_leaves_flash_in_session_for_the_following_request(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->post('/close', function () {
+            Inertia::flash('message', 'Saved!');
+
+            return Inertia::close();
+        });
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/users', function () {
+            return Inertia::render('User/Edit');
+        });
+
+        $close = $this->post('/close', [], [
+            'X-Inertia' => 'true',
+        ]);
+
+        $close->assertSuccessful();
+        $close->assertJsonMissing(['flash']);
+        // The close response left the flash in the session...
+        $this->assertEquals(['message' => 'Saved!'], session(SessionKey::FLASH_DATA));
+
+        // ...and the client's follow-up refresh consumes it.
+        $refresh = $this->withSession([SessionKey::FLASH_DATA => ['message' => 'Saved!']])->get('/users', [
+            'X-Inertia' => 'true',
+        ]);
+
+        $refresh->assertSuccessful();
+        $refresh->assertJson([
+            'flash' => ['message' => 'Saved!'],
+        ]);
+        $this->assertNull(session(SessionKey::FLASH_DATA));
+    }
+
+    public function test_close_response_does_not_drop_the_clear_history_flag(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->post('/close', function () {
+            Inertia::clearHistory();
+
+            return Inertia::close();
+        });
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/users', function () {
+            return Inertia::render('User/Edit');
+        });
+
+        $close = $this->post('/close', [], [
+            'X-Inertia' => 'true',
+        ]);
+
+        $close->assertSuccessful();
+        $close->assertJsonMissing(['clearHistory']);
+        // The close response left the flag in the session...
+        $this->assertTrue(session(SessionKey::CLEAR_HISTORY));
+
+        // ...and the client's follow-up refresh consumes it.
+        $refresh = $this->withSession([SessionKey::CLEAR_HISTORY => true])->get('/users', [
+            'X-Inertia' => 'true',
+        ]);
+
+        $refresh->assertSuccessful();
+        $refresh->assertJson([
+            'clearHistory' => true,
+        ]);
+    }
+
+    public function test_close_response_redirects_back_for_non_inertia_requests(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->post('/close', function () {
+            return Inertia::close();
+        });
+
+        $response = $this->from('/users')->post('/close');
+
+        $response->assertRedirect('/users');
+        $this->assertInstanceOf(RedirectResponse::class, $response->baseResponse);
+    }
+
+    public function test_layer_response_carries_the_layer_key_and_base(): void
+    {
+        $request = Request::create('/users/5/edit', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $response = new Response('User/Edit', [], ['user' => ['id' => 5]], 'app', '123');
+        $response = $response->layer(base: '/users', key: 'Users/Edit');
+        /** @var JsonResponse $response */
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertSame('User/Edit', $page->component);
+        $this->assertSame(5, $page->props->user->id);
+        $this->assertSame('/users/5/edit', $page->url);
+        $this->assertSame('123', $page->version);
+        $this->assertSame('Users/Edit', $page->layer->key);
+        $this->assertSame('/users', $page->layer->base);
+    }
+
+    public function test_a_layer_that_names_no_key_leaves_the_default_to_the_client(): void
+    {
+        $request = Request::create('/users/5/edit', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $response = new Response('User/Edit', [], []);
+        $response = $response->layer(base: '/users');
+        /** @var JsonResponse $response */
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        // The client resolves an absent key to the component, so emitting it here would state the
+        // same thing twice on every layer response. The mark is still what makes it a layer.
+        $this->assertFalse(property_exists($page->layer, 'key'));
+        $this->assertSame('/users', $page->layer->base);
+    }
+
+    public function test_a_layer_that_names_neither_a_key_nor_a_base_emits_an_empty_object(): void
+    {
+        $request = Request::create('/users/5/edit', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $response = new Response('User/Edit', [], []);
+        $response = $response->layer();
+        /** @var JsonResponse $response */
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        // The mark's presence is the whole signal, so a layer with nothing to declare still carries
+        // it — an unmarked response is an ordinary page.
+        $this->assertTrue(property_exists($page, 'layer'));
+        $this->assertSame([], (array) $page->layer);
+
+        // And it is an object on the wire, not an array: an empty PHP array encodes as `[]`, which
+        // is not the shape the mark is specified as.
+        $this->assertStringContainsString('"layer":{}', $response->getContent());
+    }
+
+    public function test_a_response_that_is_not_a_layer_carries_no_layer_object(): void
+    {
+        $request = Request::create('/users', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $response = new Response('User/Edit', [], []);
+        /** @var JsonResponse $response */
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertFalse(property_exists($page, 'layer'));
+    }
+
+    public function test_layer_without_a_base_carries_the_key_only(): void
+    {
+        $request = Request::create('/users/5/edit', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $response = new Response('User/Edit', [], []);
+        $response = $response->layer(key: 'Users/Edit');
+        /** @var JsonResponse $response */
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        $this->assertSame('Users/Edit', $page->layer->key);
+        $this->assertFalse(property_exists($page->layer, 'base'));
+    }
+
+    public function test_an_explicitly_empty_layer_key_is_emitted_rather_than_dropped(): void
+    {
+        $request = Request::create('/users/5/edit', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $response = new Response('User/Edit', [], []);
+        $response = $response->layer(base: '/users', key: '');
+        /** @var JsonResponse $response */
+        $response = $response->toResponse($request);
+        $page = $response->getData();
+
+        // An empty string key is an explicit choice: it is emitted so the client's
+        // `key || component` fallback resolves it to the component, rather than being
+        // indistinguishable from a layer that named no key at all.
+        $this->assertSame('', $page->layer->key);
+        $this->assertSame('/users', $page->layer->base);
+    }
+
+    public function test_layer_is_chainable_through_the_facade(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/users/5/edit', function () {
+            return Inertia::render('User/Edit')->layer(base: '/users', key: 'Users/Edit');
+        });
+
+        $response = $this->get('/users/5/edit', [
+            'X-Inertia' => 'true',
+        ]);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'component' => 'User/Edit',
+            'layer' => ['key' => 'Users/Edit', 'base' => '/users'],
+        ]);
     }
 }
