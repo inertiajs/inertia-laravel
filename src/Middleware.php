@@ -114,7 +114,7 @@ class Middleware
 
         $recorder?->requestStarted($request);
 
-        if (config('inertia.preserve_big_integers', false) && $request->isJson()) {
+        if (config()->boolean('inertia.preserve_big_integers', false) && $request->isJson()) {
             $request->json()->replace($this->decodeBigIntegers($request->json()->all()));
         }
 
@@ -221,7 +221,7 @@ class Middleware
         return count($value) === 1
             && isset($value['$bigint'])
             && is_string($value['$bigint'])
-            && preg_match('/^-?\d+$/', $value['$bigint']) === 1;
+            && preg_match('/^(0|-?[1-9]\d*)$/', $value['$bigint']) === 1;
     }
 
     /**

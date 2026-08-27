@@ -12,11 +12,13 @@ use Illuminate\Support\Facades\App;
 use Inertia\DevTools\DevTools;
 use Inertia\DevTools\RequestRecorder;
 use Inertia\Support\Header;
+use JsonSerializable;
+use stdClass;
 use Throwable;
 
 class PropsResolver
 {
-    use ResolvesCallables;
+    use EncodesBigIntegers, ResolvesCallables;
 
     /**
      * The current request instance.
@@ -149,14 +151,7 @@ class PropsResolver
      *
      * @var bool
      */
-    protected $encodeBigIntegers;
-
-    /**
-     * Whether at least one integer was wrapped while resolving props.
-     *
-     * @var bool
-     */
-    protected $wrappedBigIntegers = false;
+    protected $preserveBigIntegers;
 
     /**
      * Create a new props resolver instance.
@@ -174,7 +169,7 @@ class PropsResolver
         $this->loadedOnceProps = $this->parseHeader(Header::EXCEPT_ONCE_PROPS) ?? [];
 
         $this->recorder = DevTools::recorder($request);
-        $this->encodeBigIntegers = (bool) config('inertia.preserve_big_integers', false);
+        $this->preserveBigIntegers = $this->shouldEncodeBigIntegers();
     }
 
     /**
@@ -325,26 +320,10 @@ class PropsResolver
             // returned one), its children bypass partial filtering.
             $result[$key] = is_array($value)
                 ? $this->resolveProps($value, $path, $parentWasResolved || ! is_array($prop))
-                : $this->encodeBigInteger($value);
+                : ($this->preserveBigIntegers ? $this->encodeBigIntegers($value) : $value);
         }
 
         return $result;
-    }
-
-    /**
-     * Wrap integers outside JavaScript's safe integer range as a marker so
-     * the frontend can revive them as native BigInt values without losing
-     * precision when the JSON response is parsed.
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt#use_within_json
-     */
-    protected function encodeBigInteger(mixed $value): mixed
-    {
-        if ($this->encodeBigIntegers && is_int($value) && ($value > 9007199254740991 || $value < -9007199254740991)) {
-            return ['$bigint' => (string) $value];
-        }
-
-        return $value;
     }
 
     /**
@@ -500,6 +479,19 @@ class PropsResolver
                 if (method_exists($response, 'getData')) {
                     $value = $response->getData(true);
                 }
+            }
+
+            // Unwrapping these last keeps types that are both JsonSerializable and
+            // Responsable (e.g. API resources) on the branch above, while still
+            // letting the resolver descend into plain objects and DTOs.
+            if ($value instanceof JsonSerializable) {
+                $value = $value->jsonSerialize();
+            }
+
+            // A list would serialize as a JSON array instead of an object, so
+            // empty and numerically keyed objects are left as they are.
+            if ($value instanceof stdClass && ! array_is_list($vars = get_object_vars($value))) {
+                $value = $vars;
             }
 
             return $value;

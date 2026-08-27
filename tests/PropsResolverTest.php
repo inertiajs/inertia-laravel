@@ -15,6 +15,8 @@ use Inertia\ProvidesScrollMetadata;
 use Inertia\RenderContext;
 use Inertia\Response;
 use Inertia\ScrollProp;
+use JsonSerializable;
+use stdClass;
 
 class PropsResolverTest extends TestCase
 {
@@ -1104,6 +1106,86 @@ class PropsResolverTest extends TestCase
         ]);
 
         $this->assertGreaterThan(0, $spy->calls);
+    }
+
+    public function test_it_descends_into_plain_objects_and_json_serializable_props(): void
+    {
+        $dto = new class implements JsonSerializable
+        {
+            public function jsonSerialize(): mixed
+            {
+                return ['nested' => ['name' => 'John']];
+            }
+        };
+
+        $page = $this->makePage(Request::create('/'), [
+            'dto' => $dto,
+            'object' => (object) ['name' => 'Jane', 'nested' => (object) ['role' => 'admin']],
+            'empty' => new stdClass,
+            'list' => (object) ['0' => 'first', '1' => 'second'],
+        ]);
+
+        $this->assertSame(['nested' => ['name' => 'John']], $page['props']['dto']);
+        $this->assertSame(['name' => 'Jane', 'nested' => ['role' => 'admin']], $page['props']['object']);
+        $this->assertInstanceOf(stdClass::class, $page['props']['empty']);
+        $this->assertInstanceOf(stdClass::class, $page['props']['list']);
+    }
+
+    public function test_prop_types_nested_in_plain_objects_are_resolved(): void
+    {
+        $props = fn () => [
+            'object' => (object) ['thing' => Inertia::defer(fn () => 'deferred value'), 'plain' => 1],
+        ];
+
+        $page = $this->makePage(Request::create('/'), $props());
+
+        $this->assertSame(['plain' => 1], $page['props']['object']);
+        $this->assertSame(['default' => ['object.thing']], $page['deferredProps']);
+
+        $request = Request::create('/');
+        $request->headers->add(['X-Inertia' => 'true']);
+        $request->headers->add(['X-Inertia-Partial-Component' => 'TestComponent']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'object.thing']);
+
+        $page = $this->makePage($request, $props());
+
+        $this->assertSame('deferred value', $page['props']['object']['thing']);
+    }
+
+    public function test_big_integers_inside_plain_objects_are_wrapped_when_enabled(): void
+    {
+        config(['inertia.preserve_big_integers' => true]);
+
+        $page = $this->makePage(Request::create('/'), [
+            'object' => (object) ['id' => 900719925474099988],
+            'dto' => new class implements JsonSerializable
+            {
+                public function jsonSerialize(): mixed
+                {
+                    return ['id' => 900719925474099988];
+                }
+            },
+        ]);
+
+        $this->assertSame(['$bigint' => '900719925474099988'], $page['props']['object']['id']);
+        $this->assertSame(['$bigint' => '900719925474099988'], $page['props']['dto']['id']);
+    }
+
+    public function test_big_integers_inside_numerically_keyed_objects_are_wrapped_without_changing_the_shape(): void
+    {
+        config(['inertia.preserve_big_integers' => true]);
+
+        $page = $this->makePage(Request::create('/'), [
+            'list' => (object) ['0' => 900719925474099988, '1' => -900719925474099988],
+            'empty' => new stdClass,
+        ]);
+
+        $this->assertInstanceOf(stdClass::class, $page['props']['list']);
+        $this->assertSame(
+            '{"0":{"$bigint":"900719925474099988"},"1":{"$bigint":"-900719925474099988"}}',
+            json_encode($page['props']['list'])
+        );
+        $this->assertSame('{}', json_encode($page['props']['empty']));
     }
 
     public function test_big_integers_are_wrapped_when_enabled(): void

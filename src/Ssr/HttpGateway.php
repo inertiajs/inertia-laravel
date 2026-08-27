@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\Str;
 use Inertia\ResolvesCallables;
+use Inertia\Support\Header;
 
 class HttpGateway implements DisablesSsr, ExcludesSsrPaths, Gateway, HasHealthCheck
 {
@@ -52,7 +53,7 @@ class HttpGateway implements DisablesSsr, ExcludesSsrPaths, Gateway, HasHealthCh
             : $this->getProductionUrl('/render');
 
         try {
-            $response = Http::post($url, $page);
+            $response = Http::withHeaders($this->ssrHeaders())->post($url, $page);
 
             if ($response->failed()) {
                 $this->handleSsrFailure($page, $response->json());
@@ -135,6 +136,20 @@ class HttpGateway implements DisablesSsr, ExcludesSsrPaths, Gateway, HasHealthCh
         if (config('inertia.ssr.throw_on_error', false)) {
             throw SsrException::fromEvent($event);
         }
+    }
+
+    /**
+     * The headers to send along with the page to the SSR server. Parsing big
+     * integer markers cannot be gated by the client config there, since the
+     * config is set by the callback that receives the already-parsed page.
+     *
+     * @return array<string, string>
+     */
+    protected function ssrHeaders(): array
+    {
+        return config()->boolean('inertia.preserve_big_integers', false)
+            ? [Header::PRESERVE_BIG_INTEGERS => 'true']
+            : [];
     }
 
     /**

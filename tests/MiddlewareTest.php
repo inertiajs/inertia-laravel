@@ -70,6 +70,30 @@ class MiddlewareTest extends TestCase
         $this->assertSame(-900719925474099988, $received['nested']['deep']);
     }
 
+    public function test_only_canonical_big_integer_markers_are_decoded(): void
+    {
+        config(['inertia.preserve_big_integers' => true]);
+
+        $received = null;
+        Route::middleware(Middleware::class)->post('/', function (Request $request) use (&$received) {
+            $received = $request->all();
+        });
+
+        $this->postJson('/', [
+            'padded' => ['$bigint' => '007'],
+            'negativeZero' => ['$bigint' => '-0'],
+            'fraction' => ['$bigint' => '12.5'],
+            'extraKey' => ['$bigint' => '1', 'other' => 2],
+            'zero' => ['$bigint' => '0'],
+        ]);
+
+        $this->assertSame(['$bigint' => '007'], $received['padded']);
+        $this->assertSame(['$bigint' => '-0'], $received['negativeZero']);
+        $this->assertSame(['$bigint' => '12.5'], $received['fraction']);
+        $this->assertSame(['$bigint' => '1', 'other' => 2], $received['extraKey']);
+        $this->assertSame(0, $received['zero']);
+    }
+
     public function test_incoming_big_integer_markers_are_left_untouched_when_disabled(): void
     {
         config(['inertia.preserve_big_integers' => false]);
