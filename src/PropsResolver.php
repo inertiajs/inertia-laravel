@@ -13,7 +13,6 @@ use Inertia\DevTools\DevTools;
 use Inertia\DevTools\RequestRecorder;
 use Inertia\Support\Header;
 use JsonSerializable;
-use stdClass;
 use Throwable;
 
 class PropsResolver
@@ -481,17 +480,8 @@ class PropsResolver
                 }
             }
 
-            // Unwrapping these last keeps types that are both JsonSerializable and
-            // Responsable (e.g. API resources) on the branch above, while still
-            // letting the resolver descend into plain objects and DTOs.
             if ($value instanceof JsonSerializable) {
                 $value = $value->jsonSerialize();
-            }
-
-            // A list would serialize as a JSON array instead of an object, so
-            // empty and numerically keyed objects are left as they are.
-            if ($value instanceof stdClass && ! array_is_list($vars = get_object_vars($value))) {
-                $value = $vars;
             }
 
             return $value;

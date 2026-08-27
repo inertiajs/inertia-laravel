@@ -1108,7 +1108,7 @@ class PropsResolverTest extends TestCase
         $this->assertGreaterThan(0, $spy->calls);
     }
 
-    public function test_it_descends_into_plain_objects_and_json_serializable_props(): void
+    public function test_it_descends_into_json_serializable_props(): void
     {
         $dto = new class implements JsonSerializable
         {
@@ -1118,38 +1118,36 @@ class PropsResolverTest extends TestCase
             }
         };
 
-        $page = $this->makePage(Request::create('/'), [
-            'dto' => $dto,
-            'object' => (object) ['name' => 'Jane', 'nested' => (object) ['role' => 'admin']],
-            'empty' => new stdClass,
-            'list' => (object) ['0' => 'first', '1' => 'second'],
-        ]);
+        $page = $this->makePage(Request::create('/'), ['dto' => $dto]);
 
         $this->assertSame(['nested' => ['name' => 'John']], $page['props']['dto']);
-        $this->assertSame(['name' => 'Jane', 'nested' => ['role' => 'admin']], $page['props']['object']);
-        $this->assertInstanceOf(stdClass::class, $page['props']['empty']);
-        $this->assertInstanceOf(stdClass::class, $page['props']['list']);
     }
 
-    public function test_prop_types_nested_in_plain_objects_are_resolved(): void
+    public function test_prop_types_nested_in_json_serializable_props_are_resolved(): void
     {
         $props = fn () => [
-            'object' => (object) ['thing' => Inertia::defer(fn () => 'deferred value'), 'plain' => 1],
+            'dto' => new class implements JsonSerializable
+            {
+                public function jsonSerialize(): mixed
+                {
+                    return ['thing' => Inertia::defer(fn () => 'deferred value'), 'plain' => 1];
+                }
+            },
         ];
 
         $page = $this->makePage(Request::create('/'), $props());
 
-        $this->assertSame(['plain' => 1], $page['props']['object']);
-        $this->assertSame(['default' => ['object.thing']], $page['deferredProps']);
+        $this->assertSame(['plain' => 1], $page['props']['dto']);
+        $this->assertSame(['default' => ['dto.thing']], $page['deferredProps']);
 
         $request = Request::create('/');
         $request->headers->add(['X-Inertia' => 'true']);
         $request->headers->add(['X-Inertia-Partial-Component' => 'TestComponent']);
-        $request->headers->add(['X-Inertia-Partial-Data' => 'object.thing']);
+        $request->headers->add(['X-Inertia-Partial-Data' => 'dto.thing']);
 
         $page = $this->makePage($request, $props());
 
-        $this->assertSame('deferred value', $page['props']['object']['thing']);
+        $this->assertSame('deferred value', $page['props']['dto']['thing']);
     }
 
     public function test_big_integers_inside_plain_objects_are_wrapped_when_enabled(): void
@@ -1167,7 +1165,7 @@ class PropsResolverTest extends TestCase
             },
         ]);
 
-        $this->assertSame(['$bigint' => '900719925474099988'], $page['props']['object']['id']);
+        $this->assertSame(['$bigint' => '900719925474099988'], $page['props']['object']->id);
         $this->assertSame(['$bigint' => '900719925474099988'], $page['props']['dto']['id']);
     }
 
