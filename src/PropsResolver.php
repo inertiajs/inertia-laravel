@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\App;
 use Inertia\DevTools\DevTools;
 use Inertia\DevTools\RequestRecorder;
 use Inertia\Support\Header;
+use JsonSerializable;
 use Throwable;
 
 class PropsResolver
@@ -469,6 +470,10 @@ class PropsResolver
                 if (method_exists($response, 'getData')) {
                     $value = $response->getData(true);
                 }
+            }
+
+            if ($value instanceof JsonSerializable) {
+                $value = $value->jsonSerialize();
             }
 
             return $value;
