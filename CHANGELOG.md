@@ -1,8 +1,17 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.3.1...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.3.2...3.x)
 
 - Nothing!
+
+## [v3.3.2](https://github.com/inertiajs/inertia-laravel/compare/v3.3.1...v3.3.2) - 2026-09-02
+
+### What's Changed
+
+* [3.x] Resolve props nested in `JsonSerializable` objects by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/902
+* [3.x] Register Blade component namespace on the resolved compiler by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/906
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v3.3.1...v3.3.2
 
 ## [v3.3.1](https://github.com/inertiajs/inertia-laravel/compare/v3.3.0...v3.3.1) - 2026-08-04
 
