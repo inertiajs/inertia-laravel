@@ -7,7 +7,6 @@ use Illuminate\Foundation\Http\Kernel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use Illuminate\Testing\TestResponse;
 use Illuminate\View\FileViewFinder;
@@ -86,8 +85,8 @@ class ServiceProvider extends BaseServiceProvider
      */
     protected function registerBladeComponents(): void
     {
-        $this->callAfterResolving('blade.compiler', function () {
-            Blade::componentNamespace('Inertia\\View\\Components', 'inertia');
+        $this->callAfterResolving('blade.compiler', function ($blade) {
+            $blade->componentNamespace('Inertia\\View\\Components', 'inertia');
         });
     }
 
