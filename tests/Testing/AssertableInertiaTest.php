@@ -361,6 +361,30 @@ class AssertableInertiaTest extends TestCase
         $this->assertTrue($called);
     }
 
+    public function test_load_deferred_props_with_group_name_matching_a_global_function(): void
+    {
+        // Group names that collide with a global function/helper name (e.g. `auth`,
+        // `session`, `collect`) used to be misidentified as the callback argument,
+        // because `is_callable()` returns true for any string naming an existing
+        // function, not just for closures passed to `loadDeferredProps()`.
+        $response = $this->makeMockRequest(
+            Inertia::render('foo', [
+                'deferred1' => Inertia::defer(fn () => 'baz', 'auth'),
+            ])
+        );
+
+        $called = 0;
+
+        $response->assertInertia(function (AssertableInertia $inertia) use (&$called) {
+            $inertia->loadDeferredProps('auth', function (AssertableInertia $inertia) use (&$called) {
+                $inertia->where('deferred1', 'baz');
+                $called++;
+            });
+        });
+
+        $this->assertSame(1, $called);
+    }
+
     public function test_assert_against_deferred_props(): void
     {
         $response = $this->makeMockRequest(
