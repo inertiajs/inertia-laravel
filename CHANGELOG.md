@@ -1,8 +1,20 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.3.2...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.3.3...3.x)
 
 - Nothing!
+
+## [v3.3.3](https://github.com/inertiajs/inertia-laravel/compare/v3.3.2...v3.3.3) - 2026-09-04
+
+### What's Changed
+
+* [3.x] Fix loadDeferredProps() crashing when a group name matches a helper function by [@mdalikadar](https://github.com/mdalikadar) in https://github.com/inertiajs/inertia-laravel/pull/908
+
+### New Contributors
+
+* [@mdalikadar](https://github.com/mdalikadar) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/908
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v3.3.2...v3.3.3
 
 ## [v3.3.2](https://github.com/inertiajs/inertia-laravel/compare/v3.3.1...v3.3.2) - 2026-09-02
 
