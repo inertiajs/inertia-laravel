@@ -141,11 +141,9 @@ class AssertableInertia extends AssertableJson
      */
     public function loadDeferredProps(Closure|array|string $groupsOrCallback, ?Closure $callback = null): self
     {
-        $isCallback = $groupsOrCallback instanceof Closure;
+        $callback = $groupsOrCallback instanceof Closure ? $groupsOrCallback : $callback;
 
-        $callback = $isCallback ? $groupsOrCallback : $callback;
-
-        $groups = $isCallback ? array_keys($this->deferredProps) : Arr::wrap($groupsOrCallback);
+        $groups = $groupsOrCallback instanceof Closure ? array_keys($this->deferredProps) : Arr::wrap($groupsOrCallback);
 
         $props = collect($groups)->flatMap(function ($group) {
             return $this->deferredProps[$group] ?? [];
