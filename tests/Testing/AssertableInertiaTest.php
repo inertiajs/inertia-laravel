@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Middleware;
 use Inertia\Testing\AssertableInertia;
+use Inertia\Tests\Stubs\ExampleMiddleware;
 use Inertia\Tests\TestCase;
 use PHPUnit\Framework\AssertionFailedError;
 
@@ -528,5 +529,129 @@ class AssertableInertiaTest extends TestCase
         $this->get('/action')->assertRedirect('/intermediate');
         $this->get('/intermediate')->assertRedirect('/dashboard');
         $this->get('/dashboard')->assertInertia(fn (AssertableInertia $inertia) => $inertia->hasFlash('message', 'Success!'));
+    }
+
+    public function test_an_inertia_json_response_can_be_asserted(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/users', function () {
+            return Inertia::render('Users/Index', ['users' => []]);
+        });
+
+        // A page answered to an Inertia request is JSON rather than a view, and asserting on it
+        // reads the body: a close response is only reachable that way, and an ordinary one is too.
+        $this->get('/users', ['X-Inertia' => 'true'])
+            ->assertInertia(fn (AssertableInertia $inertia) => $inertia->component('Users/Index')->has('users'));
+    }
+
+    public function test_a_layer_response_can_be_asserted(): void
+    {
+        $response = $this->makeMockRequest(
+            Inertia::render('Users/Edit', ['user' => ['id' => 5]])->layer(base: '/users', key: 'Users/Edit')
+        );
+
+        $response->assertInertia(function (AssertableInertia $inertia) {
+            $inertia->component('Users/Edit');
+            $inertia->where('user.id', 5);
+            $inertia->hasLayer('Users/Edit');
+            $inertia->layerBase('/users');
+        });
+    }
+
+    public function test_the_layer_key_defaults_to_the_component_name(): void
+    {
+        $response = $this->makeMockRequest(
+            Inertia::render('Users/Edit')->layer(base: '/users')
+        );
+
+        // The mark carries no key, so the assertion resolves it the way the client does.
+        $response->assertInertia(fn (AssertableInertia $inertia) => $inertia->hasLayer('Users/Edit'));
+    }
+
+    public function test_an_explicitly_empty_layer_key_resolves_to_the_component_name(): void
+    {
+        $response = $this->makeMockRequest(
+            Inertia::render('Users/Edit')->layer(key: '')
+        );
+
+        // The client reads the key with `||`, so an empty one falls back to the component.
+        $response->assertInertia(fn (AssertableInertia $inertia) => $inertia->hasLayer('Users/Edit'));
+    }
+
+    public function test_a_layer_without_a_base_carries_the_key_only(): void
+    {
+        $response = $this->makeMockRequest(
+            Inertia::render('Users/Edit')->layer(key: 'Users/Edit')
+        );
+
+        $response->assertInertia(fn (AssertableInertia $inertia) => $inertia->hasLayer('Users/Edit'));
+
+        $this->expectException(AssertionFailedError::class);
+        $this->expectExceptionMessage('Inertia layer has no base.');
+
+        $response->assertInertia(fn (AssertableInertia $inertia) => $inertia->layerBase('/users'));
+    }
+
+    public function test_the_layer_assertion_fails_when_the_page_is_not_a_layer(): void
+    {
+        $response = $this->makeMockRequest(Inertia::render('Users/Edit'));
+
+        $this->expectException(AssertionFailedError::class);
+        $this->expectExceptionMessage('Inertia page is not a layer.');
+
+        $response->assertInertia(fn (AssertableInertia $inertia) => $inertia->hasLayer());
+    }
+
+    public function test_a_layer_naming_neither_a_key_nor_a_base_is_still_a_layer(): void
+    {
+        $response = $this->makeMockRequest(Inertia::render('Users/Edit')->layer());
+
+        $response->assertInertia(function (AssertableInertia $inertia) {
+            $inertia->hasLayer();
+            $inertia->hasLayer('Users/Edit');
+        });
+    }
+
+    public function test_the_layer_object_is_reachable_on_the_page(): void
+    {
+        $response = $this->makeMockRequest(
+            Inertia::render('Users/Edit')->layer(base: '/users', key: 'Users/Edit')
+        );
+
+        $page = $response->inertiaPage();
+
+        $this->assertSame('Users/Edit', $page['component']);
+        $this->assertSame(['key' => 'Users/Edit', 'base' => '/users'], $page['layer']);
+        $this->assertArrayNotHasKey('close', $page);
+    }
+
+    public function test_a_close_response_can_be_asserted(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->post('/close', function () {
+            return Inertia::close();
+        });
+
+        $this->post('/close', [], ['X-Inertia' => 'true'])
+            ->assertInertia(fn (AssertableInertia $inertia) => $inertia->isClose());
+    }
+
+    public function test_a_close_response_carries_the_close_key_on_the_page(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->post('/close', function () {
+            return Inertia::close();
+        });
+
+        $page = $this->post('/close', [], ['X-Inertia' => 'true'])->inertiaPage();
+
+        $this->assertSame('', $page['component']);
+        $this->assertTrue($page['close']);
+        $this->assertArrayNotHasKey('layer', $page);
+    }
+
+    public function test_the_close_assertion_fails_when_the_page_is_not_a_close_response(): void
+    {
+        $response = $this->makeMockRequest(Inertia::render('Users/Edit'));
+
+        $this->expectException(AssertionFailedError::class);
+        $response->assertInertia(fn (AssertableInertia $inertia) => $inertia->isClose());
     }
 }

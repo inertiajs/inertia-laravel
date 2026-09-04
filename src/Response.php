@@ -9,7 +9,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Response as ResponseFactory;
-use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
 use Inertia\DevTools\DevTools;
 use Inertia\Ssr\SsrState;
@@ -20,6 +19,7 @@ use UnitEnum;
 class Response implements Responsable
 {
     use Macroable;
+    use ResolvesUrl;
 
     /**
      * The name of the root component.
@@ -64,11 +64,40 @@ class Response implements Responsable
     protected $preserveFragment;
 
     /**
+     * Indicates if the response is an interstitial (detour) landing.
+     *
+     * @var bool
+     */
+    protected $interstitial;
+
+    /**
      * Indicates if the browser history should be encrypted.
      *
      * @var bool
      */
     protected $encryptHistory;
+
+    /**
+     * Indicates if the response is a layer. It is the mark's presence on the wire that says so, so
+     * this is tracked apart from the key and the base, which are both optional.
+     *
+     * @var bool
+     */
+    protected $isLayer = false;
+
+    /**
+     * The layer key, emitted inside the mark only when one was named.
+     *
+     * @var string|null
+     */
+    protected $layerKey;
+
+    /**
+     * The layer base url, emitted inside the mark when the layer declares what to load beneath it.
+     *
+     * @var string|null
+     */
+    protected $layerBase;
 
     /**
      * The view data.
@@ -111,6 +140,7 @@ class Response implements Responsable
         $this->version = $version;
         $this->clearHistory = session()->pull(SessionKey::CLEAR_HISTORY, false);
         $this->preserveFragment = session()->pull(SessionKey::PRESERVE_FRAGMENT, false);
+        $this->interstitial = session()->pull(SessionKey::INTERSTITIAL, false);
         $this->encryptHistory = $encryptHistory;
         $this->urlResolver = $urlResolver;
     }
@@ -179,6 +209,23 @@ class Response implements Responsable
     }
 
     /**
+     * Mark the response as a layer: the client renders it over the page it is opened from rather
+     * than replacing it. The base is what to load beneath it. A key is only carried when one is
+     * named here — the client defaults it to the component, so emitting that default would state
+     * the same thing twice on every layer response.
+     *
+     * @return $this
+     */
+    public function layer(?string $base = null, ?string $key = null): self
+    {
+        $this->isLayer = true;
+        $this->layerBase = $base;
+        $this->layerKey = $key;
+
+        return $this;
+    }
+
+    /**
      * Create an HTTP response that represents the object.
      *
      * @param  Request  $request
@@ -201,6 +248,8 @@ class Response implements Responsable
             $this->resolveEncryptHistory($request),
             $this->resolveFlashData($request),
             $this->resolvePreserveFragment($request),
+            $this->resolveInterstitial($request),
+            $this->resolveLayer(),
         );
 
         DevTools::recorder($request)?->pageRendered($request, $page, $resolvedProps);
@@ -247,6 +296,33 @@ class Response implements Responsable
     }
 
     /**
+     * Resolve the layer mark, when the response is a layer. The mark's presence is what makes the
+     * response a layer, so a layer that names neither a key nor a base is marked with an empty
+     * object rather than left unmarked. It is cast to an object because an empty PHP array encodes
+     * as `[]`, and the mark is specified as an object whether or not it carries anything.
+     *
+     * @return array<string, object>
+     */
+    protected function resolveLayer(): array
+    {
+        if (! $this->isLayer) {
+            return [];
+        }
+
+        $mark = [];
+
+        if ($this->layerKey !== null) {
+            $mark['key'] = $this->layerKey;
+        }
+
+        if ($this->layerBase !== null) {
+            $mark['base'] = $this->layerBase;
+        }
+
+        return ['layer' => (object) $mark];
+    }
+
+    /**
      * Resolve the preserve fragment flag from the session.
      *
      * @return array<string, mixed>
@@ -257,31 +333,12 @@ class Response implements Responsable
     }
 
     /**
-     * Get the URL from the request while preserving the trailing slash.
+     * Resolve the interstitial (detour) mark from the session.
+     *
+     * @return array<string, mixed>
      */
-    protected function getUrl(Request $request): string
+    protected function resolveInterstitial(Request $request): array
     {
-        $urlResolver = $this->urlResolver ?? function (Request $request) {
-            $url = Str::start(Str::after($request->fullUrl(), $request->getSchemeAndHttpHost()), '/');
-
-            $rawUri = Str::before($request->getRequestUri(), '?');
-
-            return Str::endsWith($rawUri, '/') ? $this->finishUrlWithTrailingSlash($url) : $url;
-        };
-
-        return App::call($urlResolver, ['request' => $request]);
-    }
-
-    /**
-     * Ensure the URL has a trailing slash before the query string.
-     */
-    protected function finishUrlWithTrailingSlash(string $url): string
-    {
-        // Make sure the relative URL ends with a trailing slash and re-append the query string if it exists.
-        $urlWithoutQueryWithTrailingSlash = Str::finish(Str::before($url, '?'), '/');
-
-        return str_contains($url, '?')
-            ? $urlWithoutQueryWithTrailingSlash.'?'.Str::after($url, '?')
-            : $urlWithoutQueryWithTrailingSlash;
+        return $this->interstitial ? ['interstitial' => true] : [];
     }
 }

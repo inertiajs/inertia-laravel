@@ -131,6 +131,12 @@ class ServiceProvider extends BaseServiceProvider
 
             return $this;
         });
+
+        RedirectResponse::macro('interstitial', function () {
+            inertia()->interstitial();
+
+            return $this;
+        });
     }
 
     /**
