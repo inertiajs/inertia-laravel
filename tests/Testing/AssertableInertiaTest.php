@@ -412,6 +412,28 @@ class AssertableInertiaTest extends TestCase
         $this->assertSame(4, $called);
     }
 
+    public function test_deferred_props_can_be_loaded_from_a_group_named_after_a_global_function(): void
+    {
+        $response = $this->makeMockRequest(
+            Inertia::render('foo', [
+                'deferred1' => Inertia::defer(fn () => 'baz', 'auth'),
+                'deferred2' => Inertia::defer(fn () => 'qux', 'custom'),
+            ])
+        );
+
+        $called = false;
+
+        $response->assertInertia(function (AssertableInertia $inertia) use (&$called) {
+            $inertia->loadDeferredProps('auth', function (AssertableInertia $inertia) use (&$called) {
+                $inertia->where('deferred1', 'baz');
+                $inertia->missing('deferred2');
+                $called = true;
+            });
+        });
+
+        $this->assertTrue($called);
+    }
+
     public function test_the_flash_data_can_be_asserted(): void
     {
         $response = $this->makeMockRequest(
