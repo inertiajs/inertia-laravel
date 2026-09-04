@@ -3,7 +3,9 @@
 namespace Inertia;
 
 use Closure;
+use Illuminate\Contracts\Session\Session as SessionContract;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Route;
 use Illuminate\Session\Store;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\MessageBag;
@@ -157,6 +159,8 @@ class Middleware
             return $response;
         }
 
+        $this->storeCurrentUrl($request);
+
         if ($request->method() === 'GET' && $request->header(Header::VERSION, '') !== Inertia::getVersion()) {
             $response = $this->onVersionChange($request, $response);
         }
@@ -176,6 +180,37 @@ class Middleware
         $recorder?->respondedWith($request, $response);
 
         return $response;
+    }
+
+    /**
+     * Store the current URL for Inertia visits skipped by Laravel's session middleware.
+     */
+    protected function storeCurrentUrl(Request $request): void
+    {
+        if (! $request->hasSession() ||
+            ! $request->isMethod('GET') ||
+            ! $request->route() instanceof Route ||
+            ! $request->ajax() ||
+            $request->prefetch() ||
+            $request->isPrecognitive()) {
+            return;
+        }
+
+        /** @var Store $session */
+        $session = $request->session();
+        $session->setPreviousUrl($request->fullUrl());
+
+        $this->storeCurrentRoute($session, $request->route()->getName());
+    }
+
+    /**
+     * Store the current route when supported by the Laravel version.
+     */
+    protected function storeCurrentRoute(SessionContract $session, ?string $route): void
+    {
+        if (method_exists($session, 'setPreviousRoute')) {
+            $session->setPreviousRoute($route);
+        }
     }
 
     /**
