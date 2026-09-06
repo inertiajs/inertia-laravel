@@ -2034,6 +2034,24 @@ class ResponseTest extends TestCase
         $this->assertSame('/users', $page->layer->base);
     }
 
+    public function test_a_layer_base_is_emitted_host_relative_like_the_url(): void
+    {
+        $request = Request::create('http://example.com/users/5/edit', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $response = (new Response('User/Edit', [], []))->layer(base: 'http://example.com/users?page=2');
+        /** @var JsonResponse $response */
+        $response = $response->toResponse($request);
+
+        $this->assertSame('/users?page=2', $response->getData()->layer->base);
+
+        $response = (new Response('User/Edit', [], []))->layer(base: 'https://other.example/users');
+        /** @var JsonResponse $response */
+        $response = $response->toResponse($request);
+
+        $this->assertSame('https://other.example/users', $response->getData()->layer->base);
+    }
+
     public function test_a_layer_that_names_no_key_leaves_the_default_to_the_client(): void
     {
         $request = Request::create('/users/5/edit', 'GET');

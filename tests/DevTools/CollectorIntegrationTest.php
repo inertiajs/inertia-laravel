@@ -76,6 +76,28 @@ class CollectorIntegrationTest extends TestCase
         $this->assertSame('Alice', $entry['http']['responseBody']['value']['props']['name']);
     }
 
+    public function test_a_close_is_recorded_like_a_render(): void
+    {
+        Route::middleware(Middleware::class)
+            ->post('/collector-close', fn () => Inertia::close())
+            ->name('users.store');
+
+        $response = $this->post('/collector-close', [], ['X-Inertia' => 'true', 'X-Inertia-Version' => '']);
+
+        $response->assertOk();
+
+        $this->app->make(EntryStore::class)->flush($this->repo);
+        $this->assertCount(1, $this->recordedEntries());
+
+        $entry = $this->latestRecordedEntry();
+
+        $this->assertSame('users.store', $entry['route']['name']);
+        $this->assertSame('/collector-close', $entry['route']['uri']);
+        $this->assertSame('present', $entry['http']['responseBody']['status']);
+        $this->assertTrue($entry['http']['responseBody']['value']['close']);
+        $this->assertSame('', $entry['http']['responseBody']['value']['component']);
+    }
+
     public function test_props_are_populated_with_inertia_metadata(): void
     {
         Route::middleware(Middleware::class)->get('/props-route', fn () => Inertia::render('Users/Index', [

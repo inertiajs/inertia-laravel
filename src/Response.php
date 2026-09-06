@@ -78,26 +78,12 @@ class Response implements Responsable
     protected $encryptHistory;
 
     /**
-     * Indicates if the response is a layer. It is the mark's presence on the wire that says so, so
-     * this is tracked apart from the key and the base, which are both optional.
+     * The layer mark, or null for a page. It is the mark's presence on the wire that says a response
+     * is a layer, so an empty mark still counts; the key and the base sit inside it only when named.
      *
-     * @var bool
+     * @var array{key?: string, base?: string}|null
      */
-    protected $isLayer = false;
-
-    /**
-     * The layer key, emitted inside the mark only when one was named.
-     *
-     * @var string|null
-     */
-    protected $layerKey;
-
-    /**
-     * The layer base url, emitted inside the mark when the layer declares what to load beneath it.
-     *
-     * @var string|null
-     */
-    protected $layerBase;
+    protected $layer;
 
     /**
      * The view data.
@@ -218,9 +204,7 @@ class Response implements Responsable
      */
     public function layer(?string $base = null, ?string $key = null): self
     {
-        $this->isLayer = true;
-        $this->layerBase = $base;
-        $this->layerKey = $key;
+        $this->layer = array_filter(compact('key', 'base'), fn ($value) => $value !== null);
 
         return $this;
     }
@@ -249,7 +233,7 @@ class Response implements Responsable
             $this->resolveFlashData($request),
             $this->resolvePreserveFragment($request),
             $this->resolveInterstitial($request),
-            $this->resolveLayer(),
+            $this->resolveLayer($request),
         );
 
         DevTools::recorder($request)?->pageRendered($request, $page, $resolvedProps);
@@ -303,23 +287,19 @@ class Response implements Responsable
      *
      * @return array<string, object>
      */
-    protected function resolveLayer(): array
+    protected function resolveLayer(Request $request): array
     {
-        if (! $this->isLayer) {
+        if ($this->layer === null) {
             return [];
         }
 
-        $mark = [];
+        // The base goes out the way the page's own url does, host-relative, so a route helper's
+        // absolute url and a path name the same page on the wire.
+        $layer = isset($this->layer['base'])
+            ? [...$this->layer, 'base' => $this->toRelativeUrl($request, $this->layer['base'])]
+            : $this->layer;
 
-        if ($this->layerKey !== null) {
-            $mark['key'] = $this->layerKey;
-        }
-
-        if ($this->layerBase !== null) {
-            $mark['base'] = $this->layerBase;
-        }
-
-        return ['layer' => (object) $mark];
+        return ['layer' => (object) $layer];
     }
 
     /**

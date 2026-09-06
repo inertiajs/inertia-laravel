@@ -7,6 +7,7 @@ use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
+use Inertia\DevTools\DevTools;
 use Inertia\Support\Header;
 use Inertia\Support\SessionKey;
 use Symfony\Component\HttpFoundation\Response;
@@ -45,6 +46,8 @@ class CloseResponse implements Responsable
         ];
 
         if ($request->header(Header::INERTIA)) {
+            DevTools::recorder($request)?->pageRendered($request, $page, []);
+
             return new JsonResponse($page, 200, [Header::INERTIA => 'true']);
         }
 

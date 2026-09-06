@@ -25,6 +25,16 @@ trait ResolvesUrl
     }
 
     /**
+     * Strip the app's own origin from a URL, leaving a foreign one as it is.
+     */
+    protected function toRelativeUrl(Request $request, string $url): string
+    {
+        $origin = $request->getSchemeAndHttpHost();
+
+        return Str::startsWith($url, $origin) ? Str::start(Str::after($url, $origin), '/') : $url;
+    }
+
+    /**
      * Ensure the URL has a trailing slash before the query string.
      */
     protected function finishUrlWithTrailingSlash(string $url): string
