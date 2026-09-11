@@ -1,8 +1,16 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.26...2.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.27...2.x)
 
 - Nothing!
+
+## [v2.0.27](https://github.com/inertiajs/inertia-laravel/compare/v2.0.26...v2.0.27) - 2026-09-11
+
+### What's Changed
+
+* [2.x] Escape HTML tags in the initial page JSON by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/912
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.26...v2.0.27
 
 ## [v2.0.26](https://github.com/inertiajs/inertia-laravel/compare/v2.0.25...v2.0.26) - 2026-09-04
 
