@@ -8,6 +8,7 @@ use Illuminate\Contracts\Debug\ExceptionHandler as ExceptionHandlerContract;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\RedirectResponse as IlluminateRedirectResponse;
 use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Arr;
@@ -473,7 +474,7 @@ class ResponseFactory
      *
      * @param  array<string, string>  $headers
      */
-    public function back(int $status = 302, array $headers = [], mixed $fallback = false): RedirectResponse
+    public function back(int $status = 302, array $headers = [], mixed $fallback = false): IlluminateRedirectResponse
     {
         return Redirect::back($status, $headers, $fallback);
     }
