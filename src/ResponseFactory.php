@@ -4,6 +4,7 @@ namespace Inertia;
 
 use BackedEnum;
 use Closure;
+use Illuminate\Broadcasting\Channel;
 use Illuminate\Contracts\Debug\ExceptionHandler as ExceptionHandlerContract;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Contracts\Support\Arrayable;
@@ -299,6 +300,18 @@ class ResponseFactory
     }
 
     /**
+     * Create a live property.
+     *
+     * @param  mixed  $value
+     * @param  object|class-string|string|array<int, object|class-string|string>|null  $on
+     * @param  string|Channel|array<int, string|Channel>|null  $channel
+     */
+    public function live($value, mixed $on = null, string|Channel|array|null $channel = null, ?int $throttle = null): LiveProp
+    {
+        return new LiveProp($value, $on, $channel, $throttle);
+    }
+
+    /**
      * Create an once property.
      */
     public function once(callable $value): OnceProp
@@ -387,6 +400,23 @@ class ResponseFactory
         DevTools::recorder()?->pageRendering($component, $response, $this->sharedProps);
 
         return $response;
+    }
+
+    /**
+     * Resolve props for a broadcast payload.
+     *
+     * @param  array<array-key, mixed>  $props
+     * @return array{__inertia: array{props: array<array-key, mixed>}}
+     */
+    public function broadcastProps(array $props): array
+    {
+        $resolver = new PropsResolver(request(), '');
+
+        return [
+            '__inertia' => [
+                'props' => $resolver->resolveBroadcastProps($props),
+            ],
+        ];
     }
 
     /**
