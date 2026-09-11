@@ -113,6 +113,21 @@ class DirectiveTest extends TestCase
         $this->assertSame($html, $this->renderView('@inertia("foo")', ['page' => self::EXAMPLE_PAGE_OBJECT]));
     }
 
+    public function test_inertia_directive_escapes_html_tags_in_the_page_data(): void
+    {
+        Config::set([
+            'inertia.ssr.enabled' => false,
+            'inertia.use_script_element_for_initial_page' => true,
+        ]);
+
+        $page = ['component' => 'Foo/Bar', 'props' => ['foo' => '</script><!--<script>'], 'url' => '/test', 'version' => ''];
+        $html = $this->renderView('@inertia', ['page' => $page]);
+
+        $this->assertStringContainsString('\u003C\/script\u003E\u003C!--\u003Cscript\u003E', $html);
+        $this->assertStringNotContainsString('<!--', $html);
+        $this->assertSame(1, substr_count($html, '</script>'));
+    }
+
     public function test_inertia_head_directive_renders_nothing(): void
     {
         Config::set(['inertia.ssr.enabled' => false]);
