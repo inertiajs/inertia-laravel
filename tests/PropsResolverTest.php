@@ -16,6 +16,7 @@ use Inertia\RenderContext;
 use Inertia\Response;
 use Inertia\ScrollProp;
 use JsonSerializable;
+use stdClass;
 
 class PropsResolverTest extends TestCase
 {
@@ -1147,6 +1148,73 @@ class PropsResolverTest extends TestCase
         $page = $this->makePage($request, $props());
 
         $this->assertSame('deferred value', $page['props']['dto']['thing']);
+    }
+
+    public function test_big_integers_inside_plain_objects_are_wrapped_when_enabled(): void
+    {
+        config(['inertia.preserve_big_integers' => true]);
+
+        $page = $this->makePage(Request::create('/'), [
+            'object' => (object) ['id' => 900719925474099988],
+            'dto' => new class implements JsonSerializable
+            {
+                public function jsonSerialize(): mixed
+                {
+                    return ['id' => 900719925474099988];
+                }
+            },
+        ]);
+
+        $this->assertSame(['$bigint' => '900719925474099988'], $page['props']['object']->id);
+        $this->assertSame(['$bigint' => '900719925474099988'], $page['props']['dto']['id']);
+    }
+
+    public function test_big_integers_inside_numerically_keyed_objects_are_wrapped_without_changing_the_shape(): void
+    {
+        config(['inertia.preserve_big_integers' => true]);
+
+        $page = $this->makePage(Request::create('/'), [
+            'list' => (object) ['0' => 900719925474099988, '1' => -900719925474099988],
+            'empty' => new stdClass,
+        ]);
+
+        $this->assertInstanceOf(stdClass::class, $page['props']['list']);
+        $this->assertSame(
+            '{"0":{"$bigint":"900719925474099988"},"1":{"$bigint":"-900719925474099988"}}',
+            json_encode($page['props']['list'])
+        );
+        $this->assertSame('{}', json_encode($page['props']['empty']));
+    }
+
+    public function test_big_integers_are_wrapped_when_enabled(): void
+    {
+        config(['inertia.preserve_big_integers' => true]);
+
+        $page = $this->makePage(Request::create('/'), [
+            'safe' => 42,
+            'boundary' => 9007199254740991,
+            'big' => 900719925474099988,
+            'negative' => -900719925474099988,
+            'nested' => ['deep' => [900719925474099988, 2]],
+        ]);
+
+        $this->assertSame(42, $page['props']['safe']);
+        $this->assertSame(9007199254740991, $page['props']['boundary']);
+        $this->assertSame(['$bigint' => '900719925474099988'], $page['props']['big']);
+        $this->assertSame(['$bigint' => '-900719925474099988'], $page['props']['negative']);
+        $this->assertSame(['$bigint' => '900719925474099988'], $page['props']['nested']['deep'][0]);
+        $this->assertSame(2, $page['props']['nested']['deep'][1]);
+    }
+
+    public function test_big_integers_are_not_wrapped_when_disabled(): void
+    {
+        config(['inertia.preserve_big_integers' => false]);
+
+        $page = $this->makePage(Request::create('/'), [
+            'big' => 900719925474099988,
+        ]);
+
+        $this->assertSame(900719925474099988, $page['props']['big']);
     }
 
     /**

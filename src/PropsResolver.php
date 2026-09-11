@@ -17,7 +17,7 @@ use Throwable;
 
 class PropsResolver
 {
-    use ResolvesCallables;
+    use EncodesBigIntegers, ResolvesCallables;
 
     /**
      * The current request instance.
@@ -146,6 +146,13 @@ class PropsResolver
     protected ?RequestRecorder $recorder = null;
 
     /**
+     * Whether integers outside JavaScript's safe range should be wrapped.
+     *
+     * @var bool
+     */
+    protected $preserveBigIntegers;
+
+    /**
      * Create a new props resolver instance.
      */
     public function __construct(Request $request, string $component)
@@ -161,6 +168,7 @@ class PropsResolver
         $this->loadedOnceProps = $this->parseHeader(Header::EXCEPT_ONCE_PROPS) ?? [];
 
         $this->recorder = DevTools::recorder($request);
+        $this->preserveBigIntegers = $this->shouldEncodeBigIntegers();
     }
 
     /**
@@ -311,7 +319,7 @@ class PropsResolver
             // returned one), its children bypass partial filtering.
             $result[$key] = is_array($value)
                 ? $this->resolveProps($value, $path, $parentWasResolved || ! is_array($prop))
-                : $value;
+                : ($this->preserveBigIntegers ? $this->encodeBigIntegers($value) : $value);
         }
 
         return $result;

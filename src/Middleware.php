@@ -114,6 +114,10 @@ class Middleware
 
         $recorder?->requestStarted($request);
 
+        if (config()->boolean('inertia.preserve_big_integers', false) && $request->isJson()) {
+            $request->json()->replace($this->decodeBigIntegers($request->json()->all()));
+        }
+
         Inertia::version(function () use ($request) {
             return $this->version($request);
         });
@@ -176,6 +180,60 @@ class Middleware
         $recorder?->respondedWith($request, $response);
 
         return $response;
+    }
+
+    /**
+     * Recursively revive `{"$bigint": "<value>"}` markers in the request data
+     * back into integers so controllers and validation receive the original
+     * value the frontend sent as a native BigInt.
+     *
+     * @param  array<array-key, mixed>  $input
+     * @return array<array-key, mixed>
+     *
+     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt#use_within_json
+     */
+    protected function decodeBigIntegers(array $input): array
+    {
+        $result = [];
+
+        foreach ($input as $key => $value) {
+            if (! is_array($value)) {
+                $result[$key] = $value;
+
+                continue;
+            }
+
+            $result[$key] = $this->isBigIntegerMarker($value)
+                ? $this->reviveBigInteger($value['$bigint'])
+                : $this->decodeBigIntegers($value);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Determine if the given array is a big integer marker.
+     *
+     * @param  array<array-key, mixed>  $value
+     */
+    protected function isBigIntegerMarker(array $value): bool
+    {
+        return count($value) === 1
+            && isset($value['$bigint'])
+            && is_string($value['$bigint'])
+            && preg_match('/^(0|-?[1-9]\d*)$/', $value['$bigint']) === 1;
+    }
+
+    /**
+     * Revive a big integer marker's digits. Values within PHP's integer range
+     * become a native integer; anything larger is kept as a string since PHP
+     * cannot represent it as an integer without losing precision.
+     */
+    protected function reviveBigInteger(string $digits): int|string
+    {
+        $asInteger = (int) $digits;
+
+        return (string) $asInteger === $digits ? $asInteger : $digits;
     }
 
     /**
