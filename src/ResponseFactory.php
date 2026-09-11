@@ -198,6 +198,15 @@ class ResponseFactory
     }
 
     /**
+     * Mark the next redirect as an interstitial (detour): a layer request answered with
+     * something else the client will return from keeps its pending capture.
+     */
+    public function interstitial(): void
+    {
+        session([SessionKey::INTERSTITIAL => true]);
+    }
+
+    /**
      * Encrypt the browser history.
      *
      * @param  bool  $encrypt
@@ -401,6 +410,15 @@ class ResponseFactory
         }
 
         return $url instanceof RedirectResponse ? $url : Redirect::away($url);
+    }
+
+    /**
+     * Create an Inertia close response: the client closes the top layer and refreshes the layer
+     * beneath instead of installing a page.
+     */
+    public function close(): CloseResponse
+    {
+        return new CloseResponse($this->getVersion(), $this->urlResolver);
     }
 
     /**
