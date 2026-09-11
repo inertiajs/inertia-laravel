@@ -17,7 +17,7 @@ class App extends Component
     ) {
         $state = app(SsrState::class);
         $this->response = $state->dispatch();
-        $this->pageJson = json_encode($state->page);
+        $this->pageJson = json_encode($state->page, JSON_HEX_TAG);
     }
 
     public function render(): string
