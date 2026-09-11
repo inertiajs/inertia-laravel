@@ -1,8 +1,16 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.3.3...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.3.4...3.x)
 
 - Nothing!
+
+## [v3.3.4](https://github.com/inertiajs/inertia-laravel/compare/v3.3.3...v3.3.4) - 2026-09-11
+
+### What's Changed
+
+* [3.x] Escape HTML tags in the initial page JSON by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/911
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v3.3.3...v3.3.4
 
 ## [v3.3.3](https://github.com/inertiajs/inertia-laravel/compare/v3.3.2...v3.3.3) - 2026-09-04
 
