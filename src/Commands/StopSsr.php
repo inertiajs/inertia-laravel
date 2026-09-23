@@ -32,10 +32,10 @@ class StopSsr extends Command
 
         $ch = curl_init($url);
         curl_exec($ch);
-        $error = curl_error($ch);
+        $errno = curl_errno($ch);
         curl_close($ch);
 
-        if ($error !== 'Empty reply from server') {
+        if ($errno !== CURLE_GOT_NOTHING) {
             if ($this->option('graceful')) {
                 $this->comment('Inertia SSR server is not running.');
 
