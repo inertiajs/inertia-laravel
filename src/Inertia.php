@@ -30,7 +30,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Symfony\Component\HttpFoundation\Response location(string|\Symfony\Component\HttpFoundation\RedirectResponse $url)
  * @method static void handleExceptionsUsing(callable $callback)
  * @method static \Inertia\ResponseFactory flash(\BackedEnum|\UnitEnum|string|array<string, mixed> $key, mixed $value = null)
- * @method static \Symfony\Component\HttpFoundation\RedirectResponse back(int $status = 302, array<string, string> $headers = [], mixed $fallback = false)
+ * @method static \Illuminate\Http\RedirectResponse back(int $status = 302, array<string, string> $headers = [], mixed $fallback = false)
  * @method static array<string, mixed> getFlashed(\Illuminate\Http\Request|null $request = null)
  * @method static array<string, mixed> pullFlashed(\Illuminate\Http\Request|null $request = null)
  * @method static void macro(string $name, object|callable $macro)

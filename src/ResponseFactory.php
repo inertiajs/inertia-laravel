@@ -8,6 +8,7 @@ use Illuminate\Contracts\Debug\ExceptionHandler as ExceptionHandlerContract;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Arr;
@@ -24,7 +25,7 @@ use Inertia\Support\Header;
 use Inertia\Support\SessionKey;
 use InvalidArgumentException;
 use LogicException;
-use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirectResponse;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use UnitEnum;
 
@@ -392,15 +393,15 @@ class ResponseFactory
     /**
      * Create an Inertia location response.
      *
-     * @param  string|RedirectResponse  $url
+     * @param  string|SymfonyRedirectResponse  $url
      */
     public function location($url): SymfonyResponse
     {
         if (Request::inertia()) {
-            return BaseResponse::make('', 409, [Header::LOCATION => $url instanceof RedirectResponse ? $url->getTargetUrl() : $url]);
+            return BaseResponse::make('', 409, [Header::LOCATION => $url instanceof SymfonyRedirectResponse ? $url->getTargetUrl() : $url]);
         }
 
-        return $url instanceof RedirectResponse ? $url : Redirect::away($url);
+        return $url instanceof SymfonyRedirectResponse ? $url : Redirect::away($url);
     }
 
     /**
