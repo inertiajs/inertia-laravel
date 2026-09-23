@@ -39,6 +39,10 @@ class EnsureDeferredCallbacksRun
      */
     protected function isControlResponse(Response $response): bool
     {
+        if ($response->getStatusCode() !== 409) {
+            return false;
+        }
+
         if ($response->headers->has(Header::REDIRECT)) {
             return true;
         }
