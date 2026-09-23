@@ -1,6 +1,8 @@
 <?php
 
-namespace Inertia\Tests;
+namespace Inertia\Tests\Commands;
+
+use Inertia\Tests\TestCase;
 
 class StopSsrTest extends TestCase
 {
