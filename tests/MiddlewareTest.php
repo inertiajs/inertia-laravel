@@ -2,7 +2,9 @@
 
 namespace Inertia\Tests;
 
+use Illuminate\Contracts\Http\Kernel as HttpKernelContract;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Foundation\Http\Kernel;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route as RouteInstance;
 use Illuminate\Session\Middleware\StartSession;
@@ -540,6 +542,50 @@ class MiddlewareTest extends TestCase
         $response->assertStatus(409);
         $response->assertHeader('X-Inertia-Location', 'https://inertiajs.com');
         $this->assertTrue($called);
+    }
+
+    public function test_deferred_callbacks_run_when_the_middleware_is_registered_globally(): void
+    {
+        $called = false;
+
+        /** @var Kernel $kernel */
+        $kernel = $this->app->make(HttpKernelContract::class);
+        $kernel->pushMiddleware(Middleware::class);
+
+        Route::middleware(StartSession::class)->post('/action', function () use (&$called) {
+            defer(function () use (&$called) {
+                $called = true;
+            });
+
+            return redirect('/article#section');
+        });
+
+        $response = $this->post('/action', [], [
+            'X-Inertia' => 'true',
+        ]);
+
+        $response->assertStatus(409);
+        $this->assertTrue($called);
+    }
+
+    public function test_deferred_callbacks_are_skipped_when_a_control_header_is_set_on_a_failed_response(): void
+    {
+        $called = false;
+
+        Route::middleware([StartSession::class, Middleware::class])->post('/action', function () use (&$called) {
+            defer(function () use (&$called) {
+                $called = true;
+            });
+
+            return response('', 500, ['X-Inertia-Redirect' => '/article#section']);
+        });
+
+        $response = $this->post('/action', [], [
+            'X-Inertia' => 'true',
+        ]);
+
+        $response->assertStatus(500);
+        $this->assertFalse($called);
     }
 
     public function test_deferred_callbacks_are_skipped_on_a_version_mismatch_reload(): void

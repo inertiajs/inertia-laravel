@@ -76,7 +76,7 @@ class ServiceProvider extends BaseServiceProvider
         $this->callAfterResolving(HttpKernelContract::class, function ($kernel) {
             if ($kernel instanceof Kernel) {
                 $kernel->pushMiddleware(Middleware\EnsureGetOnRedirect::class);
-                $kernel->pushMiddleware(Middleware\EnsureDeferredCallbacksRun::class);
+                $kernel->prependMiddleware(Middleware\EnsureDeferredCallbacksRun::class);
             }
         });
     }
