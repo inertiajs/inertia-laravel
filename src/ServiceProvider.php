@@ -61,7 +61,7 @@ class ServiceProvider extends BaseServiceProvider
     public function boot(): void
     {
         $this->registerConsoleCommands();
-        $this->pushRedirectMiddleware();
+        $this->registerRedirectMiddleware();
 
         $this->publishes([
             __DIR__.'/../config/inertia.php' => config_path('inertia.php'),
@@ -71,7 +71,7 @@ class ServiceProvider extends BaseServiceProvider
     /**
      * Register the global redirect middleware for Inertia requests.
      */
-    protected function pushRedirectMiddleware(): void
+    protected function registerRedirectMiddleware(): void
     {
         $this->callAfterResolving(HttpKernelContract::class, function ($kernel) {
             if ($kernel instanceof Kernel) {
