@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response as BaseResponse;
 use Illuminate\Support\Traits\Macroable;
 use Inertia\DevTools\DevTools;
+use Inertia\Ssr\ConfiguresSsrRequests;
 use Inertia\Ssr\DisablesSsr;
 use Inertia\Ssr\ExcludesSsrPaths;
 use Inertia\Ssr\Gateway;
@@ -235,6 +236,20 @@ class ResponseFactory
         }
 
         $gateway->except($paths);
+    }
+
+    /**
+     * Configure the HTTP request that is sent to the SSR server.
+     */
+    public function configureSsrRequestUsing(?Closure $callback = null): void
+    {
+        $gateway = app(Gateway::class);
+
+        if (! $gateway instanceof ConfiguresSsrRequests) {
+            throw new LogicException('The configured SSR gateway does not support configuring server-side rendering requests.');
+        }
+
+        $gateway->configureRequestUsing($callback);
     }
 
     /**

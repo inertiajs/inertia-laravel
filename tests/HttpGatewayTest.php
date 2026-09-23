@@ -6,6 +6,8 @@ use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Promise\Create;
 use GuzzleHttp\Promise\PromiseInterface;
 use GuzzleHttp\Psr7\Request;
+use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Http\Client\Request as ClientRequest;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
 use Inertia\Ssr\HttpGateway;
@@ -515,5 +517,121 @@ class HttpGatewayTest extends TestCase
         ]);
 
         $this->assertNull($this->gateway->dispatch(self::EXAMPLE_PAGE_OBJECT));
+    }
+
+    public function test_it_applies_the_configured_timeout_to_the_ssr_request(): void
+    {
+        config(['inertia.ssr.timeout' => 5]);
+
+        $this->assertEquals(5, $this->captureSsrRequest()->getOptions()['timeout']);
+    }
+
+    public function test_it_does_not_override_globally_configured_http_options(): void
+    {
+        Http::globalOptions(['timeout' => 5]);
+
+        $this->assertEquals(5, $this->captureSsrRequest()->getOptions()['timeout']);
+    }
+
+    public function test_it_configures_the_ssr_request_using_the_given_callback(): void
+    {
+        config([
+            'inertia.ssr.enabled' => true,
+            'inertia.ssr.ensure_bundle_exists' => false,
+        ]);
+
+        Http::fake([
+            $this->renderUrl => Http::response(json_encode([
+                'head' => ['<title>SSR Test</title>'],
+                'body' => '<div id="app">SSR Response</div>',
+            ])),
+        ]);
+
+        $this->gateway->configureRequestUsing(fn (PendingRequest $request) => $request->withHeader('X-Tenant', 'acme'));
+
+        $this->assertNotNull($this->gateway->dispatch(self::EXAMPLE_PAGE_OBJECT));
+
+        Http::assertSent(fn (ClientRequest $request) => $request->hasHeader('X-Tenant', 'acme'));
+    }
+
+    public function test_it_configures_the_ssr_request_when_the_callback_returns_nothing(): void
+    {
+        config([
+            'inertia.ssr.enabled' => true,
+            'inertia.ssr.ensure_bundle_exists' => false,
+        ]);
+
+        Http::fake([
+            $this->renderUrl => Http::response(json_encode([
+                'head' => ['<title>SSR Test</title>'],
+                'body' => '<div id="app">SSR Response</div>',
+            ])),
+        ]);
+
+        $this->gateway->configureRequestUsing(function (PendingRequest $request) {
+            $request->withHeader('X-Tenant', 'acme');
+        });
+
+        $this->assertNotNull($this->gateway->dispatch(self::EXAMPLE_PAGE_OBJECT));
+
+        Http::assertSent(fn (ClientRequest $request) => $request->hasHeader('X-Tenant', 'acme'));
+    }
+
+    public function test_it_configures_the_health_check_request(): void
+    {
+        Http::fake([
+            $this->gateway->getProductionUrl('/health') => Http::response(status: 200),
+        ]);
+
+        $this->gateway->configureRequestUsing(fn (PendingRequest $request) => $request->withHeader('X-Tenant', 'acme'));
+
+        $this->assertTrue($this->gateway->isHealthy());
+
+        Http::assertSent(fn (ClientRequest $request) => $request->hasHeader('X-Tenant', 'acme'));
+    }
+
+    public function test_the_ssr_request_configurator_can_be_reset(): void
+    {
+        config([
+            'inertia.ssr.enabled' => true,
+            'inertia.ssr.ensure_bundle_exists' => false,
+        ]);
+
+        Http::fake([
+            $this->renderUrl => Http::response(json_encode([
+                'head' => ['<title>SSR Test</title>'],
+                'body' => '<div id="app">SSR Response</div>',
+            ])),
+        ]);
+
+        $this->gateway->configureRequestUsing(fn (PendingRequest $request) => $request->withHeader('X-Tenant', 'acme'));
+        $this->gateway->configureRequestUsing();
+
+        $this->assertNotNull($this->gateway->dispatch(self::EXAMPLE_PAGE_OBJECT));
+
+        Http::assertSent(fn (ClientRequest $request) => ! $request->hasHeader('X-Tenant'));
+    }
+
+    /**
+     * Capture the pending HTTP request that is sent to the SSR server.
+     */
+    protected function captureSsrRequest(): PendingRequest
+    {
+        config([
+            'inertia.ssr.enabled' => true,
+            'inertia.ssr.ensure_bundle_exists' => false,
+        ]);
+
+        Http::fake([
+            $this->renderUrl => Http::response(json_encode(['head' => [], 'body' => ''])),
+        ]);
+
+        $this->gateway->configureRequestUsing(function (PendingRequest $request) use (&$captured) {
+            $captured = $request;
+        });
+
+        $this->gateway->dispatch(self::EXAMPLE_PAGE_OBJECT);
+
+        return $captured;
     }
 }

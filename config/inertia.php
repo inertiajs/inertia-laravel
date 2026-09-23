@@ -31,6 +31,8 @@ return [
 
         'hot_url' => env('INERTIA_SSR_HOT_URL'),
 
+        'timeout' => env('INERTIA_SSR_TIMEOUT'),
+
         'ensure_bundle_exists' => (bool) env('INERTIA_SSR_ENSURE_BUNDLE_EXISTS', true),
 
         // 'bundle' => base_path('bootstrap/ssr/ssr.mjs'),
