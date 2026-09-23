@@ -31,24 +31,25 @@ class StopSsr extends Command
         $url = $gateway->getUrl('/shutdown');
 
         $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_exec($ch);
         $errno = curl_errno($ch);
         curl_close($ch);
 
-        if ($errno !== CURLE_GOT_NOTHING) {
-            if ($this->option('graceful')) {
-                $this->comment('Inertia SSR server is not running.');
+        if ($errno === CURLE_GOT_NOTHING) {
+            $this->info('Inertia SSR server stopped.');
 
-                return self::SUCCESS;
-            }
-
-            $this->error('Unable to connect to Inertia SSR server.');
-
-            return self::FAILURE;
+            return self::SUCCESS;
         }
 
-        $this->info('Inertia SSR server stopped.');
+        if ($this->option('graceful') && $errno !== CURLE_OK) {
+            $this->comment('Inertia SSR server is not running.');
 
-        return self::SUCCESS;
+            return self::SUCCESS;
+        }
+
+        $this->error('Unable to connect to Inertia SSR server.');
+
+        return self::FAILURE;
     }
 }
