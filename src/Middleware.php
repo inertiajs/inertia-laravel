@@ -4,6 +4,7 @@ namespace Inertia;
 
 use Closure;
 use Illuminate\Contracts\Session\Session as SessionContract;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
 use Illuminate\Session\Store;
@@ -159,7 +160,7 @@ class Middleware
             return $response;
         }
 
-        $this->storeCurrentUrl($request);
+        $this->storeCurrentUrl($request, $response);
 
         if ($request->method() === 'GET' && $request->header(Header::VERSION, '') !== Inertia::getVersion()) {
             $response = $this->onVersionChange($request, $response);
@@ -183,16 +184,12 @@ class Middleware
     }
 
     /**
-     * Store the current URL for Inertia visits skipped by Laravel's session middleware.
+     * Store the current URL and route as the previous location, which Laravel's
+     * session middleware skips for Inertia visits.
      */
-    protected function storeCurrentUrl(Request $request): void
+    protected function storeCurrentUrl(Request $request, Response $response): void
     {
-        if (! $request->hasSession() ||
-            ! $request->isMethod('GET') ||
-            ! $request->route() instanceof Route ||
-            ! $request->ajax() ||
-            $request->prefetch() ||
-            $request->isPrecognitive()) {
+        if (! $this->shouldStoreCurrentUrl($request, $response)) {
             return;
         }
 
@@ -200,7 +197,7 @@ class Middleware
         $session = $request->session();
         $session->setPreviousUrl($request->fullUrl());
 
-        $this->storeCurrentRoute($session, $request->route()->getName());
+        $this->storeCurrentRoute($session, $request->route()?->getName());
     }
 
     /**
@@ -211,6 +208,39 @@ class Middleware
         if (method_exists($session, 'setPreviousRoute')) {
             $session->setPreviousRoute($route);
         }
+    }
+
+    /**
+     * Determine if the visit should be stored as the previous location. Partial
+     * reloads are excluded, since deferred props, polling, and infinite scroll
+     * requests aren't navigations the user came from.
+     */
+    public function shouldStoreCurrentUrl(Request $request, Response $response): bool
+    {
+        if (! config('inertia.store_previous_url', false) ||
+            ! $request->hasSession() ||
+            ! $request->isMethod('GET') ||
+            ! $request->route() instanceof Route ||
+            ! $request->ajax() ||
+            $request->prefetch() ||
+            $request->isPrecognitive()) {
+            return false;
+        }
+
+        return ! $this->isPartialReload($request, $response);
+    }
+
+    /**
+     * Determine if the request is a partial reload of the component that was rendered.
+     */
+    protected function isPartialReload(Request $request, Response $response): bool
+    {
+        if (! $component = $request->header(Header::PARTIAL_COMPONENT)) {
+            return false;
+        }
+
+        return $response instanceof JsonResponse
+            && $component === data_get($response->getData(), 'component');
     }
 
     /**

@@ -125,6 +125,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Previous URL
+    |--------------------------------------------------------------------------
+    |
+    | Laravel's session middleware doesn't store the previous URL and route for
+    | Inertia visits, as they are sent as AJAX requests. Enable this option to
+    | store them for client-side visits as well, excluding partial reloads.
+    |
+    */
+
+    'store_previous_url' => false,
+
+    /*
+    |--------------------------------------------------------------------------
     | History
     |--------------------------------------------------------------------------
     |
