@@ -7,6 +7,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Illuminate\Testing\TestResponse;
+use Inertia\Support\Header;
 use InvalidArgumentException;
 use PHPUnit\Framework\Assert as PHPUnit;
 use PHPUnit\Framework\AssertionFailedError;
@@ -63,6 +64,20 @@ class AssertableInertia extends AssertableJson
     private $flash;
 
     /**
+     * The layer mark (if the page is a layer), which may name a key, a base, or neither.
+     *
+     * @var array<string, string>|null
+     */
+    private $layer;
+
+    /**
+     * Whether the page is a close instruction.
+     *
+     * @var bool
+     */
+    private $close = false;
+
+    /**
      * Create an AssertableInertia instance from a test response.
      *
      * @param  TestResponse<Response>  $response
@@ -70,8 +85,12 @@ class AssertableInertia extends AssertableJson
     public static function fromTestResponse(TestResponse $response): self
     {
         try {
-            $response->assertViewHas('page');
-            $page = json_decode(json_encode($response->viewData('page')), true);
+            if ($response->headers->get(Header::INERTIA)) {
+                $page = $response->json();
+            } else {
+                $response->assertViewHas('page');
+                $page = json_decode(json_encode($response->viewData('page')), true);
+            }
 
             PHPUnit::assertIsArray($page);
             PHPUnit::assertArrayHasKey('component', $page);
@@ -90,6 +109,8 @@ class AssertableInertia extends AssertableJson
         $instance->clearHistory = isset($page['clearHistory']);
         $instance->deferredProps = $page['deferredProps'] ?? [];
         $instance->flash = $page['flash'] ?? [];
+        $instance->layer = $page['layer'] ?? null;
+        $instance->close = isset($page['close']) && $page['close'] === true;
 
         return $instance;
     }
@@ -130,6 +151,48 @@ class AssertableInertia extends AssertableJson
     public function version(string $value): self
     {
         PHPUnit::assertSame($value, $this->version, 'Unexpected Inertia asset version.');
+
+        return $this;
+    }
+
+    /**
+     * Assert that the page is a layer, optionally with the given key. The key asserted is the one
+     * the layer is known by, which is the component when the mark names none: the same default the
+     * client applies, so a layer that leaves its key to the component is still assertable by it.
+     */
+    public function hasLayer(?string $key = null): self
+    {
+        if ($this->layer === null) {
+            PHPUnit::fail('Inertia page is not a layer.');
+        }
+
+        if ($key !== null) {
+            PHPUnit::assertSame($key, ($this->layer['key'] ?? '') ?: $this->component, 'Unexpected Inertia layer key.');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that the layer declares the given base.
+     */
+    public function layerBase(string $base): self
+    {
+        if (! isset($this->layer['base'])) {
+            PHPUnit::fail('Inertia layer has no base.');
+        }
+
+        PHPUnit::assertSame($base, $this->layer['base'], 'Unexpected Inertia layer base.');
+
+        return $this;
+    }
+
+    /**
+     * Assert that the page is a close instruction.
+     */
+    public function isClose(): self
+    {
+        PHPUnit::assertTrue($this->close, 'Inertia page is not a close response.');
 
         return $this;
     }
@@ -299,6 +362,8 @@ class AssertableInertia extends AssertableJson
             ],
             $this->encryptHistory ? ['encryptHistory' => true] : [],
             $this->clearHistory ? ['clearHistory' => true] : [],
+            $this->layer !== null ? ['layer' => $this->layer] : [],
+            $this->close ? ['close' => true] : [],
         );
     }
 }

@@ -18,4 +18,9 @@ class SessionKey
      * Session key for preserving the URL fragment.
      */
     public const PRESERVE_FRAGMENT = 'inertia.preserve_fragment';
+
+    /**
+     * Session key for the interstitial (detour) mark.
+     */
+    public const INTERSTITIAL = 'inertia.interstitial';
 }
