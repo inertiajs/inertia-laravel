@@ -18,8 +18,11 @@ use Inertia\Middleware;
 use Inertia\Ssr\HttpGateway;
 use Inertia\Tests\Stubs\CustomUrlResolverMiddleware;
 use Inertia\Tests\Stubs\ExampleMiddleware;
+use Inertia\Tests\Stubs\PrecognitiveRequestMiddleware;
 use Inertia\Tests\Stubs\SsrExceptMiddleware;
+use Inertia\Tests\Stubs\StorePartialReloadsMiddleware;
 use Inertia\Tests\Stubs\WithAllErrorsMiddleware;
+use Inertia\Tests\Stubs\WithoutPreviousLocationMiddleware;
 use LogicException;
 use PHPUnit\Framework\Attributes\After;
 
@@ -433,6 +436,176 @@ class MiddlewareTest extends TestCase
         ]);
     }
 
+    public function test_inertia_visits_are_stored_as_the_previous_url_and_route(): void
+    {
+        config()->set('inertia.store_previous_url', true);
+
+        $this->preparePreviousLocationEndpoints();
+
+        $this->get('/initial')->assertOk();
+
+        $this->get('/users?filter=active', [
+            'X-Inertia' => 'true',
+            'X-Requested-With' => 'XMLHttpRequest',
+        ])->assertOk();
+
+        $this->assertPreviousLocation($this->baseUrl.'/users?filter=active', 'users.index');
+    }
+
+    public function test_inertia_visits_are_not_stored_as_the_previous_url_and_route_by_default(): void
+    {
+        $this->preparePreviousLocationEndpoints();
+
+        $this->get('/initial')->assertOk();
+
+        $this->get('/users', [
+            'X-Inertia' => 'true',
+            'X-Requested-With' => 'XMLHttpRequest',
+        ])->assertOk();
+
+        $this->assertPreviousLocation($this->baseUrl.'/initial', 'initial');
+    }
+
+    public function test_inertia_prefetch_visits_are_not_stored_as_the_previous_url_and_route(): void
+    {
+        config()->set('inertia.store_previous_url', true);
+
+        $this->preparePreviousLocationEndpoints();
+
+        $this->get('/initial')->assertOk();
+
+        $this->get('/users', [
+            'X-Inertia' => 'true',
+            'X-Requested-With' => 'XMLHttpRequest',
+            'Purpose' => 'prefetch',
+        ])->assertOk();
+
+        $this->assertPreviousLocation($this->baseUrl.'/initial', 'initial');
+    }
+
+    public function test_non_inertia_ajax_requests_are_not_stored_as_the_previous_url_and_route(): void
+    {
+        config()->set('inertia.store_previous_url', true);
+
+        $this->preparePreviousLocationEndpoints();
+
+        $this->get('/initial')->assertOk();
+
+        $this->get('/users', [
+            'X-Requested-With' => 'XMLHttpRequest',
+        ])->assertOk();
+
+        $this->assertPreviousLocation($this->baseUrl.'/initial', 'initial');
+    }
+
+    public function test_non_get_inertia_requests_are_not_stored_as_the_previous_url_and_route(): void
+    {
+        config()->set('inertia.store_previous_url', true);
+
+        $this->preparePreviousLocationEndpoints();
+
+        $this->get('/initial')->assertOk();
+
+        $this->post('/users', [], [
+            'X-Inertia' => 'true',
+            'X-Requested-With' => 'XMLHttpRequest',
+        ])->assertOk();
+
+        $this->assertPreviousLocation($this->baseUrl.'/initial', 'initial');
+    }
+
+    public function test_precognitive_inertia_requests_are_not_stored_as_the_previous_url_and_route(): void
+    {
+        config()->set('inertia.store_previous_url', true);
+
+        $this->preparePreviousLocationEndpoints();
+
+        $this->get('/initial')->assertOk();
+
+        $this->get('/users', [
+            'X-Inertia' => 'true',
+            'X-Requested-With' => 'XMLHttpRequest',
+            'Precognition' => 'true',
+        ])->assertSuccessful();
+
+        $this->assertPreviousLocation($this->baseUrl.'/initial', 'initial');
+    }
+
+    public function test_partial_reloads_are_not_stored_as_the_previous_url_and_route(): void
+    {
+        config()->set('inertia.store_previous_url', true);
+
+        $this->preparePreviousLocationEndpoints();
+
+        $this->get('/initial')->assertOk();
+
+        $this->get('/users', [
+            'X-Inertia' => 'true',
+            'X-Requested-With' => 'XMLHttpRequest',
+        ])->assertOk();
+
+        $this->get('/users?page=2', [
+            'X-Inertia' => 'true',
+            'X-Requested-With' => 'XMLHttpRequest',
+            'X-Inertia-Partial-Component' => 'Users/Index',
+            'X-Inertia-Partial-Data' => 'users',
+        ])->assertOk();
+
+        $this->assertPreviousLocation($this->baseUrl.'/users', 'users.index');
+    }
+
+    public function test_partial_visits_to_another_component_are_stored_as_the_previous_url_and_route(): void
+    {
+        config()->set('inertia.store_previous_url', true);
+
+        $this->preparePreviousLocationEndpoints();
+
+        $this->get('/initial')->assertOk();
+
+        $this->get('/users', [
+            'X-Inertia' => 'true',
+            'X-Requested-With' => 'XMLHttpRequest',
+            'X-Inertia-Partial-Component' => 'Dashboard',
+            'X-Inertia-Partial-Data' => 'users',
+        ])->assertOk();
+
+        $this->assertPreviousLocation($this->baseUrl.'/users', 'users.index');
+    }
+
+    public function test_partial_reloads_can_be_stored_as_the_previous_url_and_route(): void
+    {
+        config()->set('inertia.store_previous_url', true);
+
+        $this->preparePreviousLocationEndpoints(StorePartialReloadsMiddleware::class);
+
+        $this->get('/initial')->assertOk();
+
+        $this->get('/users?page=2', [
+            'X-Inertia' => 'true',
+            'X-Requested-With' => 'XMLHttpRequest',
+            'X-Inertia-Partial-Component' => 'Users/Index',
+            'X-Inertia-Partial-Data' => 'users',
+        ])->assertOk();
+
+        $this->assertPreviousLocation($this->baseUrl.'/users?page=2', 'users.index');
+    }
+
+    public function test_storing_the_previous_url_and_route_can_be_disabled(): void
+    {
+        config()->set('inertia.store_previous_url', true);
+
+        $this->preparePreviousLocationEndpoints(WithoutPreviousLocationMiddleware::class);
+
+        $this->get('/initial')->assertOk();
+
+        $this->get('/users', [
+            'X-Inertia' => 'true',
+            'X-Requested-With' => 'XMLHttpRequest',
+        ])->assertOk();
+
+        $this->assertPreviousLocation($this->baseUrl.'/initial', 'initial');
+    }
+
     public function test_redirect_with_hash_fragment_returns_409_for_inertia_requests(): void
     {
         Route::middleware([StartSession::class, Middleware::class])->get('/action', function () {
@@ -663,6 +836,42 @@ class MiddlewareTest extends TestCase
             return $middleware->handle($request, function ($request) {
                 return Inertia::render('User/Edit', ['user' => ['name' => 'Jonathan']])->toResponse($request);
             });
+        });
+    }
+
+    private function assertPreviousLocation(string $url, string $route): void
+    {
+        $response = $this->post('/inspect-previous');
+
+        $response->assertJsonPath('url', $url);
+        $response->assertJsonPath('route', $response->json('supportsRouteHistory') ? $route : null);
+    }
+
+    /**
+     * @param  class-string<Middleware>  $middleware
+     */
+    private function preparePreviousLocationEndpoints(string $middleware = Middleware::class): void
+    {
+        Route::middleware([StartSession::class, $middleware])->get('/initial', function () {
+            return response('Initial page');
+        })->name('initial');
+
+        Route::middleware([
+            StartSession::class,
+            PrecognitiveRequestMiddleware::class,
+            $middleware,
+        ])->match(['GET', 'POST'], '/users', function () {
+            return Inertia::render('Users/Index');
+        })->name('users.index');
+
+        Route::middleware(StartSession::class)->post('/inspect-previous', function (Request $request) {
+            return response()->json([
+                'url' => $request->session()->previousUrl(),
+                'route' => method_exists($request->session(), 'previousRoute')
+                    ? $request->session()->previousRoute()
+                    : null,
+                'supportsRouteHistory' => method_exists($request->session(), 'previousRoute'),
+            ]);
         });
     }
 }

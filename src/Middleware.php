@@ -3,7 +3,10 @@
 namespace Inertia;
 
 use Closure;
+use Illuminate\Contracts\Session\Session as SessionContract;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Route;
 use Illuminate\Session\Store;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\MessageBag;
@@ -157,6 +160,8 @@ class Middleware
             return $response;
         }
 
+        $this->storeCurrentUrl($request, $response);
+
         if ($request->method() === 'GET' && $request->header(Header::VERSION, '') !== Inertia::getVersion()) {
             $response = $this->onVersionChange($request, $response);
         }
@@ -176,6 +181,66 @@ class Middleware
         $recorder?->respondedWith($request, $response);
 
         return $response;
+    }
+
+    /**
+     * Store the current URL and route as the previous location, which Laravel's
+     * session middleware skips for Inertia visits.
+     */
+    protected function storeCurrentUrl(Request $request, Response $response): void
+    {
+        if (! $this->shouldStoreCurrentUrl($request, $response)) {
+            return;
+        }
+
+        /** @var Store $session */
+        $session = $request->session();
+        $session->setPreviousUrl($request->fullUrl());
+
+        $this->storeCurrentRoute($session, $request->route()?->getName());
+    }
+
+    /**
+     * Store the current route when supported by the Laravel version.
+     */
+    protected function storeCurrentRoute(SessionContract $session, ?string $route): void
+    {
+        if (method_exists($session, 'setPreviousRoute')) {
+            $session->setPreviousRoute($route);
+        }
+    }
+
+    /**
+     * Determine if the visit should be stored as the previous location. Partial
+     * reloads are excluded, since deferred props, polling, and infinite scroll
+     * requests aren't navigations the user came from.
+     */
+    public function shouldStoreCurrentUrl(Request $request, Response $response): bool
+    {
+        if (! config('inertia.store_previous_url', false) ||
+            ! $request->hasSession() ||
+            ! $request->isMethod('GET') ||
+            ! $request->route() instanceof Route ||
+            ! $request->ajax() ||
+            $request->prefetch() ||
+            $request->isPrecognitive()) {
+            return false;
+        }
+
+        return ! $this->isPartialReload($request, $response);
+    }
+
+    /**
+     * Determine if the request is a partial reload of the component that was rendered.
+     */
+    protected function isPartialReload(Request $request, Response $response): bool
+    {
+        if (! $component = $request->header(Header::PARTIAL_COMPONENT)) {
+            return false;
+        }
+
+        return $response instanceof JsonResponse
+            && $component === data_get($response->getOriginalContent(), 'component');
     }
 
     /**
