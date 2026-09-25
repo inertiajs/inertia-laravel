@@ -1,8 +1,16 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.27...2.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v2.0.28...2.x)
 
 - Nothing!
+
+## [v2.0.28](https://github.com/inertiajs/inertia-laravel/compare/v2.0.27...v2.0.28) - 2026-09-25
+
+### What's Changed
+
+* [2.x] Add --graceful option to the inertia:stop-ssr command by [@TimKunze96](https://github.com/TimKunze96) in https://github.com/inertiajs/inertia-laravel/pull/914
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v2.0.27...v2.0.28
 
 ## [v2.0.27](https://github.com/inertiajs/inertia-laravel/compare/v2.0.26...v2.0.27) - 2026-09-11
 
