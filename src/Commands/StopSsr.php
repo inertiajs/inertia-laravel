@@ -34,7 +34,6 @@ class StopSsr extends Command
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_exec($ch);
         $errno = curl_errno($ch);
-        curl_close($ch);
 
         if ($errno === CURLE_GOT_NOTHING) {
             $this->info('Inertia SSR server stopped.');
