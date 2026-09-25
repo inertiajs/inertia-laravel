@@ -1,8 +1,25 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.3.4...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.4.0...3.x)
 
 - Nothing!
+
+## [v3.4.0](https://github.com/inertiajs/inertia-laravel/compare/v3.3.4...v3.4.0) - 2026-09-25
+
+### What's Changed
+
+* [3.x] Return Illuminate's RedirectResponse from back() by [@YannikFirre](https://github.com/YannikFirre) in https://github.com/inertiajs/inertia-laravel/pull/910
+* [3.x] Configure the HTTP request sent to the SSR server by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/916
+* [3.x] Ensure deferred callbacks run on Inertia redirects by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/915
+* [3.x] Add `--graceful` option to the `inertia:stop-ssr` command by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/917
+* [3.x] Store previous locations for Inertia visits by [@drewmt](https://github.com/drewmt) in https://github.com/inertiajs/inertia-laravel/pull/888
+
+### New Contributors
+
+* [@YannikFirre](https://github.com/YannikFirre) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/910
+* [@drewmt](https://github.com/drewmt) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/888
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v3.3.4...v3.4.0
 
 ## [v3.3.4](https://github.com/inertiajs/inertia-laravel/compare/v3.3.3...v3.3.4) - 2026-09-11
 
