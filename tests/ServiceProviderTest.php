@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Illuminate\View\Compilers\BladeCompiler;
+use Inertia\Middleware\EnsureDeferredCallbacksRun;
 use Inertia\Middleware\EnsureGetOnRedirect;
 use Inertia\Tests\Stubs\ExampleMiddleware;
 
@@ -81,6 +82,15 @@ class ServiceProviderTest extends TestCase
         $kernel = $this->app->make(HttpKernelContract::class);
 
         $this->assertTrue($kernel->hasMiddleware(EnsureGetOnRedirect::class));
+    }
+
+    public function test_deferred_callbacks_middleware_wraps_the_global_middleware_stack(): void
+    {
+        /** @var Kernel $kernel */
+        $kernel = $this->app->make(HttpKernelContract::class);
+
+        $this->assertTrue($kernel->hasMiddleware(EnsureDeferredCallbacksRun::class));
+        $this->assertSame(EnsureDeferredCallbacksRun::class, $kernel->getGlobalMiddleware()[0]);
     }
 
     public function test_redirect_response_from_rate_limiter_is_converted_to_303(): void

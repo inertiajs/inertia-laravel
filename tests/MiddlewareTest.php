@@ -2,7 +2,9 @@
 
 namespace Inertia\Tests;
 
+use Illuminate\Contracts\Http\Kernel as HttpKernelContract;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Foundation\Http\Kernel;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route as RouteInstance;
 use Illuminate\Session\Middleware\StartSession;
@@ -498,6 +500,138 @@ class MiddlewareTest extends TestCase
         ]);
 
         $response->assertRedirect($this->baseUrl.'/article#section');
+    }
+
+    public function test_deferred_callbacks_run_when_a_fragment_redirect_is_returned(): void
+    {
+        $called = false;
+
+        Route::middleware([StartSession::class, Middleware::class])->post('/action', function () use (&$called) {
+            defer(function () use (&$called) {
+                $called = true;
+            });
+
+            return redirect('/article#section');
+        });
+
+        $response = $this->post('/action', [], [
+            'X-Inertia' => 'true',
+        ]);
+
+        $response->assertStatus(409);
+        $response->assertHeader('X-Inertia-Redirect', $this->baseUrl.'/article#section');
+        $this->assertTrue($called);
+    }
+
+    public function test_deferred_callbacks_run_when_a_location_visit_is_returned(): void
+    {
+        $called = false;
+
+        Route::middleware([StartSession::class, Middleware::class])->post('/action', function () use (&$called) {
+            defer(function () use (&$called) {
+                $called = true;
+            });
+
+            return Inertia::location('https://inertiajs.com');
+        });
+
+        $response = $this->post('/action', [], [
+            'X-Inertia' => 'true',
+        ]);
+
+        $response->assertStatus(409);
+        $response->assertHeader('X-Inertia-Location', 'https://inertiajs.com');
+        $this->assertTrue($called);
+    }
+
+    public function test_deferred_callbacks_run_when_the_middleware_is_registered_globally(): void
+    {
+        $called = false;
+
+        /** @var Kernel $kernel */
+        $kernel = $this->app->make(HttpKernelContract::class);
+        $kernel->pushMiddleware(Middleware::class);
+
+        Route::middleware(StartSession::class)->post('/action', function () use (&$called) {
+            defer(function () use (&$called) {
+                $called = true;
+            });
+
+            return redirect('/article#section');
+        });
+
+        $response = $this->post('/action', [], [
+            'X-Inertia' => 'true',
+        ]);
+
+        $response->assertStatus(409);
+        $this->assertTrue($called);
+    }
+
+    public function test_deferred_callbacks_are_skipped_when_a_control_header_is_set_on_a_failed_response(): void
+    {
+        $called = false;
+
+        Route::middleware([StartSession::class, Middleware::class])->post('/action', function () use (&$called) {
+            defer(function () use (&$called) {
+                $called = true;
+            });
+
+            return response('', 500, ['X-Inertia-Redirect' => '/article#section']);
+        });
+
+        $response = $this->post('/action', [], [
+            'X-Inertia' => 'true',
+        ]);
+
+        $response->assertStatus(500);
+        $this->assertFalse($called);
+    }
+
+    public function test_deferred_callbacks_are_skipped_on_a_version_mismatch_reload(): void
+    {
+        $called = false;
+
+        $middleware = new ExampleMiddleware('1234');
+
+        Route::middleware(StartSession::class)->get('/', function (Request $request) use ($middleware, &$called) {
+            return $middleware->handle($request, function ($request) use (&$called) {
+                defer(function () use (&$called) {
+                    $called = true;
+                });
+
+                return Inertia::render('User/Edit')->toResponse($request);
+            });
+        });
+
+        $response = $this->get('/', [
+            'X-Inertia' => 'true',
+            'X-Inertia-Version' => '4321',
+        ]);
+
+        $response->assertStatus(409);
+        $response->assertHeader('X-Inertia-Location', $this->baseUrl);
+        $this->assertFalse($called);
+    }
+
+    public function test_deferred_callbacks_are_skipped_on_a_failed_response(): void
+    {
+        $called = false;
+
+        Route::middleware([StartSession::class, Middleware::class])->post('/action', function () use (&$called) {
+            defer(function () use (&$called) {
+                $called = true;
+            });
+
+            abort(500);
+        });
+
+        $response = $this->post('/action', [], [
+            'X-Inertia' => 'true',
+        ]);
+
+        $response->assertStatus(500);
+        $this->assertFalse($called);
     }
 
     public function test_middleware_registers_ssr_except_paths(): void
