@@ -240,7 +240,7 @@ class Middleware
         }
 
         return $response instanceof JsonResponse
-            && $component === data_get($response->getData(), 'component');
+            && $component === data_get($response->getOriginalContent(), 'component');
     }
 
     /**
