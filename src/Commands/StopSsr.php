@@ -14,7 +14,7 @@ class StopSsr extends Command
      *
      * @var string
      */
-    protected $name = 'inertia:stop-ssr';
+    protected $signature = 'inertia:stop-ssr {--graceful : Return a successful exit code when the SSR server is not running}';
 
     /**
      * The console command description.
@@ -31,18 +31,24 @@ class StopSsr extends Command
         $url = $gateway->getProductionUrl('/shutdown');
 
         $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_exec($ch);
+        $errno = curl_errno($ch);
 
-        if (curl_error($ch) !== 'Empty reply from server') {
-            $this->error('Unable to connect to Inertia SSR server.');
+        if ($errno === CURLE_GOT_NOTHING) {
+            $this->info('Inertia SSR server stopped.');
 
-            return self::FAILURE;
+            return self::SUCCESS;
         }
 
-        $this->info('Inertia SSR server stopped.');
+        if ($this->option('graceful') && $errno !== CURLE_OK) {
+            $this->comment('Inertia SSR server is not running.');
 
-        curl_close($ch);
+            return self::SUCCESS;
+        }
 
-        return self::SUCCESS;
+        $this->error('Unable to connect to Inertia SSR server.');
+
+        return self::FAILURE;
     }
 }
