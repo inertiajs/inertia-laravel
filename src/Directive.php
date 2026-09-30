@@ -21,7 +21,7 @@ class Directive
             if ($__inertiaSsrResponse) {
                 echo $__inertiaSsrResponse->body;
             } else {
-                ?><script data-page="'.$id.'" type="application/json">{!! json_encode($page) !!}</script><div id="'.$id.'"></div><?php
+                ?><script data-page="'.$id.'" type="application/json">{!! json_encode($page, JSON_HEX_TAG) !!}</script><div id="'.$id.'"></div><?php
             }
         ?>';
 

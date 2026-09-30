@@ -5,6 +5,7 @@ namespace Inertia\Ssr;
 use Closure;
 use Exception;
 use Illuminate\Foundation\Http\Middleware\Concerns\ExcludesPaths;
+use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\StrayRequestException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -15,7 +16,7 @@ use Inertia\PreservesBigIntegers;
 use Inertia\ResolvesCallables;
 use Inertia\Support\Header;
 
-class HttpGateway implements DisablesSsr, ExcludesSsrPaths, Gateway, HasHealthCheck
+class HttpGateway implements ConfiguresSsrRequests, DisablesSsr, ExcludesSsrPaths, Gateway, HasHealthCheck
 {
     use ExcludesPaths;
     use PreservesBigIntegers;
@@ -32,6 +33,11 @@ class HttpGateway implements DisablesSsr, ExcludesSsrPaths, Gateway, HasHealthCh
      * The condition that determines if SSR is disabled.
      */
     protected Closure|bool|null $disabled = null;
+
+    /**
+     * The SSR request configurator callback.
+     */
+    protected ?Closure $requestConfigurator = null;
 
     /**
      * Dispatch the Inertia page to the SSR engine via HTTP.
@@ -55,7 +61,7 @@ class HttpGateway implements DisablesSsr, ExcludesSsrPaths, Gateway, HasHealthCh
             : $this->getProductionUrl('/render');
 
         try {
-            $response = Http::withHeaders($this->ssrHeaders())->post($url, $page);
+            $response = $this->pendingRequest()->post($url, $page);
 
             if ($response->failed()) {
                 $this->handleSsrFailure($page, $response->json());
@@ -104,6 +110,32 @@ class HttpGateway implements DisablesSsr, ExcludesSsrPaths, Gateway, HasHealthCh
     }
 
     /**
+     * Configure the HTTP request that is sent to the SSR server.
+     */
+    public function configureRequestUsing(?Closure $callback = null): void
+    {
+        $this->requestConfigurator = $callback;
+    }
+
+    /**
+     * Create the pending HTTP request for the SSR server.
+     */
+    protected function pendingRequest(): PendingRequest
+    {
+        $request = Http::createPendingRequest()->withHeaders($this->ssrHeaders());
+
+        if ($timeout = config('inertia.ssr.timeout')) {
+            $request->timeout($timeout);
+        }
+
+        if (! $this->requestConfigurator) {
+            return $request;
+        }
+
+        return ($this->requestConfigurator)($request) ?? $request;
+    }
+
+    /**
      * Handle an SSR rendering failure.
      *
      * @param  array<string, mixed>  $page
@@ -141,9 +173,9 @@ class HttpGateway implements DisablesSsr, ExcludesSsrPaths, Gateway, HasHealthCh
     }
 
     /**
-     * The headers to send along with the page to the SSR server. Parsing big
-     * integer markers cannot be gated by the client config there, since the
-     * config is set by the callback that receives the already-parsed page.
+     * The headers to send along with every request to the SSR server. Parsing
+     * big integer markers cannot be gated by the client config there, since
+     * that config is set by the callback receiving the already-parsed page.
      *
      * @return array<string, string>
      */
@@ -172,7 +204,7 @@ class HttpGateway implements DisablesSsr, ExcludesSsrPaths, Gateway, HasHealthCh
     public function isHealthy(): bool
     {
         try {
-            return Http::get($this->getProductionUrl('/health'))->successful();
+            return $this->pendingRequest()->get($this->getProductionUrl('/health'))->successful();
         } catch (Exception $e) {
             if ($e instanceof StrayRequestException) {
                 throw $e;

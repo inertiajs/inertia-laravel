@@ -7,7 +7,6 @@ use Illuminate\Foundation\Http\Kernel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use Illuminate\Testing\TestResponse;
 use Illuminate\View\FileViewFinder;
@@ -62,7 +61,7 @@ class ServiceProvider extends BaseServiceProvider
     public function boot(): void
     {
         $this->registerConsoleCommands();
-        $this->pushRedirectMiddleware();
+        $this->registerRedirectMiddleware();
 
         $this->publishes([
             __DIR__.'/../config/inertia.php' => config_path('inertia.php'),
@@ -72,11 +71,12 @@ class ServiceProvider extends BaseServiceProvider
     /**
      * Register the global redirect middleware for Inertia requests.
      */
-    protected function pushRedirectMiddleware(): void
+    protected function registerRedirectMiddleware(): void
     {
         $this->callAfterResolving(HttpKernelContract::class, function ($kernel) {
             if ($kernel instanceof Kernel) {
                 $kernel->pushMiddleware(Middleware\EnsureGetOnRedirect::class);
+                $kernel->prependMiddleware(Middleware\EnsureDeferredCallbacksRun::class);
             }
         });
     }
@@ -86,8 +86,8 @@ class ServiceProvider extends BaseServiceProvider
      */
     protected function registerBladeComponents(): void
     {
-        $this->callAfterResolving('blade.compiler', function () {
-            Blade::componentNamespace('Inertia\\View\\Components', 'inertia');
+        $this->callAfterResolving('blade.compiler', function ($blade) {
+            $blade->componentNamespace('Inertia\\View\\Components', 'inertia');
         });
     }
 
