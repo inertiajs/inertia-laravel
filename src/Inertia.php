@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static void clearHistory()
  * @method static void preserveFragment()
  * @method static void encryptHistory(bool $encrypt = true)
+ * @method static void preserveBigIntegers(bool $preserve = true)
  * @method static void disableSsr(\Closure|bool $condition = true)
  * @method static void withoutSsr(array<int, string>|string $paths)
  * @method static void configureSsrRequestUsing(\Closure|null $callback = null)

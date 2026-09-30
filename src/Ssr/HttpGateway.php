@@ -12,14 +12,12 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\Str;
-use Inertia\PreservesBigIntegers;
 use Inertia\ResolvesCallables;
 use Inertia\Support\Header;
 
 class HttpGateway implements ConfiguresSsrRequests, DisablesSsr, ExcludesSsrPaths, Gateway, HasHealthCheck
 {
     use ExcludesPaths;
-    use PreservesBigIntegers;
     use ResolvesCallables;
 
     /**
@@ -61,7 +59,7 @@ class HttpGateway implements ConfiguresSsrRequests, DisablesSsr, ExcludesSsrPath
             : $this->getProductionUrl('/render');
 
         try {
-            $response = $this->pendingRequest()->post($url, $page);
+            $response = $this->pendingRequest($page)->post($url, $page);
 
             if ($response->failed()) {
                 $this->handleSsrFailure($page, $response->json());
@@ -119,10 +117,12 @@ class HttpGateway implements ConfiguresSsrRequests, DisablesSsr, ExcludesSsrPath
 
     /**
      * Create the pending HTTP request for the SSR server.
+     *
+     * @param  array<string, mixed>|null  $page
      */
-    protected function pendingRequest(): PendingRequest
+    protected function pendingRequest(?array $page = null): PendingRequest
     {
-        $request = Http::createPendingRequest()->withHeaders($this->ssrHeaders());
+        $request = Http::createPendingRequest()->withHeaders($this->ssrHeaders($page));
 
         if ($timeout = config('inertia.ssr.timeout')) {
             $request->timeout($timeout);
@@ -173,15 +173,16 @@ class HttpGateway implements ConfiguresSsrRequests, DisablesSsr, ExcludesSsrPath
     }
 
     /**
-     * The headers to send along with every request to the SSR server. Parsing
-     * big integer markers cannot be gated by the client config there, since
-     * that config is set by the callback receiving the already-parsed page.
+     * The headers to send along with the page to the SSR server. The SSR
+     * bundle cannot know whether markers are present until it has parsed,
+     * so the page it is about to render says so up front.
      *
+     * @param  array<string, mixed>|null  $page
      * @return array<string, string>
      */
-    protected function ssrHeaders(): array
+    protected function ssrHeaders(?array $page): array
     {
-        return $this->shouldPreserveBigIntegers()
+        return ($page['preserveBigIntegers'] ?? false)
             ? [Header::PRESERVE_BIG_INTEGERS => 'true']
             : [];
     }

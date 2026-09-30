@@ -104,6 +104,7 @@ class Response implements Responsable
         string $version = '',
         bool $encryptHistory = false,
         ?Closure $urlResolver = null,
+        bool $preserveBigIntegers = false,
     ) {
         $this->component = $component;
         $this->sharedProps = $sharedProps;
@@ -114,6 +115,17 @@ class Response implements Responsable
         $this->preserveFragment = session()->pull(SessionKey::PRESERVE_FRAGMENT, false);
         $this->encryptHistory = $encryptHistory;
         $this->urlResolver = $urlResolver;
+        $this->preserveBigIntegers = $preserveBigIntegers;
+    }
+
+    /**
+     * Preserve integers outside JavaScript's safe range as BigInt values.
+     */
+    public function preserveBigIntegers(bool $preserve = true): self
+    {
+        $this->preserveBigIntegers = $preserve;
+
+        return $this;
     }
 
     /**
@@ -187,7 +199,7 @@ class Response implements Responsable
      */
     public function toResponse($request)
     {
-        $resolver = new PropsResolver($request, $this->component);
+        $resolver = new PropsResolver($request, $this->component, $this->preserveBigIntegers);
         [$resolvedProps, $resolvedMetadata] = $resolver->resolve($this->sharedProps, $this->props);
 
         $page = array_merge(
@@ -198,6 +210,7 @@ class Response implements Responsable
                 'version' => $this->version,
             ],
             $resolvedMetadata,
+            $this->resolvePreserveBigIntegers(),
             $this->resolveClearHistory($request),
             $this->resolveEncryptHistory($request),
             $this->resolveFlashData($request),
@@ -207,7 +220,13 @@ class Response implements Responsable
         DevTools::recorder($request)?->pageRendered($request, $page, $resolvedProps);
 
         if ($request->header(Header::INERTIA)) {
-            return new JsonResponse($page, 200, [Header::INERTIA => 'true']);
+            $headers = [Header::INERTIA => 'true'];
+
+            if ($this->preserveBigIntegers) {
+                $headers[Header::PRESERVE_BIG_INTEGERS] = 'true';
+            }
+
+            return new JsonResponse($page, 200, $headers);
         }
 
         App::make(SsrState::class)->setPage($page);
@@ -251,6 +270,17 @@ class Response implements Responsable
         // Flash data is merged into the page after the props are resolved, so it
         // needs the same big integer treatment the props resolver applies.
         return ['flash' => $this->encodeBigIntegersWhenEnabled($flash)];
+    }
+
+    /**
+     * Resolve the big integer flag, which tells the client the page may carry
+     * markers. Mirrored onto the response header for subsequent visits.
+     *
+     * @return array<string, true>
+     */
+    protected function resolvePreserveBigIntegers(): array
+    {
+        return $this->preserveBigIntegers ? ['preserveBigIntegers' => true] : [];
     }
 
     /**

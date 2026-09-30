@@ -1305,6 +1305,7 @@ class PropsResolverTest extends TestCase
     protected function makePage(Request $request, array $props): array
     {
         $response = new Response('TestComponent', [], $props, 'app', '123');
+        $response->preserveBigIntegers((bool) config('inertia.preserve_big_integers', false));
         $response = $response->toResponse($request);
 
         if ($response instanceof JsonResponse) {

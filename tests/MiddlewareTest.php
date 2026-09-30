@@ -69,7 +69,7 @@ class MiddlewareTest extends TestCase
             'huge' => ['$bigint' => '99999999999999999999999'],
             'nested' => ['deep' => ['$bigint' => '-900719925474099988']],
             'list' => [['$bigint' => '900719925474099988'], ['$bigint' => '2']],
-        ], ['X-Inertia' => 'true']);
+        ], ['X-Inertia-Preserve-Big-Integers' => 'true']);
 
         $this->assertSame(900719925474099988, $received['id']);
         $this->assertSame(42, $received['safe']);
@@ -93,7 +93,7 @@ class MiddlewareTest extends TestCase
             'fraction' => ['$bigint' => '12.5'],
             'extraKey' => ['$bigint' => '1', 'other' => 2],
             'zero' => ['$bigint' => '0'],
-        ], ['X-Inertia' => 'true']);
+        ], ['X-Inertia-Preserve-Big-Integers' => 'true']);
 
         $this->assertSame(['$bigint' => '007'], $received['padded']);
         $this->assertSame(['$bigint' => '-0'], $received['negativeZero']);
@@ -102,15 +102,29 @@ class MiddlewareTest extends TestCase
         $this->assertSame(0, $received['zero']);
     }
 
-    public function test_incoming_big_integer_markers_are_left_untouched_when_disabled(): void
+    public function test_incoming_big_integer_markers_are_decoded_when_the_header_is_present(): void
     {
-        config(['inertia.preserve_big_integers' => false]);
-
         $received = null;
         Route::middleware(Middleware::class)->post('/', function (Request $request) use (&$received) {
             $received = $request->all();
         });
 
+        $this->postJson('/', [
+            'id' => ['$bigint' => '900719925474099988'],
+        ], ['X-Inertia-Preserve-Big-Integers' => 'true']);
+
+        $this->assertSame(900719925474099988, $received['id']);
+    }
+
+    public function test_incoming_big_integer_markers_are_ignored_without_the_header(): void
+    {
+        $received = null;
+        Route::middleware(Middleware::class)->post('/', function (Request $request) use (&$received) {
+            $received = $request->all();
+        });
+
+        // A third-party JSON body that happens to be marker shaped. Enabling the
+        // feature does not give the middleware licence to rewrite it.
         $this->postJson('/', [
             'id' => ['$bigint' => '900719925474099988'],
         ]);
@@ -120,50 +134,14 @@ class MiddlewareTest extends TestCase
 
     public function test_incoming_requests_without_markers_are_not_walked(): void
     {
-        config(['inertia.preserve_big_integers' => true]);
-
         $received = null;
         Route::middleware(Middleware::class)->post('/', function (Request $request) use (&$received) {
             $received = $request->all();
         });
 
-        $this->postJson('/', ['id' => 42, 'name' => 'John'], ['X-Inertia' => 'true']);
+        $this->postJson('/', ['id' => 42, 'name' => 'John'], ['X-Inertia-Preserve-Big-Integers' => 'true']);
 
         $this->assertSame(['id' => 42, 'name' => 'John'], $received);
-    }
-
-    public function test_incoming_big_integer_markers_are_decoded_without_the_inertia_header(): void
-    {
-        config(['inertia.preserve_big_integers' => true]);
-
-        $received = null;
-        Route::middleware(Middleware::class)->post('/', function (Request $request) use (&$received) {
-            $received = $request->all();
-        });
-
-        // useHttp sends plain JSON requests that carry markers but no Inertia header.
-        $this->postJson('/', [
-            'id' => ['$bigint' => '900719925474099988'],
-        ]);
-
-        $this->assertSame(900719925474099988, $received['id']);
-    }
-
-    public function test_incoming_big_integer_markers_are_decoded_on_precognitive_requests(): void
-    {
-        config(['inertia.preserve_big_integers' => true]);
-
-        $received = null;
-        Route::middleware(Middleware::class)->post('/', function (Request $request) use (&$received) {
-            $received = $request->all();
-        });
-
-        // Precognition uses its own HTTP client, which never sets the Inertia header.
-        $this->postJson('/', [
-            'id' => ['$bigint' => '900719925474099988'],
-        ], ['Precognition' => 'true']);
-
-        $this->assertSame(900719925474099988, $received['id']);
     }
 
     public function test_incoming_big_integer_markers_reach_validation_as_integers(): void
@@ -177,7 +155,7 @@ class MiddlewareTest extends TestCase
 
         $this->postJson('/', [
             'id' => ['$bigint' => '900719925474099988'],
-        ], ['X-Inertia' => 'true']);
+        ], ['X-Inertia-Preserve-Big-Integers' => 'true']);
 
         $this->assertSame(900719925474099988, $validated['id']);
     }
@@ -192,7 +170,7 @@ class MiddlewareTest extends TestCase
         });
 
         // Form encoded bodies carry digits rather than markers, so they are left alone.
-        $this->post('/', ['id' => ['$bigint' => '900719925474099988']], ['X-Inertia' => 'true']);
+        $this->post('/', ['id' => ['$bigint' => '900719925474099988']], ['X-Inertia-Preserve-Big-Integers' => 'true']);
 
         $this->assertSame(['$bigint' => '900719925474099988'], $received['id']);
     }

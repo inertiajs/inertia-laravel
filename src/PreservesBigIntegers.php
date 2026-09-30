@@ -29,19 +29,16 @@ trait PreservesBigIntegers
     protected const MAX_SAFE_INTEGER = 9007199254740991;
 
     /**
-     * Determine whether integers outside JavaScript's safe range should be preserved.
+     * Whether integers outside JavaScript's safe range should be preserved.
      */
-    protected function shouldPreserveBigIntegers(): bool
-    {
-        return (bool) config('inertia.preserve_big_integers', false);
-    }
+    protected bool $preserveBigIntegers = false;
 
     /**
-     * Wrap big integers only while the feature is enabled.
+     * Wrap big integers only when this response opted in.
      */
     protected function encodeBigIntegersWhenEnabled(mixed $value): mixed
     {
-        return $this->shouldPreserveBigIntegers() ? $this->encodeBigIntegers($value) : $value;
+        return $this->preserveBigIntegers ? $this->encodeBigIntegers($value) : $value;
     }
 
     /**
@@ -144,8 +141,11 @@ trait PreservesBigIntegers
 
         $class = $value::class;
 
-        return $plain[$class] ??= $value instanceof stdClass
-            || ! (new ReflectionClass($class))->isInternal();
+        if (! isset($plain[$class])) {
+            $plain[$class] = $value instanceof stdClass || ! (new ReflectionClass($class))->isInternal();
+        }
+
+        return $plain[$class];
     }
 
     /**

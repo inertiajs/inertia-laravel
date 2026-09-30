@@ -146,14 +146,9 @@ class PropsResolver
     protected ?RequestRecorder $recorder = null;
 
     /**
-     * Whether integers outside JavaScript's safe range should be preserved.
-     */
-    protected bool $preserveBigIntegers;
-
-    /**
      * Create a new props resolver instance.
      */
-    public function __construct(Request $request, string $component)
+    public function __construct(Request $request, string $component, bool $preserveBigIntegers = false)
     {
         $this->request = $request;
         $this->component = $component;
@@ -166,7 +161,7 @@ class PropsResolver
         $this->loadedOnceProps = $this->parseHeader(Header::EXCEPT_ONCE_PROPS) ?? [];
 
         $this->recorder = DevTools::recorder($request);
-        $this->preserveBigIntegers = $this->shouldPreserveBigIntegers();
+        $this->preserveBigIntegers = $preserveBigIntegers;
     }
 
     /**
@@ -321,9 +316,7 @@ class PropsResolver
                 continue;
             }
 
-            $result[$key] = $this->preserveBigIntegers
-                ? $this->encodeBigIntegers($value)
-                : $value;
+            $result[$key] = $this->encodeBigIntegersWhenEnabled($value);
         }
 
         return $result;

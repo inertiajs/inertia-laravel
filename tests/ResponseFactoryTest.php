@@ -790,6 +790,72 @@ class ResponseFactoryTest extends TestCase
         $response->assertJson(['flash' => ['id' => 900719925474099988]]);
     }
 
+    public function test_big_integers_can_be_preserved_for_a_single_response(): void
+    {
+        config(['inertia.preserve_big_integers' => false]);
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/one-page', function () {
+            return Inertia::render('User/Edit', ['id' => 900719925474099988])->preserveBigIntegers();
+        });
+
+        $response = $this->get('/one-page', ['X-Inertia' => 'true']);
+
+        $response->assertJson(['props' => ['id' => ['$bigint' => '900719925474099988']]]);
+        $response->assertHeader('X-Inertia-Preserve-Big-Integers', 'true');
+    }
+
+    public function test_big_integers_can_be_preserved_for_every_response(): void
+    {
+        config(['inertia.preserve_big_integers' => false]);
+
+        Inertia::preserveBigIntegers();
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/every-page', function () {
+            return Inertia::render('User/Edit', ['id' => 900719925474099988]);
+        });
+
+        $this->get('/every-page', ['X-Inertia' => 'true'])
+            ->assertJson(['props' => ['id' => ['$bigint' => '900719925474099988']]]);
+    }
+
+    public function test_a_single_response_can_opt_out_of_preserving_big_integers(): void
+    {
+        config(['inertia.preserve_big_integers' => true]);
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/opted-out', function () {
+            return Inertia::render('User/Edit', ['id' => 900719925474099988])->preserveBigIntegers(false);
+        });
+
+        $response = $this->get('/opted-out', ['X-Inertia' => 'true']);
+
+        $response->assertJson(['props' => ['id' => 900719925474099988]]);
+        $response->assertHeaderMissing('X-Inertia-Preserve-Big-Integers');
+    }
+
+    public function test_the_initial_page_tells_the_client_when_big_integers_may_be_wrapped(): void
+    {
+        config(['inertia.preserve_big_integers' => true]);
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/root', function () {
+            return Inertia::render('User/Edit', ['id' => 900719925474099988]);
+        });
+
+        // The initial page cannot read a response header, and the root view may
+        // be a cached compile, so the signal travels inside the page itself.
+        $this->get('/root')->assertSee('"preserveBigIntegers":true', false);
+    }
+
+    public function test_the_initial_page_is_unmarked_when_big_integers_are_disabled(): void
+    {
+        config(['inertia.preserve_big_integers' => false]);
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/root', function () {
+            return Inertia::render('User/Edit', ['id' => 900719925474099988]);
+        });
+
+        $this->get('/root')->assertDontSee('preserveBigIntegers', false);
+    }
+
     public function test_render_without_flash_does_not_include_flash_key(): void
     {
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/no-flash', function () {

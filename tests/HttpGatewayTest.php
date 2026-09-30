@@ -99,14 +99,13 @@ class HttpGatewayTest extends TestCase
         config([
             'inertia.ssr.enabled' => true,
             'inertia.ssr.bundle' => __DIR__.'/Stubs/ssr-bundle.js',
-            'inertia.preserve_big_integers' => true,
         ]);
 
         Http::fake([
             $this->renderUrl => Http::response(json_encode(['head' => [], 'body' => ''])),
         ]);
 
-        $this->gateway->dispatch(['page' => self::EXAMPLE_PAGE_OBJECT]);
+        $this->gateway->dispatch(self::EXAMPLE_PAGE_OBJECT + ['preserveBigIntegers' => true]);
 
         Http::assertSent(fn ($request) => $request->hasHeader(Header::PRESERVE_BIG_INTEGERS, 'true'));
     }
@@ -116,7 +115,6 @@ class HttpGatewayTest extends TestCase
         config([
             'inertia.ssr.enabled' => true,
             'inertia.ssr.ensure_bundle_exists' => false,
-            'inertia.preserve_big_integers' => true,
             'inertia.ssr.timeout' => 7,
         ]);
 
@@ -126,7 +124,7 @@ class HttpGatewayTest extends TestCase
 
         $this->gateway->configureRequestUsing(fn (PendingRequest $request) => $request->withHeader('X-Tenant', 'acme'));
 
-        $this->gateway->dispatch(self::EXAMPLE_PAGE_OBJECT);
+        $this->gateway->dispatch(self::EXAMPLE_PAGE_OBJECT + ['preserveBigIntegers' => true]);
 
         Http::assertSent(fn (ClientRequest $request) => $request->hasHeader(Header::PRESERVE_BIG_INTEGERS, 'true')
             && $request->hasHeader('X-Tenant', 'acme'));
@@ -137,14 +135,13 @@ class HttpGatewayTest extends TestCase
         config([
             'inertia.ssr.enabled' => true,
             'inertia.ssr.bundle' => __DIR__.'/Stubs/ssr-bundle.js',
-            'inertia.preserve_big_integers' => false,
         ]);
 
         Http::fake([
             $this->renderUrl => Http::response(json_encode(['head' => [], 'body' => ''])),
         ]);
 
-        $this->gateway->dispatch(['page' => self::EXAMPLE_PAGE_OBJECT]);
+        $this->gateway->dispatch(self::EXAMPLE_PAGE_OBJECT);
 
         Http::assertSent(fn ($request) => ! $request->hasHeader(Header::PRESERVE_BIG_INTEGERS));
     }

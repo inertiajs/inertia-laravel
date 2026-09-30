@@ -190,17 +190,13 @@ class Middleware
     }
 
     /**
-     * Determine if the request may carry big integer markers. Scanning the raw
-     * body is far cheaper than walking the decoded array, and mirrors the guard
-     * the client runs before reaching for its own reviver.
+     * Determine if the request may carry big integer markers. Only Inertia's
+     * own clients encode them, and they say so with a header, so any other
+     * JSON body routed through this middleware is left exactly as it arrived.
      */
     protected function carriesBigIntegerMarkers(Request $request): bool
     {
-        if (! $this->shouldPreserveBigIntegers()) {
-            return false;
-        }
-
-        return str_contains($request->getContent(), '"'.static::MARKER.'"');
+        return $request->header(Header::PRESERVE_BIG_INTEGERS) === 'true';
     }
 
     /**
