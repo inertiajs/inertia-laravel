@@ -2,6 +2,7 @@
 
 namespace Inertia\Tests;
 
+use DateTimeImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response as BaseResponse;
@@ -1169,6 +1170,82 @@ class PropsResolverTest extends TestCase
         $this->assertSame(['$bigint' => '900719925474099988'], $page['props']['dto']['id']);
     }
 
+    public function test_big_integers_inside_arbitrary_objects_are_wrapped_when_enabled(): void
+    {
+        config(['inertia.preserve_big_integers' => true]);
+
+        $money = new class
+        {
+            public int $cents = 900719925474099988;
+        };
+
+        $page = $this->makePage(Request::create('/'), [
+            'money' => $money,
+            'nested' => ['money' => $money],
+            'wrapped' => (object) ['money' => $money],
+            'collection' => collect(['id' => 900719925474099988]),
+        ]);
+
+        $marker = ['$bigint' => '900719925474099988'];
+
+        $this->assertSame($marker, $page['props']['money']->cents);
+        $this->assertSame($marker, $page['props']['nested']['money']->cents);
+        $this->assertSame($marker, $page['props']['wrapped']->money->cents);
+        $this->assertSame($marker, $page['props']['collection']['id']);
+    }
+
+    public function test_self_referencing_objects_do_not_recurse_forever(): void
+    {
+        config(['inertia.preserve_big_integers' => true]);
+
+        $cyclic = new stdClass;
+        $cyclic->id = 900719925474099988;
+        $cyclic->self = $cyclic;
+
+        $page = $this->makePage(Request::create('/'), ['cyclic' => $cyclic]);
+
+        $this->assertSame(['$bigint' => '900719925474099988'], $page['props']['cyclic']->id);
+    }
+
+    public function test_an_object_shared_by_two_props_is_wrapped_in_both(): void
+    {
+        config(['inertia.preserve_big_integers' => true]);
+
+        $shared = (object) ['id' => 900719925474099988];
+
+        $page = $this->makePage(Request::create('/'), ['first' => $shared, 'second' => $shared]);
+
+        $marker = ['$bigint' => '900719925474099988'];
+
+        $this->assertSame($marker, $page['props']['first']->id);
+        $this->assertSame($marker, $page['props']['second']->id);
+    }
+
+    public function test_internal_objects_keep_the_shape_json_encode_gives_them(): void
+    {
+        config(['inertia.preserve_big_integers' => true]);
+
+        $page = $this->makePage(Request::create('/'), [
+            'when' => ['at' => new DateTimeImmutable('2020-01-01T00:00:00Z')],
+        ]);
+
+        // Walking its properties would flatten it to an empty object.
+        $this->assertSame(
+            '{"at":{"date":"2020-01-01 00:00:00.000000","timezone_type":2,"timezone":"Z"}}',
+            json_encode($page['props']['when'])
+        );
+    }
+
+    public function test_pure_enums_are_left_for_json_encode_to_reject(): void
+    {
+        config(['inertia.preserve_big_integers' => true]);
+
+        $page = $this->makePage(Request::create('/'), ['status' => PureStatus::Active]);
+
+        // Walking its properties would invent a JSON representation it does not have.
+        $this->assertSame(PureStatus::Active, $page['props']['status']);
+    }
+
     public function test_big_integers_inside_numerically_keyed_objects_are_wrapped_without_changing_the_shape(): void
     {
         config(['inertia.preserve_big_integers' => true]);
@@ -1193,6 +1270,7 @@ class PropsResolverTest extends TestCase
         $page = $this->makePage(Request::create('/'), [
             'safe' => 42,
             'boundary' => 9007199254740991,
+            'negativeBoundary' => -9007199254740991,
             'big' => 900719925474099988,
             'negative' => -900719925474099988,
             'nested' => ['deep' => [900719925474099988, 2]],
@@ -1200,6 +1278,7 @@ class PropsResolverTest extends TestCase
 
         $this->assertSame(42, $page['props']['safe']);
         $this->assertSame(9007199254740991, $page['props']['boundary']);
+        $this->assertSame(-9007199254740991, $page['props']['negativeBoundary']);
         $this->assertSame(['$bigint' => '900719925474099988'], $page['props']['big']);
         $this->assertSame(['$bigint' => '-900719925474099988'], $page['props']['negative']);
         $this->assertSame(['$bigint' => '900719925474099988'], $page['props']['nested']['deep'][0]);
@@ -1279,4 +1358,9 @@ class PropsResolverTest extends TestCase
             }
         };
     }
+}
+
+enum PureStatus
+{
+    case Active;
 }

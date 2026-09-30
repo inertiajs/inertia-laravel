@@ -11,12 +11,14 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\Str;
+use Inertia\PreservesBigIntegers;
 use Inertia\ResolvesCallables;
 use Inertia\Support\Header;
 
 class HttpGateway implements DisablesSsr, ExcludesSsrPaths, Gateway, HasHealthCheck
 {
     use ExcludesPaths;
+    use PreservesBigIntegers;
     use ResolvesCallables;
 
     /**
@@ -147,7 +149,7 @@ class HttpGateway implements DisablesSsr, ExcludesSsrPaths, Gateway, HasHealthCh
      */
     protected function ssrHeaders(): array
     {
-        return config()->boolean('inertia.preserve_big_integers', false)
+        return $this->shouldPreserveBigIntegers()
             ? [Header::PRESERVE_BIG_INTEGERS => 'true']
             : [];
     }

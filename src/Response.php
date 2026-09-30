@@ -19,8 +19,8 @@ use UnitEnum;
 
 class Response implements Responsable
 {
-    use EncodesBigIntegers;
     use Macroable;
+    use PreservesBigIntegers;
 
     /**
      * The name of the root component.
@@ -250,7 +250,7 @@ class Response implements Responsable
 
         // Flash data is merged into the page after the props are resolved, so it
         // needs the same big integer treatment the props resolver applies.
-        return ['flash' => $this->shouldEncodeBigIntegers() ? $this->encodeBigIntegers($flash) : $flash];
+        return ['flash' => $this->encodeBigIntegersWhenEnabled($flash)];
     }
 
     /**
