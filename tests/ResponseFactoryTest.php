@@ -828,8 +828,6 @@ class ResponseFactoryTest extends TestCase
             return Inertia::render('User/Edit', ['id' => 900719925474099988]);
         });
 
-        // The initial page cannot read a response header, and the root view may
-        // be a cached compile, so the signal travels inside the page itself.
         $this->get('/root')->assertSee('"preserveBigIntegers":true', false);
     }
 

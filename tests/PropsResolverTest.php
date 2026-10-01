@@ -2,6 +2,7 @@
 
 namespace Inertia\Tests;
 
+use ArrayObject;
 use DateTimeImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,6 +17,7 @@ use Inertia\ProvidesScrollMetadata;
 use Inertia\RenderContext;
 use Inertia\Response;
 use Inertia\ScrollProp;
+use Inertia\Tests\Enums\UnitEnum;
 use JsonSerializable;
 use stdClass;
 
@@ -1153,8 +1155,6 @@ class PropsResolverTest extends TestCase
 
     public function test_big_integers_inside_plain_objects_are_wrapped_when_enabled(): void
     {
-        config(['inertia.preserve_big_integers' => true]);
-
         $page = $this->makePage(Request::create('/'), [
             'object' => (object) ['id' => 900719925474099988],
             'dto' => new class implements JsonSerializable
@@ -1164,7 +1164,7 @@ class PropsResolverTest extends TestCase
                     return ['id' => 900719925474099988];
                 }
             },
-        ]);
+        ], preserveBigIntegers: true);
 
         $this->assertSame(['$bigint' => '900719925474099988'], $page['props']['object']->id);
         $this->assertSame(['$bigint' => '900719925474099988'], $page['props']['dto']['id']);
@@ -1172,8 +1172,6 @@ class PropsResolverTest extends TestCase
 
     public function test_big_integers_inside_arbitrary_objects_are_wrapped_when_enabled(): void
     {
-        config(['inertia.preserve_big_integers' => true]);
-
         $money = new class
         {
             public int $cents = 900719925474099988;
@@ -1184,7 +1182,7 @@ class PropsResolverTest extends TestCase
             'nested' => ['money' => $money],
             'wrapped' => (object) ['money' => $money],
             'collection' => collect(['id' => 900719925474099988]),
-        ]);
+        ], preserveBigIntegers: true);
 
         $marker = ['$bigint' => '900719925474099988'];
 
@@ -1196,24 +1194,20 @@ class PropsResolverTest extends TestCase
 
     public function test_self_referencing_objects_do_not_recurse_forever(): void
     {
-        config(['inertia.preserve_big_integers' => true]);
-
         $cyclic = new stdClass;
         $cyclic->id = 900719925474099988;
         $cyclic->self = $cyclic;
 
-        $page = $this->makePage(Request::create('/'), ['cyclic' => $cyclic]);
+        $page = $this->makePage(Request::create('/'), ['cyclic' => $cyclic], preserveBigIntegers: true);
 
         $this->assertSame(['$bigint' => '900719925474099988'], $page['props']['cyclic']->id);
     }
 
     public function test_an_object_shared_by_two_props_is_wrapped_in_both(): void
     {
-        config(['inertia.preserve_big_integers' => true]);
-
         $shared = (object) ['id' => 900719925474099988];
 
-        $page = $this->makePage(Request::create('/'), ['first' => $shared, 'second' => $shared]);
+        $page = $this->makePage(Request::create('/'), ['first' => $shared, 'second' => $shared], preserveBigIntegers: true);
 
         $marker = ['$bigint' => '900719925474099988'];
 
@@ -1223,37 +1217,38 @@ class PropsResolverTest extends TestCase
 
     public function test_internal_objects_keep_the_shape_json_encode_gives_them(): void
     {
-        config(['inertia.preserve_big_integers' => true]);
-
         $page = $this->makePage(Request::create('/'), [
             'when' => ['at' => new DateTimeImmutable('2020-01-01T00:00:00Z')],
-        ]);
+            'extended' => new class('2020-01-01T00:00:00Z') extends DateTimeImmutable {},
+            'bag' => new class(['name' => 'John']) extends ArrayObject {},
+        ], preserveBigIntegers: true);
 
         // Walking its properties would flatten it to an empty object.
         $this->assertSame(
             '{"at":{"date":"2020-01-01 00:00:00.000000","timezone_type":2,"timezone":"Z"}}',
             json_encode($page['props']['when'])
         );
+        $this->assertSame(
+            '{"date":"2020-01-01 00:00:00.000000","timezone_type":2,"timezone":"Z"}',
+            json_encode($page['props']['extended'])
+        );
+        $this->assertSame('{"name":"John"}', json_encode($page['props']['bag']));
     }
 
     public function test_pure_enums_are_left_for_json_encode_to_reject(): void
     {
-        config(['inertia.preserve_big_integers' => true]);
-
-        $page = $this->makePage(Request::create('/'), ['status' => PureStatus::Active]);
+        $page = $this->makePage(Request::create('/'), ['status' => UnitEnum::Index], preserveBigIntegers: true);
 
         // Walking its properties would invent a JSON representation it does not have.
-        $this->assertSame(PureStatus::Active, $page['props']['status']);
+        $this->assertSame(UnitEnum::Index, $page['props']['status']);
     }
 
     public function test_big_integers_inside_numerically_keyed_objects_are_wrapped_without_changing_the_shape(): void
     {
-        config(['inertia.preserve_big_integers' => true]);
-
         $page = $this->makePage(Request::create('/'), [
             'list' => (object) ['0' => 900719925474099988, '1' => -900719925474099988],
             'empty' => new stdClass,
-        ]);
+        ], preserveBigIntegers: true);
 
         $this->assertInstanceOf(stdClass::class, $page['props']['list']);
         $this->assertSame(
@@ -1265,8 +1260,6 @@ class PropsResolverTest extends TestCase
 
     public function test_big_integers_are_wrapped_when_enabled(): void
     {
-        config(['inertia.preserve_big_integers' => true]);
-
         $page = $this->makePage(Request::create('/'), [
             'safe' => 42,
             'boundary' => 9007199254740991,
@@ -1274,7 +1267,7 @@ class PropsResolverTest extends TestCase
             'big' => 900719925474099988,
             'negative' => -900719925474099988,
             'nested' => ['deep' => [900719925474099988, 2]],
-        ]);
+        ], preserveBigIntegers: true);
 
         $this->assertSame(42, $page['props']['safe']);
         $this->assertSame(9007199254740991, $page['props']['boundary']);
@@ -1287,8 +1280,6 @@ class PropsResolverTest extends TestCase
 
     public function test_big_integers_are_not_wrapped_when_disabled(): void
     {
-        config(['inertia.preserve_big_integers' => false]);
-
         $page = $this->makePage(Request::create('/'), [
             'big' => 900719925474099988,
         ]);
@@ -1302,10 +1293,9 @@ class PropsResolverTest extends TestCase
      * @param  array<string, mixed>  $props
      * @return array<string, mixed>
      */
-    protected function makePage(Request $request, array $props): array
+    protected function makePage(Request $request, array $props, bool $preserveBigIntegers = false): array
     {
-        $response = new Response('TestComponent', [], $props, 'app', '123');
-        $response->preserveBigIntegers((bool) config('inertia.preserve_big_integers', false));
+        $response = new Response('TestComponent', [], $props, 'app', '123', preserveBigIntegers: $preserveBigIntegers);
         $response = $response->toResponse($request);
 
         if ($response instanceof JsonResponse) {
@@ -1359,9 +1349,4 @@ class PropsResolverTest extends TestCase
             }
         };
     }
-}
-
-enum PureStatus
-{
-    case Active;
 }

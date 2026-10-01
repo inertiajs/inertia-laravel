@@ -19,8 +19,7 @@ use UnitEnum;
 
 class Response implements Responsable
 {
-    use Macroable;
-    use PreservesBigIntegers;
+    use Macroable, PreservesBigIntegers;
 
     /**
      * The name of the root component.
@@ -120,6 +119,8 @@ class Response implements Responsable
 
     /**
      * Preserve integers outside JavaScript's safe range as BigInt values.
+     *
+     * @return $this
      */
     public function preserveBigIntegers(bool $preserve = true): self
     {
@@ -199,8 +200,10 @@ class Response implements Responsable
      */
     public function toResponse($request)
     {
-        $resolver = new PropsResolver($request, $this->component, $this->preserveBigIntegers);
+        $resolver = new PropsResolver($request, $this->component);
         [$resolvedProps, $resolvedMetadata] = $resolver->resolve($this->sharedProps, $this->props);
+
+        $resolvedProps = $this->encodeBigIntegersWhenEnabled($resolvedProps);
 
         $page = array_merge(
             [
@@ -210,7 +213,7 @@ class Response implements Responsable
                 'version' => $this->version,
             ],
             $resolvedMetadata,
-            $this->resolvePreserveBigIntegers(),
+            $this->resolvePreserveBigIntegers($request),
             $this->resolveClearHistory($request),
             $this->resolveEncryptHistory($request),
             $this->resolveFlashData($request),
@@ -261,18 +264,15 @@ class Response implements Responsable
             return [];
         }
 
-        // Flash data is merged into the page after the props are resolved, so it
-        // needs the same big integer treatment the props resolver applies.
         return ['flash' => $this->encodeBigIntegersWhenEnabled($flash)];
     }
 
     /**
-     * Resolve the big integer flag, which tells the client and the SSR server
-     * that the page may carry markers.
+     * Resolve the preserve big integers flag.
      *
-     * @return array<string, true>
+     * @return array<string, mixed>
      */
-    protected function resolvePreserveBigIntegers(): array
+    protected function resolvePreserveBigIntegers(Request $request): array
     {
         return $this->preserveBigIntegers ? ['preserveBigIntegers' => true] : [];
     }

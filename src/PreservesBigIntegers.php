@@ -16,7 +16,7 @@ trait PreservesBigIntegers
      *
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt#use_within_json
      */
-    public const MARKER = '$bigint';
+    protected const BIG_INTEGER_KEY = '$bigint';
 
     /**
      * The largest integer JavaScript represents without losing precision.
@@ -24,7 +24,7 @@ trait PreservesBigIntegers
     protected const MAX_SAFE_INTEGER = 9007199254740991;
 
     /**
-     * Whether integers outside JavaScript's safe range should be preserved.
+     * Indicates if integers outside JavaScript's safe range should be preserved.
      */
     protected bool $preserveBigIntegers = false;
 
@@ -47,7 +47,7 @@ trait PreservesBigIntegers
     {
         if (is_int($value)) {
             return $value > static::MAX_SAFE_INTEGER || $value < -static::MAX_SAFE_INTEGER
-                ? [static::MARKER => (string) $value]
+                ? [static::BIG_INTEGER_KEY => (string) $value]
                 : $value;
         }
 
@@ -61,10 +61,9 @@ trait PreservesBigIntegers
 
         $seen ??= new SplObjectStorage;
 
-        // A self-referencing value would otherwise recurse until the stack is
-        // exhausted, where json_encode reports it cleanly instead. Only the
-        // ancestors are tracked, so a value shared by two branches is still
-        // encoded in both.
+        // Only ancestors are tracked, so a self-reference stops here and is left
+        // for json_encode to report, while a value shared by two branches is
+        // still encoded in both.
         if ($seen->offsetExists($value)) {
             return $value;
         }
@@ -117,9 +116,9 @@ trait PreservesBigIntegers
             return $this->encodeBigIntegers($value->jsonSerialize(), $seen);
         }
 
-        // An internal class such as DateTime serializes through its own handler,
-        // so its public properties are not what json_encode emits and walking
-        // them would change the shape rather than just the integers.
+        // An internal class such as DateTime, or a class extending one, serializes
+        // through its own handler, so walking its public properties would change
+        // the shape rather than just the integers.
         if (! $this->hasPlainJsonRepresentation($value)) {
             return $value;
         }
@@ -132,14 +131,16 @@ trait PreservesBigIntegers
      */
     protected function hasPlainJsonRepresentation(object $value): bool
     {
-        static $plain = [];
-
-        $class = $value::class;
-
-        if (! isset($plain[$class])) {
-            $plain[$class] = $value instanceof stdClass || ! (new ReflectionClass($class))->isInternal();
+        if ($value instanceof stdClass) {
+            return true;
         }
 
-        return $plain[$class];
+        foreach ([$value::class, ...class_parents($value)] as $class) {
+            if ((new ReflectionClass($class))->isInternal()) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

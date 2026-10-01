@@ -398,7 +398,7 @@ class ResponseFactory
             $this->getVersion(),
             $this->encryptHistory ?? config('inertia.history.encrypt', false),
             $this->urlResolver,
-            (bool) config('inertia.preserve_big_integers', false),
+            preserveBigIntegers: (bool) config('inertia.preserve_big_integers', false),
         );
 
         DevTools::recorder()?->pageRendering($component, $response, $this->sharedProps);

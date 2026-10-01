@@ -17,7 +17,7 @@ use Throwable;
 
 class PropsResolver
 {
-    use PreservesBigIntegers, ResolvesCallables;
+    use ResolvesCallables;
 
     /**
      * The current request instance.
@@ -148,7 +148,7 @@ class PropsResolver
     /**
      * Create a new props resolver instance.
      */
-    public function __construct(Request $request, string $component, bool $preserveBigIntegers = false)
+    public function __construct(Request $request, string $component)
     {
         $this->request = $request;
         $this->component = $component;
@@ -161,7 +161,6 @@ class PropsResolver
         $this->loadedOnceProps = $this->parseHeader(Header::EXCEPT_ONCE_PROPS) ?? [];
 
         $this->recorder = DevTools::recorder($request);
-        $this->preserveBigIntegers = $preserveBigIntegers;
     }
 
     /**
@@ -310,13 +309,9 @@ class PropsResolver
             // When the resolved value is an array, we recurse into it. If the
             // original prop was not already an array (e.g. a closure that
             // returned one), its children bypass partial filtering.
-            if (is_array($value)) {
-                $result[$key] = $this->resolveProps($value, $path, $parentWasResolved || ! is_array($prop));
-
-                continue;
-            }
-
-            $result[$key] = $this->encodeBigIntegersWhenEnabled($value);
+            $result[$key] = is_array($value)
+                ? $this->resolveProps($value, $path, $parentWasResolved || ! is_array($prop))
+                : $value;
         }
 
         return $result;
