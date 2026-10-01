@@ -1,8 +1,16 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.4.0...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.5.0...3.x)
 
 - Nothing!
+
+## [v3.5.0](https://github.com/inertiajs/inertia-laravel/compare/v3.4.0...v3.5.0) - 2026-10-01
+
+### What's Changed
+
+* [3.x] Support big integers as native BigInt values by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/904
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v3.4.0...v3.5.0
 
 ## [v3.4.0](https://github.com/inertiajs/inertia-laravel/compare/v3.3.4...v3.4.0) - 2026-09-25
 
