@@ -65,7 +65,7 @@ class Header
     public const EXCEPT_ONCE_PROPS = 'X-Inertia-Except-Once-Props';
 
     /**
-     * Header telling the SSR server that the page may contain big integer markers.
+     * Header indicating that the request body contains big integer markers.
      */
     public const PRESERVE_BIG_INTEGERS = 'X-Inertia-Preserve-Big-Integers';
 }

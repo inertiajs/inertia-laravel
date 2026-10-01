@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\Str;
 use Inertia\ResolvesCallables;
-use Inertia\Support\Header;
 
 class HttpGateway implements ConfiguresSsrRequests, DisablesSsr, ExcludesSsrPaths, Gateway, HasHealthCheck
 {
@@ -59,7 +58,7 @@ class HttpGateway implements ConfiguresSsrRequests, DisablesSsr, ExcludesSsrPath
             : $this->getProductionUrl('/render');
 
         try {
-            $response = $this->pendingRequest($page)->post($url, $page);
+            $response = $this->pendingRequest()->post($url, $page);
 
             if ($response->failed()) {
                 $this->handleSsrFailure($page, $response->json());
@@ -117,12 +116,10 @@ class HttpGateway implements ConfiguresSsrRequests, DisablesSsr, ExcludesSsrPath
 
     /**
      * Create the pending HTTP request for the SSR server.
-     *
-     * @param  array<string, mixed>|null  $page
      */
-    protected function pendingRequest(?array $page = null): PendingRequest
+    protected function pendingRequest(): PendingRequest
     {
-        $request = Http::createPendingRequest()->withHeaders($this->ssrHeaders($page));
+        $request = Http::createPendingRequest();
 
         if ($timeout = config('inertia.ssr.timeout')) {
             $request->timeout($timeout);
@@ -170,21 +167,6 @@ class HttpGateway implements ConfiguresSsrRequests, DisablesSsr, ExcludesSsrPath
         if (config('inertia.ssr.throw_on_error', false)) {
             throw SsrException::fromEvent($event);
         }
-    }
-
-    /**
-     * The headers to send along with the page to the SSR server. The SSR
-     * bundle cannot know whether markers are present until it has parsed,
-     * so the page it is about to render says so up front.
-     *
-     * @param  array<string, mixed>|null  $page
-     * @return array<string, string>
-     */
-    protected function ssrHeaders(?array $page): array
-    {
-        return ($page['preserveBigIntegers'] ?? false)
-            ? [Header::PRESERVE_BIG_INTEGERS => 'true']
-            : [];
     }
 
     /**

@@ -220,13 +220,7 @@ class Response implements Responsable
         DevTools::recorder($request)?->pageRendered($request, $page, $resolvedProps);
 
         if ($request->header(Header::INERTIA)) {
-            $headers = [Header::INERTIA => 'true'];
-
-            if ($this->preserveBigIntegers) {
-                $headers[Header::PRESERVE_BIG_INTEGERS] = 'true';
-            }
-
-            return new JsonResponse($page, 200, $headers);
+            return new JsonResponse($page, 200, [Header::INERTIA => 'true']);
         }
 
         App::make(SsrState::class)->setPage($page);
@@ -273,8 +267,8 @@ class Response implements Responsable
     }
 
     /**
-     * Resolve the big integer flag, which tells the client the page may carry
-     * markers. Mirrored onto the response header for subsequent visits.
+     * Resolve the big integer flag, which tells the client and the SSR server
+     * that the page may carry markers.
      *
      * @return array<string, true>
      */

@@ -19,11 +19,6 @@ trait PreservesBigIntegers
     public const MARKER = '$bigint';
 
     /**
-     * The digits a marker must hold to be decoded. Mirrors the client.
-     */
-    protected const INTEGER_PATTERN = '/^(0|-?[1-9]\d*)$/';
-
-    /**
      * The largest integer JavaScript represents without losing precision.
      */
     protected const MAX_SAFE_INTEGER = 9007199254740991;
@@ -178,10 +173,7 @@ trait PreservesBigIntegers
      */
     protected function isBigIntegerMarker(array $value): bool
     {
-        return count($value) === 1
-            && isset($value[static::MARKER])
-            && is_string($value[static::MARKER])
-            && preg_match(static::INTEGER_PATTERN, $value[static::MARKER]) === 1;
+        return isset($value[static::MARKER]) && is_string($value[static::MARKER]);
     }
 
     /**

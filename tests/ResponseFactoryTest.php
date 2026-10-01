@@ -800,8 +800,10 @@ class ResponseFactoryTest extends TestCase
 
         $response = $this->get('/one-page', ['X-Inertia' => 'true']);
 
-        $response->assertJson(['props' => ['id' => ['$bigint' => '900719925474099988']]]);
-        $response->assertHeader('X-Inertia-Preserve-Big-Integers', 'true');
+        $response->assertJson([
+            'props' => ['id' => ['$bigint' => '900719925474099988']],
+            'preserveBigIntegers' => true,
+        ]);
     }
 
     public function test_big_integers_can_be_preserved_for_every_response(): void
@@ -829,7 +831,7 @@ class ResponseFactoryTest extends TestCase
         $response = $this->get('/opted-out', ['X-Inertia' => 'true']);
 
         $response->assertJson(['props' => ['id' => 900719925474099988]]);
-        $response->assertHeaderMissing('X-Inertia-Preserve-Big-Integers');
+        $response->assertJsonMissingPath('preserveBigIntegers');
     }
 
     public function test_the_initial_page_tells_the_client_when_big_integers_may_be_wrapped(): void

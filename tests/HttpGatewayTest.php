@@ -14,7 +14,6 @@ use Inertia\Ssr\HttpGateway;
 use Inertia\Ssr\SsrErrorType;
 use Inertia\Ssr\SsrException;
 use Inertia\Ssr\SsrRenderFailed;
-use Inertia\Support\Header;
 
 class HttpGatewayTest extends TestCase
 {
@@ -92,58 +91,6 @@ class HttpGatewayTest extends TestCase
 
         $this->assertEquals("<title>SSR Test</title>\n<style></style>", $response->head);
         $this->assertEquals('<div id="app">SSR Response</div>', $response->body);
-    }
-
-    public function test_it_tells_the_ssr_server_when_big_integers_may_be_wrapped(): void
-    {
-        config([
-            'inertia.ssr.enabled' => true,
-            'inertia.ssr.bundle' => __DIR__.'/Stubs/ssr-bundle.js',
-        ]);
-
-        Http::fake([
-            $this->renderUrl => Http::response(json_encode(['head' => [], 'body' => ''])),
-        ]);
-
-        $this->gateway->dispatch(self::EXAMPLE_PAGE_OBJECT + ['preserveBigIntegers' => true]);
-
-        Http::assertSent(fn ($request) => $request->hasHeader(Header::PRESERVE_BIG_INTEGERS, 'true'));
-    }
-
-    public function test_the_big_integer_header_rides_alongside_a_configured_request(): void
-    {
-        config([
-            'inertia.ssr.enabled' => true,
-            'inertia.ssr.ensure_bundle_exists' => false,
-            'inertia.ssr.timeout' => 7,
-        ]);
-
-        Http::fake([
-            $this->renderUrl => Http::response(json_encode(['head' => [], 'body' => ''])),
-        ]);
-
-        $this->gateway->configureRequestUsing(fn (PendingRequest $request) => $request->withHeader('X-Tenant', 'acme'));
-
-        $this->gateway->dispatch(self::EXAMPLE_PAGE_OBJECT + ['preserveBigIntegers' => true]);
-
-        Http::assertSent(fn (ClientRequest $request) => $request->hasHeader(Header::PRESERVE_BIG_INTEGERS, 'true')
-            && $request->hasHeader('X-Tenant', 'acme'));
-    }
-
-    public function test_it_omits_the_big_integer_header_when_the_config_is_disabled(): void
-    {
-        config([
-            'inertia.ssr.enabled' => true,
-            'inertia.ssr.bundle' => __DIR__.'/Stubs/ssr-bundle.js',
-        ]);
-
-        Http::fake([
-            $this->renderUrl => Http::response(json_encode(['head' => [], 'body' => ''])),
-        ]);
-
-        $this->gateway->dispatch(self::EXAMPLE_PAGE_OBJECT);
-
-        Http::assertSent(fn ($request) => ! $request->hasHeader(Header::PRESERVE_BIG_INTEGERS));
     }
 
     public function test_it_uses_the_configured_http_url_when_bundle_file_detection_is_disabled(): void
