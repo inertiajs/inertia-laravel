@@ -1,8 +1,16 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.5.0...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.5.1...3.x)
 
 - Nothing!
+
+## [v3.5.1](https://github.com/inertiajs/inertia-laravel/compare/v3.5.0...v3.5.1) - 2026-10-01
+
+### What's Changed
+
+* [3.x] Assert big integers as plain integers in tests by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/918
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v3.5.0...v3.5.1
 
 ## [v3.5.0](https://github.com/inertiajs/inertia-laravel/compare/v3.4.0...v3.5.0) - 2026-10-01
 
