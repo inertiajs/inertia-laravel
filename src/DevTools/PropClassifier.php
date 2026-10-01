@@ -7,6 +7,7 @@ use Inertia\AlwaysProp;
 use Inertia\DeferProp;
 use Inertia\Deferrable;
 use Inertia\DevTools\Data\PropType;
+use Inertia\HasLiveUpdates;
 use Inertia\Mergeable;
 use Inertia\MergeProp;
 use Inertia\Onceable;
@@ -23,7 +24,7 @@ use Inertia\Support\Header;
 class PropClassifier
 {
     /**
-     * @return array{inertiaType: ?PropType, deferGroup: ?string, reset: bool, once: bool, mergeDirection: ?string, deepMerge: bool}
+     * @return array{inertiaType: ?PropType, deferGroup: ?string, reset: bool, once: bool, live: bool, mergeDirection: ?string, deepMerge: bool}
      */
     public function classifyResolved(string $path, mixed $prop, Request $request): array
     {
@@ -37,6 +38,7 @@ class PropClassifier
             'deferGroup' => $this->deferGroup($prop, $isDeferredDelivery),
             'reset' => in_array($path, $this->parseDevToolsHeader($request, Header::RESET), true),
             'once' => $prop instanceof Onceable && $prop->shouldResolveOnce(),
+            'live' => $prop instanceof HasLiveUpdates && $prop->isLive(),
             'mergeDirection' => $this->mergeDirection($prop),
             'deepMerge' => $this->isDeepMerge($prop),
         ];
@@ -65,12 +67,17 @@ class PropClassifier
     }
 
     /**
-     * A prop is a deep merge when it deep-merges nested data (`->deepMerge()`) or matches
-     * array items on a key (`->matchOn()`) to upsert them rather than blindly appending.
+     * A prop is a deep merge when it merges nested data or upserts matched
+     * array items. `->matchOn()` on its own leaves merging off, matching the
+     * page object behavior.
      */
     protected function isDeepMerge(mixed $prop): bool
     {
-        return $prop instanceof Mergeable && ($prop->shouldDeepMerge() || count($prop->matchesOn()) > 0);
+        if (! $prop instanceof Mergeable || ! $prop->shouldMerge()) {
+            return false;
+        }
+
+        return $prop->shouldDeepMerge() || count($prop->matchesOn()) > 0;
     }
 
     /**
