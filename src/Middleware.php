@@ -19,8 +19,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class Middleware
 {
-    use PreservesBigIntegers;
-
     /**
      * The root template that's loaded on the first page visit.
      *
@@ -119,10 +117,6 @@ class Middleware
 
         $recorder?->requestStarted($request);
 
-        if ($request->isJson() && $this->carriesBigIntegerMarkers($request)) {
-            $request->json()->replace($this->decodeBigIntegers($request->json()->all()));
-        }
-
         Inertia::version(function () use ($request) {
             return $this->version($request);
         });
@@ -187,16 +181,6 @@ class Middleware
         $recorder?->respondedWith($request, $response);
 
         return $response;
-    }
-
-    /**
-     * Determine if the request may carry big integer markers. Only Inertia's
-     * own clients encode them, and they say so with a header, so any other
-     * JSON body routed through this middleware is left exactly as it arrived.
-     */
-    protected function carriesBigIntegerMarkers(Request $request): bool
-    {
-        return $request->header(Header::PRESERVE_BIG_INTEGERS) === 'true';
     }
 
     /**

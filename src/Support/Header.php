@@ -63,9 +63,4 @@ class Header
      * Header specifying which once props to exclude from the response.
      */
     public const EXCEPT_ONCE_PROPS = 'X-Inertia-Except-Once-Props';
-
-    /**
-     * Header indicating that the request body contains big integer markers.
-     */
-    public const PRESERVE_BIG_INTEGERS = 'X-Inertia-Preserve-Big-Integers';
 }

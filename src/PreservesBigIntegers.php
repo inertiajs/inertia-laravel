@@ -142,49 +142,4 @@ trait PreservesBigIntegers
 
         return $plain[$class];
     }
-
-    /**
-     * Recursively decode `{"$bigint": "<value>"}` markers in the request data
-     * back into integers so controllers and validation receive the original
-     * value the frontend sent as a native BigInt.
-     *
-     * @param  array<array-key, mixed>  $input
-     * @return array<array-key, mixed>
-     */
-    protected function decodeBigIntegers(array $input): array
-    {
-        foreach ($input as $key => $value) {
-            if (! is_array($value)) {
-                continue;
-            }
-
-            $input[$key] = $this->isBigIntegerMarker($value)
-                ? $this->decodeBigInteger($value[static::MARKER])
-                : $this->decodeBigIntegers($value);
-        }
-
-        return $input;
-    }
-
-    /**
-     * Determine if the given array is a big integer marker.
-     *
-     * @param  array<array-key, mixed>  $value
-     */
-    protected function isBigIntegerMarker(array $value): bool
-    {
-        return isset($value[static::MARKER]) && is_string($value[static::MARKER]);
-    }
-
-    /**
-     * Decode a big integer marker's digits. Values within PHP's integer range
-     * become a native integer; anything larger is kept as a string since PHP
-     * cannot represent it as an integer without losing precision.
-     */
-    protected function decodeBigInteger(string $digits): int|string
-    {
-        $asInteger = (int) $digits;
-
-        return (string) $asInteger === $digits ? $asInteger : $digits;
-    }
 }
