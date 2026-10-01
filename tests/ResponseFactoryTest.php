@@ -806,20 +806,6 @@ class ResponseFactoryTest extends TestCase
         ]);
     }
 
-    public function test_big_integers_can_be_preserved_for_every_response(): void
-    {
-        config(['inertia.preserve_big_integers' => false]);
-
-        Inertia::preserveBigIntegers();
-
-        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/every-page', function () {
-            return Inertia::render('User/Edit', ['id' => 900719925474099988]);
-        });
-
-        $this->get('/every-page', ['X-Inertia' => 'true'])
-            ->assertJson(['props' => ['id' => ['$bigint' => '900719925474099988']]]);
-    }
-
     public function test_a_single_response_can_opt_out_of_preserving_big_integers(): void
     {
         config(['inertia.preserve_big_integers' => true]);

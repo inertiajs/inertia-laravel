@@ -70,13 +70,6 @@ class ResponseFactory
     protected $encryptHistory;
 
     /**
-     * Whether integers outside JavaScript's safe range should be preserved.
-     *
-     * @var bool|null
-     */
-    protected $preserveBigIntegers;
-
-    /**
      * The URL resolver callback.
      *
      * @var Closure|null
@@ -214,14 +207,6 @@ class ResponseFactory
     public function encryptHistory($encrypt = true): void
     {
         $this->encryptHistory = $encrypt;
-    }
-
-    /**
-     * Preserve integers outside JavaScript's safe range as BigInt values.
-     */
-    public function preserveBigIntegers(bool $preserve = true): void
-    {
-        $this->preserveBigIntegers = $preserve;
     }
 
     /**
@@ -413,7 +398,7 @@ class ResponseFactory
             $this->getVersion(),
             $this->encryptHistory ?? config('inertia.history.encrypt', false),
             $this->urlResolver,
-            $this->preserveBigIntegers ?? (bool) config('inertia.preserve_big_integers', false),
+            (bool) config('inertia.preserve_big_integers', false),
         );
 
         DevTools::recorder()?->pageRendering($component, $response, $this->sharedProps);
