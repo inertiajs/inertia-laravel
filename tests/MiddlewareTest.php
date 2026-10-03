@@ -126,6 +126,26 @@ class MiddlewareTest extends TestCase
         $response->assertJson(['component' => 'User/Edit']);
     }
 
+    public function test_a_response_body_of_zero_is_not_treated_as_empty_for_inertia_requests(): void
+    {
+        Route::middleware(Middleware::class)->get('/', fn () => response('0'));
+
+        $response = $this->from('/foo')->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertOk();
+        self::assertSame('0', $response->getContent());
+    }
+
+    public function test_streamed_responses_are_not_treated_as_empty_for_inertia_requests(): void
+    {
+        Route::middleware(Middleware::class)->get('/', fn () => response()->streamDownload(fn () => print ('hello'), 'hello.txt'));
+
+        $response = $this->from('/foo')->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertOk();
+        $response->assertDownload('hello.txt');
+    }
+
     public function test_it_will_instruct_inertia_to_reload_on_a_version_mismatch(): void
     {
         $this->prepareMockEndpoint('1234');
