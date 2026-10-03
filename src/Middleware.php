@@ -166,7 +166,7 @@ class Middleware
             $response = $this->onVersionChange($request, $response);
         }
 
-        if ($response->isOk() && empty($response->getContent())) {
+        if ($response->isOk() && $response->getContent() === '') {
             $response = $this->onEmptyResponse($request, $response);
         }
 
