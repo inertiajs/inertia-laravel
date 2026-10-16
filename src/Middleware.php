@@ -148,7 +148,7 @@ class Middleware
         }
 
         $response = $next($request);
-        $response->headers->set('Vary', Header::INERTIA);
+        $response->setVary(Header::INERTIA, false);
 
         if ($isRedirect = $response->isRedirect()) {
             $this->reflash($request);
