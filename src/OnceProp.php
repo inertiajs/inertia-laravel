@@ -2,9 +2,9 @@
 
 namespace Inertia;
 
-class OnceProp implements Onceable
+class OnceProp implements HasLiveUpdates, Onceable
 {
-    use ResolvesCallables, ResolvesOnce;
+    use ResolvesCallables, ResolvesOnce, SupportsLiveUpdates;
 
     /**
      * The callback to resolve the property.
