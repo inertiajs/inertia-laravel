@@ -1,8 +1,23 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.5.1...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.5.2...3.x)
 
 - Nothing!
+
+## [v3.5.2](https://github.com/inertiajs/inertia-laravel/compare/v3.5.1...v3.5.2) - 2026-10-21
+
+### What's Changed
+
+* Bump shivammathur/setup-php from 2.37.2 to 2.40.0 in the github-actions group by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia-laravel/pull/921
+* [3.x] Append Vary header instead of setting it by [@thannaske](https://github.com/thannaske) in https://github.com/inertiajs/inertia-laravel/pull/920
+* [3.x] Reset the cached SSR response when the page changes by [@lazerg](https://github.com/lazerg) in https://github.com/inertiajs/inertia-laravel/pull/924
+* [3.x] Don't treat streamed or "0" responses as empty for Inertia requests by [@mdalikadar](https://github.com/mdalikadar) in https://github.com/inertiajs/inertia-laravel/pull/919
+
+### New Contributors
+
+* [@thannaske](https://github.com/thannaske) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/920
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v3.5.1...v3.5.2
 
 ## [v3.5.1](https://github.com/inertiajs/inertia-laravel/compare/v3.5.0...v3.5.1) - 2026-10-01
 
