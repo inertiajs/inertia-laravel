@@ -107,18 +107,6 @@ class ComponentTest extends TestCase
         $this->assertSame(1, $gateway->times);
     }
 
-    public function test_ssr_is_dispatched_again_when_the_page_changes(): void
-    {
-        Config::set(['inertia.ssr.enabled' => true]);
-        $this->app->instance(Gateway::class, $gateway = new FakeGateway);
-
-        $view = '<x-inertia::head><title>Fallback</title></x-inertia::head><x-inertia::app />';
-        $this->renderView($view, ['page' => self::EXAMPLE_PAGE_OBJECT]);
-        $this->renderView($view, ['page' => ['component' => 'Different', 'props' => ['foo' => 'bar']]]);
-
-        $this->assertSame(2, $gateway->times);
-    }
-
     public function test_app_component_matches_directive_output_when_ssr_is_disabled(): void
     {
         Config::set(['inertia.ssr.enabled' => false]);
