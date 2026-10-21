@@ -841,6 +841,17 @@ class MiddlewareTest extends TestCase
         $this->assertSame(['X-Inertia'], $response->headers->all('Vary'));
     }
 
+    public function test_empty_vary_header_values_are_discarded(): void
+    {
+        Route::middleware(Middleware::class)->get('/', function (Request $request) {
+            return Inertia::render('User/Edit')->toResponse($request)->setVary('');
+        });
+
+        $response = $this->get('/');
+
+        $this->assertSame(['X-Inertia'], $response->headers->all('Vary'));
+    }
+
     public function test_existing_vary_header_values_are_preserved_on_precognitive_routes(): void
     {
         Route::middleware([HandlePrecognitiveRequests::class, Middleware::class])->get('/', function (Request $request) {
