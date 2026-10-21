@@ -5,6 +5,7 @@ namespace Inertia\Tests;
 use Illuminate\Contracts\Http\Kernel as HttpKernelContract;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Foundation\Http\Kernel;
+use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route as RouteInstance;
 use Illuminate\Session\Middleware\StartSession;
@@ -805,6 +806,50 @@ class MiddlewareTest extends TestCase
 
         $response->assertStatus(500);
         $this->assertFalse($called);
+    }
+
+    public function test_the_vary_header_is_set(): void
+    {
+        Route::middleware(Middleware::class)->get('/', function () {
+            return Inertia::render('User/Edit');
+        });
+
+        $response = $this->get('/');
+
+        $this->assertSame(['X-Inertia'], $response->headers->all('Vary'));
+    }
+
+    public function test_existing_vary_header_values_are_preserved(): void
+    {
+        Route::middleware(Middleware::class)->get('/', function (Request $request) {
+            return Inertia::render('User/Edit')->toResponse($request)->setVary('Accept-Language');
+        });
+
+        $response = $this->get('/');
+
+        $this->assertSame(['Accept-Language, X-Inertia'], $response->headers->all('Vary'));
+    }
+
+    public function test_the_vary_header_is_not_duplicated(): void
+    {
+        Route::middleware(Middleware::class)->get('/', function (Request $request) {
+            return Inertia::render('User/Edit')->toResponse($request)->setVary('X-Inertia');
+        });
+
+        $response = $this->get('/');
+
+        $this->assertSame(['X-Inertia'], $response->headers->all('Vary'));
+    }
+
+    public function test_existing_vary_header_values_are_preserved_on_precognitive_routes(): void
+    {
+        Route::middleware([HandlePrecognitiveRequests::class, Middleware::class])->get('/', function (Request $request) {
+            return Inertia::render('User/Edit')->toResponse($request)->setVary('Accept-Language');
+        });
+
+        $response = $this->get('/');
+
+        $this->assertSame(['Accept-Language, X-Inertia, Precognition'], $response->headers->all('Vary'));
     }
 
     public function test_middleware_registers_ssr_except_paths(): void

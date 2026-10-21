@@ -148,7 +148,7 @@ class Middleware
         }
 
         $response = $next($request);
-        $response->setVary(Header::INERTIA, false);
+        $response->setVary(implode(', ', array_unique([...$response->getVary(), Header::INERTIA])));
 
         if ($isRedirect = $response->isRedirect()) {
             $this->reflash($request);
