@@ -127,6 +127,44 @@ class MiddlewareTest extends TestCase
         $response->assertJson(['component' => 'User/Edit']);
     }
 
+    public function test_a_response_body_of_zero_is_not_treated_as_empty_for_inertia_requests(): void
+    {
+        Route::middleware(Middleware::class)->get('/', function () {
+            return response('0');
+        });
+
+        $response = $this->from('/foo')->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertOk();
+        $this->assertSame('0', $response->getContent());
+    }
+
+    public function test_streamed_responses_are_not_treated_as_empty_for_inertia_requests(): void
+    {
+        Route::middleware(Middleware::class)->get('/', function () {
+            return response()->streamDownload(function () {
+                echo 'hello';
+            }, 'hello.txt');
+        });
+
+        $response = $this->from('/foo')->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertOk();
+        $response->assertDownload('hello.txt');
+    }
+
+    public function test_file_downloads_are_not_treated_as_empty_for_inertia_requests(): void
+    {
+        Route::middleware(Middleware::class)->get('/', function () {
+            return response()->download(__DIR__.'/Stubs/ExamplePage.vue', 'example.vue');
+        });
+
+        $response = $this->from('/foo')->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertOk();
+        $response->assertDownload('example.vue');
+    }
+
     public function test_it_will_instruct_inertia_to_reload_on_a_version_mismatch(): void
     {
         $this->prepareMockEndpoint('1234');
