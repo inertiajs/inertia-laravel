@@ -1119,6 +1119,36 @@ class ResponseFactoryTest extends TestCase
         Http::assertSent(fn (ClientRequest $request) => $request->hasHeader('X-Tenant', 'acme'));
     }
 
+    public function test_ssr_renders_each_page_when_the_container_is_reused_between_requests(): void
+    {
+        config([
+            'inertia.ssr.enabled' => true,
+            'inertia.ssr.ensure_bundle_exists' => false,
+        ]);
+
+        Http::fake([
+            app(HttpGateway::class)->getProductionUrl('/render') => fn (ClientRequest $request) => Http::response(json_encode([
+                'head' => [],
+                'body' => '<div id="app">'.$request['component'].'</div>',
+            ])),
+        ]);
+
+        Inertia::setRootView('app');
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/page-a', function () {
+            return Inertia::render('Page/A');
+        });
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/page-b', function () {
+            return Inertia::render('Page/B');
+        });
+
+        $this->get('/page-a')->assertSee('<div id="app">Page/A</div>', false);
+        $this->get('/page-b')->assertSee('<div id="app">Page/B</div>', false);
+
+        Http::assertSentCount(2);
+    }
+
     public function test_configure_ssr_request_using_throws_when_the_gateway_does_not_support_it(): void
     {
         $this->app->instance(Gateway::class, new FakeGateway);

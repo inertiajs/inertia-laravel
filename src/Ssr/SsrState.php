@@ -28,6 +28,11 @@ class SsrState
      */
     public function setPage(array $page): static
     {
+        if ($page !== $this->page) {
+            $this->dispatched = false;
+            $this->response = null;
+        }
+
         $this->page = $page;
 
         return $this;
