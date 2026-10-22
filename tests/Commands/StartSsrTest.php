@@ -2,7 +2,9 @@
 
 namespace Inertia\Tests\Commands;
 
+use Inertia\Ssr\HttpGateway;
 use Inertia\Tests\TestCase;
+use Mockery;
 use Symfony\Component\Process\Process;
 
 class StartSsrTest extends TestCase
@@ -139,5 +141,27 @@ class StartSsrTest extends TestCase
         $this->artisan('inertia:start-ssr')->assertExitCode(0);
 
         $this->assertSame('nonexistent-runtime-binary', $this->processCommand[0]);
+    }
+
+    public function test_stops_a_running_server_before_starting(): void
+    {
+        $this->fakeProcess();
+
+        $gateway = Mockery::mock(HttpGateway::class);
+        $gateway->shouldReceive('getProductionUrl')->once()->with('/shutdown')->andReturn('http://127.0.0.1:1/shutdown');
+        $this->app->instance(HttpGateway::class, $gateway);
+
+        $this->artisan('inertia:start-ssr')->assertExitCode(0);
+    }
+
+    public function test_no_stop_option_leaves_a_running_server_alone(): void
+    {
+        $this->fakeProcess();
+
+        $gateway = Mockery::mock(HttpGateway::class);
+        $gateway->shouldNotReceive('getProductionUrl');
+        $this->app->instance(HttpGateway::class, $gateway);
+
+        $this->artisan('inertia:start-ssr', ['--no-stop' => true])->assertExitCode(0);
     }
 }
