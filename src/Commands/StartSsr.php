@@ -16,7 +16,9 @@ class StartSsr extends Command
      *
      * @var string
      */
-    protected $signature = 'inertia:start-ssr {--runtime=node : The runtime to use (`node` or `bun`)}';
+    protected $signature = 'inertia:start-ssr
+        {--runtime=node : The runtime to use (`node` or `bun`)}
+        {--no-stop : Do not stop a server already running at the SSR URL}';
 
     /**
      * The console command description.
@@ -60,7 +62,9 @@ class StartSsr extends Command
             return self::INVALID;
         }
 
-        $this->callSilently('inertia:stop-ssr');
+        if (! $this->option('no-stop')) {
+            $this->callSilently('inertia:stop-ssr');
+        }
 
         $process = new Process([$runtime, $bundle]);
         $process->setTimeout(null);
