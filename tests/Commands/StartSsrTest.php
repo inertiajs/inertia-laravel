@@ -143,24 +143,24 @@ class StartSsrTest extends TestCase
         $this->assertSame('nonexistent-runtime-binary', $this->processCommand[0]);
     }
 
-    public function test_stops_a_running_server_before_starting(): void
+    public function test_ssr_server_is_stopped_before_starting_by_default(): void
     {
         $this->fakeProcess();
 
-        $gateway = Mockery::mock(HttpGateway::class);
-        $gateway->shouldReceive('getProductionUrl')->once()->with('/shutdown')->andReturn('http://127.0.0.1:1/shutdown');
-        $this->app->instance(HttpGateway::class, $gateway);
+        $mock = Mockery::mock(HttpGateway::class);
+        $mock->shouldReceive('getProductionUrl')->once()->with('/shutdown')->andReturn('http://127.0.0.1:1/shutdown');
+        $this->app->instance(HttpGateway::class, $mock);
 
         $this->artisan('inertia:start-ssr')->assertExitCode(0);
     }
 
-    public function test_no_stop_before_start_option_leaves_a_running_server_alone(): void
+    public function test_ssr_server_is_not_stopped_when_the_no_stop_before_start_option_is_used(): void
     {
         $this->fakeProcess();
 
-        $gateway = Mockery::mock(HttpGateway::class);
-        $gateway->shouldNotReceive('getProductionUrl');
-        $this->app->instance(HttpGateway::class, $gateway);
+        $mock = Mockery::mock(HttpGateway::class);
+        $mock->shouldNotReceive('getProductionUrl');
+        $this->app->instance(HttpGateway::class, $mock);
 
         $this->artisan('inertia:start-ssr', ['--no-stop-before-start' => true])->assertExitCode(0);
     }
