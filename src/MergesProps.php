@@ -3,6 +3,7 @@
 namespace Inertia;
 
 use Illuminate\Support\Arr;
+use LogicException;
 
 trait MergesProps
 {
@@ -43,10 +44,15 @@ trait MergesProps
     protected array $prependsAtPaths = [];
 
     /**
-     * Mark the property for merging.
+     * Mark the property for merging. A live property cannot be merged, since
+     * refreshing it would append rather than replace its value.
      */
     public function merge(): static
     {
+        if ($this instanceof HasLiveUpdates && $this->isLive()) {
+            throw new LogicException('Live updates are not supported on merge properties.');
+        }
+
         $this->merge = true;
 
         return $this;
