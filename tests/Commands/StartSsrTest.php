@@ -154,7 +154,7 @@ class StartSsrTest extends TestCase
         $this->artisan('inertia:start-ssr')->assertExitCode(0);
     }
 
-    public function test_no_stop_option_leaves_a_running_server_alone(): void
+    public function test_no_stop_before_start_option_leaves_a_running_server_alone(): void
     {
         $this->fakeProcess();
 
@@ -162,6 +162,6 @@ class StartSsrTest extends TestCase
         $gateway->shouldNotReceive('getProductionUrl');
         $this->app->instance(HttpGateway::class, $gateway);
 
-        $this->artisan('inertia:start-ssr', ['--no-stop' => true])->assertExitCode(0);
+        $this->artisan('inertia:start-ssr', ['--no-stop-before-start' => true])->assertExitCode(0);
     }
 }

@@ -19,7 +19,7 @@ class StartSsr extends Command
      */
     protected $signature = 'inertia:start-ssr
         {--runtime= : The runtime to use (e.g. `node`, `bun`, or an absolute path)}
-        {--no-stop : Do not stop a server already running at the SSR URL}';
+        {--no-stop-before-start : Do not send a shutdown request to the configured SSR URL before starting}';
 
     /**
      * The console command description.
@@ -63,7 +63,7 @@ class StartSsr extends Command
             return self::FAILURE;
         }
 
-        if (! $this->option('no-stop')) {
+        if (! $this->option('no-stop-before-start')) {
             $this->callSilently('inertia:stop-ssr');
         }
 
