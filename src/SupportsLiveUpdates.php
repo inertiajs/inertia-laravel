@@ -15,6 +15,16 @@ use ReflectionClass;
 trait SupportsLiveUpdates
 {
     /**
+     * The prefix Laravel's channel classes add to a channel name, keyed by type.
+     */
+    protected const CHANNEL_PREFIXES = [
+        'public' => '',
+        'private' => 'private-',
+        'presence' => 'presence-',
+        'encrypted-private' => 'private-encrypted-',
+    ];
+
+    /**
      * Indicates if the property should receive live updates.
      */
     protected bool $live = false;
@@ -225,7 +235,7 @@ trait SupportsLiveUpdates
         $type = $this->channelType($channel);
 
         return [
-            'name' => $this->channelName($channel),
+            'name' => $this->channelName($channel, $type),
             'type' => $type,
         ];
     }
@@ -246,14 +256,9 @@ trait SupportsLiveUpdates
     /**
      * Resolve the name of the given channel, without the prefix Laravel's channel class added to it.
      */
-    protected function channelName(Channel $channel): string
+    protected function channelName(Channel $channel, string $type): string
     {
-        $prefix = match (true) {
-            $channel instanceof EncryptedPrivateChannel => 'private-encrypted-',
-            $channel instanceof PresenceChannel => 'presence-',
-            $channel instanceof PrivateChannel => 'private-',
-            default => '',
-        };
+        $prefix = self::CHANNEL_PREFIXES[$type];
 
         return $prefix !== '' && str_starts_with($channel->name, $prefix)
             ? substr($channel->name, strlen($prefix))
