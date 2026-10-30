@@ -43,7 +43,7 @@ jobs:
         with:
           timeout_minutes: 5
           max_attempts: 5
-          command: composer require "laravel/framework=^${{ matrix.laravel }}" --no-interaction --no-update
+          command: composer require "laravel/framework=^${{ matrix.laravel == 11 && '11.35' || matrix.laravel }}" --no-interaction --no-update
 
       - name: Allow Laravel 11 releases with security advisories
         if: matrix.laravel == 11
