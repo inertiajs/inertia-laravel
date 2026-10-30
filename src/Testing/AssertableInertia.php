@@ -82,6 +82,11 @@ class AssertableInertia extends AssertableJson
             PHPUnit::fail('Not a valid Inertia response.');
         }
 
+        if (($page['preserveBigIntegers'] ?? false) === true) {
+            $page['props'] = static::decodeBigIntegers($page['props']);
+            $page['flash'] = static::decodeBigIntegers($page['flash'] ?? []);
+        }
+
         $instance = static::fromArray($page['props']);
         $instance->component = $page['component'];
         $instance->url = $page['url'];
@@ -92,6 +97,28 @@ class AssertableInertia extends AssertableJson
         $instance->flash = $page['flash'] ?? [];
 
         return $instance;
+    }
+
+    /**
+     * Turn big integer markers back into integers, so assertions are made
+     * against the values that were passed to the response.
+     *
+     * @param  array<array-key, mixed>  $value
+     * @return array<array-key, mixed>
+     */
+    protected static function decodeBigIntegers(array $value): array
+    {
+        foreach ($value as $key => $nested) {
+            if (! is_array($nested)) {
+                continue;
+            }
+
+            $value[$key] = is_string($nested['$bigint'] ?? null)
+                ? (int) $nested['$bigint']
+                : static::decodeBigIntegers($nested);
+        }
+
+        return $value;
     }
 
     /**
@@ -141,9 +168,9 @@ class AssertableInertia extends AssertableJson
      */
     public function loadDeferredProps(Closure|array|string $groupsOrCallback, ?Closure $callback = null): self
     {
-        $callback = is_callable($groupsOrCallback) ? $groupsOrCallback : $callback;
+        $callback = $groupsOrCallback instanceof Closure ? $groupsOrCallback : $callback;
 
-        $groups = is_callable($groupsOrCallback) ? array_keys($this->deferredProps) : Arr::wrap($groupsOrCallback);
+        $groups = $groupsOrCallback instanceof Closure ? array_keys($this->deferredProps) : Arr::wrap($groupsOrCallback);
 
         $props = collect($groups)->flatMap(function ($group) {
             return $this->deferredProps[$group] ?? [];

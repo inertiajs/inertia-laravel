@@ -31,6 +31,8 @@ return [
 
         'hot_url' => env('INERTIA_SSR_HOT_URL'),
 
+        'timeout' => env('INERTIA_SSR_TIMEOUT'),
+
         'ensure_bundle_exists' => (bool) env('INERTIA_SSR_ENSURE_BUNDLE_EXISTS', true),
 
         // 'bundle' => base_path('bootstrap/ssr/ssr.mjs'),
@@ -125,6 +127,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Previous URL
+    |--------------------------------------------------------------------------
+    |
+    | Laravel's session middleware doesn't store the previous URL and route for
+    | Inertia visits, as they are sent as AJAX requests. Enable this option to
+    | store them for client-side visits as well, excluding partial reloads.
+    |
+    */
+
+    'store_previous_url' => false,
+
+    /*
+    |--------------------------------------------------------------------------
     | History
     |--------------------------------------------------------------------------
     |
@@ -201,5 +216,18 @@ return [
         ],
 
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Big Integers
+    |--------------------------------------------------------------------------
+    |
+    | When enabled, integers outside JavaScript's safe range arrive in the
+    | frontend as native BigInt values instead of losing precision. Single
+    | responses may opt in or out using the `preserveBigIntegers` method.
+    |
+    */
+
+    'preserve_big_integers' => (bool) env('INERTIA_PRESERVE_BIG_INTEGERS', false),
 
 ];

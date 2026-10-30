@@ -412,6 +412,28 @@ class AssertableInertiaTest extends TestCase
         $this->assertSame(4, $called);
     }
 
+    public function test_deferred_props_can_be_loaded_from_a_group_named_after_a_global_function(): void
+    {
+        $response = $this->makeMockRequest(
+            Inertia::render('foo', [
+                'deferred1' => Inertia::defer(fn () => 'baz', 'auth'),
+                'deferred2' => Inertia::defer(fn () => 'qux', 'custom'),
+            ])
+        );
+
+        $called = false;
+
+        $response->assertInertia(function (AssertableInertia $inertia) use (&$called) {
+            $inertia->loadDeferredProps('auth', function (AssertableInertia $inertia) use (&$called) {
+                $inertia->where('deferred1', 'baz');
+                $inertia->missing('deferred2');
+                $called = true;
+            });
+        });
+
+        $this->assertTrue($called);
+    }
+
     public function test_the_flash_data_can_be_asserted(): void
     {
         $response = $this->makeMockRequest(
@@ -429,6 +451,35 @@ class AssertableInertiaTest extends TestCase
             $inertia->missingFlash('other');
             $inertia->missingFlash('notification.other');
         });
+    }
+
+    public function test_big_integers_are_asserted_as_integers(): void
+    {
+        $response = $this->makeMockRequest(
+            fn () => Inertia::render('foo', [
+                'order' => ['id' => 900719925474099988, 'lines' => [['reference' => -900719925474099988]]],
+            ])->flash('id', 900719925474099988)->preserveBigIntegers(),
+            StartSession::class
+        );
+
+        $response->assertInertia(fn (AssertableInertia $inertia) => $inertia
+            ->where('order.id', 900719925474099988)
+            ->where('order.lines.0.reference', -900719925474099988)
+            ->hasFlash('id', 900719925474099988)
+        );
+
+        $this->assertSame(900719925474099988, $response->inertiaProps('order.id'));
+    }
+
+    public function test_big_integer_markers_built_by_the_app_are_left_alone_without_preserving_big_integers(): void
+    {
+        $response = $this->makeMockRequest(
+            Inertia::render('foo', ['id' => ['$bigint' => '900719925474099988']])
+        );
+
+        $response->assertInertia(fn (AssertableInertia $inertia) => $inertia
+            ->where('id', ['$bigint' => '900719925474099988'])
+        );
     }
 
     public function test_the_flash_assertion_fails_when_key_is_missing(): void

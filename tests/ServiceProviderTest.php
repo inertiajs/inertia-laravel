@@ -4,11 +4,15 @@ namespace Inertia\Tests;
 
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Http\Kernel as HttpKernelContract;
+use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Http\Kernel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
+use Illuminate\View\Compilers\BladeCompiler;
+use Inertia\Middleware\EnsureDeferredCallbacksRun;
 use Inertia\Middleware\EnsureGetOnRedirect;
 use Inertia\Tests\Stubs\ExampleMiddleware;
 
@@ -17,6 +21,32 @@ class ServiceProviderTest extends TestCase
     public function test_blade_directive_is_registered(): void
     {
         $this->assertArrayHasKey('inertia', Blade::getCustomDirectives());
+    }
+
+    public function test_blade_component_namespace_is_registered_on_the_resolved_compiler(): void
+    {
+        $otherCompiler = new BladeCompiler($this->app['files'], sys_get_temp_dir());
+
+        $otherApp = new Application;
+        $otherApp->instance('blade.compiler', $otherCompiler);
+
+        $facadeApplication = Facade::getFacadeApplication();
+
+        Facade::clearResolvedInstances();
+        Facade::setFacadeApplication($otherApp);
+
+        try {
+            $this->app->forgetInstance('blade.compiler');
+
+            $compiler = $this->app->make('blade.compiler');
+        } finally {
+            Facade::clearResolvedInstances();
+            Facade::setFacadeApplication($facadeApplication);
+            Application::setInstance($this->app);
+        }
+
+        $this->assertArrayHasKey('inertia', $compiler->getClassComponentNamespaces());
+        $this->assertArrayNotHasKey('inertia', $otherCompiler->getClassComponentNamespaces());
     }
 
     public function test_request_macro_is_registered(): void
@@ -52,6 +82,15 @@ class ServiceProviderTest extends TestCase
         $kernel = $this->app->make(HttpKernelContract::class);
 
         $this->assertTrue($kernel->hasMiddleware(EnsureGetOnRedirect::class));
+    }
+
+    public function test_deferred_callbacks_middleware_wraps_the_global_middleware_stack(): void
+    {
+        /** @var Kernel $kernel */
+        $kernel = $this->app->make(HttpKernelContract::class);
+
+        $this->assertTrue($kernel->hasMiddleware(EnsureDeferredCallbacksRun::class));
+        $this->assertSame(EnsureDeferredCallbacksRun::class, $kernel->getGlobalMiddleware()[0]);
     }
 
     public function test_redirect_response_from_rate_limiter_is_converted_to_303(): void

@@ -1,8 +1,85 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.3.1...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.5.2...3.x)
 
 - Nothing!
+
+## [v3.5.2](https://github.com/inertiajs/inertia-laravel/compare/v3.5.1...v3.5.2) - 2026-10-21
+
+### What's Changed
+
+* Bump shivammathur/setup-php from 2.37.2 to 2.40.0 in the github-actions group by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia-laravel/pull/921
+* [3.x] Append Vary header instead of setting it by [@thannaske](https://github.com/thannaske) in https://github.com/inertiajs/inertia-laravel/pull/920
+* [3.x] Reset the cached SSR response when the page changes by [@lazerg](https://github.com/lazerg) in https://github.com/inertiajs/inertia-laravel/pull/924
+* [3.x] Don't treat streamed or "0" responses as empty for Inertia requests by [@mdalikadar](https://github.com/mdalikadar) in https://github.com/inertiajs/inertia-laravel/pull/919
+
+### New Contributors
+
+* [@thannaske](https://github.com/thannaske) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/920
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v3.5.1...v3.5.2
+
+## [v3.5.1](https://github.com/inertiajs/inertia-laravel/compare/v3.5.0...v3.5.1) - 2026-10-01
+
+### What's Changed
+
+* [3.x] Assert big integers as plain integers in tests by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/918
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v3.5.0...v3.5.1
+
+## [v3.5.0](https://github.com/inertiajs/inertia-laravel/compare/v3.4.0...v3.5.0) - 2026-10-01
+
+### What's Changed
+
+* [3.x] Support big integers as native BigInt values by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/904
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v3.4.0...v3.5.0
+
+## [v3.4.0](https://github.com/inertiajs/inertia-laravel/compare/v3.3.4...v3.4.0) - 2026-09-25
+
+### What's Changed
+
+* [3.x] Return Illuminate's RedirectResponse from back() by [@YannikFirre](https://github.com/YannikFirre) in https://github.com/inertiajs/inertia-laravel/pull/910
+* [3.x] Configure the HTTP request sent to the SSR server by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/916
+* [3.x] Ensure deferred callbacks run on Inertia redirects by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/915
+* [3.x] Add `--graceful` option to the `inertia:stop-ssr` command by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/917
+* [3.x] Store previous locations for Inertia visits by [@drewmt](https://github.com/drewmt) in https://github.com/inertiajs/inertia-laravel/pull/888
+
+### New Contributors
+
+* [@YannikFirre](https://github.com/YannikFirre) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/910
+* [@drewmt](https://github.com/drewmt) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/888
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v3.3.4...v3.4.0
+
+## [v3.3.4](https://github.com/inertiajs/inertia-laravel/compare/v3.3.3...v3.3.4) - 2026-09-11
+
+### What's Changed
+
+* [3.x] Escape HTML tags in the initial page JSON by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/911
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v3.3.3...v3.3.4
+
+## [v3.3.3](https://github.com/inertiajs/inertia-laravel/compare/v3.3.2...v3.3.3) - 2026-09-04
+
+### What's Changed
+
+* [3.x] Fix loadDeferredProps() crashing when a group name matches a helper function by [@mdalikadar](https://github.com/mdalikadar) in https://github.com/inertiajs/inertia-laravel/pull/908
+
+### New Contributors
+
+* [@mdalikadar](https://github.com/mdalikadar) made their first contribution in https://github.com/inertiajs/inertia-laravel/pull/908
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v3.3.2...v3.3.3
+
+## [v3.3.2](https://github.com/inertiajs/inertia-laravel/compare/v3.3.1...v3.3.2) - 2026-09-02
+
+### What's Changed
+
+* [3.x] Resolve props nested in `JsonSerializable` objects by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/902
+* [3.x] Register Blade component namespace on the resolved compiler by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/906
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v3.3.1...v3.3.2
 
 ## [v3.3.1](https://github.com/inertiajs/inertia-laravel/compare/v3.3.0...v3.3.1) - 2026-08-04
 

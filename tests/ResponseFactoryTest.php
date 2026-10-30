@@ -3,12 +3,15 @@
 namespace Inertia\Tests;
 
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Http\Client\Request as ClientRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Http\Response;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Session\NullSessionHandler;
 use Illuminate\Session\Store;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\AlwaysProp;
@@ -21,13 +24,16 @@ use Inertia\OptionalProp;
 use Inertia\ResponseFactory;
 use Inertia\ScrollMetadata;
 use Inertia\ScrollProp;
+use Inertia\Ssr\Gateway;
 use Inertia\Ssr\HttpGateway;
 use Inertia\Tests\Enums\IntBackedEnum;
 use Inertia\Tests\Enums\StringBackedEnum;
 use Inertia\Tests\Enums\UnitEnum;
 use Inertia\Tests\Stubs\ExampleInertiaPropsProvider;
 use Inertia\Tests\Stubs\ExampleMiddleware;
+use Inertia\Tests\Stubs\FakeGateway;
 use InvalidArgumentException;
+use LogicException;
 
 class ResponseFactoryTest extends TestCase
 {
@@ -749,6 +755,93 @@ class ResponseFactoryTest extends TestCase
         $this->assertNull(session('inertia.flash_data'));
     }
 
+    public function test_big_integers_in_flash_data_are_wrapped_when_enabled(): void
+    {
+        config(['inertia.preserve_big_integers' => true]);
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->post('/flash-big-integer', function () {
+            return Inertia::flash('id', 900719925474099988)
+                ->flash('safe', 42)
+                ->render('User/Edit');
+        });
+
+        $response = $this->post('/flash-big-integer', [], ['X-Inertia' => 'true']);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'flash' => [
+                'id' => ['$bigint' => '900719925474099988'],
+                'safe' => 42,
+            ],
+        ]);
+    }
+
+    public function test_big_integers_in_flash_data_are_untouched_when_disabled(): void
+    {
+        config(['inertia.preserve_big_integers' => false]);
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->post('/flash-big-integer', function () {
+            return Inertia::flash('id', 900719925474099988)->render('User/Edit');
+        });
+
+        $response = $this->post('/flash-big-integer', [], ['X-Inertia' => 'true']);
+
+        $response->assertSuccessful();
+        $response->assertJson(['flash' => ['id' => 900719925474099988]]);
+    }
+
+    public function test_big_integers_can_be_preserved_for_a_single_response(): void
+    {
+        config(['inertia.preserve_big_integers' => false]);
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/one-page', function () {
+            return Inertia::render('User/Edit', ['id' => 900719925474099988])->preserveBigIntegers();
+        });
+
+        $response = $this->get('/one-page', ['X-Inertia' => 'true']);
+
+        $response->assertJson([
+            'props' => ['id' => ['$bigint' => '900719925474099988']],
+            'preserveBigIntegers' => true,
+        ]);
+    }
+
+    public function test_a_single_response_can_opt_out_of_preserving_big_integers(): void
+    {
+        config(['inertia.preserve_big_integers' => true]);
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/opted-out', function () {
+            return Inertia::render('User/Edit', ['id' => 900719925474099988])->preserveBigIntegers(false);
+        });
+
+        $response = $this->get('/opted-out', ['X-Inertia' => 'true']);
+
+        $response->assertJson(['props' => ['id' => 900719925474099988]]);
+        $response->assertJsonMissingPath('preserveBigIntegers');
+    }
+
+    public function test_the_initial_page_tells_the_client_when_big_integers_may_be_wrapped(): void
+    {
+        config(['inertia.preserve_big_integers' => true]);
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/root', function () {
+            return Inertia::render('User/Edit', ['id' => 900719925474099988]);
+        });
+
+        $this->get('/root')->assertSee('"preserveBigIntegers":true', false);
+    }
+
+    public function test_the_initial_page_is_unmarked_when_big_integers_are_disabled(): void
+    {
+        config(['inertia.preserve_big_integers' => false]);
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/root', function () {
+            return Inertia::render('User/Edit', ['id' => 900719925474099988]);
+        });
+
+        $this->get('/root')->assertDontSee('preserveBigIntegers', false);
+    }
+
     public function test_render_without_flash_does_not_include_flash_key(): void
     {
         Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/no-flash', function () {
@@ -1003,5 +1096,66 @@ class ResponseFactoryTest extends TestCase
         Inertia::withoutSsr('admin/*');
 
         $this->assertContains('admin/*', app(HttpGateway::class)->getExcludedPaths());
+    }
+
+    public function test_configure_ssr_request_using_registers_the_callback_with_the_gateway(): void
+    {
+        config([
+            'inertia.ssr.enabled' => true,
+            'inertia.ssr.ensure_bundle_exists' => false,
+        ]);
+
+        Http::fake([
+            app(HttpGateway::class)->getProductionUrl('/render') => Http::response(json_encode([
+                'head' => [],
+                'body' => '<div id="app"></div>',
+            ])),
+        ]);
+
+        Inertia::configureSsrRequestUsing(fn (PendingRequest $request) => $request->withHeader('X-Tenant', 'acme'));
+
+        $this->assertNotNull(app(HttpGateway::class)->dispatch(self::EXAMPLE_PAGE_OBJECT));
+
+        Http::assertSent(fn (ClientRequest $request) => $request->hasHeader('X-Tenant', 'acme'));
+    }
+
+    public function test_ssr_renders_each_page_when_the_container_is_reused_between_requests(): void
+    {
+        config([
+            'inertia.ssr.enabled' => true,
+            'inertia.ssr.ensure_bundle_exists' => false,
+        ]);
+
+        Http::fake([
+            app(HttpGateway::class)->getProductionUrl('/render') => fn (ClientRequest $request) => Http::response(json_encode([
+                'head' => [],
+                'body' => '<div id="app">'.$request['component'].'</div>',
+            ])),
+        ]);
+
+        Inertia::setRootView('app');
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/page-a', function () {
+            return Inertia::render('Page/A');
+        });
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/page-b', function () {
+            return Inertia::render('Page/B');
+        });
+
+        $this->get('/page-a')->assertSee('<div id="app">Page/A</div>', false);
+        $this->get('/page-b')->assertSee('<div id="app">Page/B</div>', false);
+
+        Http::assertSentCount(2);
+    }
+
+    public function test_configure_ssr_request_using_throws_when_the_gateway_does_not_support_it(): void
+    {
+        $this->app->instance(Gateway::class, new FakeGateway);
+
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('The configured SSR gateway does not support configuring server-side rendering requests.');
+
+        Inertia::configureSsrRequestUsing(fn (PendingRequest $request) => $request);
     }
 }
