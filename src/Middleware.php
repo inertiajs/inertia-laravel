@@ -175,7 +175,7 @@ class Middleware
             $response = $this->onEmptyResponse($request, $response);
         }
 
-        if ($response->getStatusCode() === 302 && in_array($request->method(), ['PUT', 'PATCH', 'DELETE'])) {
+        if ($response->getStatusCode() === 302 && in_array($request->method(), ['PUT', 'PATCH', 'DELETE', 'QUERY'])) {
             $response->setStatusCode(303);
         }
 
