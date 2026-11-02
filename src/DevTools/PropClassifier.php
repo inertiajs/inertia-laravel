@@ -7,7 +7,6 @@ use Inertia\AlwaysProp;
 use Inertia\DeferProp;
 use Inertia\Deferrable;
 use Inertia\DevTools\Data\PropType;
-use Inertia\HasLiveUpdates;
 use Inertia\Mergeable;
 use Inertia\MergeProp;
 use Inertia\Onceable;
@@ -15,6 +14,7 @@ use Inertia\OnceProp;
 use Inertia\OptionalProp;
 use Inertia\ScrollProp;
 use Inertia\Support\Header;
+use Inertia\SupportsLiveUpdates;
 
 /**
  * Maps Inertia prop wrapper instances to the stable metadata the extension renders.
@@ -38,7 +38,7 @@ class PropClassifier
             'deferGroup' => $this->deferGroup($prop, $isDeferredDelivery),
             'reset' => in_array($path, $this->parseDevToolsHeader($request, Header::RESET), true),
             'once' => $prop instanceof Onceable && $prop->shouldResolveOnce(),
-            'live' => $prop instanceof HasLiveUpdates && $prop->isLive(),
+            'live' => $prop instanceof SupportsLiveUpdates && $prop->isLive(),
             'mergeDirection' => $this->mergeDirection($prop),
             'deepMerge' => $this->isDeepMerge($prop),
         ];

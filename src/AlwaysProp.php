@@ -2,9 +2,9 @@
 
 namespace Inertia;
 
-class AlwaysProp implements HasLiveUpdates
+class AlwaysProp implements SupportsLiveUpdates
 {
-    use ResolvesCallables, SupportsLiveUpdates;
+    use HasLiveUpdates, ResolvesCallables;
 
     /**
      * The property value.

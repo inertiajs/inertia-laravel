@@ -406,7 +406,7 @@ class PropsResolver
     protected function excludeFromInitialResponse(mixed $prop, string $path): bool
     {
         // Excluding a prop from the initial response never removes its live listeners.
-        if ($prop instanceof HasLiveUpdates && $prop->isLive()) {
+        if ($prop instanceof SupportsLiveUpdates && $prop->isLive()) {
             $this->collectLiveMetadata($path, $prop, false);
         }
 
@@ -556,7 +556,7 @@ class PropsResolver
         return $value instanceof AlwaysProp
             || $value instanceof Deferrable
             || $value instanceof IgnoreFirstLoad
-            || $value instanceof HasLiveUpdates
+            || $value instanceof SupportsLiveUpdates
             || $value instanceof Mergeable
             || $value instanceof Onceable;
     }
@@ -578,7 +578,7 @@ class PropsResolver
             $this->collectOnceMetadata($path, $prop);
         }
 
-        if ($prop instanceof HasLiveUpdates && $prop->isLive()) {
+        if ($prop instanceof SupportsLiveUpdates && $prop->isLive()) {
             $this->collectLiveMetadata($path, $prop, $parentWasResolved);
         }
     }
@@ -660,7 +660,7 @@ class PropsResolver
      * Collect the live update listeners for a live prop. Emitted on every
      * response, so a partial reload keeps the listeners it refreshed up to date.
      */
-    protected function collectLiveMetadata(string $path, HasLiveUpdates $prop, bool $parentWasResolved): void
+    protected function collectLiveMetadata(string $path, SupportsLiveUpdates $prop, bool $parentWasResolved): void
     {
         // Props that resolve outside partial filters, whether because they are
         // always props or because their parent already resolved, must refresh

@@ -4,9 +4,9 @@ namespace Inertia;
 
 use Illuminate\Broadcasting\Channel;
 
-class LiveProp implements HasLiveUpdates
+class LiveProp implements SupportsLiveUpdates
 {
-    use ResolvesCallables, SupportsLiveUpdates;
+    use HasLiveUpdates, ResolvesCallables;
 
     /**
      * The property value.

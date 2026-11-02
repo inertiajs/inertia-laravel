@@ -11,7 +11,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\AlwaysProp;
 use Inertia\DeferProp;
-use Inertia\HasLiveUpdates;
 use Inertia\Inertia;
 use Inertia\LiveProp;
 use Inertia\MergeProp;
@@ -19,6 +18,7 @@ use Inertia\OnceProp;
 use Inertia\OptionalProp;
 use Inertia\Response;
 use Inertia\ScrollProp;
+use Inertia\SupportsLiveUpdates;
 use LogicException;
 
 class OrderUpdated
@@ -220,8 +220,8 @@ class LivePropTest extends TestCase
         $this->assertFalse((new OptionalProp(fn () => 'bar'))->isLive());
         $this->assertFalse((new OnceProp(fn () => 'bar'))->isLive());
         $this->assertFalse((new DeferProp(fn () => 'bar'))->isLive());
-        $this->assertFalse(is_a(MergeProp::class, HasLiveUpdates::class, true));
-        $this->assertFalse(is_a(ScrollProp::class, HasLiveUpdates::class, true));
+        $this->assertFalse(is_a(MergeProp::class, SupportsLiveUpdates::class, true));
+        $this->assertFalse(is_a(ScrollProp::class, SupportsLiveUpdates::class, true));
     }
 
     public function test_supported_prop_types_can_be_marked_as_live(): void

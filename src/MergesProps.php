@@ -49,7 +49,7 @@ trait MergesProps
      */
     public function merge(): static
     {
-        if ($this instanceof HasLiveUpdates && $this->isLive()) {
+        if ($this instanceof SupportsLiveUpdates && $this->isLive()) {
             throw new LogicException('Live updates are not supported on merge properties.');
         }
 
