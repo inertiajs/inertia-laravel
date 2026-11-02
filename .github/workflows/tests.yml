@@ -12,12 +12,18 @@ permissions:
 jobs:
   tests:
     runs-on: ubuntu-24.04
+    continue-on-error: ${{ matrix.experimental || false }}
     strategy:
       fail-fast: true
       matrix:
         php: [8.2, 8.3, 8.4, 8.5]
         laravel: [11, 12, 13]
         stability: ["prefer-lowest", "prefer-stable"]
+        include:
+          - php: 8.6
+            laravel: 13
+            stability: prefer-stable
+            experimental: true
         exclude:
           - php: 8.2
             laravel: 13
@@ -54,7 +60,7 @@ jobs:
         with:
           timeout_minutes: 5
           max_attempts: 5
-          command: composer update --${{ matrix.stability }} --no-interaction
+          command: composer update --${{ matrix.stability }} --no-interaction ${{ matrix.experimental == true && '--ignore-platform-reqs' || '' }}
 
       - name: Execute tests
         run: vendor/bin/phpunit
