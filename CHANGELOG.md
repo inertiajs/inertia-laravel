@@ -1,8 +1,16 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.5.2...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.7.0...3.x)
 
 - Nothing!
+
+## [v3.7.0](https://github.com/inertiajs/inertia-laravel/compare/v3.5.2...v3.7.0) - 2026-11-02
+
+### What's Changed
+
+* [3.x] Support for Live props by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/901
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v3.6.0...v3.7.0
 
 ## [v3.5.2](https://github.com/inertiajs/inertia-laravel/compare/v3.5.1...v3.5.2) - 2026-10-21
 
