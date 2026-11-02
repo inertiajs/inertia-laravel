@@ -2,9 +2,9 @@
 
 namespace Inertia;
 
-class OptionalProp implements IgnoreFirstLoad, Onceable
+class OptionalProp implements IgnoreFirstLoad, Onceable, SupportsLiveUpdates
 {
-    use ResolvesCallables, ResolvesOnce;
+    use HasLiveUpdates, ResolvesCallables, ResolvesOnce;
 
     /**
      * The callback to resolve the property.

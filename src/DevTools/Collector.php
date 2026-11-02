@@ -81,6 +81,7 @@ class Collector
         ?string $deferGroup = null,
         bool $reset = false,
         bool $once = false,
+        bool $live = false,
         ?string $mergeDirection = null,
         bool $deepMerge = false,
         bool $rescued = false,
@@ -104,6 +105,10 @@ class Collector
 
         if ($once) {
             $this->props[$path]['once'] = true;
+        }
+
+        if ($live) {
+            $this->props[$path]['live'] = true;
         }
 
         if ($mergeDirection !== null) {

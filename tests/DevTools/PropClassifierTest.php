@@ -19,7 +19,7 @@ class PropClassifierTest extends TestCase
 {
     /**
      * @param  array<string, string>  $headers
-     * @return array{inertiaType: ?PropType, deferGroup: ?string, reset: bool, once: bool, mergeDirection: ?string, deepMerge: bool}
+     * @return array{inertiaType: ?PropType, deferGroup: ?string, reset: bool, once: bool, live: bool, mergeDirection: ?string, deepMerge: bool}
      */
     private function classify(string $path, mixed $prop, array $headers = []): array
     {
@@ -85,6 +85,35 @@ class PropClassifierTest extends TestCase
         $this->assertNull($result['mergeDirection']);
         $this->assertFalse($result['deepMerge']);
         $this->assertFalse($result['once']);
+        $this->assertFalse($result['live']);
+    }
+
+    public function test_live_prop_keeps_its_inertia_type_and_flags_live(): void
+    {
+        $result = $this->classify('name', Inertia::live('Alice', on: 'order.updated'));
+
+        $this->assertNull($result['inertiaType']);
+        $this->assertTrue($result['live']);
+    }
+
+    public function test_composed_live_prop_keeps_its_inertia_type_and_flags_live(): void
+    {
+        $result = $this->classify('stats', Inertia::defer(fn () => 'value')->live(on: 'order.updated'), [
+            DevToolsHeader::DEVTOOLS_DEFERRED => '1',
+        ]);
+
+        $this->assertSame(PropType::Defer, $result['inertiaType']);
+        $this->assertTrue($result['live']);
+    }
+
+    public function test_non_live_prop_reports_live_false(): void
+    {
+        $result = $this->classify('stats', Inertia::defer(fn () => 'value'), [
+            DevToolsHeader::DEVTOOLS_DEFERRED => '1',
+        ]);
+
+        $this->assertSame(PropType::Defer, $result['inertiaType']);
+        $this->assertFalse($result['live']);
     }
 
     public function test_defer_prop_outside_a_deferred_request_reads_as_regular(): void
@@ -230,6 +259,17 @@ class PropClassifierTest extends TestCase
 
         $this->assertTrue($result['deepMerge']);
         $this->assertSame('append', $result['mergeDirection']);
+    }
+
+    public function test_match_on_without_merging_is_not_a_deep_merge(): void
+    {
+        // `matchOn` alone leaves merging off, so the page object records nothing
+        // for it either. Reporting a deep merge here would contradict the wire.
+        $result = $this->classify('items', Inertia::defer(fn () => [['id' => 1]])->live(on: 'order.updated', channel: 'orders.1')->matchOn('id'));
+
+        $this->assertTrue($result['live']);
+        $this->assertFalse($result['deepMerge']);
+        $this->assertNull($result['mergeDirection']);
     }
 
     public function test_plain_merge_is_not_a_deep_merge(): void
