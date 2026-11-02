@@ -205,14 +205,14 @@ class PropsResolver
 
             $value = $this->resolveValue($prop, $path, $props);
 
+            if ($value !== $prop && $this->isPropType($value)) {
+                $value = $this->resolveValue($value, $path, $props);
+            }
+
             // A rescued prop resolved to null, so leave it out rather than
             // broadcasting null over data the client already has.
             if (in_array($path, $this->rescuedProps)) {
                 continue;
-            }
-
-            if ($value !== $prop && $this->isPropType($value)) {
-                $value = $this->resolveValue($value, $path, $props);
             }
 
             $result[$key] = is_array($value)

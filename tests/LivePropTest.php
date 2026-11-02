@@ -109,6 +109,51 @@ class OrderRenamed
     }
 }
 
+enum OrderEvent: string
+{
+    case Refunded = 'order.refunded';
+}
+
+class OrderRefunded
+{
+    public function broadcastOn(): PrivateChannel
+    {
+        return new PrivateChannel('orders.1');
+    }
+
+    public function broadcastAs(): OrderEvent
+    {
+        return OrderEvent::Refunded;
+    }
+}
+
+class OrderNoted
+{
+    /**
+     * @var object{id: int}|null
+     */
+    public $order;
+
+    public function broadcastOn(): PrivateChannel
+    {
+        return new PrivateChannel('orders.'.$this->order->id);
+    }
+}
+
+class OrderBroadcastPerConnection
+{
+    /**
+     * @return array<string, array<int, Channel>>
+     */
+    public function broadcastOn(): array
+    {
+        return [
+            'reverb' => [new PrivateChannel('orders.1')],
+            'pusher' => [new PrivateChannel('pusher.orders.1')],
+        ];
+    }
+}
+
 class OrderSecured
 {
     public function broadcastOn(): EncryptedPrivateChannel
@@ -491,6 +536,12 @@ class LivePropTest extends TestCase
         $liveProp->liveListeners();
     }
 
+    public function test_an_enum_broadcast_name_resolves_to_its_value(): void
+    {
+        $this->assertSame(['order.refunded'], (new LiveProp('bar', new OrderRefunded))->liveListeners()[0]['events']);
+        $this->assertSame(['order.refunded'], (new LiveProp('bar', OrderRefunded::class))->liveListeners()[0]['events']);
+    }
+
     public function test_an_event_class_name_that_does_not_exist_throws(): void
     {
         $liveProp = new LiveProp('bar', 'App\Events\OrderUpdated', 'orders.1');
@@ -528,6 +579,42 @@ class LivePropTest extends TestCase
 
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage('Unable to resolve the channels for the ['.OrderUpdated::class.'] event because it builds them from its payload.');
+
+        $liveProp->liveListeners();
+    }
+
+    public function test_an_event_class_name_with_an_untyped_payload_throws(): void
+    {
+        // An untyped property reads as null and raises a warning rather than an
+        // Error, which Laravel turns into an ErrorException
+        $liveProp = new LiveProp('bar', OrderNoted::class);
+
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('Unable to resolve the channels for the ['.OrderNoted::class.'] event because it builds them from its payload.');
+
+        $liveProp->liveListeners();
+    }
+
+    public function test_channels_keyed_by_connection_are_read_for_the_default_connection(): void
+    {
+        config(['broadcasting.default' => 'reverb']);
+
+        $this->assertSame([
+            [
+                'channel' => ['name' => 'orders.1', 'type' => 'private'],
+                'events' => [OrderBroadcastPerConnection::class],
+            ],
+        ], (new LiveProp('bar', new OrderBroadcastPerConnection))->liveListeners());
+    }
+
+    public function test_channels_keyed_by_connection_without_the_default_connection_throw(): void
+    {
+        config(['broadcasting.default' => 'ably']);
+
+        $liveProp = new LiveProp('bar', new OrderBroadcastPerConnection);
+
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('The ['.OrderBroadcastPerConnection::class.'] event keys its channels by connection, but has none for the default [ably] connection.');
 
         $liveProp->liveListeners();
     }

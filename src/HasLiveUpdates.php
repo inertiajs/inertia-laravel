@@ -2,7 +2,6 @@
 
 namespace Inertia;
 
-use Error;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\EncryptedPrivateChannel;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -11,6 +10,9 @@ use Illuminate\Contracts\Broadcasting\HasBroadcastChannel;
 use Illuminate\Support\Arr;
 use LogicException;
 use ReflectionClass;
+use Throwable;
+
+use function Illuminate\Support\enum_value;
 
 trait HasLiveUpdates
 {
@@ -123,7 +125,7 @@ trait HasLiveUpdates
     {
         if (is_object($event)) {
             return method_exists($event, 'broadcastAs')
-                ? $event->broadcastAs()
+                ? enum_value($event->broadcastAs())
                 : $event::class;
         }
 
@@ -137,8 +139,8 @@ trait HasLiveUpdates
         // built without its payload, which is all a fixed name needs.
         if (class_exists($event) && (new ReflectionClass($event))->hasMethod('broadcastAs')) {
             try {
-                return (new ReflectionClass($event))->newInstanceWithoutConstructor()->broadcastAs();
-            } catch (Error) {
+                return enum_value((new ReflectionClass($event))->newInstanceWithoutConstructor()->broadcastAs());
+            } catch (Throwable) {
                 throw new LogicException("Unable to resolve the broadcast name for the [{$event}] event because it builds it from its payload. Pass an event instance to the [on] argument instead of its class name.");
             }
         }
@@ -166,7 +168,9 @@ trait HasLiveUpdates
 
         try {
             return $this->broadcastChannels((new ReflectionClass($event))->newInstanceWithoutConstructor());
-        } catch (Error) {
+        } catch (LogicException $exception) {
+            throw $exception;
+        } catch (Throwable) {
             throw new LogicException("Unable to resolve the channels for the [{$event}] event because it builds them from its payload. Pass an event instance to the [on] argument, or pass the [channel] argument.");
         }
     }
@@ -184,11 +188,34 @@ trait HasLiveUpdates
 
         $channels = Arr::wrap($event->broadcastOn());
 
+        // Channels keyed by connection are read for the default one, the way
+        // Laravel's broadcast job picks them per connection
+        if (collect($channels)->contains(fn ($channel) => is_array($channel))) {
+            $channels = $this->channelsForDefaultConnection($event, $channels);
+        }
+
         if (count($channels) === 0) {
             throw new LogicException('The ['.$event::class.'] event does not broadcast on any channels. Pass the [channel] argument instead.');
         }
 
         return $channels;
+    }
+
+    /**
+     * Get the channels the given event broadcasts on for the default connection.
+     *
+     * @param  array<array-key, mixed>  $channels
+     * @return array<int, string|Channel|HasBroadcastChannel>
+     */
+    protected function channelsForDefaultConnection(object $event, array $channels): array
+    {
+        $connection = config('broadcasting.default');
+
+        if (! is_array($channels[$connection] ?? null)) {
+            throw new LogicException('The ['.$event::class."] event keys its channels by connection, but has none for the default [{$connection}] connection. Pass the [channel] argument instead.");
+        }
+
+        return array_values($channels[$connection]);
     }
 
     /**

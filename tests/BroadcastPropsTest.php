@@ -165,6 +165,18 @@ class BroadcastPropsTest extends TestCase
         $this->assertArrayNotHasKey('stats', $payload['__inertia']['props']);
     }
 
+    public function test_a_rescued_prop_returned_from_a_closure_is_left_out_of_the_payload(): void
+    {
+        $payload = $this->broadcastProps([
+            'order' => ['id' => 1],
+            'stats' => fn () => Inertia::defer(function () {
+                throw new RuntimeException('Rescue this broadcast prop');
+            }, rescue: true),
+        ]);
+
+        $this->assertSame(['order' => ['id' => 1]], $payload['__inertia']['props']);
+    }
+
     public function test_a_once_prop_the_requesting_client_already_has_is_still_broadcast(): void
     {
         $request = Request::create('/orders/1', 'GET');
