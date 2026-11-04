@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Facade;
 
 /**
  * @method static void setRootView(string $name)
- * @method static void share(string|array<array-key, mixed>|\Illuminate\Contracts\Support\Arrayable<array-key, mixed>|\Inertia\ProvidesInertiaProperties $key, mixed $value = null)
+ * @method static void share(string|array<int|string, mixed>|\Illuminate\Contracts\Support\Arrayable<int|string, mixed>|\Inertia\ProvidesInertiaProperties $key, mixed $value = null)
  * @method static mixed getShared(string|null $key = null, mixed $default = null)
  * @method static void flushShared()
  * @method static void version(\Closure|string|null $version)
@@ -28,8 +28,8 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Inertia\LiveProp live(mixed $value, object|class-string|string|array<int, object|class-string|string>|null $on = null, string|\Illuminate\Broadcasting\Channel|array<int, string|\Illuminate\Broadcasting\Channel>|null $channel = null, int|null $throttle = null)
  * @method static \Inertia\OnceProp once(callable $value)
  * @method static \Inertia\OnceProp shareOnce(string $key, callable $callback)
- * @method static \Inertia\Response render(\BackedEnum|\UnitEnum|string $component, array<array-key, mixed>|\Illuminate\Contracts\Support\Arrayable<array-key, mixed>|\Inertia\ProvidesInertiaProperties $props = [])
- * @method static array{__inertia: array{props: array<array-key, mixed>}} broadcastProps(array<array-key, mixed> $props)
+ * @method static \Inertia\Response render(\BackedEnum|\UnitEnum|string $component, array<int|string, mixed>|\Illuminate\Contracts\Support\Arrayable<int|string, mixed>|\Inertia\ProvidesInertiaProperties $props = [])
+ * @method static array{__inertia: array{props: array<int|string, mixed>}} broadcastProps(array<int|string, mixed> $props)
  * @method static \Symfony\Component\HttpFoundation\Response location(string|\Symfony\Component\HttpFoundation\RedirectResponse $url)
  * @method static void handleExceptionsUsing(callable $callback)
  * @method static \Inertia\ResponseFactory flash(\BackedEnum|\UnitEnum|string|array<string, mixed> $key, mixed $value = null)
