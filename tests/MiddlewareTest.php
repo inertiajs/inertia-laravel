@@ -489,6 +489,78 @@ class MiddlewareTest extends TestCase
         ]);
     }
 
+    public function test_prefetch_requests_leave_flash_data_for_the_next_visit(): void
+    {
+        Route::middleware([StartSession::class, Middleware::class])->post('/posts', function () {
+            Inertia::flash('message', 'Saved!');
+
+            return redirect('/posts');
+        });
+
+        Route::middleware([StartSession::class, Middleware::class])->get('/posts', function () {
+            return Inertia::render('Posts');
+        });
+
+        Route::middleware([StartSession::class, Middleware::class])->get('/reports', function () {
+            return Inertia::render('Reports');
+        });
+
+        $this->post('/posts', [], ['X-Inertia' => 'true'])->assertRedirect('/posts');
+
+        $prefetch = $this->get('/reports', ['X-Inertia' => 'true', 'Purpose' => 'prefetch']);
+        $prefetch->assertOk();
+        $this->assertArrayNotHasKey('flash', $prefetch->json());
+
+        $this->get('/posts', ['X-Inertia' => 'true'])->assertJson([
+            'flash' => ['message' => 'Saved!'],
+        ]);
+    }
+
+    public function test_prefetch_requests_leave_validation_errors_for_the_next_visit(): void
+    {
+        Route::middleware([StartSession::class, Middleware::class])->post('/posts', function () {
+            return redirect('/posts/create')->withErrors(['title' => 'The title field is required.']);
+        });
+
+        Route::middleware([StartSession::class, Middleware::class])->get('/posts/create', function () {
+            return Inertia::render('Posts/Create');
+        });
+
+        Route::middleware([StartSession::class, Middleware::class])->get('/reports', function () {
+            return Inertia::render('Reports');
+        });
+
+        $this->post('/posts', [], ['X-Inertia' => 'true'])->assertRedirect('/posts/create');
+
+        $this->get('/reports', ['X-Inertia' => 'true', 'Purpose' => 'prefetch'])
+            ->assertOk()
+            ->assertJsonPath('props.errors', []);
+
+        $this->get('/posts/create', ['X-Inertia' => 'true'])
+            ->assertJsonPath('props.errors', ['title' => 'The title field is required.']);
+    }
+
+    public function test_prefetch_requests_leave_session_flash_data_for_the_next_visit(): void
+    {
+        Route::middleware([StartSession::class, Middleware::class])->post('/posts', function () {
+            return redirect('/posts')->with('status', 'Saved!');
+        });
+
+        Route::middleware([StartSession::class, Middleware::class])->get('/posts', function () {
+            return Inertia::render('Posts', ['status' => session('status')]);
+        });
+
+        Route::middleware([StartSession::class, Middleware::class])->get('/reports', function () {
+            return Inertia::render('Reports');
+        });
+
+        $this->post('/posts', [], ['X-Inertia' => 'true'])->assertRedirect('/posts');
+
+        $this->get('/reports', ['X-Inertia' => 'true', 'Purpose' => 'prefetch'])->assertOk();
+
+        $this->get('/posts', ['X-Inertia' => 'true'])->assertJsonPath('props.status', 'Saved!');
+    }
+
     public function test_inertia_visits_are_stored_as_the_previous_url_and_route(): void
     {
         config()->set('inertia.store_previous_url', true);

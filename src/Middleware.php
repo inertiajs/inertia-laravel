@@ -149,6 +149,14 @@ class Middleware
 
         $response = $next($request);
 
+        // A prefetch may never be shown, so keep the flashed session data (such
+        // as validation errors) for the next visit instead of aging it out.
+        if ($request->prefetch() && $request->hasSession()) {
+            /** @var Store $session */
+            $session = $request->session();
+            $session->reflash();
+        }
+
         if ($vary = $response->getVary()) {
             $response->setVary(collect([...$vary, Header::INERTIA])->filter()->unique()->implode(', '));
         } else {
@@ -308,7 +316,7 @@ class Middleware
      */
     public function resolveValidationErrors(Request $request)
     {
-        if (! $request->hasSession() || ! $request->session()->has('errors')) {
+        if ($request->prefetch() || ! $request->hasSession() || ! $request->session()->has('errors')) {
             return (object) [];
         }
 
