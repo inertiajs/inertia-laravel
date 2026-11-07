@@ -58,12 +58,12 @@ class RedactsSensitiveDataTest extends TestCase
         $redacted = $this->redactor->exposeRedactUrls([
             '__meta' => [
                 'url' => '/search?password=secret&q=hi',
-                'redirectLocation' => 'http://exa mple.test/?token=abc',
+                'redirectLocation' => 'http://[::1/?token=abc',
             ],
         ], ['password', 'token']);
 
         $this->assertSame('/search?password=%5BREDACTED%5D&q=hi', $redacted['__meta']['url']);
-        $this->assertSame('http://exa mple.test/?token=abc', $redacted['__meta']['redirectLocation']);
+        $this->assertSame('http://[::1/?token=abc', $redacted['__meta']['redirectLocation']);
     }
 
     public function test_header_bags_redact_cookies_and_auth_headers_case_insensitively(): void
