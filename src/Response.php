@@ -258,6 +258,12 @@ class Response implements Responsable
      */
     protected function resolveFlashData(Request $request): array
     {
+        // A prefetch may never be shown, and a cached copy must not replay
+        // the flash data later: leave it for the next visit.
+        if ($request->prefetch()) {
+            return [];
+        }
+
         $flash = Inertia::pullFlashed($request);
 
         if (! $flash) {
