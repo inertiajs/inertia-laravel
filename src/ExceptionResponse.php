@@ -154,7 +154,7 @@ class ExceptionResponse implements Responsable
     {
         foreach ($this->kernel->getMiddlewareGroups() as $group) {
             foreach ($group as $middleware) {
-                if (is_string($middleware) && is_a($middleware, Middleware::class, true)) {
+                if (is_a($middleware, Middleware::class, true)) {
                     return $middleware;
                 }
             }
