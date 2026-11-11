@@ -2034,6 +2034,26 @@ class ResponseTest extends TestCase
         $this->assertSame('/users', $page->layer->base);
     }
 
+    public function test_a_layer_response_carries_its_live_props(): void
+    {
+        $request = Request::create('/orders/3/edit', 'GET');
+        $request->headers->add(['X-Inertia' => 'true']);
+
+        $response = new Response('Orders/Edit', [], [
+            'total' => Inertia::live(fn () => 4250, on: 'order.updated', channel: 'orders.3'),
+        ], 'app', '123');
+        $response = $response->layer(base: '/orders');
+        /** @var JsonResponse $response */
+        $response = $response->toResponse($request);
+        $page = $response->getData(true);
+
+        $this->assertSame('/orders', $page['layer']['base']);
+        $this->assertSame(4250, $page['props']['total']);
+        $this->assertSame(['total'], array_keys($page['liveProps']));
+        $this->assertSame('orders.3', $page['liveProps']['total']['listeners'][0]['channel']['name']);
+        $this->assertSame(['order.updated'], $page['liveProps']['total']['listeners'][0]['events']);
+    }
+
     public function test_a_layer_base_is_emitted_host_relative_like_the_url(): void
     {
         $request = Request::create('http://example.com/users/5/edit', 'GET');
