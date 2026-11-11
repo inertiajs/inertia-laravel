@@ -5,6 +5,7 @@ namespace Inertia\Tests;
 use Illuminate\Contracts\Http\Kernel as HttpKernelContract;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Foundation\Http\Kernel;
+use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route as RouteInstance;
 use Illuminate\Session\Middleware\StartSession;
@@ -51,6 +52,20 @@ class MiddlewareTest extends TestCase
         $response->assertRedirect('/foo');
         $response->assertStatus(303);
         $this->assertTrue($fooCalled);
+    }
+
+    public function test_redirects_from_query_requests_are_converted_to_303(): void
+    {
+        Route::middleware(Middleware::class)->match(['QUERY'], '/', function () {
+            return redirect('/foo');
+        });
+
+        $response = $this->json('QUERY', '/', ['search' => 'foo'], [
+            'X-Inertia' => 'true',
+        ]);
+
+        $response->assertRedirect('/foo');
+        $response->assertStatus(303);
     }
 
     public function test_no_response_value_can_be_customized_by_overriding_the_middleware_method(): void
@@ -124,6 +139,44 @@ class MiddlewareTest extends TestCase
 
         $response->assertSuccessful();
         $response->assertJson(['component' => 'User/Edit']);
+    }
+
+    public function test_a_response_body_of_zero_is_not_treated_as_empty_for_inertia_requests(): void
+    {
+        Route::middleware(Middleware::class)->get('/', function () {
+            return response('0');
+        });
+
+        $response = $this->from('/foo')->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertOk();
+        $this->assertSame('0', $response->getContent());
+    }
+
+    public function test_streamed_responses_are_not_treated_as_empty_for_inertia_requests(): void
+    {
+        Route::middleware(Middleware::class)->get('/', function () {
+            return response()->streamDownload(function () {
+                echo 'hello';
+            }, 'hello.txt');
+        });
+
+        $response = $this->from('/foo')->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertOk();
+        $response->assertDownload('hello.txt');
+    }
+
+    public function test_file_downloads_are_not_treated_as_empty_for_inertia_requests(): void
+    {
+        Route::middleware(Middleware::class)->get('/', function () {
+            return response()->download(__DIR__.'/Stubs/ExamplePage.vue', 'example.vue');
+        });
+
+        $response = $this->from('/foo')->get('/', ['X-Inertia' => 'true']);
+
+        $response->assertOk();
+        $response->assertDownload('example.vue');
     }
 
     public function test_it_will_instruct_inertia_to_reload_on_a_version_mismatch(): void
@@ -805,6 +858,61 @@ class MiddlewareTest extends TestCase
 
         $response->assertStatus(500);
         $this->assertFalse($called);
+    }
+
+    public function test_the_vary_header_is_set(): void
+    {
+        Route::middleware(Middleware::class)->get('/', function () {
+            return Inertia::render('User/Edit');
+        });
+
+        $response = $this->get('/');
+
+        $this->assertSame(['X-Inertia'], $response->headers->all('Vary'));
+    }
+
+    public function test_existing_vary_header_values_are_preserved(): void
+    {
+        Route::middleware(Middleware::class)->get('/', function (Request $request) {
+            return Inertia::render('User/Edit')->toResponse($request)->setVary('Accept-Language');
+        });
+
+        $response = $this->get('/');
+
+        $this->assertSame(['Accept-Language, X-Inertia'], $response->headers->all('Vary'));
+    }
+
+    public function test_the_vary_header_is_not_duplicated(): void
+    {
+        Route::middleware(Middleware::class)->get('/', function (Request $request) {
+            return Inertia::render('User/Edit')->toResponse($request)->setVary('X-Inertia');
+        });
+
+        $response = $this->get('/');
+
+        $this->assertSame(['X-Inertia'], $response->headers->all('Vary'));
+    }
+
+    public function test_empty_vary_header_values_are_discarded(): void
+    {
+        Route::middleware(Middleware::class)->get('/', function (Request $request) {
+            return Inertia::render('User/Edit')->toResponse($request)->setVary('');
+        });
+
+        $response = $this->get('/');
+
+        $this->assertSame(['X-Inertia'], $response->headers->all('Vary'));
+    }
+
+    public function test_existing_vary_header_values_are_preserved_on_precognitive_routes(): void
+    {
+        Route::middleware([HandlePrecognitiveRequests::class, Middleware::class])->get('/', function (Request $request) {
+            return Inertia::render('User/Edit')->toResponse($request)->setVary('Accept-Language');
+        });
+
+        $response = $this->get('/');
+
+        $this->assertSame(['Accept-Language, X-Inertia, Precognition'], $response->headers->all('Vary'));
     }
 
     public function test_middleware_registers_ssr_except_paths(): void

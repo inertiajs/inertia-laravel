@@ -148,7 +148,12 @@ class Middleware
         }
 
         $response = $next($request);
-        $response->headers->set('Vary', Header::INERTIA);
+
+        if ($vary = $response->getVary()) {
+            $response->setVary(collect([...$vary, Header::INERTIA])->filter()->unique()->implode(', '));
+        } else {
+            $response->headers->set('Vary', Header::INERTIA);
+        }
 
         if ($isRedirect = $response->isRedirect()) {
             $this->reflash($request);
@@ -166,11 +171,11 @@ class Middleware
             $response = $this->onVersionChange($request, $response);
         }
 
-        if ($response->isOk() && empty($response->getContent())) {
+        if ($response->isOk() && $response->getContent() === '') {
             $response = $this->onEmptyResponse($request, $response);
         }
 
-        if ($response->getStatusCode() === 302 && in_array($request->method(), ['PUT', 'PATCH', 'DELETE'])) {
+        if ($response->getStatusCode() === 302 && in_array($request->method(), ['PUT', 'PATCH', 'DELETE', 'QUERY'])) {
             $response->setStatusCode(303);
         }
 

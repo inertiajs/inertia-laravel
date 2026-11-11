@@ -30,7 +30,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
           php-version: ${{ matrix.php }}
           extensions: dom, curl, libxml, mbstring, zip
@@ -43,7 +43,11 @@ jobs:
         with:
           timeout_minutes: 5
           max_attempts: 5
-          command: composer require "laravel/framework=^${{ matrix.laravel }}" --no-interaction --no-update
+          command: composer require "laravel/framework=^${{ matrix.laravel == 11 && '11.35' || matrix.laravel }}" --no-interaction --no-update
+
+      - name: Allow Laravel 11 releases with security advisories
+        if: matrix.laravel == 11
+        run: composer config policy.advisories.block false
 
       - name: Install dependencies
         uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60 # v4.0.0
