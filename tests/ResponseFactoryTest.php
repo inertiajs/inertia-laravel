@@ -878,6 +878,140 @@ class ResponseFactoryTest extends TestCase
         ]);
     }
 
+    public function test_flashed_data_can_be_forgotten(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->post('/flash-test', function () {
+            Inertia::flash([
+                'message' => 'User updated!',
+                'toast' => 'Saved',
+                'user' => ['id' => 1, 'name' => 'Jonathan'],
+            ]);
+
+            return Inertia::forgetFlashed(['toast', 'user.name'])->render('User/Edit');
+        });
+
+        $response = $this->post('/flash-test', [], ['X-Inertia' => 'true']);
+
+        $response->assertJsonPath('flash', [
+            'message' => 'User updated!',
+            'user' => ['id' => 1],
+        ]);
+    }
+
+    public function test_flashed_data_can_be_forgotten_using_enum_keys(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->post('/flash-test', function () {
+            Inertia::flash(StringBackedEnum::UsersIndex, 'Backed')
+                ->flash(UnitEnum::Index, 'Unit')
+                ->flash('message', 'User updated!');
+
+            return Inertia::forgetFlashed([StringBackedEnum::UsersIndex, UnitEnum::Index])->render('User/Edit');
+        });
+
+        $response = $this->post('/flash-test', [], ['X-Inertia' => 'true']);
+
+        $response->assertJsonPath('flash', ['message' => 'User updated!']);
+    }
+
+    public function test_flashed_data_with_a_literal_dotted_key_can_be_forgotten(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->post('/flash-test', function () {
+            Inertia::flash('user.name', 'Jonathan')->flash('message', 'User updated!');
+
+            return Inertia::forgetFlashed('user.name')->render('User/Edit');
+        });
+
+        $response = $this->post('/flash-test', [], ['X-Inertia' => 'true']);
+
+        $response->assertJsonPath('flash', ['message' => 'User updated!']);
+    }
+
+    public function test_forgetting_all_flashed_data_omits_the_flash_key(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->post('/flash-test', function () {
+            Inertia::flash('message', 'User updated!');
+
+            return Inertia::forgetFlashed('message')->render('User/Edit');
+        });
+
+        $response = $this->post('/flash-test', [], ['X-Inertia' => 'true']);
+
+        $response->assertJsonMissingPath('flash');
+    }
+
+    public function test_flashed_data_of_a_previous_request_can_be_forgotten(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->post('/users', function () {
+            Inertia::flash(['message' => 'User created!', 'toast' => 'Saved']);
+
+            return redirect('/users');
+        });
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/users', function () {
+            return Inertia::forgetFlashed('toast')->render('User/Index');
+        });
+
+        $this->post('/users', [], ['X-Inertia' => 'true'])->assertRedirect('/users');
+
+        $response = $this->get('/users', ['X-Inertia' => 'true']);
+
+        $response->assertJsonPath('flash', ['message' => 'User created!']);
+    }
+
+    public function test_forgetting_flashed_data_does_not_extend_the_lifetime_of_the_remaining_data(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->post('/users', function () {
+            Inertia::flash(['message' => 'User created!', 'toast' => 'Saved']);
+
+            return redirect('/users/export');
+        });
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/users/export', function () {
+            Inertia::forgetFlashed('toast');
+
+            return response('users.csv');
+        });
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/users', function () {
+            return Inertia::render('User/Index');
+        });
+
+        $this->post('/users', [], ['X-Inertia' => 'true'])->assertRedirect('/users/export');
+
+        $this->get('/users/export')->assertOk();
+
+        $response = $this->get('/users', ['X-Inertia' => 'true']);
+
+        $response->assertJsonMissingPath('flash');
+    }
+
+    public function test_remaining_flashed_data_of_a_previous_request_is_kept_across_a_redirect(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->post('/users', function () {
+            Inertia::flash(['message' => 'User created!', 'toast' => 'Saved']);
+
+            return redirect('/users/created');
+        });
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/users/created', function () {
+            Inertia::forgetFlashed('toast');
+
+            return redirect('/users');
+        });
+
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->get('/users', function () {
+            return Inertia::render('User/Index');
+        });
+
+        $this->post('/users', [], ['X-Inertia' => 'true'])->assertRedirect('/users/created');
+
+        $this->get('/users/created', ['X-Inertia' => 'true'])->assertRedirect('/users');
+
+        $response = $this->get('/users', ['X-Inertia' => 'true']);
+
+        $response->assertJsonPath('flash', ['message' => 'User created!']);
+    }
+
     public function test_shared_props_tracking_can_be_disabled(): void
     {
         config()->set('inertia.expose_shared_prop_keys', false);
