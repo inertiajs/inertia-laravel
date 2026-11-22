@@ -24,6 +24,7 @@ use Inertia\Ssr\DisablesSsr;
 use Inertia\Ssr\ExcludesSsrPaths;
 use Inertia\Ssr\Gateway;
 use Inertia\Support\Header;
+use Inertia\Support\RequestAttribute;
 use Inertia\Support\SessionKey;
 use InvalidArgumentException;
 use LogicException;
@@ -166,18 +167,6 @@ class ResponseFactory
             : $this->version;
 
         return (string) $version;
-    }
-
-    /**
-     * Determine if the given Inertia request was made with an outdated asset version.
-     */
-    public function hasOutdatedAssetVersion(?HttpRequest $request = null): bool
-    {
-        $request ??= request();
-
-        return $request->header(Header::INERTIA)
-            && $request->method() === 'GET'
-            && $request->header(Header::VERSION, '') !== $this->getVersion();
     }
 
     /**
@@ -558,6 +547,14 @@ class ResponseFactory
     {
         $request ??= request();
 
-        return $request->hasSession() ? $request->session()->pull(SessionKey::FLASH_DATA, []) : [];
+        if (! $request->hasSession()) {
+            return [];
+        }
+
+        $flashed = $request->session()->pull(SessionKey::FLASH_DATA, []);
+
+        $request->attributes->set(RequestAttribute::PULLED_FLASH_DATA, $flashed);
+
+        return $flashed;
     }
 }

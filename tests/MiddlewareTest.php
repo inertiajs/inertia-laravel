@@ -27,6 +27,7 @@ use Inertia\Tests\Stubs\WithAllErrorsMiddleware;
 use Inertia\Tests\Stubs\WithoutPreviousLocationMiddleware;
 use LogicException;
 use PHPUnit\Framework\Attributes\After;
+use Symfony\Component\HttpFoundation\Response;
 
 class MiddlewareTest extends TestCase
 {
@@ -511,6 +512,35 @@ class MiddlewareTest extends TestCase
             ->assertHeader('X-Inertia-Location', $this->baseUrl.'/posts');
 
         $this->get('/posts')->assertInertia(fn (AssertableInertia $page) => $page->hasFlash('message', 'Saved!'));
+    }
+
+    public function test_flash_data_is_included_when_a_custom_version_change_handler_returns_the_page(): void
+    {
+        config()->set('app.asset_url', 'https://cdn.example.com');
+
+        $this->app->instance(Middleware::class, new class extends Middleware
+        {
+            public function onVersionChange(Request $request, Response $response): Response
+            {
+                return $response;
+            }
+        });
+
+        Route::middleware([StartSession::class, Middleware::class])->post('/posts', function () {
+            Inertia::flash('message', 'Saved!');
+
+            return redirect('/posts');
+        });
+
+        Route::middleware([StartSession::class, Middleware::class])->get('/posts', function () {
+            return Inertia::render('Posts');
+        });
+
+        $this->post('/posts', [], ['X-Inertia' => 'true'])->assertRedirect('/posts');
+
+        $this->get('/posts', ['X-Inertia' => 'true', 'X-Inertia-Version' => 'outdated'])
+            ->assertOk()
+            ->assertJson(['flash' => ['message' => 'Saved!']]);
     }
 
     public function test_flash_data_is_preserved_when_an_empty_response_redirects_back(): void

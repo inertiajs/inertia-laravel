@@ -258,12 +258,6 @@ class Response implements Responsable
      */
     protected function resolveFlashData(Request $request): array
     {
-        // The middleware replaces this page with a full page reload when the asset version
-        // changed, so we will leave the flash data in the session for the page it renders.
-        if (Inertia::hasOutdatedAssetVersion($request)) {
-            return [];
-        }
-
         $flash = Inertia::pullFlashed($request);
 
         if (! $flash) {

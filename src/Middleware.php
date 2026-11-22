@@ -14,6 +14,7 @@ use Inertia\DevTools\DevTools;
 use Inertia\Ssr\ExcludesSsrPaths;
 use Inertia\Ssr\Gateway;
 use Inertia\Support\Header;
+use Inertia\Support\RequestAttribute;
 use Inertia\Support\SessionKey;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -167,7 +168,7 @@ class Middleware
 
         $this->storeCurrentUrl($request, $response);
 
-        if (Inertia::hasOutdatedAssetVersion($request)) {
+        if ($request->method() === 'GET' && $request->header(Header::VERSION, '') !== Inertia::getVersion()) {
             $response = $this->onVersionChange($request, $response);
         }
 
@@ -297,6 +298,12 @@ class Middleware
             /** @var Store $session */
             $session = $request->session();
             $session->reflash();
+
+            // The rendered page is discarded in favor of a full page reload, so we will
+            // put back the flash data it pulled from the session for the next request.
+            if ($flashed = $request->attributes->get(RequestAttribute::PULLED_FLASH_DATA)) {
+                $session->flash(SessionKey::FLASH_DATA, [...$flashed, ...Inertia::getFlashed($request)]);
+            }
         }
 
         $response = Inertia::location($request->fullUrl());
