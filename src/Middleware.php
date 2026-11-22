@@ -301,8 +301,8 @@ class Middleware
 
             // The rendered page is discarded in favor of a full page reload, so we will
             // put back the flash data it pulled from the session for the next request.
-            if ($flashed = $request->attributes->get(RequestAttribute::PULLED_FLASH_DATA)) {
-                $session->flash(SessionKey::FLASH_DATA, [...$flashed, ...Inertia::getFlashed($request)]);
+            if ($pulled = $request->attributes->get(RequestAttribute::PULLED_FLASH_DATA)) {
+                $session->flash(SessionKey::FLASH_DATA, [...$pulled, ...Inertia::getFlashed($request)]);
             }
         }
 
