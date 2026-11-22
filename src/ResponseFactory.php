@@ -548,4 +548,24 @@ class ResponseFactory
 
         return $request->hasSession() ? $request->session()->pull(SessionKey::FLASH_DATA, []) : [];
     }
+
+    /**
+     * Remove the given keys from the flashed data.
+     *
+     * @param  string|array<int, string>  $keys
+     */
+    public function forgetFlashed(string|array $keys): self
+    {
+        if (! $flashed = $this->getFlashed()) {
+            return $this;
+        }
+
+        Arr::forget($flashed, $keys);
+
+        // We will replace the flashed data without flashing it again, so the data
+        // that is left still ages out after the request it was flashed for.
+        session()->put(SessionKey::FLASH_DATA, $flashed);
+
+        return $this;
+    }
 }

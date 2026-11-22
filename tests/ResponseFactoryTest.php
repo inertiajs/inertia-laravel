@@ -878,6 +878,26 @@ class ResponseFactoryTest extends TestCase
         ]);
     }
 
+    public function test_flashed_data_can_be_forgotten(): void
+    {
+        Route::middleware([StartSession::class, ExampleMiddleware::class])->post('/flash-test', function () {
+            Inertia::flash([
+                'message' => 'User updated!',
+                'toast' => 'Saved',
+                'user' => ['id' => 1, 'name' => 'Jonathan'],
+            ]);
+
+            return Inertia::forgetFlashed(['toast', 'user.name'])->render('User/Edit');
+        });
+
+        $response = $this->post('/flash-test', [], ['X-Inertia' => 'true']);
+
+        $response->assertJsonPath('flash', [
+            'message' => 'User updated!',
+            'user' => ['id' => 1],
+        ]);
+    }
+
     public function test_shared_props_tracking_can_be_disabled(): void
     {
         config()->set('inertia.expose_shared_prop_keys', false);
