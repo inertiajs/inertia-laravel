@@ -169,6 +169,18 @@ class ResponseFactory
     }
 
     /**
+     * Determine if the given Inertia request was made with an outdated asset version.
+     */
+    public function hasOutdatedAssetVersion(?HttpRequest $request = null): bool
+    {
+        $request ??= request();
+
+        return $request->header(Header::INERTIA)
+            && $request->method() === 'GET'
+            && $request->header(Header::VERSION, '') !== $this->getVersion();
+    }
+
+    /**
      * Set the URL resolver.
      */
     public function resolveUrlUsing(?Closure $urlResolver = null): void

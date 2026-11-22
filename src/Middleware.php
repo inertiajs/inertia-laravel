@@ -167,7 +167,7 @@ class Middleware
 
         $this->storeCurrentUrl($request, $response);
 
-        if ($request->method() === 'GET' && $request->header(Header::VERSION, '') !== Inertia::getVersion()) {
+        if (Inertia::hasOutdatedAssetVersion($request)) {
             $response = $this->onVersionChange($request, $response);
         }
 

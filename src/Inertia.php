@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static void flushShared()
  * @method static void version(\Closure|string|null $version)
  * @method static string getVersion()
+ * @method static bool hasOutdatedAssetVersion(\Illuminate\Http\Request|null $request = null)
  * @method static void resolveUrlUsing(\Closure|null $urlResolver = null)
  * @method static void transformComponentUsing(\Closure|null $componentTransformer = null)
  * @method static void clearHistory()
