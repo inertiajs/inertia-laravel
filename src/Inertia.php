@@ -36,6 +36,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Illuminate\Http\RedirectResponse back(int $status = 302, array<string, string> $headers = [], mixed $fallback = false)
  * @method static array<string, mixed> getFlashed(\Illuminate\Http\Request|null $request = null)
  * @method static array<string, mixed> pullFlashed(\Illuminate\Http\Request|null $request = null)
+ * @method static \Inertia\ResponseFactory forgetFlashed(\BackedEnum|\UnitEnum|string|array<int, \BackedEnum|\UnitEnum|string> $keys, \Illuminate\Http\Request|null $request = null)
  * @method static void macro(string $name, object|callable $macro)
  * @method static void mixin(object $mixin, bool $replace = true)
  * @method static bool hasMacro(string $name)

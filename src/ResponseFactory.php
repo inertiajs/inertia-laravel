@@ -31,6 +31,8 @@ use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirectResponse
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use UnitEnum;
 
+use function Illuminate\Support\enum_value;
+
 class ResponseFactory
 {
     use Macroable;
@@ -547,5 +549,27 @@ class ResponseFactory
         $request ??= request();
 
         return $request->hasSession() ? $request->session()->pull(SessionKey::FLASH_DATA, []) : [];
+    }
+
+    /**
+     * Remove the given keys from the flashed data.
+     *
+     * @param  BackedEnum|UnitEnum|string|array<int, BackedEnum|UnitEnum|string>  $keys
+     */
+    public function forgetFlashed(BackedEnum|UnitEnum|string|array $keys, ?HttpRequest $request = null): self
+    {
+        $request ??= request();
+
+        if (! $flashed = $this->getFlashed($request)) {
+            return $this;
+        }
+
+        Arr::forget($flashed, array_map(enum_value(...), Arr::wrap($keys)));
+
+        // We will replace the flashed data without flashing it again, so the data
+        // that is left still ages out after the request it was flashed for.
+        $request->session()->put(SessionKey::FLASH_DATA, $flashed);
+
+        return $this;
     }
 }
