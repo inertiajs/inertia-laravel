@@ -14,6 +14,7 @@ use Inertia\DevTools\DevTools;
 use Inertia\Ssr\ExcludesSsrPaths;
 use Inertia\Ssr\Gateway;
 use Inertia\Support\Header;
+use Inertia\Support\RequestAttribute;
 use Inertia\Support\SessionKey;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -173,6 +174,10 @@ class Middleware
 
         if ($response->isOk() && $response->getContent() === '') {
             $response = $this->onEmptyResponse($request, $response);
+
+            if ($response->isRedirect()) {
+                $this->reflash($request);
+            }
         }
 
         if ($response->getStatusCode() === 302 && in_array($request->method(), ['PUT', 'PATCH', 'DELETE', 'QUERY'])) {
@@ -293,6 +298,12 @@ class Middleware
             /** @var Store $session */
             $session = $request->session();
             $session->reflash();
+
+            // The rendered page is discarded in favor of a full page reload, so we will
+            // put back the flash data it pulled from the session for the next request.
+            if ($pulled = $request->attributes->get(RequestAttribute::PULLED_FLASH_DATA)) {
+                $session->flash(SessionKey::FLASH_DATA, [...$pulled, ...Inertia::getFlashed($request)]);
+            }
         }
 
         $response = Inertia::location($request->fullUrl());
