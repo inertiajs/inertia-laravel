@@ -156,7 +156,11 @@ class Middleware
             $response->headers->set('Vary', Header::INERTIA);
         }
 
-        if ($isRedirect = $response->isRedirect()) {
+        $isRedirect = $response->isRedirect();
+
+        // The client follows a location response with a full page visit, so we will
+        // keep the flash data for that visit, just like we do for redirects.
+        if ($isRedirect || $this->isLocationResponse($response)) {
             $this->reflash($request);
         }
 
@@ -259,6 +263,15 @@ class Middleware
     protected function redirectHasFragment(Response $response): bool
     {
         return str_contains($response->headers->get('Location', ''), '#');
+    }
+
+    /**
+     * Determine if the response instructs the client to visit another location.
+     */
+    protected function isLocationResponse(Response $response): bool
+    {
+        return $response->getStatusCode() === 409
+            && $response->headers->has(Header::LOCATION);
     }
 
     /**
