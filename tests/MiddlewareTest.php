@@ -587,7 +587,7 @@ class MiddlewareTest extends TestCase
         ]);
     }
 
-    public function test_flash_data_is_preserved_on_location_responses(): void
+    public function test_flash_data_is_preserved_on_location_response(): void
     {
         $this->prepareFlashEndpoints();
 
@@ -602,6 +602,21 @@ class MiddlewareTest extends TestCase
             ->assertHeader('X-Inertia-Location', '/posts');
 
         $this->get('/posts')->assertInertia(fn (AssertableInertia $page) => $page->hasFlash('message', 'Saved!'));
+    }
+
+    public function test_flash_data_is_not_preserved_when_a_successful_response_has_a_location_header(): void
+    {
+        $this->prepareFlashEndpoints();
+
+        Route::middleware([StartSession::class, Middleware::class])->get('/posts/export', function () {
+            return response('posts.csv')->header('X-Inertia-Location', '/posts');
+        });
+
+        $this->post('/posts', [], ['X-Inertia' => 'true'])->assertRedirect('/posts');
+
+        $this->get('/posts/export', ['X-Inertia' => 'true'])->assertOk();
+
+        $this->get('/posts')->assertInertia(fn (AssertableInertia $page) => $page->missingFlash('message'));
     }
 
     public function test_inertia_visits_are_stored_as_the_previous_url_and_route(): void

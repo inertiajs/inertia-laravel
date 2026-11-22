@@ -158,9 +158,9 @@ class Middleware
 
         $isRedirect = $response->isRedirect();
 
-        // A location response is a redirect that the client follows with a full page
-        // visit, so we will keep the flash data for that visit just like a redirect.
-        if ($isRedirect || $response->headers->has(Header::LOCATION)) {
+        // The client follows a location response with a full page visit, so we will
+        // keep the flash data for that visit, just like we do for redirects.
+        if ($isRedirect || $this->isLocationResponse($response)) {
             $this->reflash($request);
         }
 
@@ -263,6 +263,15 @@ class Middleware
     protected function redirectHasFragment(Response $response): bool
     {
         return str_contains($response->headers->get('Location', ''), '#');
+    }
+
+    /**
+     * Determine if the response instructs the client to visit another location.
+     */
+    protected function isLocationResponse(Response $response): bool
+    {
+        return $response->getStatusCode() === 409
+            && $response->headers->has(Header::LOCATION);
     }
 
     /**
