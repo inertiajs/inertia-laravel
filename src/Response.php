@@ -14,6 +14,7 @@ use Illuminate\Support\Traits\Macroable;
 use Inertia\DevTools\DevTools;
 use Inertia\Ssr\SsrState;
 use Inertia\Support\Header;
+use Inertia\Support\RequestAttribute;
 use Inertia\Support\SessionKey;
 use UnitEnum;
 
@@ -263,6 +264,13 @@ class Response implements Responsable
         if (! $flash) {
             return [];
         }
+
+        // Keep track of the pulled flash data so the middleware may put it back in the
+        // session when this page is replaced by a full page reload on a version change.
+        $request->attributes->set(RequestAttribute::PULLED_FLASH_DATA, [
+            ...$request->attributes->get(RequestAttribute::PULLED_FLASH_DATA, []),
+            ...$flash,
+        ]);
 
         return ['flash' => $this->encodeBigIntegersWhenEnabled($flash)];
     }

@@ -24,7 +24,6 @@ use Inertia\Ssr\DisablesSsr;
 use Inertia\Ssr\ExcludesSsrPaths;
 use Inertia\Ssr\Gateway;
 use Inertia\Support\Header;
-use Inertia\Support\RequestAttribute;
 use Inertia\Support\SessionKey;
 use InvalidArgumentException;
 use LogicException;
@@ -547,14 +546,6 @@ class ResponseFactory
     {
         $request ??= request();
 
-        if (! $request->hasSession()) {
-            return [];
-        }
-
-        $flashed = $request->session()->pull(SessionKey::FLASH_DATA, []);
-
-        $request->attributes->set(RequestAttribute::PULLED_FLASH_DATA, $flashed);
-
-        return $flashed;
+        return $request->hasSession() ? $request->session()->pull(SessionKey::FLASH_DATA, []) : [];
     }
 }

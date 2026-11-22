@@ -543,6 +543,54 @@ class MiddlewareTest extends TestCase
             ->assertJson(['flash' => ['message' => 'Saved!']]);
     }
 
+    public function test_flash_data_is_preserved_when_the_asset_version_changed_after_multiple_renders(): void
+    {
+        config()->set('app.asset_url', 'https://cdn.example.com');
+
+        Route::middleware([StartSession::class, Middleware::class])->post('/posts', function () {
+            Inertia::flash('message', 'Saved!');
+
+            return redirect('/posts');
+        });
+
+        Route::middleware([StartSession::class, Middleware::class])->get('/posts', function (Request $request) {
+            if ($request->header('X-Inertia-Version') === 'outdated') {
+                Inertia::render('Posts')->toResponse($request);
+            }
+
+            return Inertia::render('Posts');
+        });
+
+        $this->post('/posts', [], ['X-Inertia' => 'true'])->assertRedirect('/posts');
+
+        $this->get('/posts', ['X-Inertia' => 'true', 'X-Inertia-Version' => 'outdated'])->assertStatus(409);
+
+        $this->get('/posts')->assertInertia(fn (AssertableInertia $page) => $page->hasFlash('message', 'Saved!'));
+    }
+
+    public function test_explicitly_pulled_flash_data_is_not_restored_when_the_asset_version_changed(): void
+    {
+        config()->set('app.asset_url', 'https://cdn.example.com');
+
+        Route::middleware([StartSession::class, Middleware::class])->post('/posts', function () {
+            Inertia::flash('message', 'Saved!');
+
+            return redirect('/posts');
+        });
+
+        Route::middleware([StartSession::class, Middleware::class])->get('/posts', function () {
+            Inertia::pullFlashed();
+
+            return Inertia::render('Posts');
+        });
+
+        $this->post('/posts', [], ['X-Inertia' => 'true'])->assertRedirect('/posts');
+
+        $this->get('/posts', ['X-Inertia' => 'true', 'X-Inertia-Version' => 'outdated'])->assertStatus(409);
+
+        $this->get('/posts')->assertInertia(fn (AssertableInertia $page) => $page->missingFlash('message'));
+    }
+
     public function test_flash_data_is_preserved_when_an_empty_response_redirects_back(): void
     {
         Route::middleware([StartSession::class, Middleware::class])->post('/posts', function () {
