@@ -587,6 +587,23 @@ class MiddlewareTest extends TestCase
         ]);
     }
 
+    public function test_flash_data_is_preserved_on_location_responses(): void
+    {
+        $this->prepareFlashEndpoints();
+
+        Route::middleware([StartSession::class, Middleware::class])->get('/posts/reload', function () {
+            return Inertia::location('/posts');
+        });
+
+        $this->post('/posts', [], ['X-Inertia' => 'true'])->assertRedirect('/posts');
+
+        $this->get('/posts/reload', ['X-Inertia' => 'true'])
+            ->assertStatus(409)
+            ->assertHeader('X-Inertia-Location', '/posts');
+
+        $this->get('/posts')->assertInertia(fn (AssertableInertia $page) => $page->hasFlash('message', 'Saved!'));
+    }
+
     public function test_inertia_visits_are_stored_as_the_previous_url_and_route(): void
     {
         config()->set('inertia.store_previous_url', true);

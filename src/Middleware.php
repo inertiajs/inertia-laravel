@@ -156,7 +156,11 @@ class Middleware
             $response->headers->set('Vary', Header::INERTIA);
         }
 
-        if ($isRedirect = $response->isRedirect()) {
+        $isRedirect = $response->isRedirect();
+
+        // A location response is a redirect that the client follows with a full page
+        // visit, so we will keep the flash data for that visit just like a redirect.
+        if ($isRedirect || $response->headers->has(Header::LOCATION)) {
             $this->reflash($request);
         }
 
