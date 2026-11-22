@@ -15,12 +15,16 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        php: [8.2, 8.3, 8.4, 8.5]
+        php: [8.2, 8.3, 8.4, 8.5, 8.6]
         laravel: [11, 12, 13]
         stability: ["prefer-lowest", "prefer-stable"]
         exclude:
           - php: 8.2
             laravel: 13
+          - php: 8.6
+            laravel: 11
+          - php: 8.6
+            laravel: 12
 
     name: PHP ${{ matrix.php }} - Laravel ${{ matrix.laravel }} (w/ ${{ matrix.stability }})
     steps:

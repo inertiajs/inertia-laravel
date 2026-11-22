@@ -37,7 +37,7 @@
         "guzzlehttp/guzzle": "^7.15.2|^8.0",
         "orchestra/testbench": "^9.2|^10.0|^11.0",
         "mockery/mockery": "^1.3.3",
-        "phpunit/phpunit": "^11.5|^12.0",
+        "phpunit/phpunit": "^11.5|^12.0|^13.0",
         "laravel/pint": "^1.16",
         "larastan/larastan": "^3.0"
     },
