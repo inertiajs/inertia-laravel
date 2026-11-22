@@ -17,6 +17,7 @@ use Inertia\AlwaysProp;
 use Inertia\Inertia;
 use Inertia\Middleware;
 use Inertia\Ssr\HttpGateway;
+use Inertia\Testing\AssertableInertia;
 use Inertia\Tests\Stubs\CustomUrlResolverMiddleware;
 use Inertia\Tests\Stubs\ExampleMiddleware;
 use Inertia\Tests\Stubs\PrecognitiveRequestMiddleware;
@@ -486,6 +487,54 @@ class MiddlewareTest extends TestCase
         $response = $this->get('/dashboard', ['X-Inertia' => 'true']);
         $response->assertJson([
             'flash' => ['message' => 'Success!'],
+        ]);
+    }
+
+    public function test_flash_data_is_preserved_when_the_asset_version_changed(): void
+    {
+        config()->set('app.asset_url', 'https://cdn.example.com');
+
+        Route::middleware([StartSession::class, Middleware::class])->post('/posts', function () {
+            Inertia::flash('message', 'Saved!');
+
+            return redirect('/posts');
+        });
+
+        Route::middleware([StartSession::class, Middleware::class])->get('/posts', function () {
+            return Inertia::render('Posts');
+        });
+
+        $this->post('/posts', [], ['X-Inertia' => 'true'])->assertRedirect('/posts');
+
+        $this->get('/posts', ['X-Inertia' => 'true', 'X-Inertia-Version' => 'outdated'])
+            ->assertStatus(409)
+            ->assertHeader('X-Inertia-Location', $this->baseUrl.'/posts');
+
+        $this->get('/posts')->assertInertia(fn (AssertableInertia $page) => $page->hasFlash('message', 'Saved!'));
+    }
+
+    public function test_flash_data_is_preserved_when_an_empty_response_redirects_back(): void
+    {
+        Route::middleware([StartSession::class, Middleware::class])->post('/posts', function () {
+            Inertia::flash('message', 'Saved!');
+
+            return redirect('/posts');
+        });
+
+        Route::middleware([StartSession::class, Middleware::class])->put('/posts/order', function () {
+            //
+        });
+
+        Route::middleware([StartSession::class, Middleware::class])->get('/posts', function () {
+            return Inertia::render('Posts');
+        });
+
+        $this->post('/posts', [], ['X-Inertia' => 'true'])->assertRedirect('/posts');
+
+        $this->from('/posts')->put('/posts/order', [], ['X-Inertia' => 'true'])->assertRedirect('/posts');
+
+        $this->get('/posts', ['X-Inertia' => 'true'])->assertJson([
+            'flash' => ['message' => 'Saved!'],
         ]);
     }
 

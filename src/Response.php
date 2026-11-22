@@ -258,6 +258,12 @@ class Response implements Responsable
      */
     protected function resolveFlashData(Request $request): array
     {
+        // The middleware replaces this page with a full page reload when the asset version is
+        // outdated, so we will leave the flash data in the session for the page it renders.
+        if ($this->hasOutdatedVersion($request)) {
+            return [];
+        }
+
         $flash = Inertia::pullFlashed($request);
 
         if (! $flash) {
@@ -265,6 +271,16 @@ class Response implements Responsable
         }
 
         return ['flash' => $this->encodeBigIntegersWhenEnabled($flash)];
+    }
+
+    /**
+     * Determine if the Inertia request was made with an outdated asset version.
+     */
+    protected function hasOutdatedVersion(Request $request): bool
+    {
+        return $request->header(Header::INERTIA)
+            && $request->method() === 'GET'
+            && $request->header(Header::VERSION, '') !== $this->version;
     }
 
     /**

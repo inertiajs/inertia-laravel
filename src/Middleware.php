@@ -173,6 +173,10 @@ class Middleware
 
         if ($response->isOk() && $response->getContent() === '') {
             $response = $this->onEmptyResponse($request, $response);
+
+            if ($response->isRedirect()) {
+                $this->reflash($request);
+            }
         }
 
         if ($response->getStatusCode() === 302 && in_array($request->method(), ['PUT', 'PATCH', 'DELETE', 'QUERY'])) {
