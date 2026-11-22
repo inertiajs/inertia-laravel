@@ -117,6 +117,12 @@ class Middleware
 
         $recorder?->requestStarted($request);
 
+        // A prefetch may never be shown, so it should only get the flash data it
+        // sets itself and leave the existing flash data for the next visit.
+        $isPrefetch = $request->header(Header::INERTIA) && $request->prefetch() && $request->hasSession();
+
+        $flashed = $isPrefetch ? Inertia::pullFlashed($request) : [];
+
         Inertia::version(function () use ($request) {
             return $this->version($request);
         });
@@ -157,6 +163,10 @@ class Middleware
 
         if ($isRedirect = $response->isRedirect()) {
             $this->reflash($request);
+        }
+
+        if ($isPrefetch) {
+            $this->restoreFlashed($request, $flashed, $isRedirect);
         }
 
         if (! $request->header(Header::INERTIA)) {
@@ -262,6 +272,22 @@ class Middleware
     protected function reflash(Request $request): void
     {
         if ($flashed = Inertia::getFlashed($request)) {
+            $request->session()->flash(SessionKey::FLASH_DATA, $flashed);
+        }
+    }
+
+    /**
+     * Put back the flash data the prefetch set aside for the next visit. Flash data a
+     * prefetched redirect set itself is discarded, as the prefetch of the redirect's
+     * target would leave it for the next visit, which is most likely another page.
+     *
+     * @param  array<string, mixed>  $flashed
+     */
+    protected function restoreFlashed(Request $request, array $flashed, bool $isRedirect): void
+    {
+        $prefetched = Inertia::pullFlashed($request);
+
+        if ($flashed = [...$flashed, ...($isRedirect ? [] : $prefetched)]) {
             $request->session()->flash(SessionKey::FLASH_DATA, $flashed);
         }
     }

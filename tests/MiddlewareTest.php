@@ -489,6 +489,146 @@ class MiddlewareTest extends TestCase
         ]);
     }
 
+    public function test_prefetch_requests_leave_flash_data_for_the_next_visit(): void
+    {
+        Route::middleware([StartSession::class, Middleware::class])->post('/posts', function () {
+            Inertia::flash('message', 'Saved!');
+
+            return redirect('/posts');
+        });
+
+        Route::middleware([StartSession::class, Middleware::class])->get('/posts', function () {
+            return Inertia::render('Posts');
+        });
+
+        Route::middleware([StartSession::class, Middleware::class])->get('/reports', function () {
+            return Inertia::render('Reports');
+        });
+
+        $this->post('/posts', [], ['X-Inertia' => 'true'])->assertRedirect('/posts');
+
+        $prefetch = $this->get('/reports', ['X-Inertia' => 'true', 'Purpose' => 'prefetch']);
+        $prefetch->assertOk();
+        $this->assertArrayNotHasKey('flash', $prefetch->json());
+
+        $this->get('/posts', ['X-Inertia' => 'true'])->assertJsonPath('flash', ['message' => 'Saved!']);
+    }
+
+    public function test_prefetch_requests_only_include_the_flash_data_they_set(): void
+    {
+        Route::middleware([StartSession::class, Middleware::class])->post('/posts', function () {
+            Inertia::flash('message', 'Saved!');
+
+            return redirect('/posts');
+        });
+
+        Route::middleware([StartSession::class, Middleware::class])->get('/posts', function () {
+            return Inertia::render('Posts');
+        });
+
+        Route::middleware([StartSession::class, Middleware::class])->get('/welcome', function () {
+            return Inertia::render('Welcome')->flash('toast', 'Welcome back!');
+        });
+
+        $this->post('/posts', [], ['X-Inertia' => 'true'])->assertRedirect('/posts');
+
+        $this->get('/welcome', ['X-Inertia' => 'true', 'Purpose' => 'prefetch'])
+            ->assertJsonPath('flash', ['toast' => 'Welcome back!']);
+
+        $this->get('/posts', ['X-Inertia' => 'true'])->assertJsonPath('flash', ['message' => 'Saved!']);
+
+        $this->get('/welcome', ['X-Inertia' => 'true', 'Purpose' => 'prefetch'])
+            ->assertJsonPath('flash', ['toast' => 'Welcome back!']);
+
+        $this->assertArrayNotHasKey('flash', $this->get('/posts', ['X-Inertia' => 'true'])->json());
+    }
+
+    public function test_prefetch_requests_discard_the_flash_data_they_set_before_redirecting(): void
+    {
+        Route::middleware([StartSession::class, Middleware::class])->post('/posts', function () {
+            Inertia::flash('message', 'Saved!');
+
+            return redirect('/posts');
+        });
+
+        Route::middleware([StartSession::class, Middleware::class])->get('/posts', function () {
+            return Inertia::render('Posts');
+        });
+
+        Route::middleware([StartSession::class, Middleware::class])->get('/old-reports', function () {
+            Inertia::flash('toast', 'Reports have moved.');
+
+            return redirect('/reports');
+        });
+
+        Route::middleware([StartSession::class, Middleware::class])->get('/reports', function () {
+            return Inertia::render('Reports');
+        });
+
+        $this->get('/old-reports', ['X-Inertia' => 'true', 'Purpose' => 'prefetch'])->assertRedirect('/reports');
+        $this->assertArrayNotHasKey('flash', $this->get('/reports', ['X-Inertia' => 'true', 'Purpose' => 'prefetch'])->json());
+
+        $this->assertArrayNotHasKey('flash', $this->get('/posts', ['X-Inertia' => 'true'])->json());
+
+        $this->post('/posts', [], ['X-Inertia' => 'true'])->assertRedirect('/posts');
+
+        $this->get('/old-reports', ['X-Inertia' => 'true', 'Purpose' => 'prefetch'])->assertRedirect('/reports');
+        $this->assertArrayNotHasKey('flash', $this->get('/reports', ['X-Inertia' => 'true', 'Purpose' => 'prefetch'])->json());
+
+        $this->get('/posts', ['X-Inertia' => 'true'])->assertJsonPath('flash', ['message' => 'Saved!']);
+    }
+
+    public function test_prefetch_requests_leave_the_flash_data_they_set_for_the_next_visit_without_an_inertia_response(): void
+    {
+        Route::middleware([StartSession::class, Middleware::class])->post('/posts', function () {
+            Inertia::flash('message', 'Saved!');
+
+            return redirect('/posts');
+        });
+
+        Route::middleware([StartSession::class, Middleware::class])->get('/posts', function () {
+            return Inertia::render('Posts');
+        });
+
+        Route::middleware([StartSession::class, Middleware::class])->get('/export', function () {
+            Inertia::flash('toast', 'Export started.');
+
+            return response()->json(['status' => 'queued']);
+        });
+
+        $this->post('/posts', [], ['X-Inertia' => 'true'])->assertRedirect('/posts');
+
+        $this->get('/export', ['X-Inertia' => 'true', 'Purpose' => 'prefetch'])->assertOk();
+
+        $this->get('/posts', ['X-Inertia' => 'true'])->assertJsonPath('flash', [
+            'message' => 'Saved!',
+            'toast' => 'Export started.',
+        ]);
+    }
+
+    public function test_prefetch_requests_with_a_version_mismatch_leave_flash_data_for_the_next_visit(): void
+    {
+        Route::middleware([StartSession::class, Middleware::class])->post('/posts', function () {
+            Inertia::flash('message', 'Saved!');
+
+            return redirect('/posts');
+        });
+
+        Route::middleware([StartSession::class, Middleware::class])->get('/posts', function () {
+            return Inertia::render('Posts');
+        });
+
+        Route::middleware([StartSession::class, Middleware::class])->get('/reports', function () {
+            return Inertia::render('Reports');
+        });
+
+        $this->post('/posts', [], ['X-Inertia' => 'true'])->assertRedirect('/posts');
+
+        $this->get('/reports', ['X-Inertia' => 'true', 'X-Inertia-Version' => 'stale', 'Purpose' => 'prefetch'])->assertStatus(409);
+
+        $this->get('/posts', ['X-Inertia' => 'true'])->assertJsonPath('flash', ['message' => 'Saved!']);
+    }
+
     public function test_inertia_visits_are_stored_as_the_previous_url_and_route(): void
     {
         config()->set('inertia.store_previous_url', true);
