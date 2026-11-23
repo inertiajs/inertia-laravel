@@ -1,8 +1,19 @@
 # Release Notes
 
-## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.7.0...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia-laravel/compare/v3.8.0...3.x)
 
 - Nothing!
+
+## [v3.8.0](https://github.com/inertiajs/inertia-laravel/compare/v3.7.0...v3.8.0) - 2026-11-22
+
+### What's Changed
+
+* [3.x] Support for PHP 8.6 by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/929
+* [3.x] Preserve flash data on asset version changes and empty responses by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/934
+* [3.x] Add `Inertia::forgetFlashed()` to remove flashed data by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/935
+* [3.x] Preserve flash data on `Inertia::location()` responses by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia-laravel/pull/936
+
+**Full Changelog**: https://github.com/inertiajs/inertia-laravel/compare/v3.7.0...v3.8.0
 
 ## [v3.7.0](https://github.com/inertiajs/inertia-laravel/compare/v3.5.2...v3.7.0) - 2026-11-02
 
